@@ -49,4 +49,4 @@ export interface CborResponse {
   mints: Array<Assets>
   error: string
 }
-export function cborParse(raw: string): CborResponse
+export declare function cborParse(raw: string): CborResponse
