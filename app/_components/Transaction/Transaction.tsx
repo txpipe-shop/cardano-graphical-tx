@@ -40,14 +40,6 @@ export const Transaction = ({ txHash, txInfoVisible }: TransactionProps) => {
     }
   };
 
-  const handleClick = () => {
-    setTransactionBox((prev) => ({
-      ...prev,
-      selectedTx: tx,
-    }));
-    txInfoVisible();
-  };
-
   return (
     <Group
       x={tx.pos.x}
@@ -80,7 +72,7 @@ export const Transaction = ({ txHash, txInfoVisible }: TransactionProps) => {
         stroke={KONVA_COLORS.BLACK}
         strokeWidth={STROKE_WIDTH}
         fill={KONVA_COLORS.GREY}
-        onClick={handleClick}
+        onClick={txInfoVisible}
       />
     </Group>
   );
