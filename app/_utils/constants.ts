@@ -34,3 +34,14 @@ export const NETWORK = {
   PREVIEW: "preview",
 } as const;
 export type NETWORK = (typeof NETWORK)[keyof typeof NETWORK];
+
+export const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+};
+
+export const TX_URL_PARAM = "tx";

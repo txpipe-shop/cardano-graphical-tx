@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { POLICY_LENGTH } from ".";
 
 const hexaToText = (hexa: string) => {
@@ -42,4 +43,9 @@ export const getAssetName = (hexa: string) => {
   if (hexa === "lovelace") return hexa;
   const name = hexaToText(hexa.slice(POLICY_LENGTH));
   return isEmpty(name) ? "n/a" : name;
+};
+
+export const handleCopy = (text: string) => () => {
+  navigator.clipboard.writeText(text);
+  toast.success("Copied to clipboard");
 };

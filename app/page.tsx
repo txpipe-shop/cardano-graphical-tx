@@ -1,11 +1,33 @@
 "use client";
-import { Header, Playground } from "./_components";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Header, InfoPanel, Playground, TxInfo } from "./_components";
+import { ROUTES, TX_URL_PARAM } from "./_utils";
 
-export default function Index() {
+interface HomeProps {
+  searchParams?: {
+    [TX_URL_PARAM]?: string;
+  };
+}
+export default function Index({ searchParams }: HomeProps) {
+  const { replace } = useRouter();
+  const { [TX_URL_PARAM]: selectedTx } = searchParams || {};
+
+  useEffect(() => {
+    // Remove URL params when reloading the page
+    replace(ROUTES.HOME);
+  }, []);
   return (
     <div className="overflow-hidden">
-      <Playground />
+      <InfoPanel
+        isVisible={selectedTx !== undefined}
+        from="left"
+        title="TX Information"
+      >
+        <TxInfo />
+      </InfoPanel>
       <Header />
+      <Playground />
     </div>
   );
 }

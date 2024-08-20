@@ -1,12 +1,17 @@
-import type { KonvaEventObject } from "konva/lib/Node";
+import { KonvaEventObject } from "konva/lib/Node";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Layer, Stage } from "react-konva";
 import { useGraphical } from "~/app/_contexts";
+import { TX_URL_PARAM } from "~/app/_utils";
 import { Line, Transaction, Utxo } from "../Transaction";
 import { PlaygroundDefault } from "./PlaygroundDefault";
 import { PlaygroundError } from "./PlaygroundError";
 
 export function Playground() {
   const { transactions, error } = useGraphical();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const searchParams = useSearchParams();
 
   const scaleBy = 1.05;
   const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
@@ -39,6 +44,12 @@ export function Playground() {
     stage.position(newPos);
   };
 
+  const txInfoVisible = (txHash: string) => () => {
+    const params = new URLSearchParams(searchParams);
+    params.set(TX_URL_PARAM, txHash);
+    replace(`${pathname}?${params.toString()}`);
+  };
+
   if (error) return <PlaygroundError />;
 
   return transactions.transactions.length ? (
@@ -50,6 +61,13 @@ export function Playground() {
       className="overflow-hidden"
     >
       <Layer>
+        {transactions.transactions.map((tx, index) => (
+          <Transaction
+            key={index}
+            txHash={tx.txHash}
+            txInfoVisible={txInfoVisible(tx.txHash)}
+          />
+        ))}
         {transactions.transactions.map((tx) => {
           return tx.outputsUTXO.map((utxo, index) => (
             <Line
@@ -74,9 +92,6 @@ export function Playground() {
         })}
         {Object.keys(transactions.utxos).map((utxoHash, index) => (
           <Utxo key={index} utxoHash={utxoHash} />
-        ))}
-        {transactions.transactions.map((tx, index) => (
-          <Transaction key={index} txHash={tx.txHash} />
         ))}
       </Layer>
     </Stage>

@@ -15,9 +15,10 @@ import {
 
 interface TransactionProps {
   txHash: string;
+  txInfoVisible: () => void;
 }
 
-export const Transaction = ({ txHash }: TransactionProps) => {
+export const Transaction = ({ txHash, txInfoVisible }: TransactionProps) => {
   const { transactions, setTransactionBox } = useGraphical();
   const [showTxId, setShowTxId] = useState(false);
 
@@ -37,6 +38,14 @@ export const Transaction = ({ txHash }: TransactionProps) => {
       if (e.type === "mouseover") stage.container().style.cursor = "pointer";
       else stage.container().style.cursor = "default";
     }
+  };
+
+  const handleClick = () => {
+    setTransactionBox((prev) => ({
+      ...prev,
+      selectedTx: tx,
+    }));
+    txInfoVisible();
   };
 
   return (
@@ -71,6 +80,7 @@ export const Transaction = ({ txHash }: TransactionProps) => {
         stroke={KONVA_COLORS.BLACK}
         strokeWidth={STROKE_WIDTH}
         fill={KONVA_COLORS.GREY}
+        onClick={handleClick}
       />
     </Group>
   );
