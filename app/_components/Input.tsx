@@ -60,8 +60,8 @@ export function Input({
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className={`block h-14 w-full appearance-none rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-white text-2xl text-black placeholder-gray-400 shadow shadow-black outline-none ${customClassName} ${
-        inputSize == "small" ? "mt-0.5 h-14 px-2 py-1" : "mt-1 px-4 py-2"
+      className={`ml-auto block w-2/3 appearance-none rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-white text-lg text-black placeholder-gray-400 shadow shadow-black outline-none ${customClassName} ${
+        inputSize == "small" ? "mt-0.5 h-10 px-2 py-1" : "mt-1 h-12 px-3 py-2"
       }`}
     />
   );
