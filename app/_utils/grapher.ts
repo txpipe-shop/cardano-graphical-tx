@@ -177,3 +177,17 @@ export const setPosition = (transactions: Transaction[]): Transaction[] => {
     };
   });
 };
+
+export const existsMint =
+  (transactionBox: TransactionsBox) => (txHash: string) => {
+    const selectedTx = getTransaction(transactionBox)(txHash);
+    if (!selectedTx) return false;
+    return selectedTx.mint.some((mint) => mint.amount > 0);
+  };
+
+export const existsBurn =
+  (transactionBox: TransactionsBox) => (txHash: string) => {
+    const selectedTx = getTransaction(transactionBox)(txHash);
+    if (!selectedTx) return false;
+    return selectedTx.mint.some((mint) => mint.amount < 0);
+  };

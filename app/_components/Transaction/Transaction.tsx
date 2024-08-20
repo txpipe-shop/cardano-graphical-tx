@@ -8,10 +8,14 @@ import {
   STROKE_WIDTH,
   TX_HEIGHT,
   TX_WIDTH,
+  existsBurn,
+  existsMint,
   getTransaction,
   trimString,
   updateLines,
 } from "~/app/_utils";
+import { BurningIcon } from "./BurningIcon";
+import { MintingIcon } from "./MintingIcon";
 
 interface TransactionProps {
   txHash: string;
@@ -39,6 +43,17 @@ export const Transaction = ({ txHash, txInfoVisible }: TransactionProps) => {
       else stage.container().style.cursor = "default";
     }
   };
+
+  const handleClick = () => {
+    setTransactionBox((prev) => ({
+      ...prev,
+      selectedTx: tx,
+    }));
+    txInfoVisible();
+  };
+
+  const mints = existsMint(transactions)(tx.txHash);
+  const burns = existsBurn(transactions)(tx.txHash);
 
   return (
     <Group
@@ -74,6 +89,12 @@ export const Transaction = ({ txHash, txInfoVisible }: TransactionProps) => {
         fill={KONVA_COLORS.GREY}
         onClick={txInfoVisible}
       />
+      {(mints || burns) && (
+        <Group onClick={handleClick}>
+          {burns && <BurningIcon />}
+          {mints && <MintingIcon />}
+        </Group>
+      )}
     </Group>
   );
 };
