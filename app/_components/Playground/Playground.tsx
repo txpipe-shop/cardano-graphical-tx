@@ -47,7 +47,9 @@ export function Playground() {
   const txInfoVisible = (txHash: string) => () => {
     const params = new URLSearchParams(searchParams);
     params.set(TX_URL_PARAM, txHash);
-    replace(`${pathname}?${params.toString()}`);
+    if (params) {
+      replace(`${pathname}?${params.toString()}`);
+    }
   };
 
   if (error) return <PlaygroundError />;

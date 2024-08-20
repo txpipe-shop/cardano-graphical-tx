@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { TX_URL_PARAM } from "~/app/_utils";
 import CloseIcon from "~/public/close.svg";
 
@@ -20,6 +21,7 @@ export const InfoPanel = ({
   const { replace } = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const panelPosition = from === "right" ? "right-0" : "left-0";
   const roundedCorner =
@@ -32,11 +34,31 @@ export const InfoPanel = ({
   const hideInfo = () => {
     const params = new URLSearchParams(searchParams);
     params.delete(TX_URL_PARAM);
-    replace(`${pathname}?${params.toString()}`);
+    if (params) {
+      replace(`${pathname}?${params.toString()}`);
+    }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        panelRef.current &&
+        !panelRef.current.contains(event.target as Node)
+      ) {
+        hideInfo();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [panelRef, searchParams, pathname]);
 
   return (
     <section
+      ref={panelRef}
       className={`fixed top-0 flex flex-col gap-6 overflow-y-auto ${panelPosition} z-40 h-screen w-1/3 bg-gray-200 p-6 dark:bg-content1 ${roundedCorner} transform transition-transform duration-300 ${
         isVisible ? "translate-x-0" : transition
       }`}

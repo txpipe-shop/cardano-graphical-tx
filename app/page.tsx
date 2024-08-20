@@ -26,8 +26,8 @@ export default function Index({ searchParams }: HomeProps) {
       >
         <TxInfo />
       </InfoPanel>
-      <Header />
       <Playground />
+      <Header />
     </div>
   );
 }
