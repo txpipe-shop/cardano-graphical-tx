@@ -28,6 +28,13 @@ export default function Index({ searchParams }: HomeProps) {
       >
         <TxInfo />
       </InfoPanel>
+      <InfoPanel
+        isVisible={selectedUtxo !== undefined}
+        from="right"
+        title="UTXO Information"
+      >
+        <UtxoInfo />
+      </InfoPanel>
       <Playground />
       <Header />
       <Playground />
