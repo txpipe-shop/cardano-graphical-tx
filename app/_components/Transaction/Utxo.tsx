@@ -17,9 +17,10 @@ import {
 
 interface UtxoProps {
   utxoHash: string;
+  utxoInfoVisible: () => void;
 }
 
-export const Utxo = ({ utxoHash }: UtxoProps) => {
+export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
   const { transactions, setTransactionBox } = useGraphical();
   const [color, setColor] = useState<{
     fill: KONVA_COLORS;
@@ -119,8 +120,21 @@ export const Utxo = ({ utxoHash }: UtxoProps) => {
     }
   };
 
+  let pendingClick: ReturnType<typeof setTimeout>;
+  const handleClick = () => {
+    clearTimeout(pendingClick);
+    pendingClick = setTimeout(function () {
+      setTransactionBox((prev) => ({
+        ...prev,
+        selectedUtxo: utxo,
+      }));
+      utxoInfoVisible();
+    }, 300);
+  };
+
   const handleDoubleClick = (e: KonvaEventObject<MouseEvent>) => {
     e.evt.preventDefault();
+    clearTimeout(pendingClick);
     setShowInfo(!showInfo);
   };
 
@@ -145,8 +159,8 @@ export const Utxo = ({ utxoHash }: UtxoProps) => {
 
   const text = isInput
     ? `Tx Id: ${txId.slice(0, 12) + "..." + txId.slice(-12)}\nIndex: ${utxo.utxoHash.split("#")[1]}\n`
-    : `Address: 
-  ${trimString(utxo.address?.bech32 ?? "", 10)}\nAssets: 
+    : `Address:
+  ${trimString(utxo.address?.bech32 ?? "", 10)}\nAssets:
   ${utxo.assets.reduce((acc, asset) => {
     const assetName = getAssetName(asset.assetName);
     return acc + `- ${assetName} ${asset.amount}\n    `;
@@ -165,6 +179,7 @@ export const Utxo = ({ utxoHash }: UtxoProps) => {
         draggable
         onDragMove={handleUtxoMove(utxoHash)}
         onDragEnd={handleUtxoMoveEnd(utxoHash)}
+        onClick={handleClick}
         onMouseOut={handleCursor}
         onMouseOver={handleCursor}
         onMouseEnter={handleMouseEnter}

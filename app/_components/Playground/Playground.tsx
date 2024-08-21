@@ -2,7 +2,7 @@ import type { KonvaEventObject } from "konva/lib/Node";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Layer, Stage } from "react-konva";
 import { useGraphical } from "~/app/_contexts";
-import { TX_URL_PARAM } from "~/app/_utils";
+import { TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
 import { Line, Transaction, Utxo } from "../Transaction";
 import { PlaygroundDefault } from "./PlaygroundDefault";
 import { PlaygroundError } from "./PlaygroundError";
@@ -42,6 +42,13 @@ export function Playground() {
       y: pointer.y - mousePointTo.y * newScale,
     };
     stage.position(newPos);
+  };
+
+  const utxoInfoVisible = (utxoHash: string) => () => {
+    const params = new URLSearchParams(searchParams);
+    params.set(UTXO_URL_PARAM, utxoHash);
+    params.delete(TX_URL_PARAM);
+    replace(`${pathname}?${params.toString()}`);
   };
 
   const txInfoVisible = (txHash: string) => () => {
@@ -93,7 +100,11 @@ export function Playground() {
           ));
         })}
         {Object.keys(transactions.utxos).map((utxoHash, index) => (
-          <Utxo key={index} utxoHash={utxoHash} />
+          <Utxo
+            key={index}
+            utxoHash={utxoHash}
+            utxoInfoVisible={utxoInfoVisible(utxoHash)}
+          />
         ))}
       </Layer>
     </Stage>
