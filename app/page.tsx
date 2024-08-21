@@ -1,17 +1,19 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Header, InfoPanel, Playground, TxInfo } from "./_components";
-import { ROUTES, TX_URL_PARAM } from "./_utils";
+import { Header, InfoPanel, Playground, TxInfo, UtxoInfo } from "./_components";
+import { ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "./_utils";
 
 interface HomeProps {
   searchParams?: {
     [TX_URL_PARAM]?: string;
+    [UTXO_URL_PARAM]?: string;
   };
 }
 export default function Index({ searchParams }: HomeProps) {
   const { replace } = useRouter();
-  const { [TX_URL_PARAM]: selectedTx } = searchParams || {};
+  const { [TX_URL_PARAM]: selectedTx, [UTXO_URL_PARAM]: selectedUtxo } =
+    searchParams || {};
 
   useEffect(() => {
     // Remove URL params when reloading the page
