@@ -45,6 +45,7 @@ export const cborHandler = async ({ cbor }: ICborHandler) => {
       txHash: res.txHash,
       fee: res.fee,
       inputs: res.inputs,
+      referenceInputs: res.referenceInputs,
       outputs,
       mints,
     });

@@ -26,6 +26,14 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
       });
     }
 
+    let mut reference_inputs = Vec::new();
+    for i in tx.reference_inputs() {
+      reference_inputs.push(InputUtxo {
+        tx_hash: i.hash().to_string(),
+        index: i.index().to_string(),
+      });
+    }
+
     let mut mints = Vec::new();
     for mint in tx.mints() {
       let policy = mint.policy().to_string();
@@ -113,7 +121,7 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
       outputs_count += 1;
     }
 
-    let parsed_cbor = CborResponse::new().with_cbor_attr(tx, inputs, outputs, mints);
+    let parsed_cbor = CborResponse::new().with_cbor_attr(tx, inputs, reference_inputs, outputs, mints);
 
     Ok(parsed_cbor)
   });

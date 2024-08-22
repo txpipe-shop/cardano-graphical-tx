@@ -68,6 +68,7 @@ export function Playground() {
               txHash={tx.txHash}
               utxoHash={utxo.utxoHash || ""}
               index={index}
+              isReferenceInput={utxo.isReferenceInput}
             />
           ));
         })}

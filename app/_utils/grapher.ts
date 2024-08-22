@@ -152,6 +152,7 @@ const setUtxoPosition = (
         x: isOutput ? 2 * TX_WIDTH : -TX_WIDTH,
         y: y - txPos.y,
       },
+      isReferenceInput: utxo.isReferenceInput,
     };
   });
 };

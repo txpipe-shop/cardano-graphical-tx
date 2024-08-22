@@ -49,6 +49,7 @@ pub struct CborResponse {
   pub tx_hash: String,
   pub fee: Option<String>,
   pub inputs: Vec<InputUtxo>,
+  pub reference_inputs: Vec<InputUtxo>,
   pub outputs: Vec<OutputUtxo>,
   pub mints: Vec<Assets>,
   pub error: String,
@@ -63,6 +64,7 @@ impl CborResponse {
     self,
     tx: MultiEraTx<'_>,
     inputs: Vec<InputUtxo>,
+    reference_inputs: Vec<InputUtxo>,
     outputs: Vec<OutputUtxo>,
     mints: Vec<Assets>,
   ) -> Self {
@@ -70,6 +72,7 @@ impl CborResponse {
       tx_hash: tx.hash().to_string(),
       fee: tx.fee().map(|x| x.to_string()),
       inputs: inputs,
+      reference_inputs: reference_inputs,
       outputs: outputs,
       mints,
       ..self
@@ -85,6 +88,7 @@ impl CborResponse {
         self.tx_hash = x.tx_hash;
         self.fee = x.fee;
         self.inputs = x.inputs;
+        self.reference_inputs = x.reference_inputs;
         self.outputs = x.outputs;
         self.mints = x.mints;
       }

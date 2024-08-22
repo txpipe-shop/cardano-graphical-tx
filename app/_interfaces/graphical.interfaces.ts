@@ -46,6 +46,7 @@ export interface UtxoItem {
   pos: Vector2d;
   lines: (Konva.Line | null)[];
   distance: Vector2d;
+  isReferenceInput: boolean;
   redeemers?: RedeemerSpend;
 }
 

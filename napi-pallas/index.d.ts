@@ -45,6 +45,7 @@ export interface CborResponse {
   txHash: string
   fee?: string
   inputs: Array<InputUtxo>
+  referenceInputs: Array<InputUtxo>
   outputs: Array<OutputUtxo>
   mints: Array<Assets>
   error: string
