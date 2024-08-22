@@ -1,19 +1,13 @@
-import {
-  Button,
-  Input,
-  Navbar,
-  NavbarContent,
-  NavbarItem,
-} from "@nextui-org/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import SearchIcon from "~/public/search.svg";
 import TxPipeIcon from "~/public/txpipe.png";
 import { useConfigs, useGraphical } from "../_contexts";
 import { ROUTES, setCBOR } from "../_utils";
 import { NetSelector } from "./NetSelector";
+import { Button } from "./Button";
+import { Input } from "./Input";
 
 export const Header = () => {
   const searchParams = useSearchParams();
@@ -38,42 +32,25 @@ export const Header = () => {
   }
 
   return (
-    <Navbar className="fixed left-0 top-0 box-border w-full">
-      <NavbarContent className="w-inherit flex gap-20">
-        <Link href={ROUTES.HOME}>
-          <div className="flex flex-col justify-center font-bold">
-            <Image
-              src={TxPipeIcon}
-              alt="TxPipe"
-              width={30}
-              className="m-auto"
-            />
-            TxPipe
-          </div>
-        </Link>
-        <NavbarItem className="flex w-3/4 items-center p-2">
-          <form
-            onSubmit={handleSubmit}
-            className="flex w-full items-center gap-4"
-          >
-            <Input
-              type="text"
-              size="md"
-              placeholder="Search for a transaction by CBOR"
-              onChange={changeRaw}
-              value={raw}
-              endContent={
-                <Button type="submit" className="bg-transparent" isIconOnly>
-                  <Image src={SearchIcon} alt="Search" />
-                </Button>
-              }
-            />
-          </form>
-        </NavbarItem>
-        <NavbarItem>
-          <NetSelector network={configs.net} />
-        </NavbarItem>
-      </NavbarContent>
-    </Navbar>
+    <header className="fixed left-0 top-0 box-border flex w-full flex-row items-center justify-between border-b-2 border-dashed border-b-gray-300 bg-white px-4 pb-4 pt-6 align-middle">
+      <div className="flex flex-row items-center gap-4">
+        <h3 className="flex items-center text-4xl text-gray-400">
+          <Link href={ROUTES.HOME}>
+            <span>Lace Anatomy</span>
+          </Link>
+        </h3>
+        <Image src={TxPipeIcon} alt="TxPipe" width={30} className="m-auto" />
+        <NetSelector network={configs.net} />
+      </div>
+      <form onSubmit={handleSubmit} className="flex w-2/3 items-center gap-4">
+        <Input
+          name="tx-input"
+          value={raw}
+          onChange={changeRaw}
+          placeholder="Enter CBOR or hash for any Cardano Tx"
+        />
+        <Button type="submit">Draw</Button>
+      </form>
+    </header>
   );
 };
