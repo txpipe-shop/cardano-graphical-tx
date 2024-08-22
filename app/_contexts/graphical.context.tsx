@@ -1,12 +1,7 @@
 "use client";
-import {
-  Dispatch,
-  SetStateAction,
-  createContext,
-  useContext,
-  useState,
-} from "react";
-import { TransactionsBox } from "../_utils";
+import type { Dispatch, SetStateAction } from "react";
+import { createContext, useContext, useState } from "react";
+import type { TransactionsBox } from "../_interfaces";
 
 export interface IGraphicalContext {
   error: string;

@@ -3,17 +3,17 @@ import { type Dispatch, type SetStateAction } from "react";
 import {
   API_ROUTES,
   isHexa,
-  NETWORK,
+  type NETWORK,
   parseQuery,
   parseTxFromCbor,
   setPosition,
-  TransactionsBox,
 } from ".";
-import { IUserConfigs } from "../_contexts";
-import {
+import type { IUserConfigs } from "../_contexts";
+import type {
   ICborTransaction,
   ICborUtxo,
   Transaction,
+  TransactionsBox,
   UtxoObject,
 } from "../_interfaces";
 

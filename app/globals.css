@@ -18,6 +18,13 @@
   }    
 }
 
+canvas {
+  background: white !important;
+  background-image: radial-gradient(black  1px, transparent  0) !important;
+  background-size: 40px 40px !important;
+  background-position: -19px -19px !important;
+}
+
 
 body {
   box-sizing: border-box;

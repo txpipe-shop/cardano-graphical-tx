@@ -1,4 +1,4 @@
-import { KonvaEventObject } from "konva/lib/Node";
+import type { KonvaEventObject } from "konva/lib/Node";
 import { useState } from "react";
 import { Group, Rect, Text } from "react-konva";
 import { useGraphical } from "~/app/_contexts";

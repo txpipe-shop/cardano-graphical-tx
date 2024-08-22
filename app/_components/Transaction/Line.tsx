@@ -1,4 +1,4 @@
-import { LineConfig, Line as LineRef } from "konva/lib/shapes/Line";
+import type { LineConfig, Line as LineRef } from "konva/lib/shapes/Line";
 import { Line } from "react-konva";
 import { useGraphical } from "~/app/_contexts";
 import {

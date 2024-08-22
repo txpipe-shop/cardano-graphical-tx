@@ -1,19 +1,14 @@
 import { bech32 } from "bech32";
-import { Vector2d } from "konva/lib/types";
-import {
-  POLICY_LENGTH,
-  TransactionsBox,
-  getUtxo,
-  isCborUtxo,
-  isEmpty,
-} from ".";
-import {
+import type { Vector2d } from "konva/lib/types";
+import { POLICY_LENGTH, getUtxo, isCborUtxo, isEmpty } from ".";
+import type {
   Address,
   ICborAsset,
   ICborTransaction,
   ICborUtxo,
   Redeemers,
   Transaction,
+  TransactionsBox,
   UtxoItem,
 } from "../_interfaces";
 

@@ -1,6 +1,11 @@
-import Konva from "konva";
-import { Vector2d } from "konva/lib/types";
-import { ICborAsset, ICborDatum } from ".";
+import type Konva from "konva";
+import type { Vector2d } from "konva/lib/types";
+import type { ICborAsset, ICborDatum } from ".";
+
+export interface TransactionsBox {
+  transactions: Transaction[];
+  utxos: UtxoObject;
+}
 
 export interface Transaction {
   txHash: string;

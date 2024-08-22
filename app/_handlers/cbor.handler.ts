@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import pallas, { CborResponse } from "napi-pallas";
-import { ICborAsset, ICborUtxo } from "../_interfaces";
-import { NETWORK, isEmpty } from "../_utils";
+import pallas, { type CborResponse } from "napi-pallas";
+import type { ICborAsset, ICborUtxo } from "../_interfaces";
+import { type NETWORK, isEmpty } from "../_utils";
 
 interface ICborHandler {
   network: NETWORK;

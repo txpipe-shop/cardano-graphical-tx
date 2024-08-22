@@ -1,7 +1,7 @@
-import Konva from "konva";
+import type Konva from "konva";
 import { type Metadata } from "next";
 import { Lato, Source_Code_Pro } from "next/font/google";
-import "~/styles/globals.css";
+import "./globals.css";
 import { Providers } from "./providers";
 
 declare global {

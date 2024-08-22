@@ -19,12 +19,14 @@ export const useLocalStorage = ({ key, initialState }: IUseLocalStorage) => {
         setState(parsedItem);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (state) {
       localStorage.setItem(key, JSON.stringify(state));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, setState]);
 
   return [state, setState];

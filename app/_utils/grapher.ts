@@ -1,12 +1,7 @@
-import { Vector2d } from "konva/lib/types";
-import { Dispatch, SetStateAction } from "react";
+import type { Vector2d } from "konva/lib/types";
+import type { Dispatch, SetStateAction } from "react";
 import { KONVA_COLORS, TX_HEIGHT, TX_WIDTH, UTXO_LINE_GAP } from ".";
-import { Transaction, UtxoItem, UtxoObject } from "../_interfaces";
-
-export interface TransactionsBox {
-  transactions: Transaction[];
-  utxos: UtxoObject;
-}
+import type { Transaction, TransactionsBox, UtxoItem } from "../_interfaces";
 
 export const getTransaction =
   (transactionBox: TransactionsBox) => (txHash: string) => {
@@ -130,7 +125,7 @@ export const getUtxoColor =
  * Calculates the positions of the UTXOs in a transaction.
  * @returns An array of UTXO items with their positions updated.
  */
-const getUtxoPosition = (
+const setUtxoPosition = (
   utxoList: UtxoItem[],
   txPos: Vector2d,
   isOutput: boolean,
@@ -168,10 +163,10 @@ export const setPosition = (transactions: Transaction[]): Transaction[] => {
   return transactions.map((tx) => {
     const txPos = { x: initial, y: TX_HEIGHT };
 
-    const inputsUTXO = getUtxoPosition(tx.inputsUTXO, txPos, false);
+    const inputsUTXO = setUtxoPosition(tx.inputsUTXO, txPos, false);
 
     const sortedOutputs = tx.outputsUTXO.sort((a, b) => a.index - b.index);
-    const outputsUTXO = getUtxoPosition(sortedOutputs, txPos, true);
+    const outputsUTXO = setUtxoPosition(sortedOutputs, txPos, true);
 
     return {
       ...tx,

@@ -1,21 +1,12 @@
 "use client";
-import {
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  createContext,
-  useContext,
-} from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
+import { createContext, useContext } from "react";
 import { useLocalStorage } from "../_hooks/useLocalStorage";
 import { NETWORK } from "../_utils";
 
 export interface IUserConfigs {
   net: NETWORK;
 }
-
-export const CONFIG_KEYS = {
-  NET: "net",
-} as const;
 
 const LOCAL_STORAGE_KEYS = {
   USER_CONFIGS: "userConfigs",
@@ -24,8 +15,8 @@ const LOCAL_STORAGE_KEYS = {
 export const ConfigsContext = createContext({
   configs: {} as IUserConfigs,
   updateConfigs: <T extends keyof IUserConfigs>(
-    configKey: T,
-    value: IUserConfigs[T],
+    _configKey: T,
+    _value: IUserConfigs[T],
   ) => {},
 });
 

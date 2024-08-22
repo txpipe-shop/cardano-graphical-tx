@@ -1,4 +1,4 @@
-import { API_ROUTES } from "./constants";
+import type { API_ROUTES } from "./constants";
 
 export const parseQuery = (
   route: (typeof API_ROUTES)[keyof typeof API_ROUTES],
