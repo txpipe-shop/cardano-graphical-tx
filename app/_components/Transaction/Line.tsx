@@ -16,6 +16,7 @@ interface UtxoLineProps {
   utxoHash: string;
   index: number;
   isOutput?: boolean;
+  isReferenceInput?: boolean;
 }
 
 export const UtxoLine = ({
@@ -23,6 +24,7 @@ export const UtxoLine = ({
   utxoHash,
   index,
   isOutput = false,
+  isReferenceInput = false,
 }: UtxoLineProps) => {
   const { transactions } = useGraphical();
   const tx = getTransaction(transactions)(txHash)!;
@@ -71,11 +73,14 @@ export const UtxoLine = ({
     }
   };
 
+  const referenceInputLine = isReferenceInput ? [5, 5] : [];
+
   return (
     <Line
       points={points}
       index={index}
       stroke={isOutput ? KONVA_COLORS.RED : KONVA_COLORS.BLUE}
+      dash={referenceInputLine}
       strokeWidth={LINE_WIDTH}
       bezier
       ref={pushRef}

@@ -27,6 +27,7 @@ export interface ICborTransaction {
   txHash: string;
   fee: number;
   inputs: ICborInput[];
+  referenceInputs: ICborInput[];
   outputs: ICborUtxo[];
   mints: ICborAsset[];
 }

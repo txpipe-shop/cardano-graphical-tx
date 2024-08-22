@@ -17,6 +17,7 @@ interface IGenerateUTXO extends ICborUtxo {
   redeemers?: Redeemers;
   transactionBox: TransactionsBox;
   position?: Vector2d;
+  isReferenceInput?: boolean;
   distance?: Vector2d;
 }
 
@@ -55,6 +56,7 @@ const generateUTXO = ({
   transactionBox,
   position = defaultPosition,
   distance = defaultPosition,
+  isReferenceInput = false,
 }: IGenerateUTXO): UtxoItem => {
   const exist = getUtxo(transactionBox)(txHash + "#" + index);
   if (exist) {
@@ -75,6 +77,7 @@ const generateUTXO = ({
     lines: [],
     pos: position,
     distance,
+    isReferenceInput,
     redeemers: redeemer ?? undefined,
   };
 };
@@ -85,17 +88,33 @@ export const parseTxFromCbor = (
 ): Transaction[] =>
   txFromCbors.map((cbor) => {
     const mint: ICborAsset[] = cbor.mints;
+    const inputsUTXO: UtxoItem[] = cbor.referenceInputs
+      .concat(cbor.inputs)
+      .map((input) => {
+        const isReferenceInput = cbor.referenceInputs.some(
+          (referenceInput) => referenceInput === input,
+        );
+        return generateUTXO({
+          txHash: input.txHash,
+          index: input.index,
+          assets: isCborUtxo(input) ? input.assets : [],
+          address: isCborUtxo(input) ? input.address : "",
+          datum: isCborUtxo(input) && input.datum ? input.datum : undefined,
+          transactionBox,
+          isReferenceInput,
+        });
+      });
 
-    const inputsUTXO: UtxoItem[] = cbor.inputs.map((input) => {
-      return generateUTXO({
+    const referenceInputsUTXO: UtxoItem[] = cbor.referenceInputs.map((input) =>
+      generateUTXO({
         txHash: input.txHash,
         index: input.index,
         assets: isCborUtxo(input) ? input.assets : [],
         address: isCborUtxo(input) ? input.address : "",
         datum: isCborUtxo(input) && input.datum ? input.datum : undefined,
         transactionBox,
-      });
-    });
+      }),
+    );
 
     const outputsUTXO = cbor.outputs.map((output) =>
       generateUTXO({
@@ -118,6 +137,7 @@ export const parseTxFromCbor = (
       mint: mint,
       pos: defaultPosition,
       inputsUTXO,
+      referenceInputsUTXO,
       outputsUTXO,
       consumedLines: [],
       producedLines: [],
