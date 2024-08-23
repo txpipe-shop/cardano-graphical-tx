@@ -59,7 +59,7 @@ export const InfoPanel = ({
         document.removeEventListener("mousedown", handleClickOutside);
       }
     };
-  }, [panelRef, searchParams, pathname, hideInfo]);
+  }, [panelRef, searchParams, pathname, hideInfo, isVisible]);
 
   return (
     <section
