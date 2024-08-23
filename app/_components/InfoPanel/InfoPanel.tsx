@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { TX_URL_PARAM } from "~/app/_utils";
 import CloseIcon from "~/public/close.svg";
 
@@ -31,13 +31,13 @@ export const InfoPanel = ({
   const transition =
     from === "right" ? "translate-x-full" : "-translate-x-full";
 
-  const hideInfo = () => {
+  const hideInfo = useCallback(() => {
     const params = new URLSearchParams(searchParams);
     params.delete(TX_URL_PARAM);
     if (params) {
       replace(`${pathname}?${params.toString()}`);
     }
-  };
+  }, [searchParams, pathname, replace]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -54,7 +54,7 @@ export const InfoPanel = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [panelRef, searchParams, pathname]);
+  }, [panelRef, searchParams, pathname, hideInfo]);
 
   return (
     <section

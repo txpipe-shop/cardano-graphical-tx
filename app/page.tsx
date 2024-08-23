@@ -16,7 +16,7 @@ export default function Index({ searchParams }: HomeProps) {
   useEffect(() => {
     // Remove URL params when reloading the page
     replace(ROUTES.HOME);
-  }, []);
+  }, [replace]);
   return (
     <div className="overflow-hidden">
       <InfoPanel

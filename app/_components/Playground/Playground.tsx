@@ -1,4 +1,4 @@
-import { KonvaEventObject } from "konva/lib/Node";
+import type { KonvaEventObject } from "konva/lib/Node";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Layer, Stage } from "react-konva";
 import { useGraphical } from "~/app/_contexts";
