@@ -37,7 +37,6 @@ export default function Index({ searchParams }: HomeProps) {
       </InfoPanel>
       <Playground />
       <Header />
-      <Playground />
     </div>
   );
 }
