@@ -43,7 +43,11 @@ export const InfoPanel = ({
   useEffect(() => {
     const panelElement = panelRef.current;
     const handleClickOutside = (event: MouseEvent) => {
-      if (panelElement && !panelElement.contains(event.target as Node)) {
+      if (
+        panelElement &&
+        !panelElement.contains(event.target as Node) &&
+        isVisible
+      ) {
         hideInfo();
       }
     };
