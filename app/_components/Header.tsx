@@ -1,17 +1,20 @@
+import { Select, SelectItem } from "@nextui-org/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { Button, Input } from "~/app/_components";
 import TxPipeIcon from "~/public/txpipe.png";
 import { useConfigs, useGraphical } from "../_contexts";
-import { ROUTES, setCBOR } from "../_utils";
+import { isEmpty, OPTIONS, ROUTES, setCBOR } from "../_utils";
 import { NetSelector } from "./NetSelector";
-import { Button } from "./Button";
-import { Input } from "./Input";
 
 export const Header = () => {
   const searchParams = useSearchParams();
   const [raw, setRaw] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<OPTIONS>(OPTIONS.HASH);
+
   const { transactions, setTransactionBox, setError } = useGraphical();
   const { configs } = useConfigs();
 
@@ -28,8 +31,19 @@ export const Header = () => {
     e.preventDefault();
     if (!raw) return;
 
-    await setCBOR(configs, raw, transactions, setTransactionBox, setError);
+    switch (selectedOption) {
+      case OPTIONS.HASH:
+        toast.error("Not implemented yet");
+        break;
+      case OPTIONS.CBOR:
+        await setCBOR(configs, raw, transactions, setTransactionBox, setError);
+        break;
+    }
   }
+
+  const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {
+    if (!isEmpty(e.target.value)) setSelectedOption(e.target.value as OPTIONS);
+  };
 
   return (
     <header className="fixed left-0 top-0 box-border flex w-full flex-row items-center justify-between border-b-2 border-dashed border-b-gray-300 bg-white px-4 pb-4 pt-6 align-middle">
@@ -42,12 +56,33 @@ export const Header = () => {
         <Image src={TxPipeIcon} alt="TxPipe" width={30} className="m-auto" />
         <NetSelector network={configs.net} />
       </div>
-      <form onSubmit={handleSubmit} className="flex w-2/3 items-center gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex w-2/3 items-center justify-end gap-4"
+      >
         <Input
           name="tx-input"
           value={raw}
           onChange={changeRaw}
           placeholder="Enter CBOR or hash for any Cardano Tx"
+          startContent={
+            <Select
+              aria-label="Close"
+              selectedKeys={[selectedOption]}
+              size="sm"
+              className="w-1/3"
+              onChange={changeSelectedOption}
+              color="primary"
+              labelPlacement="outside"
+            >
+              <SelectItem key={OPTIONS.HASH} value={OPTIONS.HASH}>
+                Search by Hash
+              </SelectItem>
+              <SelectItem key={OPTIONS.CBOR} value={OPTIONS.CBOR}>
+                Search by CBOR
+              </SelectItem>
+            </Select>
+          }
         />
         <Button type="submit">Draw</Button>
       </form>
