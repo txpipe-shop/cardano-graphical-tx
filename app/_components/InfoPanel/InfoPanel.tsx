@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
-import { TX_URL_PARAM } from "~/app/_utils";
+import { TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
 import CloseIcon from "~/public/close.svg";
 
 interface InfoPanelProps {
@@ -34,16 +34,19 @@ export const InfoPanel = ({
   const hideInfo = useCallback(() => {
     const params = new URLSearchParams(searchParams);
     params.delete(TX_URL_PARAM);
+    params.delete(UTXO_URL_PARAM);
     if (params) {
       replace(`${pathname}?${params.toString()}`);
     }
   }, [searchParams, pathname, replace]);
 
   useEffect(() => {
+    const panelElement = panelRef.current;
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        panelRef.current &&
-        !panelRef.current.contains(event.target as Node)
+        panelElement &&
+        !panelElement.contains(event.target as Node) &&
+        isVisible
       ) {
         hideInfo();
       }
@@ -52,9 +55,11 @@ export const InfoPanel = ({
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      if (panelElement) {
+        document.removeEventListener("mousedown", handleClickOutside);
+      }
     };
-  }, [panelRef, searchParams, pathname, hideInfo]);
+  }, [panelRef, searchParams, pathname, hideInfo, isVisible]);
 
   return (
     <section

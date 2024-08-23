@@ -1,3 +1,5 @@
+import JSONbig from "json-bigint";
+
 export const ROUTES = {
   HOME: "/",
 };
@@ -39,6 +41,12 @@ export const NETWORK = {
 } as const;
 export type NETWORK = (typeof NETWORK)[keyof typeof NETWORK];
 
+export const JSONBIG = JSONbig({
+  useNativeBigInt: true,
+  constructorAction: "preserve",
+  protoAction: "preserve",
+});
+
 export const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
   year: "numeric",
   month: "long",
@@ -49,6 +57,7 @@ export const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
 };
 
 export const TX_URL_PARAM = "tx";
+export const UTXO_URL_PARAM = "utxo";
 
 export const burnIconURL =
   "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgLTk2MCA5NjAgOTYwIiB3aWR0aD0iMjQiPjxwYXRoIGQ9Ik0yNDAtNDAwcTAgNTIgMjEgOTguNXQ2MCA4MS41cS0xLTUtMS05di05cTAtMzIgMTItNjB0MzUtNTFsMTEzLTExMSAxMTMgMTExcTIzIDIzIDM1IDUxdDEyIDYwdjlxMCA0LTEgOSAzOS0zNSA2MC04MS41dDIxLTk4LjVxMC01MC0xOC41LTk0LjVUNjQ4LTU3NHEtMjAgMTMtNDIgMTkuNXQtNDUgNi41cS02MiAwLTEwNy41LTQxVDQwMS02OTBxLTM5IDMzLTY5IDY4LjV0LTUwLjUgNzJRMjYxLTUxMyAyNTAuNS00NzVUMjQwLTQwMFptMjQwIDUyLTU3IDU2cS0xMSAxMS0xNyAyNXQtNiAyOXEwIDMyIDIzLjUgNTV0NTYuNSAyM3EzMyAwIDU2LjUtMjN0MjMuNS01NXEwLTE2LTYtMjkuNVQ1MzctMjkybC01Ny01NlptMC00OTJ2MTMycTAgMzQgMjMuNSA1N3Q1Ny41IDIzcTE4IDAgMzMuNS03LjVUNjIyLTY1OGwxOC0yMnE3NCA0MiAxMTcgMTE3dDQzIDE2M3EwIDEzNC05MyAyMjdUNDgwLTgwcS0xMzQgMC0yMjctOTN0LTkzLTIyN3EwLTEyOSA4Ni41LTI0NVQ0ODAtODQwWiIvPjwvc3ZnPg==";
