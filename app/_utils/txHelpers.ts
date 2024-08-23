@@ -1,6 +1,6 @@
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
-import { POLICY_LENGTH, getUtxo, isCborUtxo, isEmpty } from ".";
+import { POLICY_LENGTH, getTransaction, getUtxo, isCborUtxo, isEmpty } from ".";
 import type {
   Address,
   ICborAsset,
@@ -126,6 +126,8 @@ export const parseTxFromCbor = (
         transactionBox,
       }),
     );
+    const existsTx = getTransaction(transactionBox)(cbor.txHash);
+    const alias = existsTx ? existsTx.alias : "";
 
     return {
       txHash: cbor.txHash,
@@ -141,5 +143,6 @@ export const parseTxFromCbor = (
       outputsUTXO,
       consumedLines: [],
       producedLines: [],
+      alias,
     };
   });

@@ -11,6 +11,7 @@ import {
   existsBurn,
   existsMint,
   getTransaction,
+  isEmpty,
   trimString,
   updateLines,
 } from "~/app/_utils";
@@ -94,6 +95,18 @@ export const Transaction = ({ txHash, txInfoVisible }: TransactionProps) => {
           {burns && <BurningIcon />}
           {mints && <MintingIcon />}
         </Group>
+      )}
+      {!isEmpty(tx.alias) && (
+        <Text
+          text={tx.alias}
+          x={5}
+          y={TX_HEIGHT / 2 - 40}
+          width={TX_WIDTH - 10}
+          height={TX_HEIGHT / 2}
+          fontSize={20}
+          align="center"
+          onClick={handleClick}
+        />
       )}
     </Group>
   );
