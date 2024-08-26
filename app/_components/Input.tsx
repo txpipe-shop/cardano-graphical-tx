@@ -28,7 +28,7 @@ export function Input({
         <label htmlFor={id} className="cursor-pointer select-none text-xl">
           {label}
         </label>
-        <div className="relative mr-4 inline-block w-10 select-none align-top">
+        <div className="relative inline-block w-10 select-none align-top">
           <label className="cursor-pointer">
             <div
               className={`toggle-label flex h-7 items-center overflow-hidden rounded-full rounded-b-full border-2 border-b-4 border-black px-6 shadow-small shadow-black transition-all duration-400 ease-in-out ${
@@ -60,8 +60,10 @@ export function Input({
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className={`ml-auto block w-2/3 appearance-none rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-white text-lg text-black placeholder-gray-400 shadow shadow-black outline-none ${customClassName} ${
-        inputSize == "small" ? "mt-0.5 h-10 px-2 py-1" : "mt-1 h-12 px-3 py-2"
+      className={`block appearance-none rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-white text-lg text-black placeholder-gray-400 shadow shadow-black outline-none ${customClassName} ${
+        inputSize == "small"
+          ? "mt-0.5 h-10 w-3/4 px-2 py-1"
+          : "mt-1 w-2/3 px-3 py-2"
       }`}
     />
   );

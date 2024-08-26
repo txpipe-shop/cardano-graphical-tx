@@ -30,6 +30,7 @@ export interface Transaction {
   redeemers?: Redeemers;
   metadata?: any;
   size?: number;
+  alias: string;
 }
 
 export interface UtxoObject {

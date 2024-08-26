@@ -2,12 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button, Input } from "~/app/_components";
 import TxPipeIcon from "~/public/txpipe.png";
 import { useConfigs, useGraphical } from "../_contexts";
 import { ROUTES, setCBOR } from "../_utils";
 import { NetSelector } from "./NetSelector";
-import { Button } from "./Button";
-import { Input } from "./Input";
 
 export const Header = () => {
   const searchParams = useSearchParams();
@@ -42,7 +41,10 @@ export const Header = () => {
         <Image src={TxPipeIcon} alt="TxPipe" width={30} className="m-auto" />
         <NetSelector network={configs.net} />
       </div>
-      <form onSubmit={handleSubmit} className="flex w-2/3 items-center gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex w-2/3 items-center justify-end gap-4"
+      >
         <Input
           name="tx-input"
           value={raw}
