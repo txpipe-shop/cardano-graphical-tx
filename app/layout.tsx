@@ -1,7 +1,9 @@
 import type Konva from "konva";
 import { type Metadata } from "next";
 import { Lato, Source_Code_Pro } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
+
 import { Providers } from "./providers";
 
 declare global {
@@ -35,6 +37,7 @@ export default function RootLayout({
       <body>
         <Providers>
           <div className="m-auto flex w-full flex-col">{children}</div>
+          <Toaster position="bottom-center" />
         </Providers>
       </body>
     </html>

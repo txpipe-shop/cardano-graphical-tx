@@ -2,7 +2,9 @@
 import { Accordion, AccordionItem, Card } from "@nextui-org/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useContext } from "react";
+import { type ChangeEvent, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { Button, Input } from "~/app/_components";
 import { GraphicalContext } from "~/app/_contexts";
 import {
   DATE_TIME_OPTIONS,
@@ -15,12 +17,18 @@ import CopyIcon from "~/public/copy.svg";
 import { AssetCard } from "./AssetCard";
 
 export const TxInfo = () => {
-  const { transactions } = useContext(GraphicalContext)!;
+  const [name, setName] = useState("");
+  const { transactions, setTransactionBox } = useContext(GraphicalContext)!;
   const searchParams = useSearchParams();
   const selectedTxHash = searchParams.get(TX_URL_PARAM);
   const selectedTx = getTransaction(transactions)(selectedTxHash || "");
-  if (!selectedTx) return null;
 
+  useEffect(() => {
+    const selectedTx = getTransaction(transactions)(selectedTxHash || "");
+    setName(selectedTx?.alias || "");
+  }, [selectedTxHash, transactions]);
+
+  if (!selectedTx) return null;
   const {
     txHash,
     blockHeight,
@@ -48,6 +56,26 @@ export const TxInfo = () => {
       : "No metadata";
 
   const txTrim = trimString(txHash || "", 12);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+  };
+
+  const handleSave = (e: ChangeEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (name.length > 30) {
+      toast.error("Alias name must be less than 30 characters");
+      return;
+    }
+    setTransactionBox((prev) => {
+      const newTransactions = prev.transactions.map((tx) =>
+        tx.txHash === txHash ? { ...tx, alias: name } : tx,
+      );
+
+      return { ...prev, transactions: newTransactions };
+    });
+    toast.success("Transaction alias saved");
+  };
 
   return (
     <Accordion selectionMode="multiple">
@@ -123,6 +151,19 @@ export const TxInfo = () => {
             </Card>
           )}
         </div>
+      </AccordionItem>
+      <AccordionItem key="11" title="Alias" className="m-0">
+        <form onSubmit={handleSave} className="flex justify-around">
+          <Input
+            inputSize="small"
+            name="Name your transaction"
+            onChange={handleChange}
+            value={name}
+          />
+          <Button type="submit" className="h-10 text-sm">
+            Save
+          </Button>
+        </form>
       </AccordionItem>
     </Accordion>
   );

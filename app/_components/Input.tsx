@@ -32,7 +32,7 @@ export function CustomInput({
         <label htmlFor={id} className="cursor-pointer select-none text-xl">
           {label}
         </label>
-        <div className="relative mr-4 inline-block w-10 select-none align-top">
+        <div className="relative inline-block w-10 select-none align-top">
           <label className="cursor-pointer">
             <div
               className={`toggle-label flex h-7 items-center overflow-hidden rounded-full rounded-b-full border-2 border-b-4 border-black px-6 shadow-small shadow-black transition-all duration-400 ease-in-out ${
