@@ -1,6 +1,6 @@
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
-import { POLICY_LENGTH, getTransaction, getUtxo, isCborUtxo, isEmpty } from ".";
+import { POLICY_LENGTH, getTransaction, getUtxo, isEmpty } from ".";
 import type {
   Address,
   ICborAsset,
@@ -80,6 +80,10 @@ const generateUTXO = ({
     isReferenceInput,
     redeemers: redeemer ?? undefined,
   };
+};
+
+const isCborUtxo = (inputs: any): inputs is ICborUtxo => {
+  return "address" in inputs;
 };
 
 export const parseTxFromCbor = (

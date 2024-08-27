@@ -3,12 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { type ChangeEvent, useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import { Button, Input } from "~/app/_components";
 import TxPipeIcon from "~/public/txpipe.png";
-import { useConfigs, useGraphical } from "../_contexts";
-import { isEmpty, OPTIONS, ROUTES, setCBOR } from "../_utils";
-import { NetSelector } from "./NetSelector";
+import { useConfigs, useGraphical } from "../../_contexts";
+import { isEmpty, OPTIONS, ROUTES } from "../../_utils";
+import { NetSelector } from "../NetSelector";
+import { setCBOR, setHash } from "./header.helper";
 
 export const Header = () => {
   const searchParams = useSearchParams();
@@ -33,7 +33,7 @@ export const Header = () => {
 
     switch (selectedOption) {
       case OPTIONS.HASH:
-        toast.error("Not implemented yet");
+        await setHash(configs, raw, transactions, setTransactionBox, setError);
         break;
       case OPTIONS.CBOR:
         await setCBOR(configs, raw, transactions, setTransactionBox, setError);

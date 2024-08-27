@@ -6,6 +6,7 @@ export const ROUTES = {
 
 export const API_ROUTES = {
   CBOR: "api/cbor",
+  HASH: "api/hash",
 };
 
 export const TX_WIDTH = 125;

@@ -8,3 +8,11 @@ export const getTxFromCBORSchema = z.object({
   network: networkSchema,
   cbor: z.string({ required_error: "CBOR is required" }),
 });
+
+export const getTxFromHashSchema = z.object({
+  network: networkSchema,
+  txId: z
+    .string({ required_error: "Transaction hash is required" })
+    .min(64, { message: "Transaction hash is too short" })
+    .max(64, { message: "Transaction hash is too long" }),
+});
