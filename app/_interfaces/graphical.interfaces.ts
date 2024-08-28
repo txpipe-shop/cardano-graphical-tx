@@ -17,15 +17,12 @@ export interface Transaction {
   blockHash?: string;
   blockTxIndex?: number;
   blockHeight: number;
-  blockTimestamp: number;
   blockAbsoluteSlot?: number;
   mint: ICborAsset[];
   invalidBefore?: number;
   invalidHereafter?: number;
-  fee?: number;
-  deposit?: number;
+  fee: number;
   withdrawals?: any[];
-  additionalSigners?: string[];
   scriptsSuccessful?: boolean;
   redeemers?: Redeemers;
   metadata?: any;

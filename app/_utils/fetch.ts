@@ -66,9 +66,9 @@ export const getTxFromBlockfrost = async (
 ): Promise<IBlockfrostResponse> => {
   try {
     const query = { network, txId };
-    const res = await fetch(parseQuery(API_ROUTES.HASH, query));
-    if (res.status !== StatusCodes.OK) throw res;
-    const data = await res.json();
+    const utxoRes = await fetch(parseQuery(API_ROUTES.HASH, query));
+    if (utxoRes.status !== StatusCodes.OK) throw utxoRes;
+    const data = await utxoRes.json();
 
     return data as IBlockfrostResponse;
   } catch (error) {

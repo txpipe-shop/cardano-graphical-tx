@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import { Button, Input } from "~/app/_components";
 import { GraphicalContext } from "~/app/_contexts";
 import {
-  DATE_TIME_OPTIONS,
   TX_URL_PARAM,
   getTransaction,
   handleCopy,
@@ -38,7 +37,6 @@ export const TxInfo = () => {
     mint,
     inputsUTXO,
     outputsUTXO,
-    blockTimestamp,
   } = selectedTx;
 
   const totalOutput: bigint = outputsUTXO.reduce((acc, output) => {
@@ -124,22 +122,13 @@ export const TxInfo = () => {
           {inputsUTXO.length}
         </Card>
       </AccordionItem>
-      <AccordionItem key="8" title="Date">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
-          {blockTimestamp
-            ? new Date(blockTimestamp * 1000).toLocaleDateString(
-                undefined,
-                DATE_TIME_OPTIONS,
-              )
-            : "No date"}
-        </Card>
-      </AccordionItem>
-      <AccordionItem key="9" title="Metadata">
+
+      <AccordionItem key="8" title="Metadata">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {msg}
         </Card>
       </AccordionItem>
-      <AccordionItem key="10" title="Minting & Burning">
+      <AccordionItem key="9" title="Minting & Burning">
         <div className="flex flex-col gap-2">
           {mint.length ? (
             mint.map((asset, index) => (
@@ -152,7 +141,7 @@ export const TxInfo = () => {
           )}
         </div>
       </AccordionItem>
-      <AccordionItem key="11" title="Alias" className="m-0">
+      <AccordionItem key="10" title="Alias" className="m-0">
         <form onSubmit={handleSave} className="flex justify-around">
           <Input
             inputSize="small"

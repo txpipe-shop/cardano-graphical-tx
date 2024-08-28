@@ -98,8 +98,10 @@ export const setHash = async (
         datum: output.inline_datum,
       })),
     })),
+    // TODO: Change
     fee: 0,
     mints: [],
+    scriptsSuccessful: false,
   };
 
   const tx = parseTxFromCbor([parsedData], transactions);

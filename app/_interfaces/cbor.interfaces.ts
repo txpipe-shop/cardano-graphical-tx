@@ -30,4 +30,5 @@ export interface ICborTransaction {
   referenceInputs: ICborInput[];
   outputs: ICborUtxo[];
   mints: ICborAsset[];
+  scriptsSuccessful: boolean;
 }
