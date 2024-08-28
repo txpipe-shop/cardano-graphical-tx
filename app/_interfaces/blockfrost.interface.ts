@@ -30,6 +30,26 @@ interface OutputAmount {
   quantity: string;
 }
 
+interface Redeemer {
+  tx_index: number;
+  purpose: string;
+  script_hash: string;
+  redeemer_data_hash: string;
+  unit_mem: string;
+  unit_steps: string;
+  fee: string;
+}
+
+interface Metadata {
+  label: string;
+  json_metadata: string;
+}
+
+interface Metadata {
+  label: string;
+  cbor_metadata: string;
+  metadata: string;
+}
 export interface IBlockfrostResponse {
   // parameters for the UTxO response
   hash: string;
@@ -57,4 +77,6 @@ export interface IBlockfrostResponse {
   asset_mint_or_burn_count: number;
   redeemer_count: number;
   valid_contract: boolean;
+  metadata: Metadata[];
+  redeemers: Redeemer[];
 }

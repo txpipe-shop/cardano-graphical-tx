@@ -25,6 +25,14 @@ export const getBlockfrostTx = (network: NETWORK, hash: string) => {
   return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}`;
 };
 
+export const getBlockfrostRedeemers = (network: NETWORK, hash: string) => {
+  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/redeemers`;
+};
+
+export const getBlockfrostMetadata = (network: NETWORK, hash: string) => {
+  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/metadata`;
+};
+
 const parseQuery = (
   route: (typeof API_ROUTES)[keyof typeof API_ROUTES],
   query: Record<string, any>,
@@ -70,9 +78,9 @@ export const getTxFromBlockfrost = async (
 ): Promise<IBlockfrostResponse> => {
   try {
     const query = { network, txId };
-    const utxoRes = await fetch(parseQuery(API_ROUTES.HASH, query));
-    if (utxoRes.status !== StatusCodes.OK) throw utxoRes;
-    const data = await utxoRes.json();
+    const res = await fetch(parseQuery(API_ROUTES.HASH, query));
+    if (res.status !== StatusCodes.OK) throw res;
+    const data = await res.json();
 
     return data as IBlockfrostResponse;
   } catch (error) {

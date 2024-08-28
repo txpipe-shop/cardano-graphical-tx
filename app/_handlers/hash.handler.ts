@@ -4,6 +4,8 @@ import {
   getApiKey,
   getBlockfrostUTxO,
   getBlockfrostTx,
+  getBlockfrostMetadata,
+  getBlockfrostRedeemers,
   type NETWORK,
 } from "../_utils";
 import BlockfrostResponseSchema from "../_utils/schemas/blockfrostResponseSchema";
@@ -38,11 +40,41 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
       if (res.status !== StatusCodes.OK) throw res;
       return await res.json();
     });
-    console.log("txRes", txRes);
+
+    // Fetch metadata response
+    const metadataRes = await fetch(getBlockfrostMetadata(network, hash), {
+      headers: {
+        project_id: apiKey,
+      },
+      method: "GET",
+    }).then(async (res) => {
+      if (res.status !== StatusCodes.OK) throw res;
+      return await res.json();
+    });
+    const metadataParsed = metadataRes.map(
+      (metadata: { label: string; json_metadata: any }) => {
+        return {
+          label: metadata.label,
+          json_metadata: JSON.stringify(metadata.json_metadata, null, 2),
+        };
+      },
+    );
+    // Fetch redeemers response
+    const redeemersRes = await fetch(getBlockfrostRedeemers(network, hash), {
+      headers: {
+        project_id: apiKey,
+      },
+      method: "GET",
+    }).then(async (res) => {
+      if (res.status !== StatusCodes.OK) throw res;
+      return await res.json();
+    });
 
     const parsedData = BlockfrostResponseSchema.parse({
       ...utxosRes,
       ...txRes,
+      metadata: metadataParsed,
+      redeemers: redeemersRes,
     });
     return Response.json(parsedData);
   } catch (err: any) {
