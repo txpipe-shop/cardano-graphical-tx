@@ -1,6 +1,11 @@
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
-import { getApiKey, getBlockfrostURL, type NETWORK } from "../_utils";
+import {
+  getApiKey,
+  getBlockfrostUTxO,
+  getBlockfrostTx,
+  type NETWORK,
+} from "../_utils";
 import BlockfrostResponseSchema from "../_utils/schemas/blockfrostResponseSchema";
 
 interface IHashHandler {
@@ -11,7 +16,9 @@ interface IHashHandler {
 export const hashHandler = async ({ network, hash }: IHashHandler) => {
   try {
     const apiKey = getApiKey(network);
-    const utxosRes = await fetch(getBlockfrostURL(network, hash), {
+
+    // Fetch UTXO response
+    const utxosRes = await fetch(getBlockfrostUTxO(network, hash), {
       headers: {
         project_id: apiKey,
       },
@@ -21,8 +28,22 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
       return await res.json();
     });
 
-    const parsedData = BlockfrostResponseSchema.parse(utxosRes);
+    // Fetch Transaction response
+    const txRes = await fetch(getBlockfrostTx(network, hash), {
+      headers: {
+        project_id: apiKey,
+      },
+      method: "GET",
+    }).then(async (res) => {
+      if (res.status !== StatusCodes.OK) throw res;
+      return await res.json();
+    });
+    console.log("txRes", txRes);
 
+    const parsedData = BlockfrostResponseSchema.parse({
+      ...utxosRes,
+      ...txRes,
+    });
     return Response.json(parsedData);
   } catch (err: any) {
     console.error(err);

@@ -17,8 +17,12 @@ export const getApiKey = (network: NETWORK): string => {
   }
 };
 
-export const getBlockfrostURL = (network: NETWORK, hash: string) => {
+export const getBlockfrostUTxO = (network: NETWORK, hash: string) => {
   return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/utxos`;
+};
+
+export const getBlockfrostTx = (network: NETWORK, hash: string) => {
+  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}`;
 };
 
 const parseQuery = (
