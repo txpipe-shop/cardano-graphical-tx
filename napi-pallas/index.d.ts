@@ -51,4 +51,4 @@ export interface CborResponse {
   scriptsSuccessful: boolean
   error: string
 }
-export function cborParse(raw: string): CborResponse
+export declare function cborParse(raw: string): CborResponse

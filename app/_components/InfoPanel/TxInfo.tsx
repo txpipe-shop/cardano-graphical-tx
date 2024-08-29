@@ -39,7 +39,10 @@ export const TxInfo = () => {
     blockTxIndex,
     blockHeight,
     blockAbsoluteSlot,
+    redeemers,
+    withdrawals,
     metadata,
+    size,
   } = selectedTx;
 
   const totalOutput: bigint = outputsUTXO.reduce((acc, output) => {
@@ -136,30 +139,35 @@ export const TxInfo = () => {
           {blockAbsoluteSlot ?? "Unknown"}
         </Card>
       </AccordionItem>
-      <AccordionItem key="5" title="Outputs Count">
+      <AccordionItem key="5" title="Size">
+        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+          {size ?? "Unknown"}
+        </Card>
+      </AccordionItem>
+      <AccordionItem key="6" title="Outputs Count">
         <Card className="fl ex-row flex justify-between bg-content2 px-5 py-2 shadow-none">
           {outputsUTXO.length}
         </Card>
       </AccordionItem>
-      <AccordionItem key="6" title="Total Output Sum">
+      <AccordionItem key="7" title="Total Output Sum">
         <div className="flex flex-col gap-2">
           <AssetCard
             asset={{ assetName: "lovelace", policyId: "", amount: totalOutput }}
           />
         </div>
       </AccordionItem>
-      <AccordionItem key="7" title="Inputs Count">
+      <AccordionItem key="8" title="Inputs Count">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {inputsUTXO.length}
         </Card>
       </AccordionItem>
 
-      <AccordionItem key="8" title="Metadata">
+      <AccordionItem key="9" title="Metadata">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {msg}
         </Card>
       </AccordionItem>
-      <AccordionItem key="9" title="Minting & Burning">
+      <AccordionItem key="10" title="Minting & Burning">
         <div className="flex flex-col gap-2">
           {mint.length ? (
             mint.map((asset, index) => (
@@ -172,14 +180,14 @@ export const TxInfo = () => {
           )}
         </div>
       </AccordionItem>
-      <AccordionItem key="10" title="Scripts Successful">
+      <AccordionItem key="11" title="Scripts Successful">
         <div className="flex flex-col gap-2">
           <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
             {scriptsSuccessful ? "True" : "False"}
           </Card>
         </div>
       </AccordionItem>
-      <AccordionItem key="11" title="Alias" className="m-0">
+      <AccordionItem key="12" title="Alias" className="m-0">
         <form onSubmit={handleSave} className="flex justify-around">
           <Input
             inputSize="small"
