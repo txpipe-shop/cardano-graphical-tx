@@ -48,6 +48,7 @@ export interface CborResponse {
   referenceInputs: Array<InputUtxo>
   outputs: Array<OutputUtxo>
   mints: Array<Assets>
+  scriptsSuccessful: boolean
   error: string
 }
 export function cborParse(raw: string): CborResponse

@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
-import type { IBlockfrostResponse, ICborTransaction } from "../_interfaces";
+import type { IBlockfrostResponse, ITransaction } from "../_interfaces";
 import { env } from "../env.mjs";
 import { API_ROUTES, NETWORK } from "./constants";
 
@@ -48,7 +48,7 @@ export const getTxFromCbor = async (
   cbor: string,
   network: NETWORK,
   setFetchError: Dispatch<SetStateAction<string>>,
-): Promise<ICborTransaction> => {
+): Promise<ITransaction> => {
   try {
     const query = { network };
     const formData = new FormData();
@@ -59,7 +59,7 @@ export const getTxFromCbor = async (
     });
     if (res.status !== StatusCodes.OK) throw res;
 
-    const data: ICborTransaction & { warning?: string } = await res.json();
+    const data: ITransaction & { warning?: string } = await res.json();
 
     if (data.warning) console.warn(data.warning);
 

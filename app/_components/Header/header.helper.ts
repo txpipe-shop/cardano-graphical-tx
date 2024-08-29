@@ -1,7 +1,7 @@
 import { type Dispatch, type SetStateAction } from "react";
 import type { IUserConfigs } from "../../_contexts";
 import type {
-  Transaction,
+  IGraphicalTransaction,
   TransactionsBox,
   UtxoObject,
 } from "../../_interfaces";
@@ -9,7 +9,7 @@ import {
   getTxFromBlockfrost,
   getTxFromCbor,
   isHexa,
-  parseTxFromCbor,
+  parseTxToGraphical,
   POLICY_LENGTH,
   setPosition,
 } from "../../_utils";
@@ -31,11 +31,11 @@ export const setCBOR = async (
       setFetchError,
     );
 
-    const txs = parseTxFromCbor([cborTransaction], transactions);
+    const txs = parseTxToGraphical([cborTransaction], transactions);
     const positionedTxs = setPosition(txs);
 
     let newUtxosObject: UtxoObject = {};
-    let newTransactionsList: Transaction[] = [];
+    let newTransactionsList: IGraphicalTransaction[] = [];
 
     positionedTxs.forEach((tx) => {
       const newUtxos = [...tx.inputsUTXO, ...tx.outputsUTXO];
@@ -71,6 +71,7 @@ export const setHash = async (
   );
   const parsedData = {
     txHash: data.hash,
+    fee: parseInt(data.fees),
     inputs: data.inputs
       .filter((input) => !input.reference)
       .map((input) => ({
@@ -98,17 +99,24 @@ export const setHash = async (
         datum: output.inline_datum,
       })),
     })),
-    // TODO: Change
-    fee: 0,
-    mints: [],
-    scriptsSuccessful: false,
+    mints: [], // TODO: Complete
+    scriptsSuccessful: true,
+    blockHash: data.block,
+    blockTxIndex: data.index,
+    blockHeight: data.block_height,
+    blockAbsoluteSlot: data.slot,
+    invalidBefore: parseInt(data.invalid_before ?? ""),
+    invalidHereafter: parseInt(data.invalid_hereafter ?? ""),
+    redeemers: { spends: [], mints: [], withdrawals: [] }, // TODO: Fix this with the current data.redeemers
+    metadata: data.metadata,
+    size: data.size,
   };
 
-  const tx = parseTxFromCbor([parsedData], transactions);
+  const tx = parseTxToGraphical([parsedData], transactions);
   const positionedTxs = setPosition(tx);
 
   let newUtxosObject: UtxoObject = {};
-  let newTransactionsList: Transaction[] = [];
+  let newTransactionsList: IGraphicalTransaction[] = [];
 
   positionedTxs.forEach((tx) => {
     const newUtxos = [...tx.inputsUTXO, ...tx.outputsUTXO];

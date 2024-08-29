@@ -30,13 +30,16 @@ export const TxInfo = () => {
   if (!selectedTx) return null;
   const {
     txHash,
-    blockHeight,
-    blockAbsoluteSlot,
     fee,
-    metadata,
-    mint,
     inputsUTXO,
     outputsUTXO,
+    mint,
+    scriptsSuccessful,
+    blockHash,
+    blockTxIndex,
+    blockHeight,
+    blockAbsoluteSlot,
+    metadata,
   } = selectedTx;
 
   const totalOutput: bigint = outputsUTXO.reduce((acc, output) => {
@@ -96,28 +99,51 @@ export const TxInfo = () => {
         </div>
       </AccordionItem>
       <AccordionItem key="3" title="Block">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
-          {blockHeight}
+        <Card className="m-1 flex flex-row bg-content2 px-5 py-2 shadow-none">
+          <b>Slot:</b>&nbsp;
+          <p>{blockAbsoluteSlot ?? "Unknown"}</p>
+        </Card>
+        <Card className="m-1 flex flex-row bg-content2 px-5 py-2 shadow-none">
+          <b>Height:</b>&nbsp;
+          <p>{blockHeight ?? "Unknown"}</p>
+        </Card>
+        {blockHash && (
+          <Card className="m-1 flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+            <div className="flex">
+              <b>Hash:</b>&nbsp;
+              <p>{trimString(blockHash, 14)}</p>
+            </div>
+            <Image
+              src={CopyIcon}
+              alt="Copy"
+              onClick={handleCopy(blockHash)}
+              className="cursor-pointer"
+            />
+          </Card>
+        )}
+        <Card className="m-1 flex flex-row bg-content2 px-5 py-2 shadow-none">
+          <b>Index:</b>&nbsp;
+          <p>{blockTxIndex ?? "Unknown"}</p>
         </Card>
       </AccordionItem>
       <AccordionItem key="4" title="Slot">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
-          {blockAbsoluteSlot}
+          {blockAbsoluteSlot ?? "Unknown"}
         </Card>
       </AccordionItem>
-      <AccordionItem key="5" title="Outputs">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+      <AccordionItem key="5" title="Outputs Count">
+        <Card className="fl ex-row flex justify-between bg-content2 px-5 py-2 shadow-none">
           {outputsUTXO.length}
         </Card>
       </AccordionItem>
-      <AccordionItem key="6" title="Total Output">
+      <AccordionItem key="6" title="Total Output Sum">
         <div className="flex flex-col gap-2">
           <AssetCard
             asset={{ assetName: "lovelace", policyId: "", amount: totalOutput }}
           />
         </div>
       </AccordionItem>
-      <AccordionItem key="7" title="Inputs">
+      <AccordionItem key="7" title="Inputs Count">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {inputsUTXO.length}
         </Card>
@@ -141,7 +167,14 @@ export const TxInfo = () => {
           )}
         </div>
       </AccordionItem>
-      <AccordionItem key="10" title="Alias" className="m-0">
+      <AccordionItem key="10" title="Scripts Successful">
+        <div className="flex flex-col gap-2">
+          <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+            {scriptsSuccessful ? "True" : "False"}
+          </Card>
+        </div>
+      </AccordionItem>
+      <AccordionItem key="11" title="Alias" className="m-0">
         <form onSubmit={handleSave} className="flex justify-around">
           <Input
             inputSize="small"

@@ -65,8 +65,8 @@ export interface IBlockfrostResponse {
   fees: string;
   deposit: string;
   size: number;
-  invalid_before: string | null;
-  invalid_hereafter: string | null;
+  invalid_before: string | undefined;
+  invalid_hereafter: string | undefined;
   utxo_count: number;
   withdrawal_count: number;
   mir_cert_count: number;

@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import pallas, { type CborResponse } from "napi-pallas";
-import type { ICborAsset, ICborUtxo } from "../_interfaces";
+import type { ICborAsset, IUtxo } from "../_interfaces";
 import { type NETWORK, isEmpty } from "../_utils";
 
 interface ICborHandler {
@@ -16,7 +16,7 @@ export const cborHandler = async ({ cbor }: ICborHandler) => {
 
     if (!isEmpty(res.error)) throw Error(res.error);
 
-    const outputs: ICborUtxo[] = res.outputs.map((output) => {
+    const outputs: IUtxo[] = res.outputs.map((output) => {
       const datum = {
         hash: output.datum?.hash || "",
         bytes: output.datum?.bytes || "",
@@ -46,6 +46,7 @@ export const cborHandler = async ({ cbor }: ICborHandler) => {
       fee: res.fee,
       inputs: res.inputs,
       referenceInputs: res.referenceInputs,
+      scriptsSuccessful: res.scriptsSuccessful,
       outputs,
       mints,
     });
