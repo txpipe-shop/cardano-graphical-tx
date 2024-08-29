@@ -51,10 +51,15 @@ export const TxInfo = () => {
     return acc + BigInt(lovelace.amount);
   }, BigInt(0));
 
-  const msg =
-    metadata && metadata["674"] && metadata["674"].msg
-      ? metadata["674"].msg
-      : "No metadata";
+  const msg = (() => {
+    const item = metadata.find(
+      (entry: { label: string }) => entry.label === "674",
+    );
+    if (item && item.json_metadata) {
+      return JSON.parse(item.json_metadata).msg;
+    }
+    return "No metadata";
+  })();
 
   const txTrim = trimString(txHash || "", 12);
 
