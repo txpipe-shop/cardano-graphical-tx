@@ -1,13 +1,6 @@
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
-import {
-  getApiKey,
-  getBlockfrostUTxO,
-  getBlockfrostTx,
-  getBlockfrostMetadata,
-  getBlockfrostRedeemers,
-  type NETWORK,
-} from "../_utils";
+import { getApiKey, getBlockfrostURL, type NETWORK } from "../_utils";
 import BlockfrostResponseSchema from "../_utils/schemas/blockfrostResponseSchema";
 
 interface IHashHandler {
@@ -19,8 +12,7 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
   try {
     const apiKey = getApiKey(network);
 
-    // Fetch UTXO response
-    const utxosRes = await fetch(getBlockfrostUTxO(network, hash), {
+    const cbor = await fetch(getBlockfrostURL(network, hash), {
       headers: {
         project_id: apiKey,
       },
@@ -30,52 +22,7 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
       return await res.json();
     });
 
-    // Fetch Transaction response
-    const txRes = await fetch(getBlockfrostTx(network, hash), {
-      headers: {
-        project_id: apiKey,
-      },
-      method: "GET",
-    }).then(async (res) => {
-      if (res.status !== StatusCodes.OK) throw res;
-      return await res.json();
-    });
-
-    // Fetch metadata response
-    const metadataRes = await fetch(getBlockfrostMetadata(network, hash), {
-      headers: {
-        project_id: apiKey,
-      },
-      method: "GET",
-    }).then(async (res) => {
-      if (res.status !== StatusCodes.OK) throw res;
-      return await res.json();
-    });
-    const metadataParsed = metadataRes.map(
-      (metadata: { label: string; json_metadata: any }) => {
-        return {
-          label: metadata.label,
-          json_metadata: JSON.stringify(metadata.json_metadata, null, 2),
-        };
-      },
-    );
-    // Fetch redeemers response
-    const redeemersRes = await fetch(getBlockfrostRedeemers(network, hash), {
-      headers: {
-        project_id: apiKey,
-      },
-      method: "GET",
-    }).then(async (res) => {
-      if (res.status !== StatusCodes.OK) throw res;
-      return await res.json();
-    });
-
-    const parsedData = BlockfrostResponseSchema.parse({
-      ...utxosRes,
-      ...txRes,
-      metadata: metadataParsed,
-      redeemers: redeemersRes,
-    });
+    const parsedData = BlockfrostResponseSchema.parse(cbor);
     return Response.json(parsedData);
   } catch (err: any) {
     console.error(err);

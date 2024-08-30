@@ -17,20 +17,8 @@ export const getApiKey = (network: NETWORK): string => {
   }
 };
 
-export const getBlockfrostUTxO = (network: NETWORK, hash: string) => {
-  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/utxos`;
-};
-
-export const getBlockfrostTx = (network: NETWORK, hash: string) => {
-  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}`;
-};
-
-export const getBlockfrostRedeemers = (network: NETWORK, hash: string) => {
-  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/redeemers`;
-};
-
-export const getBlockfrostMetadata = (network: NETWORK, hash: string) => {
-  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/metadata`;
+export const getBlockfrostURL = (network: NETWORK, hash: string) => {
+  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/cbor`;
 };
 
 const parseQuery = (
@@ -65,13 +53,13 @@ export const getTxFromCbor = async (
 
     return data;
   } catch (err: any) {
-    console.log(err);
+    console.error(err);
     setFetchError(err.statusText);
     throw err;
   }
 };
 
-export const getTxFromBlockfrost = async (
+export const getCborFromHash = async (
   txId: string,
   network: NETWORK,
   setFetchError: Dispatch<SetStateAction<string>>,

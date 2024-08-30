@@ -6,9 +6,9 @@ import { type ChangeEvent, useEffect, useState } from "react";
 import { Button, Input } from "~/app/_components";
 import TxPipeIcon from "~/public/txpipe.png";
 import { useConfigs, useGraphical } from "../../_contexts";
-import { isEmpty, OPTIONS, ROUTES } from "../../_utils";
+import { getCborFromHash, isEmpty, OPTIONS, ROUTES } from "../../_utils";
 import { NetSelector } from "../NetSelector";
-import { setCBOR, setHash } from "./header.helper";
+import { setCBOR } from "./header.helper";
 
 export const Header = () => {
   const searchParams = useSearchParams();
@@ -33,7 +33,9 @@ export const Header = () => {
 
     switch (selectedOption) {
       case OPTIONS.HASH:
-        await setHash(configs, raw, transactions, setTransactionBox, setError);
+        const { cbor } = await getCborFromHash(raw, configs.net, setError);
+        await setCBOR(configs, cbor, transactions, setTransactionBox, setError);
+
         break;
       case OPTIONS.CBOR:
         await setCBOR(configs, raw, transactions, setTransactionBox, setError);

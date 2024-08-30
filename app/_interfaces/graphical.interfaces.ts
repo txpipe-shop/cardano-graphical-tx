@@ -7,6 +7,11 @@ export interface TransactionsBox {
   utxos: UtxoObject;
 }
 
+export interface UtxoObject {
+  // utxoHash format: `${txHash}#${index}`
+  [utxoHash: string]: IGraphicalUtxo;
+}
+
 export interface IGraphicalTransaction {
   txHash: string;
   pos: Vector2d;
@@ -28,11 +33,6 @@ export interface IGraphicalTransaction {
   metadata?: any;
   size?: number;
   alias: string;
-}
-
-export interface UtxoObject {
-  // utxoHash format: `${txHash}#${index}`
-  [utxoHash: string]: IGraphicalUtxo;
 }
 
 export interface IGraphicalUtxo {

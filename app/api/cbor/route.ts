@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     });
     return await cborHandler({ network, cbor });
   } catch (err: any) {
-    console.log(err);
+    console.error(err);
     if (err.issues) {
       const errors = err.issues.map((issue: any) => issue.message);
       return new Response(null, {

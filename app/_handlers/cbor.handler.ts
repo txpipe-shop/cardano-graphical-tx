@@ -51,7 +51,7 @@ export const cborHandler = async ({ cbor }: ICborHandler) => {
       mints,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return Response.json(
       { error },
       {
