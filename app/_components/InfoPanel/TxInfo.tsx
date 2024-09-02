@@ -39,8 +39,6 @@ export const TxInfo = () => {
     blockTxIndex,
     blockHeight,
     blockAbsoluteSlot,
-    redeemers,
-    withdrawals,
     metadata,
     size,
   } = selectedTx;
@@ -55,7 +53,7 @@ export const TxInfo = () => {
   }, BigInt(0));
 
   const msg = (() => {
-    const item = metadata.find(
+    const item = metadata?.find(
       (entry: { label: string }) => entry.label === "674",
     );
     if (item && item.json_metadata) {

@@ -14,6 +14,9 @@ export const env = createEnv({
     NEXTAUTH_SECRET: z.string(),
     NEXTAUTH_URL: z.string().url(),
     NODE_ENV: z.string(),
+    PREPROD_BLOCKFROST_KEY: z.string(),
+    MAINNET_BLOCKFROST_KEY: z.string(),
+    PREVIEW_BLOCKFROST_KEY: z.string(),
   },
   /*
    * Environment variables available on the client (and server).
@@ -22,9 +25,6 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_CBOR_ENDPOINT: z.string().url(),
-    NEXT_PUBLIC_PREPROD_BLOCKFROST_KEY: z.string(),
-    NEXT_PUBLIC_MAINNET_BLOCKFROST_KEY: z.string(),
-    NEXT_PUBLIC_PREVIEW_BLOCKFROST_KEY: z.string(),
   },
   /*
    * Due to how Next.js bundles environment variables on Edge and Client,
@@ -33,12 +33,9 @@ export const env = createEnv({
    * 💡 You'll get type errors if not all variables from `server` & `client` are included here.
    */
   runtimeEnv: {
-    NEXT_PUBLIC_PREPROD_BLOCKFROST_KEY:
-      process.env.NEXT_PUBLIC_PREPROD_BLOCKFROST_KEY,
-    NEXT_PUBLIC_MAINNET_BLOCKFROST_KEY:
-      process.env.NEXT_PUBLIC_MAINNET_BLOCKFROST_KEY,
-    NEXT_PUBLIC_PREVIEW_BLOCKFROST_KEY:
-      process.env.NEXT_PUBLIC_PREVIEW_BLOCKFROST_KEY,
+    PREPROD_BLOCKFROST_KEY: process.env.PREPROD_BLOCKFROST_KEY,
+    MAINNET_BLOCKFROST_KEY: process.env.MAINNET_BLOCKFROST_KEY,
+    PREVIEW_BLOCKFROST_KEY: process.env.PREVIEW_BLOCKFROST_KEY,
     NEXT_PUBLIC_CBOR_ENDPOINT: process.env.NEXT_PUBLIC_CBOR_ENDPOINT,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,

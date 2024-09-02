@@ -7,11 +7,11 @@ import { API_ROUTES, NETWORK } from "./constants";
 export const getApiKey = (network: NETWORK): string => {
   switch (network) {
     case NETWORK.MAINNET:
-      return env.NEXT_PUBLIC_MAINNET_BLOCKFROST_KEY;
+      return env.MAINNET_BLOCKFROST_KEY;
     case NETWORK.PREPROD:
-      return env.NEXT_PUBLIC_PREPROD_BLOCKFROST_KEY;
+      return env.PREPROD_BLOCKFROST_KEY;
     case NETWORK.PREVIEW:
-      return env.NEXT_PUBLIC_PREVIEW_BLOCKFROST_KEY;
+      return env.PREVIEW_BLOCKFROST_KEY;
     default:
       throw new Error("Invalid network provided");
   }
