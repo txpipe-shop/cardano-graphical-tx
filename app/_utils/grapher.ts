@@ -1,7 +1,11 @@
 import type { Vector2d } from "konva/lib/types";
 import type { Dispatch, SetStateAction } from "react";
 import { KONVA_COLORS, TX_HEIGHT, TX_WIDTH, UTXO_LINE_GAP } from ".";
-import type { Transaction, TransactionsBox, UtxoItem } from "../_interfaces";
+import type {
+  IGraphicalTransaction,
+  IGraphicalUtxo,
+  TransactionsBox,
+} from "../_interfaces";
 
 export const getTransaction =
   (transactionBox: TransactionsBox) => (txHash: string) => {
@@ -126,10 +130,10 @@ export const getUtxoColor =
  * @returns An array of UTXO items with their positions updated.
  */
 const setUtxoPosition = (
-  utxoList: UtxoItem[],
+  utxoList: IGraphicalUtxo[],
   txPos: Vector2d,
   isOutput: boolean,
-): UtxoItem[] => {
+): IGraphicalUtxo[] => {
   const length = utxoList.length;
   // hasSpace checks if there is enough space to fit all utxos in the tx_height
   const hasSpace = (length - 1) * UTXO_LINE_GAP > TX_HEIGHT;
@@ -158,7 +162,9 @@ const setUtxoPosition = (
 };
 
 /** Calculates the position of the transaction on the canvas. */
-export const setPosition = (transactions: Transaction[]): Transaction[] => {
+export const setPosition = (
+  transactions: IGraphicalTransaction[],
+): IGraphicalTransaction[] => {
   const initial = window.innerWidth / 2 - TX_WIDTH / 2;
 
   return transactions.map((tx) => {

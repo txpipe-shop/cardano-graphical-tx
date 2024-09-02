@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import { Button, Input } from "~/app/_components";
 import { GraphicalContext } from "~/app/_contexts";
 import {
-  DATE_TIME_OPTIONS,
   TX_URL_PARAM,
   getTransaction,
   handleCopy,
@@ -31,14 +30,17 @@ export const TxInfo = () => {
   if (!selectedTx) return null;
   const {
     txHash,
-    blockHeight,
-    blockAbsoluteSlot,
     fee,
-    metadata,
-    mint,
     inputsUTXO,
     outputsUTXO,
-    blockTimestamp,
+    mint,
+    scriptsSuccessful,
+    blockHash,
+    blockTxIndex,
+    blockHeight,
+    blockAbsoluteSlot,
+    metadata,
+    size,
   } = selectedTx;
 
   const totalOutput: bigint = outputsUTXO.reduce((acc, output) => {
@@ -50,10 +52,15 @@ export const TxInfo = () => {
     return acc + BigInt(lovelace.amount);
   }, BigInt(0));
 
-  const msg =
-    metadata && metadata["674"] && metadata["674"].msg
-      ? metadata["674"].msg
-      : "No metadata";
+  const msg = (() => {
+    const item = metadata?.find(
+      (entry: { label: string }) => entry.label === "674",
+    );
+    if (item && item.json_metadata) {
+      return JSON.parse(item.json_metadata).msg;
+    }
+    return "No metadata";
+  })();
 
   const txTrim = trimString(txHash || "", 12);
 
@@ -98,42 +105,61 @@ export const TxInfo = () => {
         </div>
       </AccordionItem>
       <AccordionItem key="3" title="Block">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
-          {blockHeight}
+        <Card className="m-1 flex flex-row bg-content2 px-5 py-2 shadow-none">
+          <b>Slot:</b>&nbsp;
+          <p>{blockAbsoluteSlot ?? "Unknown"}</p>
+        </Card>
+        <Card className="m-1 flex flex-row bg-content2 px-5 py-2 shadow-none">
+          <b>Height:</b>&nbsp;
+          <p>{blockHeight ?? "Unknown"}</p>
+        </Card>
+        {blockHash && (
+          <Card className="m-1 flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+            <div className="flex">
+              <b>Hash:</b>&nbsp;
+              <p>{trimString(blockHash, 14)}</p>
+            </div>
+            <Image
+              src={CopyIcon}
+              alt="Copy"
+              onClick={handleCopy(blockHash)}
+              className="cursor-pointer"
+            />
+          </Card>
+        )}
+        <Card className="m-1 flex flex-row bg-content2 px-5 py-2 shadow-none">
+          <b>Index:</b>&nbsp;
+          <p>{blockTxIndex ?? "Unknown"}</p>
         </Card>
       </AccordionItem>
       <AccordionItem key="4" title="Slot">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
-          {blockAbsoluteSlot}
+          {blockAbsoluteSlot ?? "Unknown"}
         </Card>
       </AccordionItem>
-      <AccordionItem key="5" title="Outputs">
+      <AccordionItem key="5" title="Size">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+          {size ?? "Unknown"}
+        </Card>
+      </AccordionItem>
+      <AccordionItem key="6" title="Outputs Count">
+        <Card className="fl ex-row flex justify-between bg-content2 px-5 py-2 shadow-none">
           {outputsUTXO.length}
         </Card>
       </AccordionItem>
-      <AccordionItem key="6" title="Total Output">
+      <AccordionItem key="7" title="Total Output Sum">
         <div className="flex flex-col gap-2">
           <AssetCard
             asset={{ assetName: "lovelace", policyId: "", amount: totalOutput }}
           />
         </div>
       </AccordionItem>
-      <AccordionItem key="7" title="Inputs">
+      <AccordionItem key="8" title="Inputs Count">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {inputsUTXO.length}
         </Card>
       </AccordionItem>
-      <AccordionItem key="8" title="Date">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
-          {blockTimestamp
-            ? new Date(blockTimestamp * 1000).toLocaleDateString(
-                undefined,
-                DATE_TIME_OPTIONS,
-              )
-            : "No date"}
-        </Card>
-      </AccordionItem>
+
       <AccordionItem key="9" title="Metadata">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {msg}
@@ -152,7 +178,14 @@ export const TxInfo = () => {
           )}
         </div>
       </AccordionItem>
-      <AccordionItem key="11" title="Alias" className="m-0">
+      <AccordionItem key="11" title="Scripts Successful">
+        <div className="flex flex-col gap-2">
+          <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+            {scriptsSuccessful ? "True" : "False"}
+          </Card>
+        </div>
+      </AccordionItem>
+      <AccordionItem key="12" title="Alias" className="m-0">
         <form onSubmit={handleSave} className="flex justify-around">
           <Input
             inputSize="small"

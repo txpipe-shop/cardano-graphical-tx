@@ -1,44 +1,41 @@
 import type Konva from "konva";
 import type { Vector2d } from "konva/lib/types";
-import type { ICborAsset, ICborDatum } from ".";
+import type { ICborAsset, ICborDatum, Redeemers, RedeemerSpend } from ".";
 
 export interface TransactionsBox {
-  transactions: Transaction[];
+  transactions: IGraphicalTransaction[];
   utxos: UtxoObject;
 }
 
-export interface Transaction {
+export interface UtxoObject {
+  // utxoHash format: `${txHash}#${index}`
+  [utxoHash: string]: IGraphicalUtxo;
+}
+
+export interface IGraphicalTransaction {
   txHash: string;
   pos: Vector2d;
-  outputsUTXO: UtxoItem[];
-  inputsUTXO: UtxoItem[];
+  outputsUTXO: IGraphicalUtxo[];
+  inputsUTXO: IGraphicalUtxo[];
   producedLines: (Konva.Line | null)[];
   consumedLines: (Konva.Line | null)[];
   blockHash?: string;
   blockTxIndex?: number;
-  blockHeight: number;
-  blockTimestamp: number;
+  blockHeight?: number;
   blockAbsoluteSlot?: number;
   mint: ICborAsset[];
   invalidBefore?: number;
   invalidHereafter?: number;
-  fee?: number;
-  deposit?: number;
+  fee: number;
   withdrawals?: any[];
-  additionalSigners?: string[];
-  scriptsSuccessful?: boolean;
+  scriptsSuccessful: boolean;
   redeemers?: Redeemers;
   metadata?: any;
   size?: number;
   alias: string;
 }
 
-export interface UtxoObject {
-  // utxoHash format: `${txHash}#${index}`
-  [utxoHash: string]: UtxoItem;
-}
-
-export interface UtxoItem {
+export interface IGraphicalUtxo {
   utxoHash: string;
   index: number;
   assets: Array<ICborAsset>;
@@ -57,37 +54,4 @@ export interface Address {
   netType: string;
   payment: string;
   kind: "key" | "script";
-}
-
-export interface UtxoAsPoint {
-  utxo: UtxoObject;
-  start: Vector2d;
-  end: Vector2d;
-}
-
-export interface UtxoList {
-  inputs: Array<UtxoAsPoint>;
-  outputs: Array<UtxoAsPoint>;
-}
-
-export interface Redeemers {
-  spends: RedeemerSpend[];
-  mints: any[];
-  withdrawals: any[];
-}
-
-interface RedeemerSpend {
-  script_hash: string;
-  input: {
-    tx_hash: string;
-    index: number;
-  };
-  input_index: number;
-  data: Data;
-  ex_units: number[]; // memory & steps
-}
-
-interface Data {
-  json: Record<string, any>;
-  bytes: string;
 }

@@ -52,6 +52,7 @@ pub struct CborResponse {
   pub reference_inputs: Vec<InputUtxo>,
   pub outputs: Vec<OutputUtxo>,
   pub mints: Vec<Assets>,
+  pub scripts_successful: bool,
   pub error: String,
 }
 
@@ -71,10 +72,11 @@ impl CborResponse {
     Self {
       tx_hash: tx.hash().to_string(),
       fee: tx.fee().map(|x| x.to_string()),
-      inputs: inputs,
-      reference_inputs: reference_inputs,
-      outputs: outputs,
+      inputs,
+      reference_inputs,
+      outputs,
       mints,
+      scripts_successful: tx.is_valid(),
       ..self
     }
   }
@@ -84,14 +86,7 @@ impl CborResponse {
     F: FnOnce() -> anyhow::Result<CborResponse>,
   {
     match func() {
-      Ok(x) => {
-        self.tx_hash = x.tx_hash;
-        self.fee = x.fee;
-        self.inputs = x.inputs;
-        self.reference_inputs = x.reference_inputs;
-        self.outputs = x.outputs;
-        self.mints = x.mints;
-      }
+      Ok(x) => self = x,
       Err(_x) => self.error = "Invalid Cbor".to_string(),
     };
 

@@ -1,3 +1,4 @@
+import { Input } from "@nextui-org/react";
 import type { InputHTMLAttributes } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -6,9 +7,11 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   inputSize?: "small" | "medium";
   label?: string;
   isCheckbox?: boolean;
+  startContent?: React.ReactNode;
+  value: string;
 }
 
-export function Input({
+export function CustomInput({
   name,
   disabled,
   id,
@@ -21,6 +24,7 @@ export function Input({
   label,
   isCheckbox = false,
   checked,
+  startContent,
 }: InputProps) {
   if (isCheckbox) {
     return (
@@ -52,7 +56,7 @@ export function Input({
     );
   }
   return (
-    <input
+    <Input
       name={name}
       disabled={disabled}
       id={id}
@@ -60,10 +64,10 @@ export function Input({
       value={value}
       onChange={onChange}
       placeholder={placeholder}
+      startContent={startContent}
+      size={inputSize == "small" ? "sm" : "lg"}
       className={`block appearance-none rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-white text-lg text-black placeholder-gray-400 shadow shadow-black outline-none ${customClassName} ${
-        inputSize == "small"
-          ? "mt-0.5 h-10 w-3/4 px-2 py-1"
-          : "mt-1 w-2/3 px-3 py-2"
+        inputSize == "small" ? "mt-0.5 h-10 w-3/4" : "mt-1 w-2/3"
       }`}
     />
   );

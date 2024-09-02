@@ -1,19 +1,18 @@
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
-import { POLICY_LENGTH, getTransaction, getUtxo, isCborUtxo, isEmpty } from ".";
+import { POLICY_LENGTH, getTransaction, getUtxo, isEmpty } from ".";
 import type {
   Address,
-  ICborAsset,
-  ICborTransaction,
-  ICborUtxo,
+  IGraphicalTransaction,
+  IGraphicalUtxo,
+  ITransaction,
+  IUtxo,
   Redeemers,
-  Transaction,
   TransactionsBox,
-  UtxoItem,
 } from "../_interfaces";
 
 const defaultPosition = { x: 0, y: 0 };
-interface IGenerateUTXO extends ICborUtxo {
+interface IGenerateUTXO extends IUtxo {
   redeemers?: Redeemers;
   transactionBox: TransactionsBox;
   position?: Vector2d;
@@ -46,7 +45,7 @@ const formatAddress = (address: string): Address | undefined => {
       };
 };
 
-const generateUTXO = ({
+const generateGraphicalUTXO = ({
   txHash,
   index,
   assets,
@@ -57,7 +56,7 @@ const generateUTXO = ({
   position = defaultPosition,
   distance = defaultPosition,
   isReferenceInput = false,
-}: IGenerateUTXO): UtxoItem => {
+}: IGenerateUTXO): IGraphicalUtxo => {
   const exist = getUtxo(transactionBox)(txHash + "#" + index);
   if (exist) {
     return exist;
@@ -82,47 +81,30 @@ const generateUTXO = ({
   };
 };
 
-export const parseTxFromCbor = (
-  txFromCbors: ICborTransaction[],
+export const parseTxToGraphical = (
+  txFromCbors: ITransaction[],
   transactionBox: TransactionsBox,
-): Transaction[] =>
+): IGraphicalTransaction[] =>
   txFromCbors.map((cbor) => {
-    const mint: ICborAsset[] = cbor.mints;
-    const inputsUTXO: UtxoItem[] = cbor.referenceInputs
+    const inputsUTXO: IGraphicalUtxo[] = cbor.referenceInputs
       .concat(cbor.inputs)
-      .map((input) => {
-        const isReferenceInput = cbor.referenceInputs.some(
-          (referenceInput) => referenceInput === input,
-        );
-        return generateUTXO({
-          txHash: input.txHash,
-          index: input.index,
-          assets: isCborUtxo(input) ? input.assets : [],
-          address: isCborUtxo(input) ? input.address : "",
-          datum: isCborUtxo(input) && input.datum ? input.datum : undefined,
+      .map((input) =>
+        generateGraphicalUTXO({
+          ...input,
+          // TODO: Change when input info search with indexer is implemented
+          assets: [],
+          address: "",
+          datum: undefined,
           transactionBox,
-          isReferenceInput,
-        });
-      });
-
-    const referenceInputsUTXO: UtxoItem[] = cbor.referenceInputs.map((input) =>
-      generateUTXO({
-        txHash: input.txHash,
-        index: input.index,
-        assets: isCborUtxo(input) ? input.assets : [],
-        address: isCborUtxo(input) ? input.address : "",
-        datum: isCborUtxo(input) && input.datum ? input.datum : undefined,
-        transactionBox,
-      }),
-    );
+          isReferenceInput: cbor.referenceInputs.some(
+            (referenceInput) => referenceInput === input,
+          ),
+        }),
+      );
 
     const outputsUTXO = cbor.outputs.map((output) =>
-      generateUTXO({
-        txHash: output.txHash,
-        index: output.index,
-        assets: output.assets,
-        address: output.address,
-        datum: output.datum ? output.datum : undefined,
+      generateGraphicalUTXO({
+        ...output,
         transactionBox,
       }),
     );
@@ -131,18 +113,24 @@ export const parseTxFromCbor = (
 
     return {
       txHash: cbor.txHash,
-      blockHeight: 0,
-      blockAbsoluteSlot: 0,
-      blockTimestamp: 0,
-      fee: cbor.fee,
-      metadata: "",
-      mint: mint,
       pos: defaultPosition,
-      inputsUTXO,
-      referenceInputsUTXO,
       outputsUTXO,
-      consumedLines: [],
+      inputsUTXO,
       producedLines: [],
+      consumedLines: [],
+      blockHash: cbor.blockHash,
+      blockTxIndex: cbor.blockTxIndex,
+      blockHeight: cbor.blockHeight,
+      blockAbsoluteSlot: cbor.blockAbsoluteSlot,
+      mint: cbor.mints,
+      invalidBefore: cbor.invalidBefore,
+      invalidHereafter: cbor.invalidHereafter,
+      fee: cbor.fee,
+      withdrawals: cbor.withdrawals,
+      scriptsSuccessful: cbor.scriptsSuccessful,
+      redeemers: cbor.redeemers,
+      metadata: cbor.metadata,
+      size: cbor.size,
       alias,
     };
   });
