@@ -1,11 +1,11 @@
 import { Card, CardHeader, Tooltip } from "@nextui-org/react";
 import Image from "next/image";
-import type { ICborAsset } from "~/app/_interfaces";
+import type { IAsset } from "~/app/_interfaces";
 import { getAssetName, handleCopy } from "~/app/_utils";
 import CopyIcon from "~/public/copy.svg";
 
 interface AssetCardProps {
-  asset: ICborAsset;
+  asset: IAsset;
   isMintBurn?: boolean;
 }
 

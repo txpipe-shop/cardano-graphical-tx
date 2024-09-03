@@ -91,10 +91,6 @@ export const parseTxToGraphical = (
       .map((input) =>
         generateGraphicalUTXO({
           ...input,
-          // TODO: Change when input info search with indexer is implemented
-          assets: [],
-          address: "",
-          datum: undefined,
           transactionBox,
           isReferenceInput: cbor.referenceInputs.some(
             (referenceInput) => referenceInput === input,

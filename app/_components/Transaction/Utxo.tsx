@@ -155,11 +155,8 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
   };
 
   const isInput = isInputUtxo(transactions)(utxoHash);
-  const txId = utxo.utxoHash.split("#")[0]!;
 
-  const text = isInput
-    ? `Tx Id: ${txId.slice(0, 12) + "..." + txId.slice(-12)}\nIndex: ${utxo.utxoHash.split("#")[1]}\n`
-    : `Address:
+  const text = `Address:
   ${trimString(utxo.address?.bech32 ?? "", 10)}\nAssets:
   ${utxo.assets.reduce((acc, asset) => {
     const assetName = getAssetName(asset.assetName);

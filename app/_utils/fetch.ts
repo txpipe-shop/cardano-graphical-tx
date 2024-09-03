@@ -20,6 +20,9 @@ export const getApiKey = (network: NETWORK): string => {
 export const getBlockfrostURL = (network: NETWORK, hash: string) => {
   return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/cbor`;
 };
+export const getUTxOsURL = (network: NETWORK, hash: string) => {
+  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/utxos`;
+};
 
 const parseQuery = (
   route: (typeof API_ROUTES)[keyof typeof API_ROUTES],

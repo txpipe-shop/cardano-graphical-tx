@@ -19,18 +19,13 @@ interface Data {
   json: Record<string, any>;
   bytes: string;
 }
-interface ICborInput {
-  txHash: string;
-  index: number;
-}
-
-export interface ICborDatum {
+export interface IDatum {
   hash: string;
   bytes: string;
   json: Record<string, any>;
 }
 
-export interface ICborAsset {
+export interface IAsset {
   policyId: string;
   assetName: string;
   amount: number | bigint;
@@ -40,17 +35,17 @@ export interface IUtxo {
   txHash: string;
   index: number;
   address: string;
-  assets: ICborAsset[];
-  datum?: ICborDatum;
+  assets: IAsset[];
+  datum?: IDatum;
 }
 
 export interface ITransaction {
   txHash: string;
   fee: number;
-  inputs: ICborInput[];
-  referenceInputs: ICborInput[];
+  inputs: IUtxo[];
+  referenceInputs: IUtxo[];
   outputs: IUtxo[];
-  mints: ICborAsset[];
+  mints: IAsset[];
   scriptsSuccessful: boolean;
   blockHash?: string;
   blockTxIndex?: number;
