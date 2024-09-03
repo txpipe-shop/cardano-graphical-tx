@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { type ChangeEvent, useEffect, useState } from "react";
 import { Button, Input } from "~/app/_components";
-import TxPipeIcon from "~/public/txpipe.png";
+import TxPipeIcon from "~/public/txpipe_shop.svg";
 import { useConfigs, useGraphical } from "../../_contexts";
 import { getCborFromHash, isEmpty, OPTIONS, ROUTES } from "../../_utils";
 import { NetSelector } from "../NetSelector";
@@ -55,7 +55,19 @@ export const Header = () => {
             <span>Lace Anatomy</span>
           </Link>
         </h3>
-        <Image src={TxPipeIcon} alt="TxPipe" width={30} className="m-auto" />
+
+        <Link
+          href="https://txpipe.shop/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            src={TxPipeIcon}
+            alt="TxPipe Shop Logo"
+            width={110}
+            className="m-auto"
+          />
+        </Link>
         <NetSelector network={configs.net} />
       </div>
       <form
