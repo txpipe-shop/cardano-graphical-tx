@@ -43,6 +43,10 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
     setColor(getUtxoColor(transactions)(utxoHash));
   }, [showInfo, transactions, utxoHash]);
 
+  useEffect(() => {
+    setShowInfo(false);
+  }, [utxoHash]);
+
   const utxo = getUtxo(transactions)(utxoHash)!;
 
   const handleUtxoMove =
@@ -160,7 +164,7 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
   ${trimString(utxo.address?.bech32 ?? "", 10)}\nAssets:
   ${utxo.assets.reduce((acc, asset) => {
     const assetName = getAssetName(asset.assetName);
-    return acc + `- ${assetName} ${asset.amount}\n    `;
+    return acc + `- ${assetName} ${asset.amount}\n  `;
   }, "")}`;
   return (
     <>

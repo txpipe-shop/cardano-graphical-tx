@@ -1,12 +1,12 @@
 import { StatusCodes } from "http-status-codes";
-import pallas, { type CborResponse } from "napi-pallas";
+import pallas, { napiParseDatumInfo, type CborResponse } from "napi-pallas";
 import type { IAsset, IUtxo } from "../_interfaces";
 import {
-  type NETWORK,
   POLICY_LENGTH,
   getApiKey,
   getUTxOsURL,
   isEmpty,
+  type NETWORK,
 } from "../_utils";
 import { BlockfrostUTxOSchema } from "../_utils/schemas/blockfrostResponseSchema";
 
@@ -26,9 +26,7 @@ const inputsHandle = async ({
 }): Promise<IUtxo[]> => {
   const inputPromises = inputs.map(async (input) => {
     const blockfrostUtxo = await fetch(getUTxOsURL(network, input.txHash), {
-      headers: {
-        project_id: apiKey,
-      },
+      headers: { project_id: apiKey },
       method: "GET",
     }).then(async (res) => {
       if (res.status !== StatusCodes.OK) throw res;
@@ -42,18 +40,28 @@ const inputsHandle = async ({
     return { hash: input.txHash, ...utxo };
   });
   const inputResponses = await Promise.all(inputPromises);
-  return inputResponses.map((input) => ({
-    txHash: input.hash,
-    index: input.output_index,
-    address: input.address,
-    assets: input.amount.map(({ unit, quantity }) => {
-      return {
+  return inputResponses.map((input) => {
+    const datum = input.inline_datum
+      ? {
+          hash: napiParseDatumInfo(input.inline_datum)?.hash || "",
+          bytes: napiParseDatumInfo(input.inline_datum)?.bytes || "",
+          json: JSON.parse(
+            napiParseDatumInfo(input.inline_datum)?.json || "null",
+          ),
+        }
+      : undefined;
+    return {
+      txHash: input.hash,
+      index: input.output_index,
+      address: input.address,
+      assets: input.amount.map(({ unit, quantity }) => ({
         assetName: unit == "lovelace" ? unit : unit.slice(POLICY_LENGTH),
         policyId: unit.slice(0, POLICY_LENGTH),
         amount: Number(quantity),
-      };
-    }),
-  }));
+      })),
+      datum,
+    };
+  });
 };
 
 export const cborHandler = async ({ cbor, network }: ICborHandler) => {

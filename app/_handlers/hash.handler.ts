@@ -13,9 +13,7 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
     const apiKey = getApiKey(network);
 
     const cbor = await fetch(getBlockfrostURL(network, hash), {
-      headers: {
-        project_id: apiKey,
-      },
+      headers: { project_id: apiKey },
       method: "GET",
     }).then(async (res) => {
       if (res.status !== StatusCodes.OK) throw res;
