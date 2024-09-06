@@ -39,6 +39,11 @@ export interface IUtxo {
   datum?: IDatum;
 }
 
+export interface IWithdrawal {
+  address: string;
+  amount: string;
+}
+
 export interface ITransaction {
   txHash: string;
   fee: number;
@@ -53,7 +58,7 @@ export interface ITransaction {
   blockAbsoluteSlot?: number;
   invalidBefore?: number;
   invalidHereafter?: number;
-  withdrawals?: any[];
+  withdrawals?: IWithdrawal[];
   redeemers?: Redeemers;
   metadata?: any;
   size?: number;
