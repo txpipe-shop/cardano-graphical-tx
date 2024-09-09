@@ -10,7 +10,7 @@ extern crate napi_derive;
 mod address;
 mod tx;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 #[napi(object)]
 pub struct Datum {
   pub hash: String,
@@ -18,7 +18,7 @@ pub struct Datum {
   pub json: String,
 }
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 #[napi(object)]
 pub struct OutputUtxo {
   pub tx_hash: String,
@@ -28,14 +28,14 @@ pub struct OutputUtxo {
   pub assets: Vec<Assets>,
 }
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 #[napi(object)]
 pub struct InputUtxo {
   pub tx_hash: String,
   pub index: String,
 }
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 #[napi(object)]
 pub struct Assets {
   pub policy_id: String,
@@ -43,7 +43,7 @@ pub struct Assets {
   pub quantity: String,
 }
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 #[napi(object)]
 pub struct CborResponse {
   pub tx_hash: String,
@@ -100,6 +100,11 @@ pub fn cbor_parse(raw: String) -> CborResponse {
     Ok(x) => x,
     Err(x) => x,
   }
+}
+
+#[napi]
+pub fn napi_parse_datum_info(raw: String) -> Option<Datum> {
+  tx::parse_datum_info(raw)
 }
 
 fn compute_datum_hashmap<'b>(mtx: MultiEraTx<'b>) -> HashMap<DatumHash, Datum> {

@@ -1,6 +1,6 @@
 import type Konva from "konva";
 import type { Vector2d } from "konva/lib/types";
-import type { ICborAsset, ICborDatum, Redeemers, RedeemerSpend } from ".";
+import type { IAsset, IDatum, Redeemers, RedeemerSpend } from ".";
 
 export interface TransactionsBox {
   transactions: IGraphicalTransaction[];
@@ -23,7 +23,7 @@ export interface IGraphicalTransaction {
   blockTxIndex?: number;
   blockHeight?: number;
   blockAbsoluteSlot?: number;
-  mint: ICborAsset[];
+  mint: IAsset[];
   invalidBefore?: number;
   invalidHereafter?: number;
   fee: number;
@@ -38,9 +38,9 @@ export interface IGraphicalTransaction {
 export interface IGraphicalUtxo {
   utxoHash: string;
   index: number;
-  assets: Array<ICborAsset>;
+  assets: Array<IAsset>;
   address?: Address;
-  datum: ICborDatum | undefined;
+  datum: IDatum | undefined;
   pos: Vector2d;
   lines: (Konva.Line | null)[];
   distance: Vector2d;

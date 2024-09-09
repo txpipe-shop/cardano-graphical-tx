@@ -50,7 +50,7 @@ export const setCBOR = async (
     });
     setFetchError("");
   } catch (error) {
-    console.error("Error processing CBOR:", error);
-    setFetchError("Error processing CBOR");
+    console.error("Error processing CBOR or hash:", error);
+    setFetchError("Error processing CBOR or hash");
   }
 };

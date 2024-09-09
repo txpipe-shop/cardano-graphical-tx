@@ -51,4 +51,5 @@ export interface CborResponse {
   scriptsSuccessful: boolean
   error: string
 }
-export declare function cborParse(raw: string): CborResponse
+export function cborParse(raw: string): CborResponse
+export function napiParseDatumInfo(raw: string): Datum | null

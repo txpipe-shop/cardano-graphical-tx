@@ -1,5 +1,4 @@
 import toast from "react-hot-toast";
-import { POLICY_LENGTH } from ".";
 
 const hexaToText = (hexa: string) => {
   let text = "";
@@ -41,8 +40,7 @@ export const getQuery = (query: string) => {
 
 export const getAssetName = (hexa: string) => {
   if (hexa === "lovelace") return hexa;
-  const name = hexaToText(hexa.slice(POLICY_LENGTH));
-  return isEmpty(name) ? "n/a" : name;
+  return isEmpty(hexaToText(hexa)) ? "n/a" : hexaToText(hexa);
 };
 
 export const handleCopy = (text: string) => () => {

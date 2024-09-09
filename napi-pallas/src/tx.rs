@@ -6,122 +6,121 @@ use crate::{
 
 use pallas::{
   codec::utils::KeepRaw,
+  crypto::hash::Hasher,
   ledger::{
     primitives::{conway::PlutusData, ToCanonicalJson},
     traverse::{ComputeHash, MultiEraTx},
   },
 };
-use pallas_primitives::conway::{DatumHash, PseudoDatumOption};
+use pallas_primitives::{
+  conway::{DatumHash, PseudoDatumOption},
+  Fragment,
+};
 
 pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
   let out = CborResponse::new().try_build(|| {
     let cbor = hex::decode(raw)?;
     let tx = MultiEraTx::decode(&cbor)?;
 
-    let mut inputs = Vec::new();
-    for i in tx.inputs() {
-      inputs.push(InputUtxo {
+    let inputs: Vec<InputUtxo> = tx
+      .inputs()
+      .iter()
+      .map(|i| InputUtxo {
         tx_hash: i.hash().to_string(),
         index: i.index().to_string(),
-      });
-    }
+      })
+      .collect();
 
-    let mut reference_inputs = Vec::new();
-    for i in tx.reference_inputs() {
-      reference_inputs.push(InputUtxo {
+    let reference_inputs: Vec<InputUtxo> = tx
+      .reference_inputs()
+      .iter()
+      .map(|i| InputUtxo {
         tx_hash: i.hash().to_string(),
         index: i.index().to_string(),
-      });
-    }
+      })
+      .collect();
 
-    let mut mints = Vec::new();
-    for mint in tx.mints() {
-      let policy = mint.policy().to_string();
-      let asset_name = mint
-        .assets()
-        .iter()
-        .map(|x| hex::encode(x.name()))
-        .collect();
-      let quantity = mint
-        .assets()
-        .iter()
-        .map(|x| match x.mint_coin() {
-          Some(value) => value.to_string(),
-          None => String::from("None"),
-        })
-        .collect();
-      mints.push(Assets {
-        policy_id: policy,
-        asset_name,
-        quantity,
-      });
-    }
-    
-    let mut outputs = Vec::new();
+    let mints: Vec<Assets> = tx
+      .mints()
+      .iter()
+      .map(|mint| {
+        let policy = mint.policy().to_string();
+        let asset_name = mint
+          .assets()
+          .iter()
+          .map(|x| hex::encode(x.name()))
+          .collect();
+        let quantity = mint
+          .assets()
+          .iter()
+          .map(|x| {
+            x.mint_coin()
+              .map_or_else(|| "None".to_string(), |value| value.to_string())
+          })
+          .collect();
+
+        Assets {
+          policy_id: policy,
+          asset_name,
+          quantity,
+        }
+      })
+      .collect();
+
     let tx_copy = tx.clone();
     let datum_hashmap = compute_datum_hashmap(tx_copy);
-    let mut outputs_count = 0;
-    
-    for o in tx.outputs() {
-      let lovelace = o.lovelace_amount();
-      let other_assets: Vec<Assets> = o
-        .non_ada_assets()
-        .iter()
-        .flat_map(|x| {
-          let policy = x.policy().to_string();
-          let assets_in_this_policy = x.assets();
-          let mut parsed_assets: Vec<Assets> = Vec::new();
 
-          if assets_in_this_policy.len() > 1 {
-            for asset in assets_in_this_policy {
-              let asset_name = hex::encode(asset.name());
-              let quantity = match asset.output_coin() {
-                Some(value) => value.to_string(),
-                None => String::from("None"),
-              };
-              parsed_assets.push(Assets {
-                policy_id: policy.clone(),
-                asset_name,
-                quantity,
-              });
-            }
+    let outputs: Vec<OutputUtxo> = tx
+      .outputs()
+      .iter()
+      .enumerate()
+      .map(|(index, o)| {
+        let lovelace = o.lovelace_amount();
+        let other_assets: Vec<Assets> = o
+          .non_ada_assets()
+          .iter()
+          .flat_map(|x| {
+            let policy = x.policy().to_string();
+            let parsed_assets: Vec<Assets> = x
+              .assets()
+              .iter()
+              .map(|asset| {
+                let asset_name = hex::encode(asset.name());
+                let quantity = match asset.output_coin() {
+                  Some(value) => value.to_string(),
+                  None => String::from("None"),
+                };
+                Assets {
+                  policy_id: policy.clone(),
+                  asset_name,
+                  quantity,
+                }
+              })
+              .collect();
+            parsed_assets
+          })
+          .collect();
 
-          } else {
-            let asset_name = hex::encode(assets_in_this_policy[0].name());
-            let quantity = match assets_in_this_policy[0].output_coin() {
-              Some(value) => value.to_string(),
-              None => String::from("None"),
-            };
+        let mut assets: Vec<Assets> = other_assets;
+        assets.push(Assets {
+          policy_id: "".to_string(),
+          asset_name: "lovelace".to_string(),
+          quantity: lovelace.to_string(),
+        });
 
-            parsed_assets.push(Assets {
-              policy_id: policy,
-              asset_name,
-              quantity,
-            });
-          }
+        let datum_info = get_datum_info(&o.datum(), &datum_hashmap);
+        OutputUtxo {
+          tx_hash: tx.hash().to_string(),
+          index: index.to_string(),
+          address: o.address().unwrap().to_string(),
+          assets,
+          datum: datum_info,
+        }
+      })
+      .collect();
 
-          parsed_assets
-        }).collect::<Vec<Assets>>();
-
-      let mut assets: Vec<Assets> = other_assets;
-      assets.push(Assets {
-        policy_id: "".to_string(),
-        asset_name: "lovelace".to_string(),
-        quantity: lovelace.to_string(),
-      });
-
-      let datum_info = get_datum_info(&o.datum(), &datum_hashmap);
-      outputs.push(OutputUtxo {
-        tx_hash: tx.hash().to_string(),
-        index: outputs_count.to_string(),
-        address: o.address().unwrap().to_string(),
-        assets,
-        datum: datum_info,
-      });
-      outputs_count += 1;
-    }
-
-    let parsed_cbor = CborResponse::new().with_cbor_attr(tx, inputs, reference_inputs, outputs, mints);
+    let parsed_cbor =
+      CborResponse::new().with_cbor_attr(tx, inputs, reference_inputs, outputs, mints);
 
     Ok(parsed_cbor)
   });
@@ -144,4 +143,15 @@ fn get_datum_info(
     },
     None => None,
   }
+}
+
+pub fn parse_datum_info(raw: String) -> Option<DatumInfo> {
+  let cbor = hex::decode(raw.clone()).ok()?;
+  let data = PlutusData::decode_fragment(&cbor).ok()?;
+
+  Some(DatumInfo {
+    hash: Hasher::<256>::hash(&cbor).to_string(),
+    json: data.to_json().to_string(),
+    bytes: raw.clone(),
+  })
 }

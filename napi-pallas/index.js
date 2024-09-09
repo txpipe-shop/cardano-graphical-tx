@@ -281,6 +281,7 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { cborParse } = nativeBinding
+const { cborParse, napiParseDatumInfo } = nativeBinding
 
 module.exports.cborParse = cborParse
+module.exports.napiParseDatumInfo = napiParseDatumInfo
