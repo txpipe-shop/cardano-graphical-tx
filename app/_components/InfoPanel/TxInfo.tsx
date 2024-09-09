@@ -56,8 +56,8 @@ export const TxInfo = () => {
     const item = metadata?.find(
       (entry: { label: string }) => entry.label === "674",
     );
-    if (item && item.json_metadata) {
-      return JSON.parse(item.json_metadata).msg;
+    if (item && item.jsonMetadata) {
+      return item.jsonMetadata["msg"];
     }
     return "No metadata";
   })();

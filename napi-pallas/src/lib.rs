@@ -43,6 +43,13 @@ pub struct Assets {
   pub quantity: String,
 }
 
+#[derive(Debug, Default)]
+#[napi(object)]
+pub struct MetadataItem {
+  pub label: String,
+  pub json_metadata: HashMap<String, String>,
+}
+
 #[derive(Default)]
 #[napi(object)]
 pub struct CborResponse {
@@ -52,6 +59,7 @@ pub struct CborResponse {
   pub reference_inputs: Vec<InputUtxo>,
   pub outputs: Vec<OutputUtxo>,
   pub mints: Vec<Assets>,
+  pub metadata: Vec<MetadataItem>,
   pub scripts_successful: bool,
   pub error: String,
 }
@@ -68,6 +76,7 @@ impl CborResponse {
     reference_inputs: Vec<InputUtxo>,
     outputs: Vec<OutputUtxo>,
     mints: Vec<Assets>,
+    metadata: Vec<MetadataItem>,
   ) -> Self {
     Self {
       tx_hash: tx.hash().to_string(),
@@ -77,6 +86,7 @@ impl CborResponse {
       outputs,
       mints,
       scripts_successful: tx.is_valid(),
+      metadata,
       ..self
     }
   }
