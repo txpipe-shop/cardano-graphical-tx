@@ -10,9 +10,10 @@ export const PlaygroundError = () => {
 
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center text-center text-2xl font-black text-red-400">
-      <Image src={getError()} alt="" />
-      There was an error fetching the transaction <br />
-      {error}
+      <Image src={getError()} alt="ERROR" />
+      There was an error fetching the transaction: <br />
+      {error} <br /> <br />
+      Try using another network, or check your hash/CBOR.
     </div>
   );
 };

@@ -8,6 +8,8 @@ export interface IGraphicalContext {
   setError: Dispatch<SetStateAction<string>>;
   transactions: TransactionsBox;
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>;
+  loading: boolean;
+  setLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 export const GraphicalContext = createContext<IGraphicalContext>({
@@ -18,6 +20,8 @@ export const GraphicalContext = createContext<IGraphicalContext>({
     utxos: {},
   },
   setTransactionBox: () => {},
+  loading: false,
+  setLoading: () => {},
 });
 
 export const useGraphical = () => {
@@ -37,6 +41,7 @@ export const GraphicalProvider = ({
     transactions: [],
     utxos: {},
   });
+  const [loading, setLoading] = useState<boolean>(false);
   return (
     <GraphicalContext.Provider
       value={{
@@ -44,6 +49,8 @@ export const GraphicalProvider = ({
         setError,
         transactions: transactionBox,
         setTransactionBox,
+        loading,
+        setLoading,
       }}
     >
       {children}

@@ -66,6 +66,7 @@ export const getCborFromHash = async (
   txId: string,
   network: NETWORK,
   setFetchError: Dispatch<SetStateAction<string>>,
+  setLoading: Dispatch<SetStateAction<boolean>>,
 ): Promise<IBlockfrostResponse> => {
   try {
     const query = { network, txId };
@@ -76,6 +77,7 @@ export const getCborFromHash = async (
     return data as IBlockfrostResponse;
   } catch (error) {
     console.error("Error processing Transaction Hash:", error);
+    setLoading(false);
     setFetchError("Error processing Hash");
     throw error;
   }
