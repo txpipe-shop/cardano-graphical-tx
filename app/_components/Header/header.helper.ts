@@ -18,6 +18,8 @@ export const setCBOR = async (
   transactions: TransactionsBox,
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
   setFetchError: Dispatch<SetStateAction<string>>,
+  setLoading: Dispatch<SetStateAction<boolean>>,
+  fromHash: boolean,
 ) => {
   try {
     const isInvalid = !isHexa(uniqueInput);
@@ -50,7 +52,9 @@ export const setCBOR = async (
     });
     setFetchError("");
   } catch (error) {
-    console.error("Error processing CBOR or hash:", error);
-    setFetchError("Error processing CBOR or hash");
+    console.error(`Error processing ${fromHash ? "hash" : "CBOR"}:`, error);
+    setFetchError(`Error processing ${fromHash ? "hash" : "CBOR"}`);
+  } finally {
+    setLoading(false);
   }
 };

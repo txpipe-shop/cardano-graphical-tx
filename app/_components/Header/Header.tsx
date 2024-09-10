@@ -15,7 +15,8 @@ export const Header = () => {
   const [raw, setRaw] = useState<string>("");
   const [selectedOption, setSelectedOption] = useState<OPTIONS>(OPTIONS.HASH);
 
-  const { transactions, setTransactionBox, setError } = useGraphical();
+  const { transactions, setTransactionBox, setError, setLoading } =
+    useGraphical();
   const { configs } = useConfigs();
 
   useEffect(() => {
@@ -30,15 +31,37 @@ export const Header = () => {
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!raw) return;
+    setLoading(true);
 
     switch (selectedOption) {
       case OPTIONS.HASH:
-        const { cbor } = await getCborFromHash(raw, configs.net, setError);
-        await setCBOR(configs, cbor, transactions, setTransactionBox, setError);
+        const { cbor } = await getCborFromHash(
+          raw,
+          configs.net,
+          setError,
+          setLoading,
+        );
+        await setCBOR(
+          configs,
+          cbor,
+          transactions,
+          setTransactionBox,
+          setError,
+          setLoading,
+          true,
+        );
 
         break;
       case OPTIONS.CBOR:
-        await setCBOR(configs, raw, transactions, setTransactionBox, setError);
+        await setCBOR(
+          configs,
+          raw,
+          transactions,
+          setTransactionBox,
+          setError,
+          setLoading,
+          false,
+        );
         break;
     }
   }
