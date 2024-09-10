@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use crate::{
-  compute_datum_hashmap, Assets, CborResponse, Datum as DatumInfo, InputUtxo, OutputUtxo,
+  compute_datum_hashmap, Assets, CborResponse, Datum as DatumInfo, InputUtxo, MetadataItem,
+  OutputUtxo,
 };
 
 use pallas::{
@@ -12,10 +13,50 @@ use pallas::{
     traverse::{ComputeHash, MultiEraTx},
   },
 };
+use pallas_codec::utils::KeyValuePairs;
 use pallas_primitives::{
-  conway::{DatumHash, PseudoDatumOption},
+  conway::{DatumHash, Metadatum, PseudoDatumOption},
   Fragment,
 };
+
+fn metadatum_to_string(metadatum: &Metadatum) -> String {
+  match metadatum {
+    Metadatum::Text(text) => text.clone(),
+    Metadatum::Int(int) => int.to_string(),
+    Metadatum::Bytes(bytes) => String::from_utf8(bytes.to_vec()).unwrap(),
+    Metadatum::Array(arr) => arr
+      .iter()
+      .map(metadatum_to_string)
+      .collect::<Vec<_>>()
+      .join(", "), // REVIEW: Should we use a different separator?
+    Metadatum::Map(map) => map
+      .iter()
+      .map(|(key, value)| {
+        format!(
+          "{}: {}",
+          metadatum_to_string(key),
+          metadatum_to_string(value)
+        )
+      })
+      .collect::<Vec<_>>()
+      .join(", "),
+  }
+}
+
+fn map_to_hashmap(map: &KeyValuePairs<Metadatum, Metadatum>) -> HashMap<String, String> {
+  map
+    .iter()
+    .filter_map(|(key, value)| {
+      if let Metadatum::Text(key_str) = key {
+        let value_str = metadatum_to_string(value);
+        Some((key_str.clone(), value_str))
+      } else {
+        // Ignore non-text keys
+        None
+      }
+    })
+    .collect()
+}
 
 pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
   let out = CborResponse::new().try_build(|| {
@@ -119,8 +160,33 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
       })
       .collect();
 
+    let metadata: Vec<MetadataItem> = match tx.metadata().as_alonzo() {
+      Some(metadata) => metadata
+        .iter()
+        .map(|(k, v)| {
+          let label_str = format!("{:?}", k);
+          let json_metadata = match v {
+            Metadatum::Map(map) => map_to_hashmap(map),
+            _ => {
+              let json_value = serde_json::to_value(v).expect("Failed to convert to JSON");
+              let json_string =
+                serde_json::to_string(&json_value).expect("Failed to serialize JSON");
+              let mut hashmap = HashMap::new();
+              hashmap.insert("value".to_string(), json_string);
+              hashmap
+            }
+          };
+
+          MetadataItem {
+            label: label_str,
+            json_metadata,
+          }
+        })
+        .collect(),
+      None => vec![],
+    };
     let parsed_cbor =
-      CborResponse::new().with_cbor_attr(tx, inputs, reference_inputs, outputs, mints);
+      CborResponse::new().with_cbor_attr(tx, inputs, reference_inputs, outputs, mints, metadata);
 
     Ok(parsed_cbor)
   });
