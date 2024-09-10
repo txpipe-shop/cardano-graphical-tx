@@ -90,12 +90,10 @@ export const Transaction = ({ txHash, txInfoVisible }: TransactionProps) => {
         fill={KONVA_COLORS.GREY}
         onClick={txInfoVisible}
       />
-      {(mints || burns) && (
-        <Group onClick={handleClick}>
-          {burns && <BurningIcon />}
-          {mints && <MintingIcon />}
-        </Group>
-      )}
+      <Group onClick={handleClick}>
+        <BurningIcon on={burns} />
+        <MintingIcon on={mints} />
+      </Group>
       {!isEmpty(tx.alias) && (
         <Text
           text={tx.alias}
