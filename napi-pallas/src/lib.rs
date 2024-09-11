@@ -53,7 +53,7 @@ pub struct MetadataItem {
 #[derive(Default)]
 #[napi(object)]
 pub struct WithdrawalItem {
-  pub address: String,
+  pub raw_address: String,
   pub amount: String,
 }
 

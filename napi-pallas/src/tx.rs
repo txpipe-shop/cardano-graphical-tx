@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
   compute_datum_hashmap, Assets, CborResponse, Datum as DatumInfo, InputUtxo, MetadataItem,
-  OutputUtxo,
+  OutputUtxo, WithdrawalItem,
 };
 
 use pallas::{
@@ -185,8 +185,30 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
         .collect(),
       None => vec![],
     };
-    let parsed_cbor =
-      CborResponse::new().with_cbor_attr(tx, inputs, reference_inputs, outputs, mints, metadata);
+
+    let withdrawals: Vec<WithdrawalItem> = match tx.withdrawals().as_alonzo() {
+      Some(withdrawals) => withdrawals
+        .iter()
+        .map(|(k, v)| {
+          // TODO - parse address into bech32
+          WithdrawalItem {
+            raw_address: k.to_string(),
+            amount: v.to_string(),
+          }
+        })
+        .collect(),
+      None => vec![],
+    };
+
+    let parsed_cbor = CborResponse::new().with_cbor_attr(
+      tx,
+      inputs,
+      reference_inputs,
+      outputs,
+      mints,
+      metadata,
+      withdrawals,
+    );
 
     Ok(parsed_cbor)
   });

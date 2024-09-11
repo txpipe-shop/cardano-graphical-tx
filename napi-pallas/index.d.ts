@@ -45,6 +45,10 @@ export interface MetadataItem {
   label: string;
   jsonMetadata: Record<string, string>; // REVIEW: change to Record<string, any> if needed
 }
+export interface WithdrawalItem {
+  rawAddress: string;
+  amount: string;
+}
 export interface CborResponse {
   txHash: string;
   fee?: string;
@@ -53,6 +57,7 @@ export interface CborResponse {
   outputs: Array<OutputUtxo>;
   mints: Array<Assets>;
   metadata: Array<MetadataItem>;
+  withdrawals: Array<WithdrawalItem>;
   scriptsSuccessful: boolean;
   error: string;
 }
