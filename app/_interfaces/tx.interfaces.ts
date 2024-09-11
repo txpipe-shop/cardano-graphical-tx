@@ -40,7 +40,7 @@ export interface IUtxo {
 }
 
 export interface IWithdrawal {
-  address: string;
+  rawAddress: string;
   amount: string;
 }
 
