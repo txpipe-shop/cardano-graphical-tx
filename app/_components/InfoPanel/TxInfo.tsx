@@ -162,16 +162,16 @@ export const TxInfo = () => {
       </AccordionItem>
       <AccordionItem key="9" title="Withdrawals">
         <div className="flex flex-col gap-2">
-          {withdrawals ? (
+          {withdrawals?.length ? (
             withdrawals.map((withdrawal, index) => (
               <Card
                 key={index}
-                className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none"
+                className="flex flex-col bg-content2 px-5 py-2 shadow-none"
               >
-                <div className="mb-1 flex items-center">
+                <div className="mb-2 flex items-center">
                   <b>Raw Address:</b>&nbsp;
                   <span className="ml-2">
-                    {trimString(withdrawal.rawAddress, 12)}
+                    {trimString(withdrawal.rawAddress, 13)}
                   </span>
                   <Image
                     src={CopyIcon}
@@ -180,8 +180,7 @@ export const TxInfo = () => {
                     className="ml-2 cursor-pointer"
                   />
                 </div>
-                <br />
-                <div className="mt-1 flex items-center">
+                <div className="flex items-center">
                   <b>Amount:</b>&nbsp;
                   <span>{withdrawal.amount}</span>
                 </div>
