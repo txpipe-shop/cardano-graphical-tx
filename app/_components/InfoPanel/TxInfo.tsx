@@ -170,7 +170,7 @@ export const TxInfo = () => {
               >
                 <div className="mb-2 flex items-center">
                   <b>Raw Address:</b>&nbsp;
-                  <span className="ml-2">
+                  <span className="ml-1 mr-auto">
                     {trimString(withdrawal.rawAddress, 13)}
                   </span>
                   <Image
