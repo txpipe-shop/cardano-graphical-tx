@@ -1,6 +1,6 @@
 import type Konva from "konva";
 import type { Vector2d } from "konva/lib/types";
-import type { IAsset, IDatum, Redeemers, RedeemerSpend } from ".";
+import type { IAsset, IDatum, IWithdrawal, Redeemers, RedeemerSpend } from ".";
 
 export interface TransactionsBox {
   transactions: IGraphicalTransaction[];
@@ -27,7 +27,7 @@ export interface IGraphicalTransaction {
   invalidBefore?: number;
   invalidHereafter?: number;
   fee: number;
-  withdrawals?: any[];
+  withdrawals?: IWithdrawal[];
   scriptsSuccessful: boolean;
   redeemers?: Redeemers;
   metadata?: any;

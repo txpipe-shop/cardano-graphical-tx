@@ -39,6 +39,7 @@ export const TxInfo = () => {
     blockTxIndex,
     blockHeight,
     blockAbsoluteSlot,
+    withdrawals,
     metadata,
     size,
   } = selectedTx;
@@ -159,13 +160,45 @@ export const TxInfo = () => {
           {inputsUTXO.length}
         </Card>
       </AccordionItem>
-
-      <AccordionItem key="9" title="Metadata">
+      <AccordionItem key="9" title="Withdrawals">
+        <div className="flex flex-col gap-2">
+          {withdrawals?.length ? (
+            withdrawals.map((withdrawal, index) => (
+              <Card
+                key={index}
+                className="flex flex-col bg-content2 px-5 py-2 shadow-none"
+              >
+                <div className="mb-2 flex items-center">
+                  <b>Raw Address:</b>&nbsp;
+                  <span className="ml-1 mr-auto">
+                    {trimString(withdrawal.rawAddress, 13)}
+                  </span>
+                  <Image
+                    src={CopyIcon}
+                    alt="Copy"
+                    onClick={handleCopy(withdrawal.rawAddress)}
+                    className="ml-2 cursor-pointer"
+                  />
+                </div>
+                <div className="flex items-center">
+                  <b>Amount:</b>&nbsp;
+                  <span>{withdrawal.amount}</span>
+                </div>
+              </Card>
+            ))
+          ) : (
+            <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+              No withdrawals
+            </Card>
+          )}
+        </div>
+      </AccordionItem>
+      <AccordionItem key="10" title="Metadata">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {msg}
         </Card>
       </AccordionItem>
-      <AccordionItem key="10" title="Minting & Burning">
+      <AccordionItem key="11" title="Minting & Burning">
         <div className="flex flex-col gap-2">
           {mint.length ? (
             mint.map((asset, index) => (
@@ -178,14 +211,14 @@ export const TxInfo = () => {
           )}
         </div>
       </AccordionItem>
-      <AccordionItem key="11" title="Scripts Successful">
+      <AccordionItem key="12" title="Scripts Successful">
         <div className="flex flex-col gap-2">
           <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
             {scriptsSuccessful ? "True" : "False"}
           </Card>
         </div>
       </AccordionItem>
-      <AccordionItem key="12" title="Alias" className="m-0">
+      <AccordionItem key="13" title="Alias" className="m-0">
         <form onSubmit={handleSave} className="flex justify-around">
           <Input
             inputSize="small"
