@@ -24,6 +24,10 @@ export const getUTxOsURL = (network: NETWORK, hash: string) => {
   return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/utxos`;
 };
 
+export const getTransactionURL = (network: NETWORK, hash: string) => {
+  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}`;
+};
+
 const parseQuery = (
   route: (typeof API_ROUTES)[keyof typeof API_ROUTES],
   query: Record<string, any>,
