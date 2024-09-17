@@ -156,6 +156,10 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
           address: o.address().unwrap().to_string(),
           assets,
           datum: datum_info,
+          script_ref: o
+            .script_ref()
+            .map(|x| x.encode_fragment().ok().map(hex::encode))
+            .flatten(),
         }
       })
       .collect();

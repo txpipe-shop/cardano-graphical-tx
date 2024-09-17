@@ -41,6 +41,7 @@ export interface IGraphicalUtxo {
   assets: Array<IAsset>;
   address?: Address;
   datum: IDatum | undefined;
+  scriptRef?: string;
   pos: Vector2d;
   lines: (Konva.Line | null)[];
   distance: Vector2d;

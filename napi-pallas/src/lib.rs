@@ -26,6 +26,7 @@ pub struct OutputUtxo {
   pub datum: Option<Datum>,
   pub address: String,
   pub assets: Vec<Assets>,
+  pub script_ref: Option<String>,
 }
 
 #[derive(Default)]

@@ -100,6 +100,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
           isEmpty(datum.hash) && isEmpty(datum.bytes) && datum.json === null
             ? undefined
             : datum,
+        scriptRef: output.scriptRef,
       };
     });
 

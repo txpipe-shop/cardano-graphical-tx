@@ -37,6 +37,7 @@ export interface IUtxo {
   address: string;
   assets: IAsset[];
   datum?: IDatum;
+  scriptRef?: string;
 }
 
 export interface IWithdrawal {
