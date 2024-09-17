@@ -4,6 +4,7 @@ import type { IAsset, IUtxo } from "../_interfaces";
 import {
   POLICY_LENGTH,
   getApiKey,
+  getTransactionURL,
   getUTxOsURL,
   isEmpty,
   type NETWORK,
@@ -107,10 +108,22 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       amount: Number(mint.quantity),
     }));
 
+    const txInfo = await fetch(getTransactionURL(network, res.txHash), {
+      headers: { project_id: apiKey },
+      method: "GET",
+    }).then(async (res) => {
+      if (res.status !== StatusCodes.OK) throw res;
+      return await res.json();
+    });
+
     return Response.json({
       txHash: res.txHash,
       fee: res.fee,
       inputs,
+      blockHash: txInfo.block,
+      blockTxIndex: txInfo.index,
+      blockHeight: txInfo.block_height,
+      blockAbsoluteSlot: txInfo.slot,
       referenceInputs,
       scriptsSuccessful: res.scriptsSuccessful,
       outputs,
