@@ -69,6 +69,7 @@ pub struct CborResponse {
   pub mints: Vec<Assets>,
   pub metadata: Vec<MetadataItem>,
   pub withdrawals: Vec<WithdrawalItem>,
+  pub size: String,
   pub scripts_successful: bool,
   pub error: String,
 }
@@ -98,6 +99,7 @@ impl CborResponse {
       scripts_successful: tx.is_valid(),
       metadata,
       withdrawals,
+      size: tx.size().to_string(),
       ..self
     }
   }

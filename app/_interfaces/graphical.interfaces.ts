@@ -31,7 +31,7 @@ export interface IGraphicalTransaction {
   scriptsSuccessful: boolean;
   redeemers?: Redeemers;
   metadata?: any;
-  size?: number;
+  size: number;
   alias: string;
 }
 

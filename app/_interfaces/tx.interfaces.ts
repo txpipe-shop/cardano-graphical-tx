@@ -62,5 +62,5 @@ export interface ITransaction {
   withdrawals?: IWithdrawal[];
   redeemers?: Redeemers;
   metadata?: any;
-  size?: number;
+  size: number;
 }
