@@ -60,7 +60,6 @@ export const TxInfo = () => {
     if (item && item.jsonMetadata) {
       return item.jsonMetadata["msg"];
     }
-    return "No metadata";
   })();
 
   const txTrim = trimString(txHash || "", 12);
@@ -85,8 +84,14 @@ export const TxInfo = () => {
     toast.success("Transaction alias saved");
   };
 
+  const disabledKeys = [
+    !withdrawals?.length ? "8" : "",
+    !msg ? "9" : "",
+    !mint.length ? "10" : "",
+  ].filter(Boolean);
+
   return (
-    <Accordion selectionMode="multiple">
+    <Accordion selectionMode="multiple" disabledKeys={disabledKeys}>
       <AccordionItem key="1" title="TxHash">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {txTrim}
@@ -133,92 +138,75 @@ export const TxInfo = () => {
           <p>{blockTxIndex ?? "Unknown"}</p>
         </Card>
       </AccordionItem>
-      <AccordionItem key="4" title="Slot">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
-          {blockAbsoluteSlot ?? "Unknown"}
-        </Card>
-      </AccordionItem>
-      <AccordionItem key="5" title="Size">
+      <AccordionItem key="4" title="Size">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {size ?? "Unknown"}
         </Card>
       </AccordionItem>
-      <AccordionItem key="6" title="Outputs Count">
+      <AccordionItem key="5" title="Outputs Count">
         <Card className="fl ex-row flex justify-between bg-content2 px-5 py-2 shadow-none">
           {outputsUTXO.length}
         </Card>
       </AccordionItem>
-      <AccordionItem key="7" title="Total Output Sum">
+      <AccordionItem key="6" title="Total Output Sum">
         <div className="flex flex-col gap-2">
           <AssetCard
             asset={{ assetName: "lovelace", policyId: "", amount: totalOutput }}
           />
         </div>
       </AccordionItem>
-      <AccordionItem key="8" title="Inputs Count">
+      <AccordionItem key="7" title="Inputs Count">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {inputsUTXO.length}
         </Card>
       </AccordionItem>
-      <AccordionItem key="9" title="Withdrawals">
+      <AccordionItem key="8" title="Withdrawals">
         <div className="flex flex-col gap-2">
-          {withdrawals?.length ? (
-            withdrawals.map((withdrawal, index) => (
-              <Card
-                key={index}
-                className="flex flex-col bg-content2 px-5 py-2 shadow-none"
-              >
-                <div className="mb-2 flex items-center">
-                  <b>Raw Address:</b>&nbsp;
-                  <span className="ml-1 mr-auto">
-                    {trimString(withdrawal.rawAddress, 13)}
-                  </span>
-                  <Image
-                    src={CopyIcon}
-                    alt="Copy"
-                    onClick={handleCopy(withdrawal.rawAddress)}
-                    className="ml-2 cursor-pointer"
-                  />
-                </div>
-                <div className="flex items-center">
-                  <b>Amount:</b>&nbsp;
-                  <span>{withdrawal.amount}</span>
-                </div>
-              </Card>
-            ))
-          ) : (
-            <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
-              No withdrawals
+          {withdrawals?.map((withdrawal, index) => (
+            <Card
+              key={index}
+              className="flex flex-col bg-content2 px-5 py-2 shadow-none"
+            >
+              <div className="mb-2 flex items-center">
+                <b>Raw Address:</b>&nbsp;
+                <span className="ml-1 mr-auto">
+                  {trimString(withdrawal.rawAddress, 13)}
+                </span>
+                <Image
+                  src={CopyIcon}
+                  alt="Copy"
+                  onClick={handleCopy(withdrawal.rawAddress)}
+                  className="ml-2 cursor-pointer"
+                />
+              </div>
+              <div className="flex items-center">
+                <b>Amount:</b>&nbsp;
+                <span>{withdrawal.amount}</span>
+              </div>
             </Card>
-          )}
+          ))}
         </div>
       </AccordionItem>
-      <AccordionItem key="10" title="Metadata">
+      <AccordionItem key="9" title="Metadata">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {msg}
         </Card>
       </AccordionItem>
-      <AccordionItem key="11" title="Minting & Burning">
+      <AccordionItem key="10" title="Minting & Burning">
         <div className="flex flex-col gap-2">
-          {mint.length ? (
-            mint.map((asset, index) => (
-              <AssetCard key={index} asset={asset} isMintBurn />
-            ))
-          ) : (
-            <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
-              No minting or burning
-            </Card>
-          )}
+          {mint.map((asset, index) => (
+            <AssetCard key={index} asset={asset} isMintBurn />
+          ))}
         </div>
       </AccordionItem>
-      <AccordionItem key="12" title="Scripts Successful">
+      <AccordionItem key="11" title="Scripts Successful">
         <div className="flex flex-col gap-2">
           <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
             {scriptsSuccessful ? "True" : "False"}
           </Card>
         </div>
       </AccordionItem>
-      <AccordionItem key="13" title="Alias" className="m-0">
+      <AccordionItem key="12" title="Alias" className="m-0">
         <form onSubmit={handleSave} className="flex justify-around">
           <Input
             inputSize="small"
