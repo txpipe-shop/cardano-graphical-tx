@@ -61,6 +61,7 @@ const inputsHandle = async ({
         amount: Number(quantity),
       })),
       datum,
+      scriptRef: input.reference_script_hash || undefined,
     };
   });
 };

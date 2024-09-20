@@ -44,7 +44,7 @@ pub struct Assets {
   pub quantity: String,
 }
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 #[napi(object)]
 pub struct MetadataItem {
   pub label: String,
