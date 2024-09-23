@@ -60,6 +60,12 @@ pub struct WithdrawalItem {
 
 #[derive(Default)]
 #[napi(object)]
+pub struct Certificates {
+  pub json: String,
+}
+
+#[derive(Default)]
+#[napi(object)]
 pub struct CborResponse {
   pub tx_hash: String,
   pub fee: Option<String>,
@@ -69,6 +75,7 @@ pub struct CborResponse {
   pub mints: Vec<Assets>,
   pub metadata: Vec<MetadataItem>,
   pub withdrawals: Vec<WithdrawalItem>,
+  pub cert: Vec<Certificates>,
   pub size: String,
   pub scripts_successful: bool,
   pub error: String,
@@ -88,6 +95,7 @@ impl CborResponse {
     mints: Vec<Assets>,
     metadata: Vec<MetadataItem>,
     withdrawals: Vec<WithdrawalItem>,
+    cert: Vec<Certificates>,
   ) -> Self {
     Self {
       tx_hash: tx.hash().to_string(),
@@ -99,6 +107,7 @@ impl CborResponse {
       scripts_successful: tx.is_valid(),
       metadata,
       withdrawals,
+      cert,
       size: tx.size().to_string(),
       ..self
     }

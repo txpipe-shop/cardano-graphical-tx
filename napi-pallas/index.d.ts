@@ -50,6 +50,9 @@ export interface WithdrawalItem {
   rawAddress: string;
   amount: string;
 }
+export interface Certificates {
+  json: string;
+}
 export interface CborResponse {
   txHash: string;
   fee?: string;

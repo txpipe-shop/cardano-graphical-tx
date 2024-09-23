@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use crate::{
-  compute_datum_hashmap, Assets, CborResponse, Datum as DatumInfo, InputUtxo, MetadataItem,
-  OutputUtxo, WithdrawalItem,
+  compute_datum_hashmap, Assets, CborResponse, Certificates, Datum as DatumInfo, InputUtxo,
+  MetadataItem, OutputUtxo, WithdrawalItem,
 };
 
 use pallas::{
@@ -204,6 +204,25 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
       None => vec![],
     };
 
+    let certs: Vec<Certificates> = tx
+      .certs()
+      .iter()
+      .map(|cert| match cert {
+        pallas::ledger::traverse::MultiEraCert::NotApplicable => Certificates {
+          json: "Not applicable".to_string(),
+        },
+        pallas::ledger::traverse::MultiEraCert::AlonzoCompatible(cow) => Certificates {
+          json: serde_json::to_string(&cow).unwrap(),
+        },
+        pallas::ledger::traverse::MultiEraCert::Conway(cow) => Certificates {
+          json: serde_json::to_string(&cow).unwrap(),
+        },
+        _ => Certificates {
+          json: "Not implemented".to_string(),
+        },
+      })
+      .collect();
+
     let parsed_cbor = CborResponse::new().with_cbor_attr(
       tx,
       inputs,
@@ -212,6 +231,7 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
       mints,
       metadata,
       withdrawals,
+      certs,
     );
 
     Ok(parsed_cbor)
@@ -231,6 +251,7 @@ fn get_datum_info(
         hash: hash.compute_hash().to_string(),
         json: hash.to_json().to_string(),
         bytes: hex::encode(hash.raw_cbor()),
+      certs,
       }),
     },
     None => None,

@@ -41,6 +41,7 @@ export const TxInfo = () => {
     blockAbsoluteSlot,
     withdrawals,
     metadata,
+    certificates,
     size,
   } = selectedTx;
 
