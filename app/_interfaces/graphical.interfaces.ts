@@ -31,7 +31,7 @@ export interface IGraphicalTransaction {
   scriptsSuccessful: boolean;
   redeemers?: Redeemers;
   metadata?: any;
-  size?: number;
+  size: number;
   alias: string;
 }
 
@@ -41,6 +41,7 @@ export interface IGraphicalUtxo {
   assets: Array<IAsset>;
   address?: Address;
   datum: IDatum | undefined;
+  scriptRef?: string;
   pos: Vector2d;
   lines: (Konva.Line | null)[];
   distance: Vector2d;

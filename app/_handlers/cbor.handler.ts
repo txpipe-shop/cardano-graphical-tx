@@ -61,6 +61,7 @@ const inputsHandle = async ({
         amount: Number(quantity),
       })),
       datum,
+      scriptRef: input.reference_script_hash || undefined,
     };
   });
 };
@@ -100,6 +101,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
           isEmpty(datum.hash) && isEmpty(datum.bytes) && datum.json === null
             ? undefined
             : datum,
+        scriptRef: output.scriptRef,
       };
     });
 
@@ -130,6 +132,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       mints,
       metadata: res.metadata,
       withdrawals: res.withdrawals,
+      size: res.size,
     });
   } catch (error) {
     console.error(error);

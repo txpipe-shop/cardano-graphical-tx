@@ -40,7 +40,8 @@ export const UtxoInfo = () => {
   const selectedUtxo = getUtxo(transactions)(selectedUtxoHash!);
   if (!selectedUtxo) return null;
 
-  const { utxoHash, assets, address, datum, redeemers } = selectedUtxo;
+  const { scriptRef, utxoHash, assets, address, datum, redeemers } =
+    selectedUtxo;
 
   const txTrim = trimString(utxoHash, 12);
   const addrTrim = trimString(address?.bech32 || "", 20);
@@ -49,7 +50,8 @@ export const UtxoInfo = () => {
     !address ? "1" : "",
     !assets.length ? "2" : "",
     !datum ? "4" : "",
-    !redeemers ? "5" : "",
+    !scriptRef ? "5" : "",
+    !redeemers ? "6" : "",
   ].filter(Boolean);
 
   return (
@@ -163,7 +165,21 @@ export const UtxoInfo = () => {
           )}
         </AccordionItem>
 
-        <AccordionItem key="5" title="Redeemers">
+        <AccordionItem key="5" title="Script Reference">
+          <Card className="flex h-16 w-full flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+            <p className="overflow-hidden text-ellipsis whitespace-normal break-words">
+              {trimString(scriptRef ?? "", 52)}
+            </p>
+            <Image
+              src={CopyIcon}
+              alt="Copy"
+              onClick={handleCopy(scriptRef ?? "")}
+              className="ml-2 cursor-pointer"
+            />
+          </Card>
+        </AccordionItem>
+
+        <AccordionItem key="6" title="Redeemer">
           <JSONModal
             isOpen={isOpenRedeemer}
             onOpenChange={onOpenRedeemerChange}

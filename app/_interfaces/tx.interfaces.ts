@@ -37,6 +37,7 @@ export interface IUtxo {
   address: string;
   assets: IAsset[];
   datum?: IDatum;
+  scriptRef?: string;
 }
 
 export interface IWithdrawal {
@@ -61,5 +62,5 @@ export interface ITransaction {
   withdrawals?: IWithdrawal[];
   redeemers?: Redeemers;
   metadata?: any;
-  size?: number;
+  size: number;
 }

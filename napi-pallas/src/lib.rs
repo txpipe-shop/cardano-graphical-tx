@@ -26,6 +26,7 @@ pub struct OutputUtxo {
   pub datum: Option<Datum>,
   pub address: String,
   pub assets: Vec<Assets>,
+  pub script_ref: Option<String>,
 }
 
 #[derive(Default)]
@@ -43,7 +44,7 @@ pub struct Assets {
   pub quantity: String,
 }
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 #[napi(object)]
 pub struct MetadataItem {
   pub label: String,
@@ -68,6 +69,7 @@ pub struct CborResponse {
   pub mints: Vec<Assets>,
   pub metadata: Vec<MetadataItem>,
   pub withdrawals: Vec<WithdrawalItem>,
+  pub size: String,
   pub scripts_successful: bool,
   pub error: String,
 }
@@ -97,6 +99,7 @@ impl CborResponse {
       scripts_successful: tx.is_valid(),
       metadata,
       withdrawals,
+      size: tx.size().to_string(),
       ..self
     }
   }
