@@ -62,6 +62,7 @@ export interface CborResponse {
   mints: Array<Assets>;
   metadata: Array<MetadataItem>;
   withdrawals: Array<WithdrawalItem>;
+  certificates: Array<Certificates>;
   size: string;
   scriptsSuccessful: boolean;
   error: string;

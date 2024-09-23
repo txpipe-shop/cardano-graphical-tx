@@ -251,7 +251,6 @@ fn get_datum_info(
         hash: hash.compute_hash().to_string(),
         json: hash.to_json().to_string(),
         bytes: hex::encode(hash.raw_cbor()),
-      certs,
       }),
     },
     None => None,

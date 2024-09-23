@@ -75,7 +75,7 @@ pub struct CborResponse {
   pub mints: Vec<Assets>,
   pub metadata: Vec<MetadataItem>,
   pub withdrawals: Vec<WithdrawalItem>,
-  pub cert: Vec<Certificates>,
+  pub certificates: Vec<Certificates>,
   pub size: String,
   pub scripts_successful: bool,
   pub error: String,
@@ -95,7 +95,7 @@ impl CborResponse {
     mints: Vec<Assets>,
     metadata: Vec<MetadataItem>,
     withdrawals: Vec<WithdrawalItem>,
-    cert: Vec<Certificates>,
+    certificates: Vec<Certificates>,
   ) -> Self {
     Self {
       tx_hash: tx.hash().to_string(),
@@ -107,7 +107,7 @@ impl CborResponse {
       scripts_successful: tx.is_valid(),
       metadata,
       withdrawals,
-      cert,
+      certificates,
       size: tx.size().to_string(),
       ..self
     }
