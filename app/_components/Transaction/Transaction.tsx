@@ -17,6 +17,8 @@ import {
 } from "~/app/_utils";
 import { BurningIcon } from "./BurningIcon";
 import { MintingIcon } from "./MintingIcon";
+import { WithdrawalIcon } from "./WithdrawalIcon";
+import { CertificateIcon } from "./CertificateIcon";
 
 interface TransactionProps {
   txHash: string;
