@@ -8,12 +8,12 @@ export const BurningIcon = ({ on }: { on: boolean }) => {
   return (
     <Group>
       <Rect
-        x={TX_WIDTH / 12}
-        y={TX_HEIGHT - TX_WIDTH / 3}
+        x={TX_WIDTH / 12 - 6}
+        y={TX_HEIGHT - TX_WIDTH / 3 + 9}
         stroke={KONVA_COLORS.RED_BURN_STROKE}
-        strokeWidth={1}
-        width={TX_WIDTH / 4}
-        height={TX_WIDTH / 4}
+        strokeWidth={2}
+        width={TX_WIDTH / 4.8}
+        height={TX_WIDTH / 4.8}
         fill={KONVA_COLORS.RED_BURN_FILL}
         cornerRadius={4}
         opacity={on ? 1 : 0.2}
@@ -22,10 +22,10 @@ export const BurningIcon = ({ on }: { on: boolean }) => {
         image={image}
         opacity={on ? 1 : 0.2}
         alt="Burn"
-        x={TX_WIDTH / 12}
-        y={TX_HEIGHT - TX_WIDTH / 3}
-        width={TX_WIDTH / 4}
-        height={TX_WIDTH / 4}
+        x={TX_WIDTH / 12 - 6}
+        y={TX_HEIGHT - TX_WIDTH / 3 + 9}
+        width={TX_WIDTH / 4.8}
+        height={TX_WIDTH / 4.8}
       />
     </Group>
   );

@@ -1,32 +1,33 @@
 import { Group, Image, Rect } from "react-konva";
 import useImage from "use-image";
-import { KONVA_COLORS, TX_HEIGHT, TX_WIDTH, mintIconURL } from "~/app/_utils";
+import {
+  KONVA_COLORS,
+  TX_HEIGHT,
+  TX_WIDTH,
+  withdrawalIconURL,
+} from "~/app/_utils";
 
-export const MintingIcon = ({ on }: { on: boolean }) => {
-  const [image] = useImage(mintIconURL);
+export const WithdrawalIcon = ({ on }: { on: boolean }) => {
+  const [image] = useImage(withdrawalIconURL);
 
   return (
     <Group>
       <Rect
-        x={TX_WIDTH / 4 + 3}
+        x={TX_WIDTH / 4 + 33}
         y={TX_HEIGHT - TX_WIDTH / 3 + 9}
-        stroke={KONVA_COLORS.GREEN_MINT_STROKE}
+        stroke={KONVA_COLORS.YELLOW_STROKE}
         strokeWidth={2}
         width={TX_WIDTH / 4.8}
         height={TX_WIDTH / 4.8}
-        fill={KONVA_COLORS.GREEN_MINT_FILL}
-        shadowColor={
-          on ? KONVA_COLORS.GREEN_MINT_FILL : KONVA_COLORS.TRANSAPARENT
-        }
-        shadowBlur={on ? 20 : 0}
+        fill={KONVA_COLORS.YELLOW_FILL}
         cornerRadius={4}
         opacity={on ? 1 : 0.2}
       />
       <Image
         image={image}
         opacity={on ? 1 : 0.2}
-        alt="Mint"
-        x={TX_WIDTH / 4 + 3}
+        alt="Burn"
+        x={TX_WIDTH / 4 + 33}
         y={TX_HEIGHT - TX_WIDTH / 3 + 9}
         width={TX_WIDTH / 4.8}
         height={TX_WIDTH / 4.8}

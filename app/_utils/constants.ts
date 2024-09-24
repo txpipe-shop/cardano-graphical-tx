@@ -32,6 +32,10 @@ export const KONVA_COLORS = {
   RED_BURN_FILL: "#FF3E45",
   RED_BURN_STROKE: "#FF262D",
   WHITE: "#FFFFFF",
+  PURPLE_FILL: "#9d4edd",
+  PURPLE_STROKE: "#893ec7",
+  YELLOW_FILL: "#ffdd63",
+  YELLOW_STROKE: "#fcd72c",
 };
 export type KONVA_COLORS = (typeof KONVA_COLORS)[keyof typeof KONVA_COLORS];
 

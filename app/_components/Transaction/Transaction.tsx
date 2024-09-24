@@ -95,6 +95,8 @@ export const Transaction = ({ txHash, txInfoVisible }: TransactionProps) => {
       <Group onClick={handleClick}>
         <BurningIcon on={burns} />
         <MintingIcon on={mints} />
+        <WithdrawalIcon on={(tx.withdrawals?.length ?? 0) > 0} />
+        <CertificateIcon on={(tx.certificates?.length ?? 0) > 0} />
       </Group>
       {!isEmpty(tx.alias) && (
         <Text
