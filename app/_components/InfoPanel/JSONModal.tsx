@@ -20,7 +20,7 @@ export const JSONModal = ({
       size="5xl"
       scrollBehavior="inside"
     >
-      <ModalContent className="bg-content2 p-2">
+      <ModalContent className="modal-content bg-content2 p-2">
         <ModalHeader className="flex flex-col gap-1 bg-content2">
           {title}
         </ModalHeader>
