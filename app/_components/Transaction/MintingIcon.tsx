@@ -8,12 +8,12 @@ export const MintingIcon = ({ on }: { on: boolean }) => {
   return (
     <Group>
       <Rect
-        x={TX_WIDTH / 4 + 3}
+        x={TX_WIDTH / 4 + 3.5}
         y={TX_HEIGHT - TX_WIDTH / 3 + 9}
         stroke={KONVA_COLORS.GREEN_MINT_STROKE}
         strokeWidth={2}
-        width={TX_WIDTH / 4.8}
-        height={TX_WIDTH / 4.8}
+        width={TX_WIDTH / 5}
+        height={TX_WIDTH / 5}
         fill={KONVA_COLORS.GREEN_MINT_FILL}
         shadowColor={
           on ? KONVA_COLORS.GREEN_MINT_FILL : KONVA_COLORS.TRANSAPARENT
@@ -26,10 +26,10 @@ export const MintingIcon = ({ on }: { on: boolean }) => {
         image={image}
         opacity={on ? 1 : 0.2}
         alt="Mint"
-        x={TX_WIDTH / 4 + 3}
+        x={TX_WIDTH / 4 + 3.5}
         y={TX_HEIGHT - TX_WIDTH / 3 + 9}
-        width={TX_WIDTH / 4.8}
-        height={TX_WIDTH / 4.8}
+        width={TX_WIDTH / 5}
+        height={TX_WIDTH / 5}
       />
     </Group>
   );
