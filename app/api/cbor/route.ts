@@ -1,6 +1,6 @@
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
-import { cborHandler } from "~/app/_handlers";
 import { getQuery, getTxFromCBORSchema } from "~/app/_utils";
+import { cborHandler } from "../_handlers";
 
 export async function POST(req: Request) {
   try {

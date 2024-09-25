@@ -44,9 +44,9 @@ export const TxInfo = () => {
   const {
     txHash,
     fee,
-    inputsUTXO,
-    outputsUTXO,
-    mint,
+    inputs,
+    outputs,
+    mints,
     scriptsSuccessful,
     blockHash,
     blockTxIndex,
@@ -58,7 +58,7 @@ export const TxInfo = () => {
     size,
   } = selectedTx;
 
-  const totalOutput: bigint = outputsUTXO.reduce((acc, output) => {
+  const totalOutput: bigint = outputs.reduce((acc, output) => {
     const lovelace = output.assets.find(
       (asset) => asset.assetName === "lovelace",
     );
@@ -160,7 +160,7 @@ export const TxInfo = () => {
       </AccordionItem>
       <AccordionItem key="5" title="Outputs Count">
         <Card className="fl ex-row flex justify-between bg-content2 px-5 py-2 shadow-none">
-          {outputsUTXO.length}
+          {outputs.length}
         </Card>
       </AccordionItem>
       <AccordionItem key="6" title="Total Output Sum">
@@ -172,7 +172,7 @@ export const TxInfo = () => {
       </AccordionItem>
       <AccordionItem key="7" title="Inputs Count">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
-          {inputsUTXO.length}
+          {inputs.length}
         </Card>
       </AccordionItem>
       <AccordionItem key="8" title="Withdrawals">
@@ -239,7 +239,7 @@ export const TxInfo = () => {
       </AccordionItem>
       <AccordionItem key="11" title="Minting & Burning">
         <div className="flex flex-col gap-2">
-          {mint.map((asset, index) => (
+          {mints.map((asset, index) => (
             <AssetCard key={index} asset={asset} isMintBurn />
           ))}
         </div>

@@ -44,6 +44,10 @@ export interface IWithdrawal {
   rawAddress: string;
   amount: string;
 }
+export interface IMetadata {
+  label: string;
+  jsonMetadata: Record<string, string>;
+}
 
 export interface ICertificate {
   json: Record<string, any>;
@@ -61,11 +65,11 @@ export interface ITransaction {
   blockTxIndex?: number;
   blockHeight?: number;
   blockAbsoluteSlot?: number;
-  invalidBefore?: number;
-  invalidHereafter?: number;
+  validityStart?: number;
+  ttl?: number;
   withdrawals?: IWithdrawal[];
   redeemers?: Redeemers;
-  metadata?: any;
   certificates?: ICertificate[];
+  metadata?: IMetadata[];
   size: number;
 }

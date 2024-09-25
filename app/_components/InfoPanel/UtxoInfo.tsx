@@ -40,10 +40,9 @@ export const UtxoInfo = () => {
   const selectedUtxo = getUtxo(transactions)(selectedUtxoHash!);
   if (!selectedUtxo) return null;
 
-  const { scriptRef, utxoHash, assets, address, datum, redeemers } =
-    selectedUtxo;
+  const { scriptRef, txHash, assets, address, datum, redeemers } = selectedUtxo;
 
-  const txTrim = trimString(utxoHash, 12);
+  const txTrim = trimString(txHash, 12);
   const addrTrim = trimString(address?.bech32 || "", 20);
 
   const disabledKeys = [
@@ -132,7 +131,7 @@ export const UtxoInfo = () => {
             <Image
               src={CopyIcon}
               alt="Copy"
-              onClick={handleCopy(utxoHash)}
+              onClick={handleCopy(txHash)}
               className="cursor-pointer"
             />
           </Card>

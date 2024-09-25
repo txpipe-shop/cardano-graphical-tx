@@ -1,7 +1,7 @@
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
-import { getApiKey, getBlockfrostURL, type NETWORK } from "../_utils";
-import { BlockfrostResponseSchema } from "../_utils/schemas/blockfrostResponseSchema";
+import { getApiKey, getBlockfrostURL, type NETWORK } from "~/app/_utils";
+import { BlockfrostResponseSchema } from "~/app/_utils/schemas";
 
 interface IHashHandler {
   network: NETWORK;

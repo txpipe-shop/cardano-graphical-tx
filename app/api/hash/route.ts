@@ -1,8 +1,8 @@
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { type NextRequest } from "next/server";
 import { ZodError } from "zod";
-import { hashHandler } from "~/app/_handlers/hash.handler";
 import { getQuery, getTxFromHashSchema } from "~/app/_utils";
+import { hashHandler } from "../_handlers";
 
 export async function GET(req: NextRequest) {
   try {

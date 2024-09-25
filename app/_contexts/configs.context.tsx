@@ -2,10 +2,12 @@
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { createContext, useContext } from "react";
 import { useLocalStorage } from "../_hooks/useLocalStorage";
-import { NETWORK } from "../_utils";
+import { NETWORK, OPTIONS } from "../_utils";
 
 export interface IUserConfigs {
   net: NETWORK;
+  option: OPTIONS;
+  query: string;
 }
 
 const LOCAL_STORAGE_KEYS = {
@@ -30,6 +32,8 @@ export const useConfigs = () => {
 export const ConfigsProvider = ({ children }: { children: ReactNode }) => {
   const initialState: IUserConfigs = {
     net: NETWORK.MAINNET,
+    option: OPTIONS.CBOR,
+    query: "",
   };
   const [configs, setConfigs] = useLocalStorage({
     key: LOCAL_STORAGE_KEYS.USER_CONFIGS,

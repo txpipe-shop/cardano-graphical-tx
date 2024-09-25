@@ -2,7 +2,7 @@ import type Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { useEffect, useRef, useState } from "react";
 import { Circle, Group, Rect, Text } from "react-konva";
-import { useGraphical } from "~/app/_contexts";
+import { useGraphical, useUI } from "~/app/_contexts";
 import {
   KONVA_COLORS,
   POINT_SIZE,
@@ -28,7 +28,7 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
   }>(getUtxoColor(transactions)(utxoHash));
   const [showInfo, setShowInfo] = useState(false);
   const [dimensions, setDimensions] = useState({ rectWidth: 0, rectHeight: 0 });
-  const { error } = useGraphical();
+  const { error } = useUI();
   const textRef = useRef<Konva.Text | null>(null);
 
   useEffect(() => {
@@ -78,26 +78,26 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
         ...prev,
         transactions: prev.transactions.map((tx) => {
           const newPos = { x: x - tx.pos.x, y: y - tx.pos.y };
-          const txHasUtxoAsInput = tx.inputsUTXO.find(
-            (utxo) => utxo.utxoHash === utxoHashMap,
+          const txHasUtxoAsInput = tx.inputs.find(
+            (utxo) => utxo.txHash === utxoHashMap,
           );
           if (txHasUtxoAsInput)
             return {
               ...tx,
-              inputsUTXO: tx.inputsUTXO.map((utxo) => {
-                if (utxo.utxoHash === utxoHashMap)
+              inputs: tx.inputs.map((utxo) => {
+                if (utxo.txHash === utxoHashMap)
                   return { ...utxo, distance: newPos };
                 return utxo;
               }),
             };
-          const txHasUtxoAsOutput = tx.outputsUTXO.find(
-            (utxo) => utxo.utxoHash === utxoHashMap,
+          const txHasUtxoAsOutput = tx.outputs.find(
+            (utxo) => utxo.txHash === utxoHashMap,
           );
           if (txHasUtxoAsOutput)
             return {
               ...tx,
-              outputsUTXO: tx.outputsUTXO.map((utxo) => {
-                if (utxo.utxoHash === utxoHashMap)
+              outputs: tx.outputs.map((utxo) => {
+                if (utxo.txHash === utxoHashMap)
                   return { ...utxo, distance: newPos };
                 return utxo;
               }),

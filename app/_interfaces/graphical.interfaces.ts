@@ -4,6 +4,7 @@ import type {
   IAsset,
   ICertificate,
   IDatum,
+  IMetadata,
   IWithdrawal,
   Redeemers,
   RedeemerSpend,
@@ -21,40 +22,40 @@ export interface UtxoObject {
 
 export interface IGraphicalTransaction {
   txHash: string;
-  pos: Vector2d;
-  outputsUTXO: IGraphicalUtxo[];
-  inputsUTXO: IGraphicalUtxo[];
-  producedLines: (Konva.Line | null)[];
+  fee: number;
+  inputs: IGraphicalUtxo[];
   consumedLines: (Konva.Line | null)[];
+  outputs: IGraphicalUtxo[];
+  producedLines: (Konva.Line | null)[];
+  mints: IAsset[];
+  scriptsSuccessful: boolean;
+  pos: Vector2d;
   blockHash?: string;
   blockTxIndex?: number;
   blockHeight?: number;
   blockAbsoluteSlot?: number;
-  mint: IAsset[];
-  invalidBefore?: number;
-  invalidHereafter?: number;
-  fee: number;
+  validityStart?: number;
+  ttl?: number;
   withdrawals?: IWithdrawal[];
-  scriptsSuccessful: boolean;
   redeemers?: Redeemers;
-  metadata?: any;
+  metadata?: IMetadata[];
   certificates?: ICertificate[];
   size: number;
   alias: string;
 }
 
 export interface IGraphicalUtxo {
-  utxoHash: string;
+  txHash: string;
   index: number;
-  assets: Array<IAsset>;
   address?: Address;
+  assets: Array<IAsset>;
   datum: IDatum | undefined;
   scriptRef?: string;
+  isReferenceInput: boolean;
+  redeemers?: RedeemerSpend;
   pos: Vector2d;
   lines: (Konva.Line | null)[];
   distance: Vector2d;
-  isReferenceInput: boolean;
-  redeemers?: RedeemerSpend;
 }
 
 export interface Address {

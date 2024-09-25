@@ -1,14 +1,15 @@
 import type { KonvaEventObject } from "konva/lib/Node";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Layer, Stage } from "react-konva";
-import { useGraphical } from "~/app/_contexts";
+import { useGraphical, useUI } from "~/app/_contexts";
 import { TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
 import { Line, Transaction, Utxo } from "../Transaction";
 import { PlaygroundDefault } from "./PlaygroundDefault";
 import { PlaygroundError } from "./PlaygroundError";
 
 export function Playground() {
-  const { transactions, error } = useGraphical();
+  const { transactions } = useGraphical();
+  const { error } = useUI();
   const pathname = usePathname();
   const { replace } = useRouter();
   const searchParams = useSearchParams();
@@ -78,22 +79,22 @@ export function Playground() {
           />
         ))}
         {transactions.transactions.map((tx) => {
-          return tx.outputsUTXO.map((utxo, index) => (
+          return tx.outputs.map((utxo, index) => (
             <Line
               key={index}
               txHash={tx.txHash}
-              utxoHash={utxo.utxoHash || ""}
+              utxoHash={utxo.txHash || ""}
               index={index}
               isOutput
             />
           ));
         })}
         {transactions.transactions.map((tx) => {
-          return tx.inputsUTXO.map((utxo, index) => (
+          return tx.inputs.map((utxo, index) => (
             <Line
               key={index}
               txHash={tx.txHash}
-              utxoHash={utxo.utxoHash || ""}
+              utxoHash={utxo.txHash || ""}
               index={index}
               isReferenceInput={utxo.isReferenceInput}
             />

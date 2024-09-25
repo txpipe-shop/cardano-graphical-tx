@@ -1,6 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import pallas, { napiParseDatumInfo, type CborResponse } from "napi-pallas";
-import type { IAsset, IUtxo } from "../_interfaces";
+import type { IAsset, IUtxo } from "~/app/_interfaces";
 import {
   POLICY_LENGTH,
   getApiKey,
@@ -8,8 +8,8 @@ import {
   getUTxOsURL,
   isEmpty,
   type NETWORK,
-} from "../_utils";
-import { BlockfrostUTxOSchema } from "../_utils/schemas/blockfrostResponseSchema";
+} from "~/app/_utils";
+import { BlockfrostUTxOSchema } from "~/app/_utils/schemas";
 
 interface ICborHandler {
   network: NETWORK;
@@ -127,9 +127,9 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       blockHeight: txInfo.block_height,
       blockAbsoluteSlot: txInfo.slot,
       referenceInputs,
-      scriptsSuccessful: res.scriptsSuccessful,
       outputs,
       mints,
+      scriptsSuccessful: res.scriptsSuccessful,
       metadata: res.metadata,
       withdrawals: res.withdrawals,
       certificates: res.certificates,

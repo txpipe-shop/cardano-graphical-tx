@@ -36,10 +36,10 @@ export const updateLines =
     selectedTx.producedLines.forEach((line) => {
       if (!line) return;
       const utxoIndex = line.attrs.index;
-      const selectedUtxo = selectedTx.outputsUTXO[utxoIndex];
+      const selectedUtxo = selectedTx.outputs[utxoIndex];
       if (!selectedUtxo) return;
       const { x: distanceX, y: distanceY } = selectedUtxo.distance;
-      const utxoHash = selectedUtxo.utxoHash;
+      const utxoHash = selectedUtxo.txHash;
 
       if (newUtxos[utxoHash])
         newUtxos[utxoHash] = {
@@ -50,10 +50,10 @@ export const updateLines =
     selectedTx.consumedLines.forEach((line) => {
       if (!line) return;
       const utxoIndex = line.attrs.index;
-      const selectedUtxo = selectedTx.inputsUTXO[utxoIndex];
+      const selectedUtxo = selectedTx.inputs[utxoIndex];
       if (!selectedUtxo) return;
       const { x: distanceX, y: distanceY } = selectedUtxo.distance;
-      const utxoHash = selectedUtxo.utxoHash;
+      const utxoHash = selectedUtxo.txHash;
 
       if (newUtxos[utxoHash])
         newUtxos[utxoHash] = {
@@ -106,14 +106,14 @@ export const updateUtxoLines =
 export const isInputUtxo =
   (transactionBox: TransactionsBox) => (utxoHash: string) => {
     return transactionBox.transactions.some((tx) =>
-      tx.inputsUTXO.some((utxo) => utxo.utxoHash === utxoHash),
+      tx.inputs.some((utxo) => utxo.txHash === utxoHash),
     );
   };
 
 export const isOutputUtxo =
   (transactionBox: TransactionsBox) => (utxoHash: string) => {
     return transactionBox.transactions.some((tx) =>
-      tx.outputsUTXO.some((utxo) => utxo.utxoHash === utxoHash),
+      tx.outputs.some((utxo) => utxo.txHash === utxoHash),
     );
   };
 
@@ -170,15 +170,15 @@ export const setPosition = (
   return transactions.map((tx) => {
     const txPos = { x: initial, y: TX_HEIGHT };
 
-    const inputsUTXO = setUtxoPosition(tx.inputsUTXO, txPos, false);
+    const inputs = setUtxoPosition(tx.inputs, txPos, false);
 
-    const sortedOutputs = tx.outputsUTXO.sort((a, b) => a.index - b.index);
-    const outputsUTXO = setUtxoPosition(sortedOutputs, txPos, true);
+    const sortedOutputs = tx.outputs.sort((a, b) => a.index - b.index);
+    const outputs = setUtxoPosition(sortedOutputs, txPos, true);
 
     return {
       ...tx,
-      inputsUTXO,
-      outputsUTXO,
+      inputs,
+      outputs,
       pos: txPos,
     };
   });
@@ -188,12 +188,12 @@ export const existsMint =
   (transactionBox: TransactionsBox) => (txHash: string) => {
     const selectedTx = getTransaction(transactionBox)(txHash);
     if (!selectedTx) return false;
-    return selectedTx.mint.some((mint) => mint.amount > 0);
+    return selectedTx.mints.some((mint) => mint.amount > 0);
   };
 
 export const existsBurn =
   (transactionBox: TransactionsBox) => (txHash: string) => {
     const selectedTx = getTransaction(transactionBox)(txHash);
     if (!selectedTx) return false;
-    return selectedTx.mint.some((mint) => mint.amount < 0);
+    return selectedTx.mints.some((mint) => mint.amount < 0);
   };

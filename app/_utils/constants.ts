@@ -2,6 +2,8 @@ import JSONbig from "json-bigint";
 
 export const ROUTES = {
   HOME: "/",
+  GRAPHER: "/grapher",
+  DISSECT: "/dissect",
 };
 
 export const API_ROUTES = {
