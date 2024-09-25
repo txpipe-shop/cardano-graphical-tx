@@ -1,5 +1,10 @@
 "use client";
-import { Accordion, AccordionItem, Card } from "@nextui-org/react";
+import {
+  Accordion,
+  AccordionItem,
+  Card,
+  useDisclosure,
+} from "@nextui-org/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { type ChangeEvent, useContext, useEffect, useState } from "react";
@@ -7,6 +12,7 @@ import toast from "react-hot-toast";
 import { Button, Input } from "~/app/_components";
 import { GraphicalContext } from "~/app/_contexts";
 import {
+  JSONBIG,
   TX_URL_PARAM,
   getTransaction,
   handleCopy,
@@ -14,6 +20,8 @@ import {
 } from "~/app/_utils";
 import CopyIcon from "~/public/copy.svg";
 import { AssetCard } from "./AssetCard";
+import { JSONModal } from "./JSONModal";
+import FullScreen from "/public/fullscreen.svg";
 
 export const TxInfo = () => {
   const [name, setName] = useState("");
@@ -21,6 +29,11 @@ export const TxInfo = () => {
   const searchParams = useSearchParams();
   const selectedTxHash = searchParams.get(TX_URL_PARAM);
   const selectedTx = getTransaction(transactions)(selectedTxHash || "");
+  const {
+    isOpen: isOpenCertificate,
+    onOpen: onOpenCertificate,
+    onOpenChange: onOpenCertificateChange,
+  } = useDisclosure();
 
   useEffect(() => {
     const selectedTx = getTransaction(transactions)(selectedTxHash || "");
@@ -41,6 +54,7 @@ export const TxInfo = () => {
     blockAbsoluteSlot,
     withdrawals,
     metadata,
+    certificates,
     size,
   } = selectedTx;
 
@@ -87,7 +101,8 @@ export const TxInfo = () => {
   const disabledKeys = [
     !withdrawals?.length ? "8" : "",
     !msg ? "9" : "",
-    !mint.length ? "10" : "",
+    !certificates?.length ? "10" : "",
+    !mint.length ? "11" : "",
   ].filter(Boolean);
 
   return (
@@ -192,21 +207,51 @@ export const TxInfo = () => {
           {msg}
         </Card>
       </AccordionItem>
-      <AccordionItem key="10" title="Minting & Burning">
+      <AccordionItem key="10" title="Certificates">
+        <JSONModal
+          isOpen={isOpenCertificate}
+          onOpenChange={onOpenCertificateChange}
+          title="Certificates"
+        >
+          <pre className="font-code bg-content2">
+            {JSONBIG.stringify(certificates, null, 2)
+              .replace(/"json":/g, "")
+              .replace(/\\/g, "")}
+          </pre>
+        </JSONModal>
+        {certificates && (
+          <Card className="gap-2 overflow-x-hidden bg-content2 px-5 py-2 shadow-none">
+            <div className="absolute right-4">
+              <Image
+                src={FullScreen}
+                alt="See Modal"
+                onClick={onOpenCertificate}
+                className="cursor-pointer"
+              />
+            </div>
+            <pre className="font-code overflow-x-auto">
+              {JSONBIG.stringify(certificates, null, 2)
+                .replace(/"json":/g, "")
+                .replace(/\\/g, "")}
+            </pre>
+          </Card>
+        )}
+      </AccordionItem>
+      <AccordionItem key="11" title="Minting & Burning">
         <div className="flex flex-col gap-2">
           {mint.map((asset, index) => (
             <AssetCard key={index} asset={asset} isMintBurn />
           ))}
         </div>
       </AccordionItem>
-      <AccordionItem key="11" title="Scripts Successful">
+      <AccordionItem key="12" title="Scripts Successful">
         <div className="flex flex-col gap-2">
           <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
             {scriptsSuccessful ? "True" : "False"}
           </Card>
         </div>
       </AccordionItem>
-      <AccordionItem key="12" title="Alias" className="m-0">
+      <AccordionItem key="13" title="Alias" className="m-0">
         <form onSubmit={handleSave} className="flex justify-around">
           <Input
             inputSize="small"

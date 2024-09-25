@@ -46,7 +46,8 @@ export const InfoPanel = ({
       if (
         panelElement &&
         !panelElement.contains(event.target as Node) &&
-        isVisible
+        isVisible &&
+        !(event.target as HTMLElement).closest(".modal-content")
       ) {
         hideInfo();
       }
