@@ -13,12 +13,12 @@ export const WithdrawalIcon = ({ on }: { on: boolean }) => {
   return (
     <Group>
       <Rect
-        x={TX_WIDTH / 4 + 33}
+        x={TX_WIDTH / 4 + 34}
         y={TX_HEIGHT - TX_WIDTH / 3 + 9}
         stroke={KONVA_COLORS.YELLOW_STROKE}
         strokeWidth={2}
-        width={TX_WIDTH / 4.8}
-        height={TX_WIDTH / 4.8}
+        width={TX_WIDTH / 5}
+        height={TX_WIDTH / 5}
         fill={KONVA_COLORS.YELLOW_FILL}
         cornerRadius={4}
         opacity={on ? 1 : 0.2}
@@ -27,10 +27,11 @@ export const WithdrawalIcon = ({ on }: { on: boolean }) => {
         image={image}
         opacity={on ? 1 : 0.2}
         alt="Burn"
-        x={TX_WIDTH / 4 + 33}
+        x={TX_WIDTH / 4 + 59}
         y={TX_HEIGHT - TX_WIDTH / 3 + 9}
-        width={TX_WIDTH / 4.8}
-        height={TX_WIDTH / 4.8}
+        width={TX_WIDTH / 5}
+        height={TX_WIDTH / 5}
+        rotation={90}
       />
     </Group>
   );
