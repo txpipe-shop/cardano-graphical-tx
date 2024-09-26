@@ -50,6 +50,9 @@ export interface WithdrawalItem {
   rawAddress: string;
   amount: string;
 }
+export interface Certificates {
+  json: string;
+}
 export interface CborResponse {
   txHash: string;
   fee?: string;
@@ -59,6 +62,7 @@ export interface CborResponse {
   mints: Array<Assets>;
   metadata: Array<MetadataItem>;
   withdrawals: Array<WithdrawalItem>;
+  certificates: Array<Certificates>;
   size: string;
   scriptsSuccessful: boolean;
   error: string;

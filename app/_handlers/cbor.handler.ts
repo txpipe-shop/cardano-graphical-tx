@@ -132,6 +132,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       mints,
       metadata: res.metadata,
       withdrawals: res.withdrawals,
+      certificates: res.certificates,
       size: res.size,
     });
   } catch (error) {

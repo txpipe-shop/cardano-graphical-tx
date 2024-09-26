@@ -125,6 +125,7 @@ export const parseTxToGraphical = (
       invalidHereafter: cbor.invalidHereafter,
       fee: cbor.fee,
       withdrawals: cbor.withdrawals,
+      certificates: cbor.certificates,
       scriptsSuccessful: cbor.scriptsSuccessful,
       redeemers: cbor.redeemers,
       metadata: cbor.metadata,

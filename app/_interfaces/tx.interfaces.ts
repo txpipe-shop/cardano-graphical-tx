@@ -45,6 +45,10 @@ export interface IWithdrawal {
   amount: string;
 }
 
+export interface ICertificate {
+  json: Record<string, any>;
+}
+
 export interface ITransaction {
   txHash: string;
   fee: number;
@@ -62,5 +66,6 @@ export interface ITransaction {
   withdrawals?: IWithdrawal[];
   redeemers?: Redeemers;
   metadata?: any;
+  certificates?: ICertificate[];
   size: number;
 }
