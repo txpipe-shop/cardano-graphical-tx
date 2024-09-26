@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && source $HOME/.cargo/env && cd napi-pallas && yarn install && yarn build && cd ..;  bun install && next build",
+    "build": "prisma generate && cd napi-pallas && yarn install && yarn build && cd ..  && bun install && next build ",
     "db:generate": "prisma migrate dev",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
