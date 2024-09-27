@@ -6,17 +6,23 @@ import CopyIcon from "~/public/copy.svg";
 
 interface AssetCardProps {
   asset: IAsset;
+  policyId: string;
   isMintBurn?: boolean;
 }
 
-export const AssetCard = ({ asset, isMintBurn = false }: AssetCardProps) => {
-  const { policyId, assetName, amount } = asset;
+export const AssetCard = ({
+  asset,
+  policyId,
+  isMintBurn = false,
+}: AssetCardProps) => {
+  const { assetName, coint } = asset;
 
-  const colorVar = isMintBurn
-    ? asset.amount > 0
-      ? "text-green-500"
-      : "text-red-500"
-    : "dark:text-white text-black";
+  const colorVar =
+    isMintBurn && asset.coint
+      ? asset.coint > 0
+        ? "text-green-500"
+        : "text-red-500"
+      : "dark:text-white text-black";
 
   const tooltipContent =
     assetName !== "lovelace" ? "Policy " + policyId : "Lovelace";
@@ -33,7 +39,7 @@ export const AssetCard = ({ asset, isMintBurn = false }: AssetCardProps) => {
           <div>
             <b className={colorVar}>{name}</b>
             &nbsp;
-            {amount.toString()}
+            {coint?.toString()}
           </div>
           <div>
             {assetName !== "lovelace" && (

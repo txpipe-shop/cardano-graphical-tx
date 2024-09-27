@@ -15,19 +15,19 @@ export function PropBlock({
   value: string | undefined;
 }) {
   return (
-    <>
+    <div className="mb-4">
+      <P>{description}</P>
       {value ? (
-        <div className="mb-4">
-          <P>{description}</P>
+        <>
           <div className="mt-4 break-words rounded-lg border-2 border-gray-700 bg-gray-200 p-4 text-xl shadow shadow-black">
             <div className="text-sm text-gray-600">{title}</div>
-            {value ?? "(empty)"}
+            {value}
           </div>
-        </div>
+        </>
       ) : (
-        <EmptyBlock />
+        <>{description && <EmptyBlock title={title} />}</>
       )}
-    </>
+    </div>
   );
 }
 
@@ -44,9 +44,10 @@ export function P(props: PropsWithChildren) {
   return <p className="text-xl text-gray-600">{props.children}</p>;
 }
 
-export function EmptyBlock() {
+export function EmptyBlock({ title }: { title?: string }) {
   return (
     <div className="mt-8 rounded-lg border-2 border-red-400 bg-red-200 p-4 text-xl text-red-600 shadow shadow-black">
+      <div className="text-sm text-gray-600">{title}</div>
       Empty
     </div>
   );

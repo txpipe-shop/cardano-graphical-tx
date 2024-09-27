@@ -24,9 +24,9 @@ export const setCBOR = async (
     const isInvalid = !isHexa(uniqueInput);
     if (isInvalid) throw new Error("Invalid CBOR");
 
-    const cborTransaction = await getTxFromCbor(uniqueInput, network);
+    const transaction = await getTxFromCbor(uniqueInput, network);
 
-    const txs = parseTxToGraphical([cborTransaction], transactions);
+    const txs = parseTxToGraphical([transaction], transactions);
     const positionedTxs = setPosition(txs);
 
     let newUtxosObject: UtxoObject = {};

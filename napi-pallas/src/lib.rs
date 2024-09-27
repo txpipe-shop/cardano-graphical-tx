@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use pallas::ledger::{primitives::conway::DatumHash, traverse::MultiEraTx};
+use pallas::ledger::traverse::MultiEraTx;
 
 #[macro_use]
 extern crate napi_derive;
@@ -22,9 +22,11 @@ pub struct Datum {
 #[napi(object)]
 pub struct OutputUtxo {
   pub tx_hash: String,
-  pub index: String,
-  pub datum: Option<Datum>,
+  pub index: i64,
+  pub bytes: String,
   pub address: String,
+  pub lovelace: i64,
+  pub datum: Option<Datum>,
   pub assets: Vec<Assets>,
   pub script_ref: Option<String>,
 }
@@ -38,10 +40,17 @@ pub struct InputUtxo {
 
 #[derive(Default)]
 #[napi(object)]
+pub struct Asset {
+  pub asset_name: String,
+  pub asset_name_ascii: Option<String>,
+  pub coint: Option<i64>,
+}
+
+#[derive(Default)]
+#[napi(object)]
 pub struct Assets {
   pub policy_id: String,
-  pub asset_name: String,
-  pub quantity: String,
+  pub assets_policy: Vec<Asset>,
 }
 
 #[derive(Default)]
@@ -137,22 +146,4 @@ pub fn cbor_parse(raw: String) -> CborResponse {
 #[napi]
 pub fn napi_parse_datum_info(raw: String) -> Option<Datum> {
   tx::parse_datum_info(raw)
-}
-
-fn compute_datum_hashmap<'b>(mtx: MultiEraTx<'b>) -> HashMap<DatumHash, Datum> {
-  let mut m = HashMap::new();
-  let plutus_data = mtx.plutus_data();
-  plutus_data.iter().for_each(|datum| {
-    let hash = pallas_crypto::hash::Hasher::<256>::hash(datum.raw_cbor());
-    m.insert(
-      hash,
-      Datum {
-        hash: hash.to_string(),
-        bytes: hex::encode(datum.raw_cbor()),
-        json: serde_json::to_string(&datum.clone().unwrap()).unwrap(),
-      },
-    );
-  });
-
-  return m;
 }

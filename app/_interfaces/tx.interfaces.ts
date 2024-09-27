@@ -22,22 +22,29 @@ interface Data {
 export interface IDatum {
   hash: string;
   bytes: string;
-  json: Record<string, any>;
+  json: string;
 }
 
 export interface IAsset {
-  policyId: string;
   assetName: string;
-  amount: number | bigint;
+  assetNameAscii?: string;
+  coint?: number;
+}
+
+export interface IAssets {
+  policyId: string;
+  assetsPolicy: IAsset[];
 }
 
 export interface IUtxo {
   txHash: string;
   index: number;
+  bytes: string;
   address: string;
-  assets: IAsset[];
+  lovelace: number;
   datum?: IDatum;
   scriptRef?: string;
+  assets: IAssets[];
 }
 
 export interface IWithdrawal {
@@ -59,7 +66,7 @@ export interface ITransaction {
   inputs: IUtxo[];
   referenceInputs: IUtxo[];
   outputs: IUtxo[];
-  mints: IAsset[];
+  mints: IAssets[];
   scriptsSuccessful: boolean;
   blockHash?: string;
   blockTxIndex?: number;

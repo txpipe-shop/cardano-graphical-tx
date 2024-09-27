@@ -2,14 +2,14 @@
 import type { Dispatch, SetStateAction } from "react";
 import { createContext, useContext, useState } from "react";
 
-export interface IUIContext {
+interface IUIContext {
   error: string;
   setError: Dispatch<SetStateAction<string>>;
   loading: boolean;
   setLoading: Dispatch<SetStateAction<boolean>>;
 }
 
-export const UIContext = createContext<IUIContext>({
+const UIContext = createContext<IUIContext>({
   error: "",
   setError: () => {},
   loading: false,

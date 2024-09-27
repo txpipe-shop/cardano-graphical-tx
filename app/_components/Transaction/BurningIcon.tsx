@@ -15,6 +15,10 @@ export const BurningIcon = ({ on }: { on: boolean }) => {
         width={TX_WIDTH / 5}
         height={TX_WIDTH / 5}
         fill={KONVA_COLORS.RED_BURN_FILL}
+        shadowColor={
+          on ? KONVA_COLORS.RED_BURN_FILL : KONVA_COLORS.TRANSAPARENT
+        }
+        shadowBlur={on ? 20 : 0}
         cornerRadius={4}
         opacity={on ? 1 : 0.2}
       />

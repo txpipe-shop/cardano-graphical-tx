@@ -3,12 +3,12 @@ import type { Dispatch, SetStateAction } from "react";
 import { createContext, useContext, useState } from "react";
 import type { TransactionsBox } from "../_interfaces";
 
-export interface IGraphicalContext {
+interface IGraphicalContext {
   transactions: TransactionsBox;
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>;
 }
 
-export const GraphicalContext = createContext<IGraphicalContext>({
+const GraphicalContext = createContext<IGraphicalContext>({
   transactions: {
     transactions: [],
     utxos: {},

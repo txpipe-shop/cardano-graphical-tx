@@ -188,12 +188,16 @@ export const existsMint =
   (transactionBox: TransactionsBox) => (txHash: string) => {
     const selectedTx = getTransaction(transactionBox)(txHash);
     if (!selectedTx) return false;
-    return selectedTx.mints.some((mint) => mint.amount > 0);
+    return selectedTx.mints.some(({ assetsPolicy }) =>
+      assetsPolicy.some((asset) => asset.coint && asset.coint > 0),
+    );
   };
 
 export const existsBurn =
   (transactionBox: TransactionsBox) => (txHash: string) => {
     const selectedTx = getTransaction(transactionBox)(txHash);
     if (!selectedTx) return false;
-    return selectedTx.mints.some((mint) => mint.amount < 0);
+    return selectedTx.mints.some(({ assetsPolicy }) =>
+      assetsPolicy.some((asset) => asset.coint && asset.coint < 0),
+    );
   };

@@ -1,6 +1,12 @@
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
-import { POLICY_LENGTH, getTransaction, getUtxo, isEmpty } from ".";
+import {
+  POLICY_LENGTH,
+  defaultPosition,
+  getTransaction,
+  getUtxo,
+  isEmpty,
+} from ".";
 import type {
   Address,
   IGraphicalTransaction,
@@ -11,7 +17,6 @@ import type {
   TransactionsBox,
 } from "../_interfaces";
 
-const defaultPosition = { x: 0, y: 0 };
 interface IGenerateUTXO extends IUtxo {
   redeemers?: Redeemers;
   transactionBox: TransactionsBox;
@@ -48,9 +53,11 @@ const formatAddress = (address: string): Address | undefined => {
 const generateGraphicalUTXO = ({
   txHash,
   index,
-  assets,
+  bytes,
   address,
+  lovelace,
   datum,
+  assets,
   scriptRef,
   redeemers,
   transactionBox,
@@ -67,13 +74,14 @@ const generateGraphicalUTXO = ({
     (spend) =>
       spend.input.tx_hash + "#" + spend.input.index === txHash + "#" + index,
   );
-
   return {
     txHash: txHash + "#" + index,
     index,
-    assets,
+    bytes,
     address: formatAddress(address),
+    lovelace,
     datum,
+    assets,
     scriptRef,
     lines: [],
     pos: position,
@@ -110,26 +118,12 @@ export const parseTxToGraphical = (
     const alias = existsTx ? existsTx.alias : "";
 
     return {
-      txHash: cbor.txHash,
+      ...cbor,
       pos: defaultPosition,
       outputs,
       inputs,
       producedLines: [],
       consumedLines: [],
-      blockHash: cbor.blockHash,
-      blockTxIndex: cbor.blockTxIndex,
-      blockHeight: cbor.blockHeight,
-      blockAbsoluteSlot: cbor.blockAbsoluteSlot,
-      mints: cbor.mints,
-      validityStart: cbor.validityStart,
-      ttl: cbor.ttl,
-      fee: cbor.fee,
-      withdrawals: cbor.withdrawals,
-      certificates: cbor.certificates,
-      scriptsSuccessful: cbor.scriptsSuccessful,
-      redeemers: cbor.redeemers,
-      metadata: cbor.metadata,
-      size: cbor.size,
       alias,
     };
   });

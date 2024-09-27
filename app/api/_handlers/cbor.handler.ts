@@ -1,9 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 import pallas, { napiParseDatumInfo, type CborResponse } from "napi-pallas";
-import type { IAsset, IUtxo } from "~/app/_interfaces";
+import type { IAssets, IUtxo } from "~/app/_interfaces";
 import {
   POLICY_LENGTH,
   getApiKey,
+  getAssetName,
   getTransactionURL,
   getUTxOsURL,
   isEmpty,
@@ -54,12 +55,35 @@ const inputsHandle = async ({
     return {
       txHash: input.hash,
       index: input.output_index,
+      // TODO: Look for bytes
+      bytes: "",
       address: input.address,
-      assets: input.amount.map(({ unit, quantity }) => ({
-        assetName: unit == "lovelace" ? unit : unit.slice(POLICY_LENGTH),
-        policyId: unit.slice(0, POLICY_LENGTH),
-        amount: Number(quantity),
-      })),
+      lovelace: Number(
+        input.amount.find((asset) => asset.unit === "lovelace")!.quantity,
+      ),
+      assets: input.amount.reduce((acc, { unit, quantity }) => {
+        if (unit == "lovelace") return acc;
+        const policyId = unit.slice(0, POLICY_LENGTH);
+        const assetName = unit.slice(POLICY_LENGTH);
+        const assetNameAscii = getAssetName(assetName);
+        const coint = Number(quantity);
+        const assetWithPolicyExisting = acc.find(
+          (asset) => asset.policyId === policyId,
+        );
+        if (assetWithPolicyExisting) {
+          assetWithPolicyExisting.assetsPolicy.push({
+            assetName,
+            assetNameAscii,
+            coint,
+          });
+        } else {
+          acc.push({
+            policyId,
+            assetsPolicy: [{ assetName, assetNameAscii, coint }],
+          });
+        }
+        return acc;
+      }, [] as IAssets[]),
       datum,
       scriptRef: input.reference_script_hash || undefined,
     };
@@ -84,32 +108,6 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       apiKey,
     });
 
-    const outputs: IUtxo[] = res.outputs.map((output) => {
-      const datum = {
-        hash: output.datum?.hash || "",
-        bytes: output.datum?.bytes || "",
-        json: JSON.parse(output.datum?.json || "null"),
-      };
-      return {
-        ...output,
-        index: Number(output.index),
-        assets: output.assets.map((asset) => ({
-          ...asset,
-          amount: Number(asset.quantity),
-        })),
-        datum:
-          isEmpty(datum.hash) && isEmpty(datum.bytes) && datum.json === null
-            ? undefined
-            : datum,
-        scriptRef: output.scriptRef,
-      };
-    });
-
-    const mints: IAsset[] = res.mints.map((mint) => ({
-      ...mint,
-      amount: Number(mint.quantity),
-    }));
-
     const txInfo = await fetch(getTransactionURL(network, res.txHash), {
       headers: { project_id: apiKey },
       method: "GET",
@@ -119,21 +117,13 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
     });
 
     return Response.json({
-      txHash: res.txHash,
-      fee: res.fee,
+      ...res,
       inputs,
+      referenceInputs,
       blockHash: txInfo.block,
       blockTxIndex: txInfo.index,
       blockHeight: txInfo.block_height,
       blockAbsoluteSlot: txInfo.slot,
-      referenceInputs,
-      outputs,
-      mints,
-      scriptsSuccessful: res.scriptsSuccessful,
-      metadata: res.metadata,
-      withdrawals: res.withdrawals,
-      certificates: res.certificates,
-      size: res.size,
     });
   } catch (error) {
     console.error(error);

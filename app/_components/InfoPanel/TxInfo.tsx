@@ -7,10 +7,10 @@ import {
 } from "@nextui-org/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { type ChangeEvent, useContext, useEffect, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Button, Input } from "~/app/_components";
-import { GraphicalContext } from "~/app/_contexts";
+import { useGraphical } from "~/app/_contexts";
 import {
   JSONBIG,
   TX_URL_PARAM,
@@ -25,7 +25,7 @@ import FullScreen from "/public/fullscreen.svg";
 
 export const TxInfo = () => {
   const [name, setName] = useState("");
-  const { transactions, setTransactionBox } = useContext(GraphicalContext)!;
+  const { transactions, setTransactionBox } = useGraphical()!;
   const searchParams = useSearchParams();
   const selectedTxHash = searchParams.get(TX_URL_PARAM);
   const selectedTx = getTransaction(transactions)(selectedTxHash || "");
@@ -59,12 +59,9 @@ export const TxInfo = () => {
   } = selectedTx;
 
   const totalOutput: bigint = outputs.reduce((acc, output) => {
-    const lovelace = output.assets.find(
-      (asset) => asset.assetName === "lovelace",
-    );
-    if (!lovelace) return acc;
+    const lovelace = output.lovelace;
 
-    return acc + BigInt(lovelace.amount);
+    return acc + BigInt(lovelace);
   }, BigInt(0));
 
   const msg = (() => {
@@ -102,7 +99,7 @@ export const TxInfo = () => {
     !withdrawals?.length ? "8" : "",
     !msg ? "9" : "",
     !certificates?.length ? "10" : "",
-    !mint.length ? "11" : "",
+    !mints.length ? "11" : "",
   ].filter(Boolean);
 
   return (
@@ -121,7 +118,8 @@ export const TxInfo = () => {
       <AccordionItem key="2" title="Fee">
         <div className="flex flex-col gap-2">
           <AssetCard
-            asset={{ assetName: "lovelace", policyId: "", amount: Number(fee) }}
+            asset={{ assetName: "lovelace", coint: Number(fee) }}
+            policyId=""
           />
         </div>
       </AccordionItem>
@@ -166,7 +164,8 @@ export const TxInfo = () => {
       <AccordionItem key="6" title="Total Output Sum">
         <div className="flex flex-col gap-2">
           <AssetCard
-            asset={{ assetName: "lovelace", policyId: "", amount: totalOutput }}
+            asset={{ assetName: "lovelace", coint: Number(totalOutput) }}
+            policyId=""
           />
         </div>
       </AccordionItem>
@@ -239,9 +238,16 @@ export const TxInfo = () => {
       </AccordionItem>
       <AccordionItem key="11" title="Minting & Burning">
         <div className="flex flex-col gap-2">
-          {mints.map((asset, index) => (
-            <AssetCard key={index} asset={asset} isMintBurn />
-          ))}
+          {mints.map(({ policyId, assetsPolicy }, index) =>
+            assetsPolicy.map((asset) => (
+              <AssetCard
+                key={index}
+                asset={asset}
+                policyId={policyId}
+                isMintBurn
+              />
+            )),
+          )}
         </div>
       </AccordionItem>
       <AccordionItem key="12" title="Scripts Successful">

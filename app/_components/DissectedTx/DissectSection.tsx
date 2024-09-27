@@ -1,4 +1,5 @@
 import type { IGraphicalTransaction } from "~/app/_interfaces";
+import { JSONBIG } from "~/app/_utils";
 import { EmptyBlock, P, PropBlock } from "../Constructors";
 import TOPICS from "./topics";
 
@@ -11,7 +12,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     inputs,
     outputs,
     // mints,
-    // scriptsSuccessful,
+    scriptsSuccessful,
     // blockHash,
     // blockTxIndex,
     // blockHeight,
@@ -25,7 +26,9 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     <div className="flex h-screen flex-col gap-0 overflow-auto p-10 pt-32">
       <h4 className="text-3xl">Valid CBOR data</h4>
       <P>Your HEX bytes were successfully decoded using the CBOR standard.</P>
-      <PropBlock title="Tx Hash" value={txHash} description={TOPICS.hash} />
+      {scriptsSuccessful && (
+        <PropBlock title="Tx Hash" value={txHash} description={TOPICS.hash} />
+      )}
       <PropBlock title="Fee" value={fee.toString()} description={TOPICS.fee} />
       <PropBlock title="Start" value={validityStart?.toString()} />
       <PropBlock
@@ -126,11 +129,11 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
               description={i == 0 ? TOPICS.inputs_hash : ""}
               value={label.toString()}
             />
-            {/* <PropBlock
+            <PropBlock
               title="Metadatum Value"
               description={i == 0 ? TOPICS.inputs_index : ""}
-              value={jsonMetadata}
-            /> */}
+              value={JSONBIG.stringify(jsonMetadata, null, 2)}
+            />
           </blockquote>
         ))}
       </blockquote>

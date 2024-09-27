@@ -4,7 +4,7 @@ import { createContext, useContext } from "react";
 import { useLocalStorage } from "../_hooks/useLocalStorage";
 import { NETWORK, OPTIONS } from "../_utils";
 
-export interface IUserConfigs {
+interface IUserConfigs {
   net: NETWORK;
   option: OPTIONS;
   query: string;
@@ -14,7 +14,7 @@ const LOCAL_STORAGE_KEYS = {
   USER_CONFIGS: "userConfigs",
 } as const;
 
-export const ConfigsContext = createContext({
+const ConfigsContext = createContext({
   configs: {} as IUserConfigs,
   updateConfigs: <T extends keyof IUserConfigs>(
     _configKey: T,

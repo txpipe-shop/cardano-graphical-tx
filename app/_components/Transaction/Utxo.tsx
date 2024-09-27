@@ -162,9 +162,13 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
 
   const text = `Address:
   ${trimString(utxo.address?.bech32 ?? "", 10)}\nAssets:
-  ${utxo.assets.reduce((acc, asset) => {
-    const assetName = getAssetName(asset.assetName);
-    return acc + `- ${assetName} ${asset.amount}\n  `;
+  - lovelace ${utxo.lovelace}
+  ${utxo.assets.reduce((accc, { assetsPolicy }) => {
+    const actual = assetsPolicy.reduce((acc, asset) => {
+      const assetName = getAssetName(asset.assetName);
+      return acc + `- ${assetName} ${asset.coint}\n  `;
+    }, "");
+    return accc + actual;
   }, "")}`;
   return (
     <>

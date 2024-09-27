@@ -1,7 +1,7 @@
 import type Konva from "konva";
 import type { Vector2d } from "konva/lib/types";
 import type {
-  IAsset,
+  IAssets,
   ICertificate,
   IDatum,
   IMetadata,
@@ -27,7 +27,7 @@ export interface IGraphicalTransaction {
   consumedLines: (Konva.Line | null)[];
   outputs: IGraphicalUtxo[];
   producedLines: (Konva.Line | null)[];
-  mints: IAsset[];
+  mints: IAssets[];
   scriptsSuccessful: boolean;
   pos: Vector2d;
   blockHash?: string;
@@ -47,10 +47,12 @@ export interface IGraphicalTransaction {
 export interface IGraphicalUtxo {
   txHash: string;
   index: number;
+  bytes: string;
   address?: Address;
-  assets: Array<IAsset>;
+  lovelace: number;
   datum: IDatum | undefined;
   scriptRef?: string;
+  assets: Array<IAssets>;
   isReferenceInput: boolean;
   redeemers?: RedeemerSpend;
   pos: Vector2d;

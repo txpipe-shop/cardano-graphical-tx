@@ -1,12 +1,11 @@
 use std::collections::HashMap;
 
 use crate::{
-  compute_datum_hashmap, Assets, CborResponse, Certificates, Datum as DatumInfo, InputUtxo,
-  MetadataItem, OutputUtxo, WithdrawalItem,
+  Asset, Assets, CborResponse, Certificates, Datum as DatumInfo, Datum, InputUtxo, MetadataItem,
+  OutputUtxo, WithdrawalItem,
 };
 
 use pallas::{
-  codec::utils::KeepRaw,
   crypto::hash::Hasher,
   ledger::{
     primitives::{conway::PlutusData, ToCanonicalJson},
@@ -14,10 +13,7 @@ use pallas::{
   },
 };
 use pallas_codec::utils::KeyValuePairs;
-use pallas_primitives::{
-  conway::{DatumHash, Metadatum, PseudoDatumOption},
-  Fragment,
-};
+use pallas_primitives::{conway::Metadatum, Fragment};
 
 fn metadatum_to_string(metadatum: &Metadatum) -> String {
   match metadatum {
@@ -58,6 +54,82 @@ fn map_to_hashmap(map: &KeyValuePairs<Metadatum, Metadatum>) -> HashMap<String, 
     .collect()
 }
 
+fn get_outputs(tx: &MultiEraTx<'_>) -> Vec<OutputUtxo> {
+  tx.outputs()
+    .iter()
+    .enumerate()
+    .map(|(index, o)| OutputUtxo {
+      tx_hash: tx.hash().to_string(),
+      index: index as i64,
+      bytes: hex::encode(o.encode()),
+      address: o.address().unwrap().to_string(),
+      lovelace: o.lovelace_amount() as i64,
+      datum: o.datum().map(|x| match x {
+        pallas::ledger::primitives::conway::PseudoDatumOption::Hash(x) => Datum {
+          hash: x.to_string(),
+          bytes: "".to_string(),
+          json: "".to_string(),
+        },
+        pallas::ledger::primitives::conway::PseudoDatumOption::Data(x) => Datum {
+          hash: x.compute_hash().to_string(),
+          bytes: hex::encode(x.raw_cbor()),
+          json: serde_json::to_string(&x.to_json()).unwrap(),
+        },
+      }),
+      script_ref: o
+        .script_ref()
+        .map(|x| x.encode_fragment().ok().map(hex::encode))
+        .flatten(),
+      assets: o
+        .non_ada_assets()
+        .into_iter()
+        .map(|x| {
+          let policy_id = x.policy().to_string();
+          let assets_policy = x
+            .assets()
+            .iter()
+            .map(|asset| {
+              let asset_name = hex::encode(asset.name());
+              let asset_name_ascii = asset.to_ascii_name();
+              let coint = match asset.output_coin() {
+                Some(c) => Some(c as i64),
+                None => None,
+              };
+              Asset {
+                asset_name,
+                asset_name_ascii,
+                coint,
+              }
+            })
+            .collect();
+          Assets {
+            policy_id,
+            assets_policy,
+          }
+        })
+        .collect(),
+    })
+    .collect()
+}
+
+fn get_mints(tx: &MultiEraTx<'_>) -> Vec<Assets> {
+  tx.mints()
+    .into_iter()
+    .map(|x| Assets {
+      policy_id: x.policy().to_string(),
+      assets_policy: x
+        .assets()
+        .into_iter()
+        .map(|asset| Asset {
+          asset_name: hex::encode(asset.name()),
+          asset_name_ascii: asset.to_ascii_name(),
+          coint: asset.mint_coin(),
+        })
+        .collect(),
+    })
+    .collect()
+}
+
 pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
   let out = CborResponse::new().try_build(|| {
     let cbor = hex::decode(raw)?;
@@ -81,89 +153,9 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
       })
       .collect();
 
-    let mints: Vec<Assets> = tx
-      .mints()
-      .iter()
-      .map(|mint| {
-        let policy = mint.policy().to_string();
-        let asset_name = mint
-          .assets()
-          .iter()
-          .map(|x| hex::encode(x.name()))
-          .collect();
-        let quantity = mint
-          .assets()
-          .iter()
-          .map(|x| {
-            x.mint_coin()
-              .map_or_else(|| "None".to_string(), |value| value.to_string())
-          })
-          .collect();
+    let mints: Vec<Assets> = get_mints(&tx);
 
-        Assets {
-          policy_id: policy,
-          asset_name,
-          quantity,
-        }
-      })
-      .collect();
-
-    let tx_copy = tx.clone();
-    let datum_hashmap = compute_datum_hashmap(tx_copy);
-
-    let outputs: Vec<OutputUtxo> = tx
-      .outputs()
-      .iter()
-      .enumerate()
-      .map(|(index, o)| {
-        let lovelace = o.lovelace_amount();
-        let other_assets: Vec<Assets> = o
-          .non_ada_assets()
-          .iter()
-          .flat_map(|x| {
-            let policy = x.policy().to_string();
-            let parsed_assets: Vec<Assets> = x
-              .assets()
-              .iter()
-              .map(|asset| {
-                let asset_name = hex::encode(asset.name());
-                let quantity = match asset.output_coin() {
-                  Some(value) => value.to_string(),
-                  None => String::from("None"),
-                };
-                Assets {
-                  policy_id: policy.clone(),
-                  asset_name,
-                  quantity,
-                }
-              })
-              .collect();
-            parsed_assets
-          })
-          .collect();
-
-        let mut assets: Vec<Assets> = other_assets;
-        assets.push(Assets {
-          policy_id: "".to_string(),
-          asset_name: "lovelace".to_string(),
-          quantity: lovelace.to_string(),
-        });
-
-        let datum_info = get_datum_info(&o.datum(), &datum_hashmap);
-        OutputUtxo {
-          tx_hash: tx.hash().to_string(),
-          index: index.to_string(),
-          address: o.address().unwrap().to_string(),
-          assets,
-          datum: datum_info,
-          script_ref: o
-            .script_ref()
-            .map(|x| x.encode_fragment().ok().map(hex::encode))
-            .flatten(),
-        }
-      })
-      .collect();
-
+    let outputs: Vec<OutputUtxo> = get_outputs(&tx);
     let metadata: Vec<MetadataItem> = match tx.metadata().as_alonzo() {
       Some(metadata) => metadata
         .iter()
@@ -238,23 +230,6 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
   });
 
   Ok(out)
-}
-
-fn get_datum_info(
-  datum: &Option<PseudoDatumOption<KeepRaw<'_, PlutusData>>>,
-  datum_hashmap: &HashMap<DatumHash, DatumInfo>,
-) -> Option<DatumInfo> {
-  match datum {
-    Some(pseudo_hash) => match pseudo_hash {
-      PseudoDatumOption::Hash(hash) => Some(datum_hashmap.get(&hash).unwrap().clone()),
-      PseudoDatumOption::Data(hash) => Some(DatumInfo {
-        hash: hash.compute_hash().to_string(),
-        json: hash.to_json().to_string(),
-        bytes: hex::encode(hash.raw_cbor()),
-      }),
-    },
-    None => None,
-  }
 }
 
 pub fn parse_datum_info(raw: String) -> Option<DatumInfo> {

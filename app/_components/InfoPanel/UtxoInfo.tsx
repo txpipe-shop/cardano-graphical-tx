@@ -8,8 +8,7 @@ import {
 } from "@nextui-org/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useContext } from "react";
-import { GraphicalContext } from "~/app/_contexts";
+import { useGraphical } from "~/app/_contexts";
 import {
   JSONBIG,
   UTXO_URL_PARAM,
@@ -23,7 +22,7 @@ import CopyIcon from "/public/copy.svg";
 import FullScreen from "/public/fullscreen.svg";
 
 export const UtxoInfo = () => {
-  const { transactions } = useContext(GraphicalContext);
+  const { transactions } = useGraphical();
   const searchParams = useSearchParams();
   const {
     isOpen: isOpenDatum,
@@ -47,7 +46,7 @@ export const UtxoInfo = () => {
 
   const disabledKeys = [
     !address ? "1" : "",
-    !assets.length ? "2" : "",
+    !assets.length && selectedUtxo.lovelace <= 0 ? "2" : "",
     !datum ? "4" : "",
     !scriptRef ? "5" : "",
     !redeemers ? "6" : "",
@@ -119,9 +118,18 @@ export const UtxoInfo = () => {
 
         <AccordionItem key="2" title="Assets">
           <div className="flex flex-col gap-2">
-            {assets.map((asset, index) => (
-              <AssetCard key={index} asset={asset} />
-            ))}
+            <AssetCard
+              asset={{
+                assetName: "lovelace",
+                coint: selectedUtxo.lovelace,
+              }}
+              policyId={""}
+            />
+            {assets.map(({ policyId, assetsPolicy }, index) =>
+              assetsPolicy.map((asset) => (
+                <AssetCard key={index} asset={asset} policyId={policyId} />
+              )),
+            )}
           </div>
         </AccordionItem>
 

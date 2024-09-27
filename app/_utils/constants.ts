@@ -11,6 +11,8 @@ export const API_ROUTES = {
   HASH: "api/hash",
 };
 
+export const defaultPosition = { x: 0, y: 0 };
+
 export const TX_WIDTH = 125;
 export const TX_HEIGHT = 250;
 export const POINT_SIZE = 10;
