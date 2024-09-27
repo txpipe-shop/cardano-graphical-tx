@@ -62,6 +62,9 @@ export interface Certificates {
 export interface CborResponse {
   txHash: string
   fee?: string
+  era: string
+  validityStart?: string
+  ttl?: string
   inputs: Array<InputUtxo>
   referenceInputs: Array<InputUtxo>
   outputs: Array<OutputUtxo>

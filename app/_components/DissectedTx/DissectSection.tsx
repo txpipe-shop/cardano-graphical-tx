@@ -11,15 +11,15 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     ttl,
     inputs,
     outputs,
-    // mints,
+    mints,
     scriptsSuccessful,
+    metadata,
     // blockHash,
     // blockTxIndex,
     // blockHeight,
     // blockAbsoluteSlot,
     // withdrawals,
     // redeemers,
-    metadata,
     // size,
   } = tx;
   return (
@@ -37,7 +37,9 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         description={TOPICS.ttl}
       />
       <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-7">
-        <h4 className="text-3xl">Transaction Inputs</h4>
+        <h4 className="text-3xl font-bold text-blue-500 underline decoration-solid underline-offset-2">
+          Transaction Inputs
+        </h4>
         <P>{TOPICS.inputs}</P>
         {inputs
           .filter((i) => !i.isReferenceInput)
@@ -46,7 +48,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
               className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
               key={i}
             >
-              <h4 className="text-3xl">Input</h4>
+              <h4 className="text-3xl text-blue-500">Input</h4>
               <PropBlock
                 title="UtxoRef Hash"
                 description={i == 0 ? TOPICS.inputs_hash : ""}
@@ -61,30 +63,71 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           ))}
       </blockquote>
       <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-7">
-        <h4 className="text-3xl">Transaction Outputs</h4>
+        <h4 className="text-3xl font-bold text-red-500 underline decoration-solid underline-offset-2">
+          Transaction Outputs
+        </h4>
         <P>{TOPICS.outputs}</P>
-        {outputs.map(({ txHash, index, address }, i) => (
-          // TODO: Add assets, datum and reedemers
+        {outputs.map(({ txHash, index, address, lovelace, assets }, i) => (
           <blockquote
             className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
             key={i}
           >
-            <h4 className="text-3xl">Output</h4>
+            <h4 className="text-3xl text-red-500">Output</h4>
             <PropBlock title="Tx Hash" value={txHash} />
             <PropBlock title="Output Index" value={index.toString()} />
             <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-7">
               <h4 className="text-3xl">Address</h4>
+              <PropBlock
+                title="Bech32"
+                value={address?.bech32}
+                description={TOPICS.outputs_address}
+              />
               <PropBlock title="Header Type" value={address?.headerType} />
               <PropBlock title="Kind" value={address?.kind} />
               <PropBlock title="Network Type" value={address?.netType} />
-              <PropBlock title="Bech32" value={address?.bech32} />
               <PropBlock title="Payment" value={address?.payment} />
+            </blockquote>
+            <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-7">
+              <h4 className="text-3xl">Assets</h4>
+              <PropBlock
+                title="Lovelace"
+                value={lovelace.toString()}
+                description={TOPICS.outputs_lovelace}
+              />
+              {assets.map(({ policyId, assetsPolicy }, i) => (
+                <blockquote
+                  className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
+                  key={i}
+                >
+                  <h4 className="text-3xl">Policy Id</h4>
+                  <PropBlock title="Policy Id" value={policyId} />
+                  {assetsPolicy.map(
+                    ({ assetName, assetNameAscii, coint }, i) => (
+                      <blockquote
+                        className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
+                        key={i}
+                      >
+                        <h4 className="text-2xl">Asset</h4>
+                        <PropBlock title="Asset Name" value={assetName} />
+                        {assetNameAscii && (
+                          <PropBlock title="Asset Name" value={assetName} />
+                        )}
+                        {coint && (
+                          <PropBlock title="Coint" value={coint.toString()} />
+                        )}
+                      </blockquote>
+                    ),
+                  )}
+                </blockquote>
+              ))}
             </blockquote>
           </blockquote>
         ))}
       </blockquote>
       <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-7">
-        <h4 className="text-3xl">Reference Inputs</h4>
+        <h4 className="text-3xl font-bold text-blue-500 underline decoration-dashed underline-offset-2">
+          Reference Inputs
+        </h4>
         <P>{TOPICS.reference_inputs}</P>
         {inputs
           .filter((i) => i.isReferenceInput)
@@ -113,7 +156,44 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
       <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-7">
         <h4 className="text-3xl">Transaction Mints</h4>
         <P>{TOPICS.mints}</P>
-        {/* TODO: Complete when assets interface is done */}
+        {mints.map(({ policyId, assetsPolicy }, i) => {
+          const mint = assetsPolicy.find((a) => a.coint && a.coint > 0);
+          return (
+            <blockquote
+              className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
+              key={i}
+            >
+              <h4 className="text-3xl">Policy Id</h4>
+              <PropBlock
+                title="Policy Id"
+                value={policyId}
+                color={
+                  mint
+                    ? "bg-green-200 border-green-700"
+                    : "bg-red-200 border-red-700"
+                }
+              />
+              {assetsPolicy.map(({ assetName, assetNameAscii, coint }, i) => (
+                <blockquote
+                  className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
+                  key={i}
+                >
+                  <h4 className="text-2xl">Asset</h4>
+                  <PropBlock title="Asset Name" value={assetName} />
+                  {assetNameAscii && (
+                    <PropBlock title="Asset Name" value={assetName} />
+                  )}
+                  {coint && (
+                    <PropBlock title="Coint" value={coint.toString()} />
+                  )}
+                </blockquote>
+              ))}
+            </blockquote>
+          );
+        })}
+        {mints.length === 0 && (
+          <PropBlock title="" value="No minting or burning" />
+        )}
       </blockquote>
       <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-7">
         <h4 className="text-3xl">Transaction Metadata</h4>

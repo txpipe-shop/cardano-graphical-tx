@@ -52,6 +52,8 @@ export const TxInfo = () => {
     blockTxIndex,
     blockHeight,
     blockAbsoluteSlot,
+    validityStart,
+    ttl,
     withdrawals,
     metadata,
     certificates,
@@ -96,10 +98,10 @@ export const TxInfo = () => {
   };
 
   const disabledKeys = [
-    !withdrawals?.length ? "8" : "",
-    !msg ? "9" : "",
-    !certificates?.length ? "10" : "",
-    !mints.length ? "11" : "",
+    !withdrawals?.length ? "10" : "",
+    !msg ? "11" : "",
+    !certificates?.length ? "12" : "",
+    !mints.length ? "13" : "",
   ].filter(Boolean);
 
   return (
@@ -156,12 +158,22 @@ export const TxInfo = () => {
           {size ?? "Unknown"}
         </Card>
       </AccordionItem>
-      <AccordionItem key="5" title="Outputs Count">
+      <AccordionItem key="5" title="Invalid Before (Start)">
+        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+          {validityStart ?? "Unknown"}
+        </Card>
+      </AccordionItem>
+      <AccordionItem key="6" title="Invalid Hereafter (TTL)">
+        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+          {ttl ?? "Unknown"}
+        </Card>
+      </AccordionItem>
+      <AccordionItem key="7" title="Outputs Count">
         <Card className="fl ex-row flex justify-between bg-content2 px-5 py-2 shadow-none">
           {outputs.length}
         </Card>
       </AccordionItem>
-      <AccordionItem key="6" title="Total Output Sum">
+      <AccordionItem key="8" title="Total Output Sum">
         <div className="flex flex-col gap-2">
           <AssetCard
             asset={{ assetName: "lovelace", coint: Number(totalOutput) }}
@@ -169,12 +181,12 @@ export const TxInfo = () => {
           />
         </div>
       </AccordionItem>
-      <AccordionItem key="7" title="Inputs Count">
+      <AccordionItem key="9" title="Inputs Count">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {inputs.length}
         </Card>
       </AccordionItem>
-      <AccordionItem key="8" title="Withdrawals">
+      <AccordionItem key="10" title="Withdrawals">
         <div className="flex flex-col gap-2">
           {withdrawals?.map((withdrawal, index) => (
             <Card
@@ -201,12 +213,12 @@ export const TxInfo = () => {
           ))}
         </div>
       </AccordionItem>
-      <AccordionItem key="9" title="Metadata">
+      <AccordionItem key="11" title="Metadata">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {msg}
         </Card>
       </AccordionItem>
-      <AccordionItem key="10" title="Certificates">
+      <AccordionItem key="12" title="Certificates">
         <JSONModal
           isOpen={isOpenCertificate}
           onOpenChange={onOpenCertificateChange}
@@ -236,7 +248,7 @@ export const TxInfo = () => {
           </Card>
         )}
       </AccordionItem>
-      <AccordionItem key="11" title="Minting & Burning">
+      <AccordionItem key="13" title="Minting & Burning">
         <div className="flex flex-col gap-2">
           {mints.map(({ policyId, assetsPolicy }, index) =>
             assetsPolicy.map((asset) => (
@@ -250,14 +262,14 @@ export const TxInfo = () => {
           )}
         </div>
       </AccordionItem>
-      <AccordionItem key="12" title="Scripts Successful">
+      <AccordionItem key="14" title="Scripts Successful">
         <div className="flex flex-col gap-2">
           <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
             {scriptsSuccessful ? "True" : "False"}
           </Card>
         </div>
       </AccordionItem>
-      <AccordionItem key="13" title="Alias" className="m-0">
+      <AccordionItem key="15" title="Alias" className="m-0">
         <form onSubmit={handleSave} className="flex justify-around">
           <Input
             inputSize="small"

@@ -78,6 +78,9 @@ pub struct Certificates {
 pub struct CborResponse {
   pub tx_hash: String,
   pub fee: Option<String>,
+  pub era: String,
+  pub validity_start: Option<String>,
+  pub ttl: Option<String>,
   pub inputs: Vec<InputUtxo>,
   pub reference_inputs: Vec<InputUtxo>,
   pub outputs: Vec<OutputUtxo>,
@@ -109,6 +112,9 @@ impl CborResponse {
     Self {
       tx_hash: tx.hash().to_string(),
       fee: tx.fee().map(|x| x.to_string()),
+      era: tx.era().to_string(),
+      validity_start: tx.validity_start().map(|v| v.to_string()),
+      ttl: tx.ttl().map(|v| v.to_string()),
       inputs,
       reference_inputs,
       outputs,
