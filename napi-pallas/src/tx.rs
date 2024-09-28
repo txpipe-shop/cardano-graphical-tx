@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use crate::{
-  Asset, Assets, CborResponse, Certificates, Datum as DatumInfo, Datum, InputUtxo, MetadataItem,
-  OutputUtxo, WithdrawalItem,
+  Asset, Assets, CborResponse, Certificates, Collateral, Datum, Input, Metadata, Utxo, Withdrawal,
+  Witness, Witnesses,
 };
 
 use pallas::{
@@ -54,11 +54,11 @@ fn map_to_hashmap(map: &KeyValuePairs<Metadatum, Metadatum>) -> HashMap<String, 
     .collect()
 }
 
-fn get_outputs(tx: &MultiEraTx<'_>) -> Vec<OutputUtxo> {
+fn get_outputs(tx: &MultiEraTx<'_>) -> Vec<Utxo> {
   tx.outputs()
     .iter()
     .enumerate()
-    .map(|(index, o)| OutputUtxo {
+    .map(|(index, o)| Utxo {
       tx_hash: tx.hash().to_string(),
       index: index as i64,
       bytes: hex::encode(o.encode()),
@@ -91,10 +91,7 @@ fn get_outputs(tx: &MultiEraTx<'_>) -> Vec<OutputUtxo> {
             .map(|asset| {
               let asset_name = hex::encode(asset.name());
               let asset_name_ascii = asset.to_ascii_name();
-              let coint = match asset.output_coin() {
-                Some(c) => Some(c as i64),
-                None => None,
-              };
+              let coint = asset.output_coin().map(|x| x as i64);
               Asset {
                 asset_name,
                 asset_name_ascii,
@@ -123,11 +120,63 @@ fn get_mints(tx: &MultiEraTx<'_>) -> Vec<Assets> {
         .map(|asset| Asset {
           asset_name: hex::encode(asset.name()),
           asset_name_ascii: asset.to_ascii_name(),
-          coint: asset.mint_coin(),
+          coint: asset.mint_coin().map(|x| x as i64),
         })
         .collect(),
     })
     .collect()
+}
+
+fn get_collaterals(tx: &MultiEraTx<'_>) -> Collateral {
+  Collateral {
+    total: tx.total_collateral().map(|x| x.to_string()),
+    collateral_return: tx
+      .collateral()
+      .iter()
+      .map(|i| Input {
+        tx_hash: i.hash().to_string(),
+        index: i.index() as i64,
+      })
+      .collect(),
+  }
+}
+
+fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
+  Witnesses {
+    vkey_witnesses: tx
+      .vkey_witnesses()
+      .iter()
+      .map(|wit| Witness {
+        key: hex::encode(wit.vkey.as_slice()),
+        hash: hex::encode(Hasher::<224>::hash(wit.vkey.as_slice())),
+        signature: hex::encode(wit.signature.as_slice()),
+      })
+      .collect(),
+    plutus_data: tx
+      .plutus_data()
+      .iter()
+      .map(|x| Datum {
+        hash: String::from_utf8_lossy(x.raw_cbor()).to_string(),
+        bytes: hex::encode(x.compute_hash()),
+        json: x.to_json().to_string(),
+      })
+      .collect(),
+    plutus_v1_scripts: tx
+      .plutus_v1_scripts()
+      .iter()
+      .map(|x| hex::encode(x))
+      .collect(),
+    plutus_v2_scripts: tx
+      .plutus_v2_scripts()
+      .iter()
+      .map(|x| hex::encode(x))
+      .collect(),
+    plutus_v3_scripts: tx
+      .plutus_v3_scripts()
+      .iter()
+      .map(|x| hex::encode(x))
+      .collect(),
+  }
 }
 
 pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
@@ -135,28 +184,28 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
     let cbor = hex::decode(raw)?;
     let tx = MultiEraTx::decode(&cbor)?;
 
-    let inputs: Vec<InputUtxo> = tx
+    let inputs: Vec<Input> = tx
       .inputs()
       .iter()
-      .map(|i| InputUtxo {
+      .map(|i| Input {
         tx_hash: i.hash().to_string(),
-        index: i.index().to_string(),
+        index: i.index() as i64,
       })
       .collect();
 
-    let reference_inputs: Vec<InputUtxo> = tx
+    let reference_inputs: Vec<Input> = tx
       .reference_inputs()
       .iter()
-      .map(|i| InputUtxo {
+      .map(|i| Input {
         tx_hash: i.hash().to_string(),
-        index: i.index().to_string(),
+        index: i.index() as i64,
       })
       .collect();
 
     let mints: Vec<Assets> = get_mints(&tx);
 
-    let outputs: Vec<OutputUtxo> = get_outputs(&tx);
-    let metadata: Vec<MetadataItem> = match tx.metadata().as_alonzo() {
+    let outputs: Vec<Utxo> = get_outputs(&tx);
+    let metadata: Vec<Metadata> = match tx.metadata().as_alonzo() {
       Some(metadata) => metadata
         .iter()
         .map(|(k, v)| {
@@ -173,7 +222,7 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
             }
           };
 
-          MetadataItem {
+          Metadata {
             label: label_str,
             json_metadata,
           }
@@ -182,21 +231,21 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
       None => vec![],
     };
 
-    let withdrawals: Vec<WithdrawalItem> = match tx.withdrawals().as_alonzo() {
+    let withdrawals: Vec<Withdrawal> = match tx.withdrawals().as_alonzo() {
       Some(withdrawals) => withdrawals
         .iter()
         .map(|(k, v)| {
           // TODO - parse address into bech32
-          WithdrawalItem {
+          Withdrawal {
             raw_address: k.to_string(),
-            amount: v.to_string(),
+            amount: v.to_owned() as i64,
           }
         })
         .collect(),
       None => vec![],
     };
 
-    let certs: Vec<Certificates> = tx
+    let certificates: Vec<Certificates> = tx
       .certs()
       .iter()
       .map(|cert| match cert {
@@ -215,6 +264,10 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
       })
       .collect();
 
+    let collateral = get_collaterals(&tx);
+
+    let witnesses = get_witnesses(&tx);
+
     let parsed_cbor = CborResponse::new().with_cbor_attr(
       tx,
       inputs,
@@ -223,7 +276,9 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
       mints,
       metadata,
       withdrawals,
-      certs,
+      certificates,
+      collateral,
+      witnesses,
     );
 
     Ok(parsed_cbor)
@@ -232,11 +287,11 @@ pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
   Ok(out)
 }
 
-pub fn parse_datum_info(raw: String) -> Option<DatumInfo> {
+pub fn parse_datum_info(raw: String) -> Option<Datum> {
   let cbor = hex::decode(raw.clone()).ok()?;
   let data = PlutusData::decode_fragment(&cbor).ok()?;
 
-  Some(DatumInfo {
+  Some(Datum {
     hash: Hasher::<256>::hash(&cbor).to_string(),
     json: data.to_json().to_string(),
     bytes: raw.clone(),

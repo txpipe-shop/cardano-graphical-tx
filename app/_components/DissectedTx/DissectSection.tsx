@@ -216,6 +216,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             />
           </blockquote>
         ))}
+        {metadata?.length === 0 && <EmptyBlock />}
       </blockquote>
     </div>
   );

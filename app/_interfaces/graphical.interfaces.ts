@@ -1,14 +1,13 @@
 import type Konva from "konva";
 import type { Vector2d } from "konva/lib/types";
 import type {
-  IAssets,
-  ICertificate,
-  IDatum,
-  IMetadata,
-  IWithdrawal,
-  Redeemers,
-  RedeemerSpend,
-} from ".";
+  Assets,
+  Certificates,
+  Datum,
+  Metadata,
+  Withdrawal,
+} from "~/napi-pallas";
+import type { Redeemers, RedeemerSpend } from ".";
 
 export interface TransactionsBox {
   transactions: IGraphicalTransaction[];
@@ -27,7 +26,7 @@ export interface IGraphicalTransaction {
   consumedLines: (Konva.Line | null)[];
   outputs: IGraphicalUtxo[];
   producedLines: (Konva.Line | null)[];
-  mints: IAssets[];
+  mints: Assets[];
   scriptsSuccessful: boolean;
   pos: Vector2d;
   blockHash?: string;
@@ -36,10 +35,10 @@ export interface IGraphicalTransaction {
   blockAbsoluteSlot?: number;
   validityStart?: number;
   ttl?: number;
-  withdrawals?: IWithdrawal[];
+  withdrawals?: Withdrawal[];
   redeemers?: Redeemers;
-  metadata?: IMetadata[];
-  certificates?: ICertificate[];
+  metadata?: Metadata[];
+  certificates?: Certificates[];
   size: number;
   alias: string;
 }
@@ -50,9 +49,9 @@ export interface IGraphicalUtxo {
   bytes: string;
   address?: Address;
   lovelace: number;
-  datum: IDatum | undefined;
+  datum: Datum | undefined;
   scriptRef?: string;
-  assets: Array<IAssets>;
+  assets: Assets[];
   isReferenceInput: boolean;
   redeemers?: RedeemerSpend;
   pos: Vector2d;

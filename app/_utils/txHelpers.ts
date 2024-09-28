@@ -1,5 +1,6 @@
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
+import type { Utxo } from "~/napi-pallas";
 import {
   POLICY_LENGTH,
   defaultPosition,
@@ -12,12 +13,11 @@ import type {
   IGraphicalTransaction,
   IGraphicalUtxo,
   ITransaction,
-  IUtxo,
   Redeemers,
   TransactionsBox,
 } from "../_interfaces";
 
-interface IGenerateUTXO extends IUtxo {
+interface IGenerateUTXO extends Utxo {
   redeemers?: Redeemers;
   transactionBox: TransactionsBox;
   position?: Vector2d;

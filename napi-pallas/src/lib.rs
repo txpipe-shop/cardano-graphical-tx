@@ -20,26 +20,6 @@ pub struct Datum {
 
 #[derive(Default)]
 #[napi(object)]
-pub struct OutputUtxo {
-  pub tx_hash: String,
-  pub index: i64,
-  pub bytes: String,
-  pub address: String,
-  pub lovelace: i64,
-  pub datum: Option<Datum>,
-  pub assets: Vec<Assets>,
-  pub script_ref: Option<String>,
-}
-
-#[derive(Default)]
-#[napi(object)]
-pub struct InputUtxo {
-  pub tx_hash: String,
-  pub index: String,
-}
-
-#[derive(Default)]
-#[napi(object)]
 pub struct Asset {
   pub asset_name: String,
   pub asset_name_ascii: Option<String>,
@@ -55,16 +35,36 @@ pub struct Assets {
 
 #[derive(Default)]
 #[napi(object)]
-pub struct MetadataItem {
+pub struct Utxo {
+  pub tx_hash: String,
+  pub index: i64,
+  pub bytes: String,
+  pub address: String,
+  pub lovelace: i64,
+  pub datum: Option<Datum>,
+  pub assets: Vec<Assets>,
+  pub script_ref: Option<String>,
+}
+
+#[derive(Default)]
+#[napi(object)]
+pub struct Input {
+  pub tx_hash: String,
+  pub index: i64,
+}
+
+#[derive(Default)]
+#[napi(object)]
+pub struct Metadata {
   pub label: String,
   pub json_metadata: HashMap<String, String>,
 }
 
 #[derive(Default)]
 #[napi(object)]
-pub struct WithdrawalItem {
+pub struct Withdrawal {
   pub raw_address: String,
-  pub amount: String,
+  pub amount: i64,
 }
 
 #[derive(Default)]
@@ -75,21 +75,63 @@ pub struct Certificates {
 
 #[derive(Default)]
 #[napi(object)]
+pub struct Collateral {
+  pub total: Option<String>,
+  pub collateral_return: Vec<Input>,
+}
+
+#[derive(Default)]
+#[napi(object)]
+pub struct Witness {
+  pub key: String,
+  pub hash: String,
+  pub signature: String,
+}
+
+#[derive(Default)]
+#[napi(object)]
+pub struct ExUnits {
+  pub mem: i64,
+  pub steps: u32,
+}
+
+#[derive(Default)]
+#[napi(object)]
+pub struct Redeemer {
+  pub tag: String,
+  pub data_json: String,
+  pub ex_units: ExUnits,
+}
+
+#[derive(Default)]
+#[napi(object)]
+pub struct Witnesses {
+  pub vkey_witnesses: Vec<Witness>,
+  pub plutus_data: Vec<Datum>,
+  pub plutus_v1_scripts: Vec<String>,
+  pub plutus_v2_scripts: Vec<String>,
+  pub plutus_v3_scripts: Vec<String>,
+}
+
+#[derive(Default)]
+#[napi(object)]
 pub struct CborResponse {
-  pub tx_hash: String,
-  pub fee: Option<String>,
   pub era: String,
-  pub validity_start: Option<String>,
-  pub ttl: Option<String>,
-  pub inputs: Vec<InputUtxo>,
-  pub reference_inputs: Vec<InputUtxo>,
-  pub outputs: Vec<OutputUtxo>,
-  pub mints: Vec<Assets>,
-  pub metadata: Vec<MetadataItem>,
-  pub withdrawals: Vec<WithdrawalItem>,
-  pub certificates: Vec<Certificates>,
-  pub size: String,
+  pub tx_hash: String,
   pub scripts_successful: bool,
+  pub fee: Option<i64>,
+  pub inputs: Vec<Input>,
+  pub reference_inputs: Vec<Input>,
+  pub outputs: Vec<Utxo>,
+  pub mints: Vec<Assets>,
+  pub validity_start: Option<i64>,
+  pub ttl: Option<i64>,
+  pub metadata: Vec<Metadata>,
+  pub withdrawals: Vec<Withdrawal>,
+  pub certificates: Vec<Certificates>,
+  pub collateral: Collateral,
+  pub witnesses: Witnesses,
+  pub size: i64,
   pub error: String,
 }
 
@@ -101,20 +143,22 @@ impl CborResponse {
   fn with_cbor_attr(
     self,
     tx: MultiEraTx<'_>,
-    inputs: Vec<InputUtxo>,
-    reference_inputs: Vec<InputUtxo>,
-    outputs: Vec<OutputUtxo>,
+    inputs: Vec<Input>,
+    reference_inputs: Vec<Input>,
+    outputs: Vec<Utxo>,
     mints: Vec<Assets>,
-    metadata: Vec<MetadataItem>,
-    withdrawals: Vec<WithdrawalItem>,
+    metadata: Vec<Metadata>,
+    withdrawals: Vec<Withdrawal>,
     certificates: Vec<Certificates>,
+    collateral: Collateral,
+    witnesses: Witnesses,
   ) -> Self {
     Self {
       tx_hash: tx.hash().to_string(),
-      fee: tx.fee().map(|x| x.to_string()),
+      fee: tx.fee().map(|x| x as i64),
       era: tx.era().to_string(),
-      validity_start: tx.validity_start().map(|v| v.to_string()),
-      ttl: tx.ttl().map(|v| v.to_string()),
+      validity_start: tx.validity_start().map(|v| v as i64),
+      ttl: tx.ttl().map(|v| v as i64),
       inputs,
       reference_inputs,
       outputs,
@@ -123,7 +167,9 @@ impl CborResponse {
       metadata,
       withdrawals,
       certificates,
-      size: tx.size().to_string(),
+      collateral,
+      witnesses,
+      size: tx.size() as i64,
       ..self
     }
   }

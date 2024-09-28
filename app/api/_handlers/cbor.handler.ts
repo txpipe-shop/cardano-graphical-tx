@@ -1,13 +1,18 @@
 import { StatusCodes } from "http-status-codes";
-import pallas, { napiParseDatumInfo, type CborResponse } from "napi-pallas";
-import type { IAssets, IUtxo } from "~/app/_interfaces";
+import pallas, {
+  napiParseDatumInfo,
+  type Assets,
+  type CborResponse,
+  type Input,
+  type Utxo,
+} from "napi-pallas";
 import {
-  POLICY_LENGTH,
   getApiKey,
   getAssetName,
   getTransactionURL,
   getUTxOsURL,
   isEmpty,
+  POLICY_LENGTH,
   type NETWORK,
 } from "~/app/_utils";
 import { BlockfrostUTxOSchema } from "~/app/_utils/schemas";
@@ -22,10 +27,10 @@ const inputsHandle = async ({
   network,
   apiKey,
 }: {
-  inputs: { txHash: string; index: string }[];
+  inputs: Input[];
   network: NETWORK;
   apiKey: string;
-}): Promise<IUtxo[]> => {
+}): Promise<Utxo[]> => {
   const inputPromises = inputs.map(async (input) => {
     const blockfrostUtxo = await fetch(getUTxOsURL(network, input.txHash), {
       headers: { project_id: apiKey },
@@ -83,7 +88,7 @@ const inputsHandle = async ({
           });
         }
         return acc;
-      }, [] as IAssets[]),
+      }, [] as Assets[]),
       datum,
       scriptRef: input.reference_script_hash || undefined,
     };

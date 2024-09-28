@@ -120,7 +120,7 @@ export const TxInfo = () => {
       <AccordionItem key="2" title="Fee">
         <div className="flex flex-col gap-2">
           <AssetCard
-            asset={{ assetName: "lovelace", coint: Number(fee) }}
+            asset={{ assetName: "lovelace", coint: fee }}
             policyId=""
           />
         </div>

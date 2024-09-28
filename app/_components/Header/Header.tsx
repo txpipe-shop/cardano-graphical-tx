@@ -42,7 +42,6 @@ export const Header = () => {
         setError,
         true,
       );
-      updateConfigs("query", cbor);
     } else {
       await setCBOR(
         configs.net,
@@ -52,8 +51,8 @@ export const Header = () => {
         setError,
         false,
       );
-      updateConfigs("query", raw);
     }
+    updateConfigs("query", raw);
     setLoading(false);
   }
   const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {
