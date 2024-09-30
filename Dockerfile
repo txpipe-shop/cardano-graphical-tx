@@ -1,37 +1,35 @@
-# Set up build arguments for Node version and port
-ARG NODE_VERSION=19.8.1
-ARG PORT=3000
+# Building phase
+# Change it so that it uses node 18
+FROM node:18-alpine as builder
+WORKDIR /app
+# Install cargo deps
+RUN apk add python3 curl gcc make musl-dev build-base cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
+# Install cargo
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+# Add cargo to path
+ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Use the specified Node version as the base image
-FROM node:${NODE_VERSION}
-
-# Install Rust, Cargo, and other dependencies
-RUN apt-get update && \
-    apt-get install -y curl build-essential && \
-    curl https://sh.rustup.rs -sSf | sh -s -- -y && \
-    curl -fsSL https://bun.sh/install | bash && \
-    echo 'export PATH="/root/.cargo/bin:/root/.bun/bin:$PATH"' >> ~/.bashrc
-
-# Source .bashrc to set the new PATH immediately
-RUN /bin/bash -c "source ~/.bashrc"
-
-# Make Cargo and Bun available in the PATH for subsequent commands
-ENV PATH="/root/.cargo/bin:/root/.bun/bin:${PATH}"
-
-# Set the environment variable for production
-COPY ${ENV_FILE} .
-
-# Copy all application files into the container
+# Copy repo
 COPY . .
 
-# Install Node.js dependencies
-RUN npm install
+# build and installs deps
+RUN yarn build:pallas
+RUN echo node --version
+RUN yarn install --immutable
+RUN yarn build
 
-# Run the build script
-RUN npm run build
+# Runner image
+FROM node:18-alpine
+WORKDIR /app
 
-# Expose the application port
-EXPOSE ${PORT}
 
-# Command to run the application (change to production start if needed)
-CMD ["npm", "run", "dev"]
+# Copy from builder image
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+
+
+EXPOSE 3000
+CMD ["yarn", "start"]
+

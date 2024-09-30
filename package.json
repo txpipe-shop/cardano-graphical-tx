@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "prisma generate && cd napi-pallas && yarn install && yarn build && cd ..  && bun install && next build ",
+    "build:pallas": "cd napi-pallas && yarn install --immutable && yarn build",
+    "build": "next build",
     "db:generate": "prisma migrate dev",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
@@ -32,7 +33,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^10.18.0",
     "http-status-codes": "^2.3.0",
-    "json-bigint": "https://github.com/sidorares/json-bigint",
+    "json-bigint": "sidorares/json-bigint#8208aa1",
     "konva": "^9.3.13",
     "napi-pallas": "./napi-pallas",
     "next": "latest",
@@ -69,5 +70,5 @@
   "ct3aMetadata": {
     "initVersion": "7.36.2"
   },
-  "packageManager": "npm@9.6.7"
+  "packageManager": "yarn@1.22.22"
 }
