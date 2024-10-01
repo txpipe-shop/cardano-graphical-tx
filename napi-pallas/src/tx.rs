@@ -156,8 +156,8 @@ fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
       .plutus_data()
       .iter()
       .map(|x| Datum {
-        hash: String::from_utf8_lossy(x.raw_cbor()).to_string(),
-        bytes: hex::encode(x.compute_hash()),
+        hash: x.compute_hash().to_string(),
+        bytes: hex::encode(x.raw_cbor()),
         json: x.to_json().to_string(),
       })
       .collect(),
