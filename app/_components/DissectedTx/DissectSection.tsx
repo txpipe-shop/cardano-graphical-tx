@@ -26,18 +26,16 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     <div className="flex h-screen flex-col gap-0 overflow-auto p-10 pt-32">
       <h4 className="text-3xl">Valid CBOR data</h4>
       <P>Your HEX bytes were successfully decoded using the CBOR standard.</P>
-      {scriptsSuccessful && (
-        <>
-          <PropBlock title="Tx Hash" value={txHash} description={TOPICS.hash} />
-          <PropBlock title="Block Hash" value={blockHash?.toString()} />
-          <PropBlock title="Block Index" value={blockTxIndex?.toString()} />
-          <PropBlock title="Block Height" value={blockHeight?.toString()} />
-          <PropBlock
-            title="Block Absolute Slot"
-            value={blockAbsoluteSlot?.toString()}
-          />
-        </>
-      )}
+      <div className={scriptsSuccessful ? "" : "hidden"}>
+        <PropBlock title="Tx Hash" value={txHash} description={TOPICS.hash} />
+        <PropBlock title="Block Hash" value={blockHash?.toString()} />
+        <PropBlock title="Block Index" value={blockTxIndex?.toString()} />
+        <PropBlock title="Block Height" value={blockHeight?.toString()} />
+        <PropBlock
+          title="Block Absolute Slot"
+          value={blockAbsoluteSlot?.toString()}
+        />
+      </div>
       <PropBlock title="Size" value={size.toString()} />
       <PropBlock title="Fee" value={fee.toString()} description={TOPICS.fee} />
 
