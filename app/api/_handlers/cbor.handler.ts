@@ -32,19 +32,31 @@ const inputsHandle = async ({
   apiKey: string;
 }): Promise<Utxo[]> => {
   const inputPromises = inputs.map(async (input) => {
-    const blockfrostUtxo = await fetch(getUTxOsURL(network, input.txHash), {
-      headers: { project_id: apiKey },
-      method: "GET",
-    }).then(async (res) => {
-      if (res.status !== StatusCodes.OK) throw res;
-      return await res.json();
-    });
-    const parsedUtxo = BlockfrostUTxOSchema.parse(blockfrostUtxo);
-    const utxo = parsedUtxo.outputs.find(
-      (utxo) => utxo.output_index === Number(input.index),
-    );
-    if (!utxo) throw Error("Input not found");
-    return { hash: input.txHash, ...utxo };
+    try {
+      const blockfrostUtxoRes = await fetch(
+        getUTxOsURL(network, input.txHash),
+        { headers: { project_id: apiKey }, method: "GET" },
+      );
+      if (blockfrostUtxoRes.status !== StatusCodes.OK) throw blockfrostUtxoRes;
+      const blockfrostUtxo = await blockfrostUtxoRes.json();
+      const parsedUtxo = BlockfrostUTxOSchema.parse(blockfrostUtxo);
+      const utxo = parsedUtxo.outputs.find(
+        (utxo) => utxo.output_index === Number(input.index),
+      );
+      if (!utxo) throw Error("Input not found");
+      return { hash: input.txHash, ...utxo };
+    } catch {
+      return {
+        hash: input.txHash,
+        output_index: input.index,
+        address: "",
+        amount: [],
+        data_hash: null,
+        inline_datum: null,
+        reference_script_hash: null,
+        collateral: false,
+      };
+    }
   });
   const inputResponses = await Promise.all(inputPromises);
   return inputResponses.map((input) => {
@@ -60,12 +72,14 @@ const inputsHandle = async ({
     return {
       txHash: input.hash,
       index: input.output_index,
-      // TODO: Look for bytes
       bytes: "",
       address: input.address,
-      lovelace: Number(
-        input.amount.find((asset) => asset.unit === "lovelace")!.quantity,
-      ),
+      lovelace:
+        input.amount.length > 0
+          ? Number(
+              input.amount.find((asset) => asset.unit === "lovelace")!.quantity,
+            )
+          : 0,
       assets: input.amount.reduce((acc, { unit, quantity }) => {
         if (unit == "lovelace") return acc;
         const policyId = unit.slice(0, POLICY_LENGTH);
@@ -75,18 +89,17 @@ const inputsHandle = async ({
         const assetWithPolicyExisting = acc.find(
           (asset) => asset.policyId === policyId,
         );
-        if (assetWithPolicyExisting) {
+        if (assetWithPolicyExisting)
           assetWithPolicyExisting.assetsPolicy.push({
             assetName,
             assetNameAscii,
             coint,
           });
-        } else {
+        else
           acc.push({
             policyId,
             assetsPolicy: [{ assetName, assetNameAscii, coint }],
           });
-        }
         return acc;
       }, [] as Assets[]),
       datum,
@@ -113,13 +126,17 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       apiKey,
     });
 
-    const txInfo = await fetch(getTransactionURL(network, res.txHash), {
+    const txInfoRes = await fetch(getTransactionURL(network, res.txHash), {
       headers: { project_id: apiKey },
       method: "GET",
-    }).then(async (res) => {
-      if (res.status !== StatusCodes.OK) throw res;
-      return await res.json();
     });
+    if (txInfoRes.status !== StatusCodes.OK)
+      return Response.json({
+        ...res,
+        inputs,
+        referenceInputs,
+      });
+    const txInfo = await txInfoRes.json();
 
     return Response.json({
       ...res,

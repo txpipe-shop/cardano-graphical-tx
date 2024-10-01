@@ -5,6 +5,7 @@ import type {
   Metadata,
   Utxo,
   Withdrawal,
+  Witnesses,
 } from "~/napi-pallas";
 
 export interface Redeemers {
@@ -32,8 +33,8 @@ interface Data {
 export interface ITransaction {
   era: string;
   txHash: string;
-  scriptsSuccessful: boolean;
   fee: number;
+  scriptsSuccessful: boolean;
   inputs: Utxo[];
   referenceInputs: Utxo[];
   outputs: Utxo[];
@@ -48,6 +49,7 @@ export interface ITransaction {
   withdrawals?: Withdrawal[];
   certificates?: Certificates[];
   collateral?: Collateral;
+  witnesses?: Witnesses;
   redeemers?: Redeemers;
   size: number;
 }

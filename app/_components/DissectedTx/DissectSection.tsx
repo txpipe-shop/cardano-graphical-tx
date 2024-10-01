@@ -14,22 +14,33 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     mints,
     scriptsSuccessful,
     metadata,
-    // blockHash,
-    // blockTxIndex,
-    // blockHeight,
-    // blockAbsoluteSlot,
-    // withdrawals,
-    // redeemers,
-    // size,
+    blockHash,
+    blockTxIndex,
+    blockHeight,
+    blockAbsoluteSlot,
+    witnesses,
+    collateral,
+    size,
   } = tx;
   return (
     <div className="flex h-screen flex-col gap-0 overflow-auto p-10 pt-32">
       <h4 className="text-3xl">Valid CBOR data</h4>
       <P>Your HEX bytes were successfully decoded using the CBOR standard.</P>
       {scriptsSuccessful && (
-        <PropBlock title="Tx Hash" value={txHash} description={TOPICS.hash} />
+        <>
+          <PropBlock title="Tx Hash" value={txHash} description={TOPICS.hash} />
+          <PropBlock title="Block Hash" value={blockHash?.toString()} />
+          <PropBlock title="Block Index" value={blockTxIndex?.toString()} />
+          <PropBlock title="Block Height" value={blockHeight?.toString()} />
+          <PropBlock
+            title="Block Absolute Slot"
+            value={blockAbsoluteSlot?.toString()}
+          />
+        </>
       )}
+      <PropBlock title="Size" value={size.toString()} />
       <PropBlock title="Fee" value={fee.toString()} description={TOPICS.fee} />
+
       <PropBlock title="Start" value={validityStart?.toString()} />
       <PropBlock
         title="Time to live"
@@ -139,13 +150,13 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
               <h4 className="text-3xl">Input</h4>
               <PropBlock
                 title="UtxoRef Hash"
-                description={i == 0 ? TOPICS.inputs_hash : ""}
                 value={txHash}
+                description={i == 0 ? TOPICS.inputs_hash : ""}
               />
               <PropBlock
                 title="UtxoRef Index"
-                description={i == 0 ? TOPICS.inputs_index : ""}
                 value={index.toString()}
+                description={i == 0 ? TOPICS.inputs_index : ""}
               />
             </blockquote>
           ))}
@@ -206,17 +217,79 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             <h4 className="text-3xl">Metadatum</h4>
             <PropBlock
               title="Metadata Label"
-              description={i == 0 ? TOPICS.inputs_hash : ""}
               value={label.toString()}
+              description={i == 0 ? TOPICS.inputs_hash : ""}
             />
             <PropBlock
               title="Metadatum Value"
-              description={i == 0 ? TOPICS.inputs_index : ""}
               value={JSONBIG.stringify(jsonMetadata, null, 2)}
+              description={i == 0 ? TOPICS.inputs_index : ""}
             />
           </blockquote>
         ))}
         {metadata?.length === 0 && <EmptyBlock />}
+      </blockquote>
+      <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-7">
+        <h4 className="text-3xl">Collateral</h4>
+        {collateral?.collateralReturn.map(({ txHash, index }, i) => (
+          <blockquote
+            className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
+            key={i}
+          >
+            <h4 className="text-3xl">Collateral Return</h4>
+            <PropBlock
+              title="UtxoRef Hash"
+              value={txHash}
+              description={i == 0 ? TOPICS.inputs_hash : ""}
+            />
+            <PropBlock
+              title="UtxoRef Index"
+              value={index.toString()}
+              description={i == 0 ? TOPICS.inputs_index : ""}
+            />
+          </blockquote>
+        ))}
+        <PropBlock title="Total" value={collateral?.total} />
+      </blockquote>
+      <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-7">
+        <h4 className="text-3xl">Witnesses</h4>
+        <P>{TOPICS.witnesses}</P>
+
+        {witnesses?.vkeyWitnesses.map(({ hash, key, signature }, i) => (
+          <blockquote
+            className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
+            key={i}
+          >
+            <h4 className="text-3xl">Verification Key Witness</h4>
+            <PropBlock
+              title="Key"
+              value={key}
+              description={i == 0 ? TOPICS.vkey_witness : ""}
+            />
+            <PropBlock title="Hash" value={hash} />
+            <PropBlock title="Signature" value={signature} />
+          </blockquote>
+        ))}
+        {witnesses?.plutusData.map(({ hash, bytes, json }, i) => (
+          <blockquote
+            className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
+            key={i}
+          >
+            <h4 className="text-3xl">Transaction datum</h4>
+            <P>{TOPICS.datum}</P>
+            <PropBlock
+              title="Hash"
+              value={hash}
+              description={i == 0 ? TOPICS.datum_hash : ""}
+            />
+            <PropBlock title="Bytes" value={bytes} />
+            <PropBlock
+              title="JSON"
+              value={json}
+              description={i == 0 ? TOPICS.datum_json : ""}
+            />
+          </blockquote>
+        ))}
       </blockquote>
     </div>
   );

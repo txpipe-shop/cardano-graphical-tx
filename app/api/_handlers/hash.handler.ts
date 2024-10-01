@@ -12,13 +12,12 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
   try {
     const apiKey = getApiKey(network);
 
-    const cbor = await fetch(getBlockfrostURL(network, hash), {
+    const cborRes = await fetch(getBlockfrostURL(network, hash), {
       headers: { project_id: apiKey },
       method: "GET",
-    }).then(async (res) => {
-      if (res.status !== StatusCodes.OK) throw res;
-      return await res.json();
     });
+    if (cborRes.status !== StatusCodes.OK) throw cborRes;
+    const cbor = cborRes.json();
 
     const parsedData = BlockfrostResponseSchema.parse(cbor);
     return Response.json(parsedData);

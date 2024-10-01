@@ -57,8 +57,8 @@ export const UtxoInfo = () => {
       {!address && (
         <p>
           <b className="text-danger-500">Warning:</b> The following UTxO seems
-          to be incomplete. This may occurs because you search for a CBOR into
-          the wrong network or the transaction does not exist.
+          to be incomplete. This may have occurred because you searched for a
+          CBOR on the wrong network or the transaction does not exist.
         </p>
       )}
       <Accordion

@@ -160,8 +160,9 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
 
   const isInput = isInputUtxo(transactions)(utxoHash);
 
-  const text = `Address:
-  ${trimString(utxo.address?.bech32 ?? "", 10)}\nAssets:
+  const text = utxo.address?.bech32
+    ? `Address:
+  ${trimString(utxo.address?.bech32, 10)}\nAssets:
   - lovelace ${utxo.lovelace}
   ${utxo.assets.reduce((accc, { assetsPolicy }) => {
     const actual = assetsPolicy.reduce((acc, asset) => {
@@ -169,7 +170,8 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
       return acc + `- ${assetName} ${asset.coint}\n  `;
     }, "");
     return accc + actual;
-  }, "")}`;
+  }, "")}`
+    : `txHash: ${trimString(utxo.txHash.slice(0, -2), 10)}\nIndex: ${utxo.index}\n`;
   return (
     <>
       <Circle

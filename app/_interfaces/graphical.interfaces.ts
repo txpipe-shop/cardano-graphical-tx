@@ -3,9 +3,11 @@ import type { Vector2d } from "konva/lib/types";
 import type {
   Assets,
   Certificates,
+  Collateral,
   Datum,
   Metadata,
   Withdrawal,
+  Witnesses,
 } from "~/napi-pallas";
 import type { Redeemers, RedeemerSpend } from ".";
 
@@ -22,12 +24,12 @@ export interface UtxoObject {
 export interface IGraphicalTransaction {
   txHash: string;
   fee: number;
+  scriptsSuccessful: boolean;
   inputs: IGraphicalUtxo[];
   consumedLines: (Konva.Line | null)[];
   outputs: IGraphicalUtxo[];
   producedLines: (Konva.Line | null)[];
   mints: Assets[];
-  scriptsSuccessful: boolean;
   pos: Vector2d;
   blockHash?: string;
   blockTxIndex?: number;
@@ -35,10 +37,12 @@ export interface IGraphicalTransaction {
   blockAbsoluteSlot?: number;
   validityStart?: number;
   ttl?: number;
-  withdrawals?: Withdrawal[];
-  redeemers?: Redeemers;
   metadata?: Metadata[];
+  withdrawals?: Withdrawal[];
   certificates?: Certificates[];
+  collateral?: Collateral;
+  witnesses?: Witnesses;
+  redeemers?: Redeemers;
   size: number;
   alias: string;
 }
