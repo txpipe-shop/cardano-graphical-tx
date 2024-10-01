@@ -121,7 +121,7 @@ export const UtxoInfo = () => {
             <AssetCard
               asset={{
                 assetName: "lovelace",
-                coint: selectedUtxo.lovelace,
+                amount: selectedUtxo.lovelace,
               }}
               policyId={""}
             />

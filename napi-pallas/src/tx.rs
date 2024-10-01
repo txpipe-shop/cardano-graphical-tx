@@ -91,11 +91,11 @@ fn get_outputs(tx: &MultiEraTx<'_>) -> Vec<Utxo> {
             .map(|asset| {
               let asset_name = hex::encode(asset.name());
               let asset_name_ascii = asset.to_ascii_name();
-              let coint = asset.output_coin().map(|x| x as i64);
+              let amount = asset.output_coin().map(|x| x as i64);
               Asset {
                 asset_name,
                 asset_name_ascii,
-                coint,
+                amount,
               }
             })
             .collect();
@@ -120,7 +120,7 @@ fn get_mints(tx: &MultiEraTx<'_>) -> Vec<Assets> {
         .map(|asset| Asset {
           asset_name: hex::encode(asset.name()),
           asset_name_ascii: asset.to_ascii_name(),
-          coint: asset.mint_coin().map(|x| x as i64),
+          amount: asset.mint_coin().map(|x| x as i64),
         })
         .collect(),
     })

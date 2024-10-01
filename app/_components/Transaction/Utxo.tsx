@@ -167,7 +167,7 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
   ${utxo.assets.reduce((accc, { assetsPolicy }) => {
     const actual = assetsPolicy.reduce((acc, asset) => {
       const assetName = getAssetName(asset.assetName);
-      return acc + `- ${assetName} ${asset.coint}\n  `;
+      return acc + `- ${assetName} ${asset.amount}\n  `;
     }, "");
     return accc + actual;
   }, "")}`

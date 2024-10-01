@@ -23,7 +23,7 @@ pub struct Datum {
 pub struct Asset {
   pub asset_name: String,
   pub asset_name_ascii: Option<String>,
-  pub coint: Option<i64>,
+  pub amount: Option<i64>,
 }
 
 #[derive(Default)]

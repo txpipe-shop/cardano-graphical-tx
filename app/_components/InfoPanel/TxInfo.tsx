@@ -120,7 +120,7 @@ export const TxInfo = () => {
       <AccordionItem key="2" title="Fee">
         <div className="flex flex-col gap-2">
           <AssetCard
-            asset={{ assetName: "lovelace", coint: fee }}
+            asset={{ assetName: "lovelace", amount: fee }}
             policyId=""
           />
         </div>
@@ -176,7 +176,7 @@ export const TxInfo = () => {
       <AccordionItem key="8" title="Total Output Sum">
         <div className="flex flex-col gap-2">
           <AssetCard
-            asset={{ assetName: "lovelace", coint: Number(totalOutput) }}
+            asset={{ assetName: "lovelace", amount: Number(totalOutput) }}
             policyId=""
           />
         </div>

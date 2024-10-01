@@ -15,11 +15,11 @@ export const AssetCard = ({
   policyId,
   isMintBurn = false,
 }: AssetCardProps) => {
-  const { assetName, coint } = asset;
+  const { assetName, amount } = asset;
 
   const colorVar =
-    isMintBurn && asset.coint
-      ? asset.coint > 0
+    isMintBurn && asset.amount
+      ? asset.amount > 0
         ? "text-green-500"
         : "text-red-500"
       : "dark:text-white text-black";
@@ -39,7 +39,7 @@ export const AssetCard = ({
           <div>
             <b className={colorVar}>{name}</b>
             &nbsp;
-            {coint?.toString()}
+            {amount?.toString()}
           </div>
           <div>
             {assetName !== "lovelace" && (

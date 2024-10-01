@@ -111,7 +111,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                   <h4 className="text-3xl">Policy Id</h4>
                   <PropBlock title="Policy Id" value={policyId} />
                   {assetsPolicy.map(
-                    ({ assetName, assetNameAscii, coint }, i) => (
+                    ({ assetName, assetNameAscii, amount }, i) => (
                       <blockquote
                         className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
                         key={i}
@@ -121,8 +121,8 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                         {assetNameAscii && (
                           <PropBlock title="Asset Name" value={assetName} />
                         )}
-                        {coint && (
-                          <PropBlock title="Coint" value={coint.toString()} />
+                        {amount && (
+                          <PropBlock title="amount" value={amount.toString()} />
                         )}
                       </blockquote>
                     ),
@@ -166,7 +166,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         <h4 className="text-3xl">Transaction Mints</h4>
         <P>{TOPICS.mints}</P>
         {mints.map(({ policyId, assetsPolicy }, i) => {
-          const mint = assetsPolicy.find((a) => a.coint && a.coint > 0);
+          const mint = assetsPolicy.find((a) => a.amount && a.amount > 0);
           return (
             <blockquote
               className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
@@ -182,7 +182,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                     : "bg-red-200 border-red-700"
                 }
               />
-              {assetsPolicy.map(({ assetName, assetNameAscii, coint }, i) => (
+              {assetsPolicy.map(({ assetName, assetNameAscii, amount }, i) => (
                 <blockquote
                   className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
                   key={i}
@@ -192,8 +192,8 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                   {assetNameAscii && (
                     <PropBlock title="Asset Name" value={assetName} />
                   )}
-                  {coint && (
-                    <PropBlock title="Coint" value={coint.toString()} />
+                  {amount && (
+                    <PropBlock title="Amount" value={amount.toString()} />
                   )}
                 </blockquote>
               ))}

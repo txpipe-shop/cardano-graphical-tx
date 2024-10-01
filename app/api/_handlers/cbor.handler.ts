@@ -85,7 +85,7 @@ const inputsHandle = async ({
         const policyId = unit.slice(0, POLICY_LENGTH);
         const assetName = unit.slice(POLICY_LENGTH);
         const assetNameAscii = getAssetName(assetName);
-        const coint = Number(quantity);
+        const amount = Number(quantity);
         const assetWithPolicyExisting = acc.find(
           (asset) => asset.policyId === policyId,
         );
@@ -93,12 +93,12 @@ const inputsHandle = async ({
           assetWithPolicyExisting.assetsPolicy.push({
             assetName,
             assetNameAscii,
-            coint,
+            amount,
           });
         else
           acc.push({
             policyId,
-            assetsPolicy: [{ assetName, assetNameAscii, coint }],
+            assetsPolicy: [{ assetName, assetNameAscii, amount }],
           });
         return acc;
       }, [] as Assets[]),

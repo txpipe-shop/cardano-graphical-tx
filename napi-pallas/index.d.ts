@@ -28,7 +28,7 @@ export interface Datum {
 export interface Asset {
   assetName: string
   assetNameAscii?: string
-  coint?: number
+  amount?: number
 }
 export interface Assets {
   policyId: string
