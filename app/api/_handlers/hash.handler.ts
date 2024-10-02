@@ -17,8 +17,7 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
       method: "GET",
     });
     if (cborRes.status !== StatusCodes.OK) throw cborRes;
-    const cbor = cborRes.json();
-
+    const cbor = await cborRes.json();
     const parsedData = BlockfrostResponseSchema.parse(cbor);
     return Response.json(parsedData);
   } catch (err: any) {
