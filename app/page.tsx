@@ -1,57 +1,21 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import {
-  Header,
-  InfoPanel,
-  Loading,
-  Playground,
-  TxInfo,
-  UtxoInfo,
-} from "./_components";
-import { useGraphical } from "./_contexts";
-import { ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "./_utils";
 
-interface HomeProps {
-  searchParams?: {
-    [TX_URL_PARAM]?: string;
-    [UTXO_URL_PARAM]?: string;
-  };
-}
-export default function Index({ searchParams }: HomeProps) {
-  const { replace } = useRouter();
-  const { [TX_URL_PARAM]: selectedTx, [UTXO_URL_PARAM]: selectedUtxo } =
-    searchParams || {};
-  const { loading } = useGraphical();
+import { Header } from "./_components";
 
-  useEffect(() => {
-    // Remove URL params when reloading the page
-    replace(ROUTES.HOME);
-  }, [replace]);
+export default function Index() {
   return (
-    <div className="overflow-hidden">
-      {loading ? (
-        <Loading />
-      ) : (
-        <>
-          <InfoPanel
-            isVisible={selectedTx !== undefined}
-            from="left"
-            title="TX Information"
-          >
-            <TxInfo />
-          </InfoPanel>
-          <InfoPanel
-            isVisible={selectedUtxo !== undefined}
-            from="right"
-            title="UTXO Information"
-          >
-            <UtxoInfo />
-          </InfoPanel>
-          <Playground />
-        </>
-      )}
+    <>
       <Header />
-    </div>
+      <div className="flex h-screen flex-col gap-3 p-10 pt-32 text-center">
+        <div className="text-5xl">Main Page</div>
+        <div className="px-10 text-xl">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+          aliquip
+        </div>
+        <div className="mt-10 text-3xl">Examples</div>
+      </div>
+    </>
   );
 }

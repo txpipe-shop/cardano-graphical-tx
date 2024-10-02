@@ -1,13 +1,15 @@
 import type Konva from "konva";
 import type { Vector2d } from "konva/lib/types";
 import type {
-  IAsset,
-  ICertificate,
-  IDatum,
-  IWithdrawal,
-  Redeemers,
-  RedeemerSpend,
-} from ".";
+  Assets,
+  Certificates,
+  Collateral,
+  Datum,
+  Metadata,
+  Withdrawal,
+  Witnesses,
+} from "~/napi-pallas";
+import type { Redeemers, RedeemerSpend } from ".";
 
 export interface TransactionsBox {
   transactions: IGraphicalTransaction[];
@@ -21,40 +23,44 @@ export interface UtxoObject {
 
 export interface IGraphicalTransaction {
   txHash: string;
-  pos: Vector2d;
-  outputsUTXO: IGraphicalUtxo[];
-  inputsUTXO: IGraphicalUtxo[];
-  producedLines: (Konva.Line | null)[];
+  fee: number;
+  scriptsSuccessful: boolean;
+  inputs: IGraphicalUtxo[];
   consumedLines: (Konva.Line | null)[];
+  outputs: IGraphicalUtxo[];
+  producedLines: (Konva.Line | null)[];
+  mints: Assets[];
+  pos: Vector2d;
   blockHash?: string;
   blockTxIndex?: number;
   blockHeight?: number;
   blockAbsoluteSlot?: number;
-  mint: IAsset[];
-  invalidBefore?: number;
-  invalidHereafter?: number;
-  fee: number;
-  withdrawals?: IWithdrawal[];
-  scriptsSuccessful: boolean;
+  validityStart?: number;
+  ttl?: number;
+  metadata?: Metadata[];
+  withdrawals?: Withdrawal[];
+  certificates?: Certificates[];
+  collateral?: Collateral;
+  witnesses?: Witnesses;
   redeemers?: Redeemers;
-  metadata?: any;
-  certificates?: ICertificate[];
   size: number;
   alias: string;
 }
 
 export interface IGraphicalUtxo {
-  utxoHash: string;
+  txHash: string;
   index: number;
-  assets: Array<IAsset>;
+  bytes: string;
   address?: Address;
-  datum: IDatum | undefined;
+  lovelace: number;
+  datum: Datum | undefined;
   scriptRef?: string;
+  assets: Assets[];
+  isReferenceInput: boolean;
+  redeemers?: RedeemerSpend;
   pos: Vector2d;
   lines: (Konva.Line | null)[];
   distance: Vector2d;
-  isReferenceInput: boolean;
-  redeemers?: RedeemerSpend;
 }
 
 export interface Address {

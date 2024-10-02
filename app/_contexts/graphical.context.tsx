@@ -3,25 +3,17 @@ import type { Dispatch, SetStateAction } from "react";
 import { createContext, useContext, useState } from "react";
 import type { TransactionsBox } from "../_interfaces";
 
-export interface IGraphicalContext {
-  error: string;
-  setError: Dispatch<SetStateAction<string>>;
+interface IGraphicalContext {
   transactions: TransactionsBox;
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>;
-  loading: boolean;
-  setLoading: Dispatch<SetStateAction<boolean>>;
 }
 
-export const GraphicalContext = createContext<IGraphicalContext>({
-  error: "",
-  setError: () => {},
+const GraphicalContext = createContext<IGraphicalContext>({
   transactions: {
     transactions: [],
     utxos: {},
   },
   setTransactionBox: () => {},
-  loading: false,
-  setLoading: () => {},
 });
 
 export const useGraphical = () => {
@@ -36,21 +28,15 @@ export const GraphicalProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [error, setError] = useState<string>("");
   const [transactionBox, setTransactionBox] = useState<TransactionsBox>({
     transactions: [],
     utxos: {},
   });
-  const [loading, setLoading] = useState<boolean>(false);
   return (
     <GraphicalContext.Provider
       value={{
-        error,
-        setError,
         transactions: transactionBox,
         setTransactionBox,
-        loading,
-        setLoading,
       }}
     >
       {children}

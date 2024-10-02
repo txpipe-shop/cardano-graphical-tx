@@ -16,9 +16,9 @@ import {
   updateLines,
 } from "~/app/_utils";
 import { BurningIcon } from "./BurningIcon";
+import { CertificateIcon } from "./CertificateIcon";
 import { MintingIcon } from "./MintingIcon";
 import { WithdrawalIcon } from "./WithdrawalIcon";
-import { CertificateIcon } from "./CertificateIcon";
 
 interface TransactionProps {
   txHash: string;
@@ -91,6 +91,11 @@ export const Transaction = ({ txHash, txInfoVisible }: TransactionProps) => {
         strokeWidth={STROKE_WIDTH}
         fill={KONVA_COLORS.GREY}
         onClick={txInfoVisible}
+        cornerRadius={POINT_SIZE}
+        shadowColor={KONVA_COLORS.BLACK}
+        shadowBlur={0}
+        shadowOffset={{ x: 3, y: 6 }}
+        shadowOpacity={1}
       />
       <Group onClick={handleClick}>
         <BurningIcon on={burns} />

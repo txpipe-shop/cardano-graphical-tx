@@ -42,7 +42,6 @@ const parseQuery = (
 export const getTxFromCbor = async (
   cbor: string,
   network: NETWORK,
-  setFetchError: Dispatch<SetStateAction<string>>,
 ): Promise<ITransaction> => {
   try {
     const query = { network };
@@ -58,10 +57,9 @@ export const getTxFromCbor = async (
 
     if (data.warning) console.warn(data.warning);
 
-    return data;
+    return data as ITransaction;
   } catch (err: any) {
     console.error(err);
-    setFetchError(err.statusText);
     throw err;
   }
 };
@@ -69,7 +67,7 @@ export const getTxFromCbor = async (
 export const getCborFromHash = async (
   txId: string,
   network: NETWORK,
-  setFetchError: Dispatch<SetStateAction<string>>,
+  setError: Dispatch<SetStateAction<string>>,
   setLoading: Dispatch<SetStateAction<boolean>>,
 ): Promise<IBlockfrostResponse> => {
   try {
@@ -81,8 +79,8 @@ export const getCborFromHash = async (
     return data as IBlockfrostResponse;
   } catch (error) {
     console.error("Error processing Transaction Hash:", error);
+    setError("Error processing CBOR");
     setLoading(false);
-    setFetchError("Error processing Hash");
     throw error;
   }
 };

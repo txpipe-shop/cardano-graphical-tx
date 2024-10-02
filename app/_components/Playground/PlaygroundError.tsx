@@ -1,10 +1,10 @@
 import Image from "next/image";
-import { useGraphical } from "~/app/_contexts";
+import { useUI } from "~/app/_contexts";
 import Error500Icon from "~/public/error.svg";
 import NotFoundIcon from "~/public/not-found.svg";
 
 export const PlaygroundError = () => {
-  const { error } = useGraphical();
+  const { error } = useUI();
   const getError = () =>
     error === "Internal server error" ? Error500Icon : NotFoundIcon;
 

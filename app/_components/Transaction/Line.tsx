@@ -30,8 +30,8 @@ export const UtxoLine = ({
   const tx = getTransaction(transactions)(txHash)!;
   const utxo = getUtxo(transactions)(utxoHash)!;
 
-  const totalInputs = tx.inputsUTXO.length;
-  const totalOutputs = tx.outputsUTXO.length;
+  const totalInputs = tx.inputs.length;
+  const totalOutputs = tx.outputs.length;
   const distanceBetweenInputs = TX_HEIGHT / (totalInputs + 1);
   const distanceBetweenOutputs = TX_HEIGHT / (totalOutputs + 1);
 

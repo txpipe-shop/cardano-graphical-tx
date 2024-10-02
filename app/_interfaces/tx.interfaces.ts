@@ -1,3 +1,13 @@
+import type {
+  Assets,
+  Certificates,
+  Collateral,
+  Metadata,
+  Utxo,
+  Withdrawal,
+  Witnesses,
+} from "~/napi-pallas";
+
 export interface Redeemers {
   spends: RedeemerSpend[];
   mints: any[];
@@ -19,53 +29,27 @@ interface Data {
   json: Record<string, any>;
   bytes: string;
 }
-export interface IDatum {
-  hash: string;
-  bytes: string;
-  json: Record<string, any>;
-}
-
-export interface IAsset {
-  policyId: string;
-  assetName: string;
-  amount: number | bigint;
-}
-
-export interface IUtxo {
-  txHash: string;
-  index: number;
-  address: string;
-  assets: IAsset[];
-  datum?: IDatum;
-  scriptRef?: string;
-}
-
-export interface IWithdrawal {
-  rawAddress: string;
-  amount: string;
-}
-
-export interface ICertificate {
-  json: Record<string, any>;
-}
 
 export interface ITransaction {
+  era: string;
   txHash: string;
   fee: number;
-  inputs: IUtxo[];
-  referenceInputs: IUtxo[];
-  outputs: IUtxo[];
-  mints: IAsset[];
   scriptsSuccessful: boolean;
+  inputs: Utxo[];
+  referenceInputs: Utxo[];
+  outputs: Utxo[];
+  mints: Assets[];
   blockHash?: string;
   blockTxIndex?: number;
   blockHeight?: number;
   blockAbsoluteSlot?: number;
-  invalidBefore?: number;
-  invalidHereafter?: number;
-  withdrawals?: IWithdrawal[];
+  validityStart?: number;
+  ttl?: number;
+  metadata?: Metadata[];
+  withdrawals?: Withdrawal[];
+  certificates?: Certificates[];
+  collateral?: Collateral;
+  witnesses?: Witnesses;
   redeemers?: Redeemers;
-  metadata?: any;
-  certificates?: ICertificate[];
   size: number;
 }

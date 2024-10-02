@@ -1,28 +1,22 @@
 import { Select, SelectItem } from "@nextui-org/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { type ChangeEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { type ChangeEvent, useState } from "react";
 import { Button, Input } from "~/app/_components";
+import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
+import { getCborFromHash, isEmpty, OPTIONS, ROUTES } from "~/app/_utils";
 import TxPipeIcon from "~/public/txpipe_shop.svg";
-import { useConfigs, useGraphical } from "../../_contexts";
-import { getCborFromHash, isEmpty, OPTIONS, ROUTES } from "../../_utils";
 import { NetSelector } from "../NetSelector";
 import { setCBOR } from "./header.helper";
 
 export const Header = () => {
-  const searchParams = useSearchParams();
-  const [raw, setRaw] = useState<string>("");
-  const [selectedOption, setSelectedOption] = useState<OPTIONS>(OPTIONS.HASH);
-
-  const { transactions, setTransactionBox, setError, setLoading } =
-    useGraphical();
-  const { configs } = useConfigs();
-
-  useEffect(() => {
-    const rawValue = searchParams.get("raw");
-    if (rawValue) setRaw(rawValue);
-  }, [searchParams, transactions]);
+  const router = useRouter();
+  const { setLoading, setError } = useUI();
+  const { transactions, setTransactionBox } = useGraphical();
+  const { configs, updateConfigs } = useConfigs();
+  const [raw, setRaw] = useState<string>(configs.query);
+  const [toGo, setToGo] = useState<string>("");
 
   const changeRaw = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRaw(e.target.value);
@@ -31,43 +25,43 @@ export const Header = () => {
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!raw) return;
+    router.push(toGo);
     setLoading(true);
-
-    switch (selectedOption) {
-      case OPTIONS.HASH:
-        const { cbor } = await getCborFromHash(
-          raw,
-          configs.net,
-          setError,
-          setLoading,
-        );
-        await setCBOR(
-          configs,
-          cbor,
-          transactions,
-          setTransactionBox,
-          setError,
-          setLoading,
-          true,
-        );
-
-        break;
-      case OPTIONS.CBOR:
-        await setCBOR(
-          configs,
-          raw,
-          transactions,
-          setTransactionBox,
-          setError,
-          setLoading,
-          false,
-        );
-        break;
+    if (configs.option === OPTIONS.HASH) {
+      const { cbor } = await getCborFromHash(
+        raw,
+        configs.net,
+        setError,
+        setLoading,
+      );
+      await setCBOR(
+        configs.net,
+        cbor,
+        transactions,
+        setTransactionBox,
+        setError,
+        true,
+      );
+    } else {
+      await setCBOR(
+        configs.net,
+        raw,
+        transactions,
+        setTransactionBox,
+        setError,
+        false,
+      );
     }
+    updateConfigs("query", raw);
+    setLoading(false);
   }
-
   const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {
-    if (!isEmpty(e.target.value)) setSelectedOption(e.target.value as OPTIONS);
+    if (!isEmpty(e.target.value))
+      updateConfigs("option", e.target.value as OPTIONS);
+  };
+
+  const changeGoTo = (route: string) => () => {
+    setToGo(route);
   };
 
   return (
@@ -105,7 +99,7 @@ export const Header = () => {
           startContent={
             <Select
               aria-label="Close"
-              selectedKeys={[selectedOption]}
+              selectedKeys={[configs.option]}
               size="sm"
               className="w-1/3"
               onChange={changeSelectedOption}
@@ -121,7 +115,12 @@ export const Header = () => {
             </Select>
           }
         />
-        <Button type="submit">Draw</Button>
+        <Button type="submit" onClick={changeGoTo(ROUTES.GRAPHER)}>
+          Draw
+        </Button>
+        <Button type="submit" onClick={changeGoTo(ROUTES.DISSECT)}>
+          Dissect
+        </Button>
       </form>
     </header>
   );

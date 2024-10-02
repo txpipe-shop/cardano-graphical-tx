@@ -2,12 +2,16 @@ import JSONbig from "json-bigint";
 
 export const ROUTES = {
   HOME: "/",
+  GRAPHER: "/grapher",
+  DISSECT: "/dissect",
 };
 
 export const API_ROUTES = {
   CBOR: "api/cbor",
   HASH: "api/hash",
 };
+
+export const defaultPosition = { x: 0, y: 0 };
 
 export const TX_WIDTH = 125;
 export const TX_HEIGHT = 250;

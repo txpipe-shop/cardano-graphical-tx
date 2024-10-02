@@ -1,22 +1,28 @@
 import { Card, CardHeader, Tooltip } from "@nextui-org/react";
 import Image from "next/image";
-import type { IAsset } from "~/app/_interfaces";
 import { getAssetName, handleCopy } from "~/app/_utils";
+import type { Asset } from "~/napi-pallas";
 import CopyIcon from "~/public/copy.svg";
 
 interface AssetCardProps {
-  asset: IAsset;
+  asset: Asset;
+  policyId: string;
   isMintBurn?: boolean;
 }
 
-export const AssetCard = ({ asset, isMintBurn = false }: AssetCardProps) => {
-  const { policyId, assetName, amount } = asset;
+export const AssetCard = ({
+  asset,
+  policyId,
+  isMintBurn = false,
+}: AssetCardProps) => {
+  const { assetName, amount } = asset;
 
-  const colorVar = isMintBurn
-    ? asset.amount > 0
-      ? "text-green-500"
-      : "text-red-500"
-    : "dark:text-white text-black";
+  const colorVar =
+    isMintBurn && asset.amount
+      ? asset.amount > 0
+        ? "text-green-500"
+        : "text-red-500"
+      : "dark:text-white text-black";
 
   const tooltipContent =
     assetName !== "lovelace" ? "Policy " + policyId : "Lovelace";
@@ -33,7 +39,7 @@ export const AssetCard = ({ asset, isMintBurn = false }: AssetCardProps) => {
           <div>
             <b className={colorVar}>{name}</b>
             &nbsp;
-            {amount.toString()}
+            {amount?.toString()}
           </div>
           <div>
             {assetName !== "lovelace" && (

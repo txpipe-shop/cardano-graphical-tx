@@ -8,8 +8,7 @@ import {
 } from "@nextui-org/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useContext } from "react";
-import { GraphicalContext } from "~/app/_contexts";
+import { useGraphical } from "~/app/_contexts";
 import {
   JSONBIG,
   UTXO_URL_PARAM,
@@ -23,7 +22,7 @@ import CopyIcon from "/public/copy.svg";
 import FullScreen from "/public/fullscreen.svg";
 
 export const UtxoInfo = () => {
-  const { transactions } = useContext(GraphicalContext);
+  const { transactions } = useGraphical();
   const searchParams = useSearchParams();
   const {
     isOpen: isOpenDatum,
@@ -40,15 +39,14 @@ export const UtxoInfo = () => {
   const selectedUtxo = getUtxo(transactions)(selectedUtxoHash!);
   if (!selectedUtxo) return null;
 
-  const { scriptRef, utxoHash, assets, address, datum, redeemers } =
-    selectedUtxo;
+  const { scriptRef, txHash, assets, address, datum, redeemers } = selectedUtxo;
 
-  const txTrim = trimString(utxoHash, 12);
+  const txTrim = trimString(txHash, 12);
   const addrTrim = trimString(address?.bech32 || "", 20);
 
   const disabledKeys = [
     !address ? "1" : "",
-    !assets.length ? "2" : "",
+    !assets.length && selectedUtxo.lovelace <= 0 ? "2" : "",
     !datum ? "4" : "",
     !scriptRef ? "5" : "",
     !redeemers ? "6" : "",
@@ -59,8 +57,8 @@ export const UtxoInfo = () => {
       {!address && (
         <p>
           <b className="text-danger-500">Warning:</b> The following UTxO seems
-          to be incomplete. This may occurs because you search for a CBOR into
-          the wrong network or the transaction does not exist.
+          to be incomplete. This may have occurred because you searched for a
+          CBOR on the wrong network or the transaction does not exist.
         </p>
       )}
       <Accordion
@@ -120,9 +118,18 @@ export const UtxoInfo = () => {
 
         <AccordionItem key="2" title="Assets">
           <div className="flex flex-col gap-2">
-            {assets.map((asset, index) => (
-              <AssetCard key={index} asset={asset} />
-            ))}
+            <AssetCard
+              asset={{
+                assetName: "lovelace",
+                amount: selectedUtxo.lovelace,
+              }}
+              policyId={""}
+            />
+            {assets.map(({ policyId, assetsPolicy }, index) =>
+              assetsPolicy.map((asset) => (
+                <AssetCard key={index} asset={asset} policyId={policyId} />
+              )),
+            )}
           </div>
         </AccordionItem>
 
@@ -132,7 +139,7 @@ export const UtxoInfo = () => {
             <Image
               src={CopyIcon}
               alt="Copy"
-              onClick={handleCopy(utxoHash)}
+              onClick={handleCopy(txHash)}
               className="cursor-pointer"
             />
           </Card>

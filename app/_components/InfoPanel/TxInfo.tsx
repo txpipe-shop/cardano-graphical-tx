@@ -7,10 +7,10 @@ import {
 } from "@nextui-org/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { type ChangeEvent, useContext, useEffect, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Button, Input } from "~/app/_components";
-import { GraphicalContext } from "~/app/_contexts";
+import { useGraphical } from "~/app/_contexts";
 import {
   JSONBIG,
   TX_URL_PARAM,
@@ -25,7 +25,7 @@ import FullScreen from "/public/fullscreen.svg";
 
 export const TxInfo = () => {
   const [name, setName] = useState("");
-  const { transactions, setTransactionBox } = useContext(GraphicalContext)!;
+  const { transactions, setTransactionBox } = useGraphical()!;
   const searchParams = useSearchParams();
   const selectedTxHash = searchParams.get(TX_URL_PARAM);
   const selectedTx = getTransaction(transactions)(selectedTxHash || "");
@@ -44,27 +44,26 @@ export const TxInfo = () => {
   const {
     txHash,
     fee,
-    inputsUTXO,
-    outputsUTXO,
-    mint,
+    inputs,
+    outputs,
+    mints,
     scriptsSuccessful,
     blockHash,
     blockTxIndex,
     blockHeight,
     blockAbsoluteSlot,
+    validityStart,
+    ttl,
     withdrawals,
     metadata,
     certificates,
     size,
   } = selectedTx;
 
-  const totalOutput: bigint = outputsUTXO.reduce((acc, output) => {
-    const lovelace = output.assets.find(
-      (asset) => asset.assetName === "lovelace",
-    );
-    if (!lovelace) return acc;
+  const totalOutput: bigint = outputs.reduce((acc, output) => {
+    const lovelace = output.lovelace;
 
-    return acc + BigInt(lovelace.amount);
+    return acc + BigInt(lovelace);
   }, BigInt(0));
 
   const msg = (() => {
@@ -99,10 +98,10 @@ export const TxInfo = () => {
   };
 
   const disabledKeys = [
-    !withdrawals?.length ? "8" : "",
-    !msg ? "9" : "",
-    !certificates?.length ? "10" : "",
-    !mint.length ? "11" : "",
+    !withdrawals?.length ? "10" : "",
+    !msg ? "11" : "",
+    !certificates?.length ? "12" : "",
+    !mints.length ? "13" : "",
   ].filter(Boolean);
 
   return (
@@ -121,7 +120,8 @@ export const TxInfo = () => {
       <AccordionItem key="2" title="Fee">
         <div className="flex flex-col gap-2">
           <AssetCard
-            asset={{ assetName: "lovelace", policyId: "", amount: Number(fee) }}
+            asset={{ assetName: "lovelace", amount: fee }}
+            policyId=""
           />
         </div>
       </AccordionItem>
@@ -158,24 +158,35 @@ export const TxInfo = () => {
           {size ?? "Unknown"}
         </Card>
       </AccordionItem>
-      <AccordionItem key="5" title="Outputs Count">
-        <Card className="fl ex-row flex justify-between bg-content2 px-5 py-2 shadow-none">
-          {outputsUTXO.length}
+      <AccordionItem key="5" title="Invalid Before (Start)">
+        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+          {validityStart ?? "Unknown"}
         </Card>
       </AccordionItem>
-      <AccordionItem key="6" title="Total Output Sum">
+      <AccordionItem key="6" title="Invalid Hereafter (TTL)">
+        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+          {ttl ?? "Unknown"}
+        </Card>
+      </AccordionItem>
+      <AccordionItem key="7" title="Outputs Count">
+        <Card className="fl ex-row flex justify-between bg-content2 px-5 py-2 shadow-none">
+          {outputs.length}
+        </Card>
+      </AccordionItem>
+      <AccordionItem key="8" title="Total Output Sum">
         <div className="flex flex-col gap-2">
           <AssetCard
-            asset={{ assetName: "lovelace", policyId: "", amount: totalOutput }}
+            asset={{ assetName: "lovelace", amount: Number(totalOutput) }}
+            policyId=""
           />
         </div>
       </AccordionItem>
-      <AccordionItem key="7" title="Inputs Count">
+      <AccordionItem key="9" title="Inputs Count">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
-          {inputsUTXO.length}
+          {inputs.length}
         </Card>
       </AccordionItem>
-      <AccordionItem key="8" title="Withdrawals">
+      <AccordionItem key="10" title="Withdrawals">
         <div className="flex flex-col gap-2">
           {withdrawals?.map((withdrawal, index) => (
             <Card
@@ -202,12 +213,12 @@ export const TxInfo = () => {
           ))}
         </div>
       </AccordionItem>
-      <AccordionItem key="9" title="Metadata">
+      <AccordionItem key="11" title="Metadata">
         <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
           {msg}
         </Card>
       </AccordionItem>
-      <AccordionItem key="10" title="Certificates">
+      <AccordionItem key="12" title="Certificates">
         <JSONModal
           isOpen={isOpenCertificate}
           onOpenChange={onOpenCertificateChange}
@@ -237,21 +248,28 @@ export const TxInfo = () => {
           </Card>
         )}
       </AccordionItem>
-      <AccordionItem key="11" title="Minting & Burning">
+      <AccordionItem key="13" title="Minting & Burning">
         <div className="flex flex-col gap-2">
-          {mint.map((asset, index) => (
-            <AssetCard key={index} asset={asset} isMintBurn />
-          ))}
+          {mints.map(({ policyId, assetsPolicy }, index) =>
+            assetsPolicy.map((asset) => (
+              <AssetCard
+                key={index}
+                asset={asset}
+                policyId={policyId}
+                isMintBurn
+              />
+            )),
+          )}
         </div>
       </AccordionItem>
-      <AccordionItem key="12" title="Scripts Successful">
+      <AccordionItem key="14" title="Scripts Successful">
         <div className="flex flex-col gap-2">
           <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
             {scriptsSuccessful ? "True" : "False"}
           </Card>
         </div>
       </AccordionItem>
-      <AccordionItem key="13" title="Alias" className="m-0">
+      <AccordionItem key="15" title="Alias" className="m-0">
         <form onSubmit={handleSave} className="flex justify-around">
           <Input
             inputSize="small"

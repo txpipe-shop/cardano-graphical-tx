@@ -1,18 +1,23 @@
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
-import { POLICY_LENGTH, getTransaction, getUtxo, isEmpty } from ".";
+import type { Utxo } from "~/napi-pallas";
+import {
+  POLICY_LENGTH,
+  defaultPosition,
+  getTransaction,
+  getUtxo,
+  isEmpty,
+} from ".";
 import type {
   Address,
   IGraphicalTransaction,
   IGraphicalUtxo,
   ITransaction,
-  IUtxo,
   Redeemers,
   TransactionsBox,
 } from "../_interfaces";
 
-const defaultPosition = { x: 0, y: 0 };
-interface IGenerateUTXO extends IUtxo {
+interface IGenerateUTXO extends Utxo {
   redeemers?: Redeemers;
   transactionBox: TransactionsBox;
   position?: Vector2d;
@@ -48,9 +53,11 @@ const formatAddress = (address: string): Address | undefined => {
 const generateGraphicalUTXO = ({
   txHash,
   index,
-  assets,
+  bytes,
   address,
+  lovelace,
   datum,
+  assets,
   scriptRef,
   redeemers,
   transactionBox,
@@ -67,13 +74,14 @@ const generateGraphicalUTXO = ({
     (spend) =>
       spend.input.tx_hash + "#" + spend.input.index === txHash + "#" + index,
   );
-
   return {
-    utxoHash: txHash + "#" + index,
+    txHash: txHash + "#" + index,
     index,
-    assets,
+    bytes,
     address: formatAddress(address),
+    lovelace,
     datum,
+    assets,
     scriptRef,
     lines: [],
     pos: position,
@@ -88,7 +96,7 @@ export const parseTxToGraphical = (
   transactionBox: TransactionsBox,
 ): IGraphicalTransaction[] =>
   txFromCbors.map((cbor) => {
-    const inputsUTXO: IGraphicalUtxo[] = cbor.referenceInputs
+    const inputs: IGraphicalUtxo[] = cbor.referenceInputs
       .concat(cbor.inputs)
       .map((input) =>
         generateGraphicalUTXO({
@@ -100,7 +108,7 @@ export const parseTxToGraphical = (
         }),
       );
 
-    const outputsUTXO = cbor.outputs.map((output) =>
+    const outputs = cbor.outputs.map((output) =>
       generateGraphicalUTXO({
         ...output,
         transactionBox,
@@ -110,26 +118,12 @@ export const parseTxToGraphical = (
     const alias = existsTx ? existsTx.alias : "";
 
     return {
-      txHash: cbor.txHash,
+      ...cbor,
       pos: defaultPosition,
-      outputsUTXO,
-      inputsUTXO,
+      outputs,
+      inputs,
       producedLines: [],
       consumedLines: [],
-      blockHash: cbor.blockHash,
-      blockTxIndex: cbor.blockTxIndex,
-      blockHeight: cbor.blockHeight,
-      blockAbsoluteSlot: cbor.blockAbsoluteSlot,
-      mint: cbor.mints,
-      invalidBefore: cbor.invalidBefore,
-      invalidHereafter: cbor.invalidHereafter,
-      fee: cbor.fee,
-      withdrawals: cbor.withdrawals,
-      certificates: cbor.certificates,
-      scriptsSuccessful: cbor.scriptsSuccessful,
-      redeemers: cbor.redeemers,
-      metadata: cbor.metadata,
-      size: cbor.size,
       alias,
     };
   });
