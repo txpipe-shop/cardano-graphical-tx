@@ -35,7 +35,9 @@ interface IGenerateUTXO extends Utxo {
 const formatAddress = (address: string): Address | undefined => {
   let hexAddress = "";
   if (!isEmpty(address)) {
-    const result = bech32.decode(address, 108);
+    // TODO: Add base58 address decoding for byron addresses
+    const result = bech32.decodeUnsafe(address, 108);
+    if (!result) return undefined;
     const unwords = bech32.fromWords(result.words);
     hexAddress = Buffer.from(unwords).toString("hex");
   }

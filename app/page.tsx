@@ -104,9 +104,9 @@ export default function Index() {
     },
   ];
   return (
-    <div className="flex h-svh w-full justify-center">
+    <div className="flex h-full w-full justify-center">
       <Header />
-      <div className="flex h-full w-2/3 flex-col items-start justify-start gap-3 p-10 pt-32 text-center">
+      <div className="flex h-full w-2/3 flex-col items-start justify-start gap-3 p-10 py-32 text-center">
         <div className="text-5xl">About Us</div>
         <div className="mt-4 justify-center text-justify text-xl text-gray-500">
           Lace Anatomy renders transactions from CBOR and transaction hashes,

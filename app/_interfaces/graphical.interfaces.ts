@@ -22,6 +22,7 @@ export interface UtxoObject {
 }
 
 export interface IGraphicalTransaction {
+  era: string;
   txHash: string;
   fee: number;
   scriptsSuccessful: boolean;

@@ -60,7 +60,7 @@ export interface Certificates {
   json: string
 }
 export interface Collateral {
-  total?: string
+  total?: number
   collateralReturn: Array<Input>
 }
 export interface Witness {
