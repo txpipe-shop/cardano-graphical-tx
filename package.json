@@ -13,6 +13,7 @@
     "dev": "next dev",
     "build:docker": "docker build -t graphical-tx .",
     "run:docker": "docker run -p 3000:3000 graphical-tx",
+    "push:docker": "npm run build:docker && docker tag graphical-tx graphicaltx/cardano-graphical-tx:latest && docker push graphicaltx/cardano-graphical-tx:latest",
     "lint": "next lint",
     "clear": "rm -rf .next && rm -rf node_modules && rm -rf napi-pallas/target && rm -rf napi-pallas/node_modules",
     "start": "next start"
