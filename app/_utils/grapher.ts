@@ -189,7 +189,7 @@ export const existsMint =
     const selectedTx = getTransaction(transactionBox)(txHash);
     if (!selectedTx) return false;
     return selectedTx.mints.some(({ assetsPolicy }) =>
-      assetsPolicy.some((asset) => asset.amount && asset.amount > 0),
+      assetsPolicy.some((asset) => (asset.amount ?? 0) > 0),
     );
   };
 
@@ -198,6 +198,6 @@ export const existsBurn =
     const selectedTx = getTransaction(transactionBox)(txHash);
     if (!selectedTx) return false;
     return selectedTx.mints.some(({ assetsPolicy }) =>
-      assetsPolicy.some((asset) => asset.amount && asset.amount < 0),
+      assetsPolicy.some((asset) => (asset.amount ?? 0) < 0),
     );
   };
