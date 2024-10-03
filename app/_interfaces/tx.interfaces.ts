@@ -8,28 +8,6 @@ import type {
   Witnesses,
 } from "~/napi-pallas";
 
-export interface Redeemers {
-  spends: RedeemerSpend[];
-  mints: any[];
-  withdrawals: any[];
-}
-
-export interface RedeemerSpend {
-  script_hash: string;
-  input: {
-    tx_hash: string;
-    index: number;
-  };
-  input_index: number;
-  data: Data;
-  ex_units: number[]; // memory & steps
-}
-
-interface Data {
-  json: Record<string, any>;
-  bytes: string;
-}
-
 export interface ITransaction {
   era: string;
   txHash: string;
@@ -50,6 +28,5 @@ export interface ITransaction {
   certificates?: Certificates[];
   collateral?: Collateral;
   witnesses?: Witnesses;
-  redeemers?: Redeemers;
   size: number;
 }

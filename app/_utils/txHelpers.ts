@@ -13,12 +13,10 @@ import type {
   IGraphicalTransaction,
   IGraphicalUtxo,
   ITransaction,
-  Redeemers,
   TransactionsBox,
 } from "../_interfaces";
 
 interface IGenerateUTXO extends Utxo {
-  redeemers?: Redeemers;
   transactionBox: TransactionsBox;
   position?: Vector2d;
   isReferenceInput?: boolean;
@@ -61,7 +59,6 @@ const generateGraphicalUTXO = ({
   datum,
   assets,
   scriptRef,
-  redeemers,
   transactionBox,
   position = defaultPosition,
   distance = defaultPosition,
@@ -72,10 +69,6 @@ const generateGraphicalUTXO = ({
     return exist;
   }
 
-  const redeemer = redeemers?.spends.find(
-    (spend) =>
-      spend.input.tx_hash + "#" + spend.input.index === txHash + "#" + index,
-  );
   return {
     txHash: txHash + "#" + index,
     index,
@@ -89,7 +82,6 @@ const generateGraphicalUTXO = ({
     pos: position,
     distance,
     isReferenceInput,
-    redeemers: redeemer ?? undefined,
   };
 };
 

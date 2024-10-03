@@ -39,19 +39,31 @@ export const UtxoInfo = () => {
   const selectedUtxo = getUtxo(transactions)(selectedUtxoHash!);
   if (!selectedUtxo) return null;
 
-  const { scriptRef, txHash, assets, address, datum, redeemers } = selectedUtxo;
+  const { scriptRef, txHash, assets, address, datum } = selectedUtxo;
 
   const txTrim = trimString(txHash, 12);
   const addrTrim = trimString(address?.bech32 || "", 20);
+
+  const txWichInputIsSelectedUtxo = transactions.transactions.find((tx) =>
+    tx.inputs.some(
+      (input) =>
+        input.txHash === selectedUtxo.txHash &&
+        input.index === selectedUtxo.index,
+    ),
+  );
+
+  const redeemerInfo = txWichInputIsSelectedUtxo?.witnesses?.redeemers.find(
+    (redeemer) =>
+      redeemer.tag === "Spend" && redeemer.index === selectedUtxo.index,
+  );
 
   const disabledKeys = [
     !address ? "1" : "",
     !assets.length && selectedUtxo.lovelace <= 0 ? "2" : "",
     !datum ? "4" : "",
     !scriptRef ? "5" : "",
-    !redeemers ? "6" : "",
+    !redeemerInfo ? "6" : "",
   ].filter(Boolean);
-
   return (
     <>
       {!address && (
@@ -187,17 +199,21 @@ export const UtxoInfo = () => {
         </AccordionItem>
 
         <AccordionItem key="6" title="Redeemer">
-          <JSONModal
-            isOpen={isOpenRedeemer}
-            onOpenChange={onOpenRedeemerChange}
-            title="Redeemer"
-          >
-            <pre className="font-code bg-content2">
-              {JSONBIG.stringify(redeemers?.data, null, 2)}
-            </pre>
-          </JSONModal>
-          {redeemers && (
+          {redeemerInfo && (
             <>
+              <JSONModal
+                isOpen={isOpenRedeemer}
+                onOpenChange={onOpenRedeemerChange}
+                title="Redeemer"
+              >
+                <pre className="font-code bg-content2">
+                  {JSONBIG.stringify(
+                    JSON.parse(redeemerInfo?.dataJson),
+                    null,
+                    2,
+                  )}
+                </pre>
+              </JSONModal>
               <Card className="gap-2 overflow-x-hidden bg-content2 px-5 py-2 shadow-none">
                 <div className="absolute right-4">
                   <Image
@@ -208,16 +224,20 @@ export const UtxoInfo = () => {
                   />
                 </div>
                 <pre className="font-code overflow-x-auto">
-                  {JSONBIG.stringify(redeemers?.data, null, 2)}
+                  {JSONBIG.stringify(
+                    JSON.parse(redeemerInfo?.dataJson),
+                    null,
+                    2,
+                  )}
                 </pre>
               </Card>
               <Card className="mt-1 flex flex-row gap-2 overflow-x-hidden bg-content2 px-5 py-2 shadow-none">
                 <b>Memory:</b>
-                <p>{redeemers?.ex_units[0]}</p>
+                <p>{redeemerInfo.exUnits.mem}</p>
               </Card>
               <Card className="mt-1 flex flex-row gap-2 overflow-x-hidden bg-content2 px-5 py-2 shadow-none">
                 <b>Steps:</b>
-                <p>{redeemers?.ex_units[1]}</p>
+                <p>{redeemerInfo.exUnits.steps}</p>
               </Card>
             </>
           )}
