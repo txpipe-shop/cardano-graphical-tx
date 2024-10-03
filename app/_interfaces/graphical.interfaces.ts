@@ -9,7 +9,6 @@ import type {
   Withdrawal,
   Witnesses,
 } from "~/napi-pallas";
-import type { Redeemers, RedeemerSpend } from ".";
 
 export interface TransactionsBox {
   transactions: IGraphicalTransaction[];
@@ -43,7 +42,6 @@ export interface IGraphicalTransaction {
   certificates?: Certificates[];
   collateral?: Collateral;
   witnesses?: Witnesses;
-  redeemers?: Redeemers;
   size: number;
   alias: string;
 }
@@ -58,7 +56,6 @@ export interface IGraphicalUtxo {
   scriptRef?: string;
   assets: Assets[];
   isReferenceInput: boolean;
-  redeemers?: RedeemerSpend;
   pos: Vector2d;
   lines: (Konva.Line | null)[];
   distance: Vector2d;
