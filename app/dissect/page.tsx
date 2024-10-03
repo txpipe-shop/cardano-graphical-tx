@@ -1,6 +1,6 @@
 "use client";
 
-import { DissectSection, Header, Loading } from "../_components";
+import { DissectSection, Error, Header, Loading } from "../_components";
 import { useGraphical, useUI } from "../_contexts";
 import { isEmpty } from "../_utils";
 
@@ -8,21 +8,17 @@ export default function Index() {
   const { transactions } = useGraphical();
   const { loading, error } = useUI();
   return (
-    <>
+    <div>
       <Header />
       {!isEmpty(error) ? (
-        <div className="flex h-screen flex-col gap-3 p-10 pt-32 text-center">
-          Dissect Error: {error}
-        </div>
+        <Error action="dissecting" />
       ) : loading ? (
-        <div>
-          <Loading />
-        </div>
+        <Loading />
       ) : transactions.transactions[0] ? (
         <DissectSection tx={transactions.transactions[0]} />
       ) : (
-        <div>Look for tx</div>
+        <></>
       )}
-    </>
+    </div>
   );
 }

@@ -129,7 +129,7 @@ fn get_mints(tx: &MultiEraTx<'_>) -> Vec<Assets> {
 
 fn get_collaterals(tx: &MultiEraTx<'_>) -> Collateral {
   Collateral {
-    total: tx.total_collateral().map(|x| x.to_string()),
+    total: tx.total_collateral().map(|x| x as i64),
     collateral_return: tx
       .collateral()
       .iter()

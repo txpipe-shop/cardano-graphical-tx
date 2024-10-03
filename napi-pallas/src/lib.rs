@@ -76,7 +76,7 @@ pub struct Certificates {
 #[derive(Default)]
 #[napi(object)]
 pub struct Collateral {
-  pub total: Option<String>,
+  pub total: Option<i64>,
   pub collateral_return: Vec<Input>,
 }
 

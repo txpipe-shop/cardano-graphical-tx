@@ -45,7 +45,6 @@ export const setCBOR = async (
       transactions: newTransactionsList,
       utxos: newUtxosObject,
     });
-    setFetchError("");
   } catch (error) {
     console.error(`Error processing ${fromHash ? "hash" : "CBOR"}:`, error);
     setFetchError(`Error processing ${fromHash ? "hash" : "CBOR"}`);

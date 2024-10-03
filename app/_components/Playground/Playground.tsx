@@ -3,9 +3,9 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Layer, Stage } from "react-konva";
 import { useGraphical, useUI } from "~/app/_contexts";
 import { TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
+import { Error } from "../Error";
 import { Line, Transaction, Utxo } from "../Transaction";
 import { PlaygroundDefault } from "./PlaygroundDefault";
-import { PlaygroundError } from "./PlaygroundError";
 
 export function Playground() {
   const { transactions } = useGraphical();
@@ -60,7 +60,7 @@ export function Playground() {
     }
   };
 
-  if (error) return <PlaygroundError />;
+  if (error) return <Error action="fetching" />;
 
   return transactions.transactions.length ? (
     <Stage
