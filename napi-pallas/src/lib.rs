@@ -92,13 +92,14 @@ pub struct Witness {
 #[napi(object)]
 pub struct ExUnits {
   pub mem: i64,
-  pub steps: u32,
+  pub steps: i64,
 }
 
 #[derive(Default)]
 #[napi(object)]
 pub struct Redeemer {
   pub tag: String,
+  pub index: u32,
   pub data_json: String,
   pub ex_units: ExUnits,
 }
@@ -107,6 +108,7 @@ pub struct Redeemer {
 #[napi(object)]
 pub struct Witnesses {
   pub vkey_witnesses: Vec<Witness>,
+  pub redeemers: Vec<Redeemer>,
   pub plutus_data: Vec<Datum>,
   pub plutus_v1_scripts: Vec<String>,
   pub plutus_v2_scripts: Vec<String>,

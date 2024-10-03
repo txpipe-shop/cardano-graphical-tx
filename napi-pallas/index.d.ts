@@ -74,11 +74,13 @@ export interface ExUnits {
 }
 export interface Redeemer {
   tag: string
+  index: number
   dataJson: string
   exUnits: ExUnits
 }
 export interface Witnesses {
   vkeyWitnesses: Array<Witness>
+  redeemers: Array<Redeemer>
   plutusData: Array<Datum>
   plutusV1Scripts: Array<string>
   plutusV2Scripts: Array<string>
