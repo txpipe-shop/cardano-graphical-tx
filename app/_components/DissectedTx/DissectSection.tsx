@@ -11,6 +11,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     ttl,
     inputs,
     outputs,
+    withdrawals,
     mints,
     scriptsSuccessful,
     metadata,
@@ -26,8 +27,8 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     <div className="flex h-screen flex-col gap-0 overflow-auto p-10 pt-32">
       <h4 className="text-3xl">Valid CBOR data</h4>
       <P>Your HEX bytes were successfully decoded using the CBOR standard.</P>
+      <PropBlock title="Tx Hash" value={txHash} description={TOPICS.hash} />
       <div className={scriptsSuccessful ? "" : "hidden"}>
-        <PropBlock title="Tx Hash" value={txHash} description={TOPICS.hash} />
         <PropBlock title="Block Hash" value={blockHash?.toString()} />
         <PropBlock title="Block Index" value={blockTxIndex?.toString()} />
         <PropBlock title="Block Height" value={blockHeight?.toString()} />
@@ -41,7 +42,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
 
       <PropBlock title="Start" value={validityStart?.toString()} />
       <PropBlock
-        title="Time to live"
+        title="Time to Live"
         value={ttl?.toString()}
         description={TOPICS.ttl}
       />
@@ -161,6 +162,19 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         {inputs.filter((i) => i.isReferenceInput).length === 0 && (
           <EmptyBlock />
         )}
+      </blockquote>
+      <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-7">
+        <h4 className="text-3xl">Withdrawals</h4>
+        {withdrawals?.map(({ rawAddress, amount }, i) => (
+          <blockquote
+            className="mt-6 border-dashed py-4 md:border-l-4 md:px-7"
+            key={i}
+          >
+            <h4 className="text-3xl">Withdrawal</h4>
+            <PropBlock title="Raw Address" value={rawAddress} />
+            <PropBlock title="Amount" value={amount.toString()} />
+          </blockquote>
+        ))}
       </blockquote>
       <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-7">
         <h4 className="text-3xl">Transaction Mints</h4>

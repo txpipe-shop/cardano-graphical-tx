@@ -193,19 +193,21 @@ export const TxInfo = () => {
               key={index}
               className="flex flex-col bg-content2 px-5 py-2 shadow-none"
             >
-              <div className="mb-2 flex items-center">
+              <div className="mb-2 flex items-center justify-between">
                 <b>Raw Address:</b>&nbsp;
-                <span className="ml-1 mr-auto">
-                  {trimString(withdrawal.rawAddress, 13)}
-                </span>
-                <Image
-                  src={CopyIcon}
-                  alt="Copy"
-                  onClick={handleCopy(withdrawal.rawAddress)}
-                  className="ml-2 cursor-pointer"
-                />
+                <div className="flex">
+                  <span className="ml-1 mr-auto">
+                    {trimString(withdrawal.rawAddress, 12)}
+                  </span>
+                  <Image
+                    src={CopyIcon}
+                    alt="Copy"
+                    onClick={handleCopy(withdrawal.rawAddress)}
+                    className="ml-2 cursor-pointer"
+                  />
+                </div>
               </div>
-              <div className="flex items-center">
+              <div className="flex items-center justify-between pr-2">
                 <b>Amount:</b>&nbsp;
                 <span>{withdrawal.amount}</span>
               </div>

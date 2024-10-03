@@ -38,15 +38,6 @@ export function PropBlock({
   );
 }
 
-export function HexBlock(props: { name: string; value: string }) {
-  return (
-    <div className="mt-8 break-words rounded-lg border-2 border-green-700 bg-green-200 p-4 text-2xl shadow shadow-black">
-      <div className="text-sm text-green-800">{props.name}</div>
-      {props.value}
-    </div>
-  );
-}
-
 export function P(props: PropsWithChildren) {
   return <p className="text-xl text-gray-600">{props.children}</p>;
 }
