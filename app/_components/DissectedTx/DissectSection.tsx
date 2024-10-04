@@ -39,10 +39,6 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     { title: "Time to Live", value: ttl, description: TOPICS.ttl },
   ];
 
-  const vKeyWitnesses = witnesses?.vkeyWitnesses ?? [];
-  const plutusDataWitnesses = witnesses?.plutusData ?? [];
-  const certs = certificates ?? [];
-
   return (
     <div className="flex h-screen flex-col gap-0 overflow-auto p-10 pt-32">
       <Accordion
@@ -246,9 +242,9 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           title={<h4 className="text-3xl">Certificates</h4>}
           textValue="Certificates"
         >
-          {certs?.length > 0 ? (
+          {(certificates ?? [])?.length > 0 ? (
             <Accordion>
-              {certs.map(({ json }, i) => (
+              {(certificates ?? []).map(({ json }, i) => (
                 <AccordionItem
                   key={i}
                   title={<h4 className="text-2xl">Certificate {i + 1}</h4>}
@@ -264,19 +260,29 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             <EmptyBlock />
           )}
         </AccordionItem>
-
         <AccordionItem
           key="withdrawals"
           title={<h4 className="text-3xl">Withdrawals</h4>}
           textValue="Withdrawals"
         >
-          {withdrawals?.map(({ rawAddress, amount }, i) => (
-            <Section title="Withdrawal" key={i}>
-              <PropBlock title="Raw Address" value={rawAddress} />
-              <PropBlock title="Amount" value={amount} />
-            </Section>
-          ))}
-          {withdrawals?.length === 0 && <EmptyBlock />}
+          {(withdrawals ?? []).length > 0 ? (
+            <Accordion selectionMode="multiple">
+              {(withdrawals ?? []).map(({ rawAddress, amount }, i) => (
+                <AccordionItem
+                  key={i}
+                  title={<h4 className="text-2xl">Withdrawal {i + 1}</h4>}
+                  textValue={`Withdrawal ${i + 1}`}
+                >
+                  <Section title="Withdrawal Details">
+                    <PropBlock title="Raw Address" value={rawAddress} />
+                    <PropBlock title="Amount" value={amount} />
+                  </Section>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          ) : (
+            <EmptyBlock />
+          )}
         </AccordionItem>
         <AccordionItem
           key="mints"
@@ -378,36 +384,38 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           textValue="Witnesses"
           subtitle={<P>{TOPICS.witnesses}</P>}
         >
-          {vKeyWitnesses.length > 0 ? (
+          {(witnesses?.vkeyWitnesses ?? []).length > 0 ? (
             <Accordion selectionMode="multiple">
-              {vKeyWitnesses.map(({ hash, key, signature }, i) => (
-                <AccordionItem
-                  key={i}
-                  title={
-                    <h4 className="text-2xl">
-                      Verification Key Witness {i + 1}
-                    </h4>
-                  }
-                  textValue={`Verification Key Witness ${i + 1}`}
-                >
-                  <Section title="">
-                    <PropBlock
-                      title="Key"
-                      value={key}
-                      description={i == 0 ? TOPICS.vkey_witness : ""}
-                    />
-                    <PropBlock title="Hash" value={hash} />
-                    <PropBlock title="Signature" value={signature} />
-                  </Section>
-                </AccordionItem>
-              ))}
+              {(witnesses?.vkeyWitnesses ?? []).map(
+                ({ hash, key, signature }, i) => (
+                  <AccordionItem
+                    key={i}
+                    title={
+                      <h4 className="text-2xl">
+                        Verification Key Witness {i + 1}
+                      </h4>
+                    }
+                    textValue={`Verification Key Witness ${i + 1}`}
+                  >
+                    <Section title="">
+                      <PropBlock
+                        title="Key"
+                        value={key}
+                        description={i == 0 ? TOPICS.vkey_witness : ""}
+                      />
+                      <PropBlock title="Hash" value={hash} />
+                      <PropBlock title="Signature" value={signature} />
+                    </Section>
+                  </AccordionItem>
+                ),
+              )}
             </Accordion>
           ) : (
             <EmptyBlock title="Verification Key Witness" />
           )}
-          {plutusDataWitnesses.length > 0 ? (
+          {(witnesses?.plutusData ?? []).length > 0 ? (
             <Accordion selectionMode="multiple">
-              {plutusDataWitnesses.map(({ hash, bytes, json }, i) => (
+              {(witnesses?.plutusData ?? []).map(({ hash, bytes, json }, i) => (
                 <AccordionItem
                   key={i}
                   title={
