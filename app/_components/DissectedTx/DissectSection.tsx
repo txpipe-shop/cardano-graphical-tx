@@ -41,6 +41,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
 
   const vKeyWitnesses = witnesses?.vkeyWitnesses ?? [];
   const plutusDataWitnesses = witnesses?.plutusData ?? [];
+  const certs = certificates ?? [];
 
   return (
     <div className="flex h-screen flex-col gap-0 overflow-auto p-10 pt-32">
@@ -242,16 +243,28 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         </AccordionItem>
         <AccordionItem
           key="certificates"
-          title={<h4 className="f text-3xl">Certificates</h4>}
+          title={<h4 className="text-3xl">Certificates</h4>}
           textValue="Certificates"
         >
-          {certificates?.map(({ json }, i) => (
-            <Section title="Certificate" titleClass="text-blue-500" key={i}>
-              <PropBlock title="JSON" value={json} />
-            </Section>
-          ))}
-          {certificates?.length === 0 && <EmptyBlock />}
+          {certs?.length > 0 ? (
+            <Accordion>
+              {certs.map(({ json }, i) => (
+                <AccordionItem
+                  key={i}
+                  title={<h4 className="text-2xl">Certificate {i + 1}</h4>}
+                  textValue={`Certificate ${i + 1}`}
+                >
+                  <Section title="">
+                    <PropBlock title="JSON" value={json} />
+                  </Section>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          ) : (
+            <EmptyBlock />
+          )}
         </AccordionItem>
+
         <AccordionItem
           key="withdrawals"
           title={<h4 className="text-3xl">Withdrawals</h4>}
@@ -271,28 +284,47 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           textValue="Transaction Mints"
           subtitle={<P>{TOPICS.mints}</P>}
         >
-          {mints.map(({ policyId, assetsPolicy }, i) => {
-            const mint = assetsPolicy.find((a) => a.amount && a.amount > 0);
-            return (
-              <Section title="Policy ID" key={i}>
-                <PropBlock
-                  title="Policy Id"
-                  value={policyId}
-                  color={mint ? "green" : "red"}
-                />
-                {assetsPolicy.map(
-                  ({ assetName, assetNameAscii, amount }, i) => (
-                    <Section title="Asset" key={i}>
-                      <PropBlock title="Asset Name" value={assetName} />
-                      <PropBlock title="Asset Name" value={assetNameAscii} />
-                      <PropBlock title="Amount" value={amount} />
+          {mints.length > 0 ? (
+            <Accordion>
+              {mints.map(({ policyId, assetsPolicy }, i) => {
+                const mint = assetsPolicy.find((a) => a.amount && a.amount > 0);
+                return (
+                  <AccordionItem
+                    key={i}
+                    title={
+                      <h4 className="text-2xl">
+                        {mint ? "Minted" : "Burned"} token {i + 1}
+                      </h4>
+                    }
+                    textValue={`Token ${i + 1}`}
+                  >
+                    <Section title="">
+                      <PropBlock
+                        title="Policy Id"
+                        value={policyId}
+                        color={mint ? "green" : "red"}
+                      />
+
+                      {assetsPolicy.map(
+                        ({ assetName, assetNameAscii, amount }, j) => (
+                          <Section title="Asset" key={j}>
+                            <PropBlock title="Asset Name" value={assetName} />
+                            <PropBlock
+                              title="Asset Name (ASCII)"
+                              value={assetNameAscii}
+                            />
+                            <PropBlock title="Amount" value={amount} />
+                          </Section>
+                        ),
+                      )}
                     </Section>
-                  ),
-                )}
-              </Section>
-            );
-          })}
-          {mints.length === 0 && <PropBlock value="No minting or burning" />}
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+          ) : (
+            <PropBlock value="No minting or burning" />
+          )}
         </AccordionItem>
         <AccordionItem
           key="metadata"
