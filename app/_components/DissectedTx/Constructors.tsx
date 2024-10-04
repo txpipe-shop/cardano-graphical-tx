@@ -17,7 +17,7 @@ export function PropBlock({
   color?: "green" | "red";
 }) {
   return (
-    <div className="mb-4">
+    <div className="mb-4 w-full">
       <P>{description}</P>
       {value?.toString() ? (
         <div
@@ -62,7 +62,7 @@ interface ISection {
 }
 
 export const Section = ({ title, children, titleClass }: ISection) => (
-  <blockquote className={`my-6 border-dashed md:border-l-4 md:px-7`}>
+  <blockquote className={`mt-4 border-dashed md:border-l-4 md:px-4`}>
     <h4 className={`text-3xl ${titleClass || ""}`}>{title}</h4>
     {children}
   </blockquote>

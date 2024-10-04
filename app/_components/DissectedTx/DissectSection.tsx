@@ -40,7 +40,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
 
   return (
     <div className="flex h-screen flex-col gap-0 overflow-auto p-10 pt-32">
-      <h4 className="text-3xl">Valid CBOR data</h4>
+      <h4 className="text-4xl">Valid CBOR data</h4>
       <P>Your HEX bytes were successfully decoded using the CBOR standard.</P>
       {propsBlocks.map(({ title, value, description }, i) => (
         <PropBlock
@@ -51,7 +51,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         />
       ))}
 
-      <h4 className="text-3xl font-bold text-blue-500 underline decoration-solid underline-offset-2">
+      <h4 className="text-4xl font-bold text-blue-500 underline decoration-solid underline-offset-2">
         Transaction Inputs
       </h4>
       <P>{TOPICS.inputs}</P>
@@ -73,7 +73,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         ))}
       {inputs.filter((i) => !i.isReferenceInput).length === 0 && <EmptyBlock />}
 
-      <h4 className="text-3xl font-bold text-red-500 underline decoration-solid underline-offset-2">
+      <h4 className="pt-10 text-4xl font-bold text-red-500 underline decoration-solid underline-offset-2">
         Transaction Outputs
       </h4>
       <P>{TOPICS.outputs}</P>
@@ -99,7 +99,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
               description={TOPICS.outputs_lovelace}
             />
             {assets.map(({ policyId, assetsPolicy }, i) => (
-              <Section key={i} title="Assets">
+              <Section key={i} title="Policy Assets">
                 <PropBlock title="Policy Id" value={policyId} />
                 {assetsPolicy.map(
                   ({ assetName, assetNameAscii, amount }, i) => (
@@ -120,7 +120,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
       ))}
       {outputs.length === 0 && <EmptyBlock />}
 
-      <h4 className="text-3xl font-bold text-blue-500 underline decoration-dashed underline-offset-2">
+      <h4 className="pt-10 text-4xl font-bold text-blue-500 underline decoration-dashed underline-offset-2">
         Reference Inputs
       </h4>
       <P>{TOPICS.reference_inputs}</P>
@@ -142,15 +142,15 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         ))}
       {inputs.filter((i) => i.isReferenceInput).length === 0 && <EmptyBlock />}
 
-      <h4 className="text-3xl">Certificates</h4>
+      <h4 className="pt-10 text-4xl">Certificates</h4>
       {certificates?.map(({ json }, i) => (
         <Section title="Certificate" titleClass="text-blue-500" key={i}>
-          <PropBlock title="JSON" value={json} />
+          <PropBlock title="JSON" value={JSON.parse(json)} />
         </Section>
       ))}
       {certificates?.length === 0 && <EmptyBlock />}
 
-      <h4 className="text-3xl">Withdrawals</h4>
+      <h4 className="pt-10 text-4xl">Withdrawals</h4>
       {withdrawals?.map(({ rawAddress, amount }, i) => (
         <Section title="Withdrawal" key={i}>
           <PropBlock title="Raw Address" value={rawAddress} />
@@ -159,7 +159,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
       ))}
       {withdrawals?.length === 0 && <EmptyBlock />}
 
-      <h4 className="text-3xl">Transaction Mints</h4>
+      <h4 className="pt-10 text-4xl">Transaction Mints</h4>
       <P>{TOPICS.mints}</P>
       {mints.map(({ policyId, assetsPolicy }, i) => {
         const mint = assetsPolicy.find((a) => a.amount && a.amount > 0);
@@ -182,7 +182,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
       })}
       {mints.length === 0 && <PropBlock value="No minting or burning" />}
 
-      <h4 className="text-3xl">Transaction Metadata</h4>
+      <h4 className="pt-10 text-4xl">Transaction Metadata</h4>
       <P>{TOPICS.metadata}</P>
       {metadata?.map(({ label, jsonMetadata }, i) => (
         <Section title="Metadatum" key={i}>
@@ -200,63 +200,77 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
       ))}
       {metadata?.length === 0 && <EmptyBlock />}
 
-      <blockquote className="">
-        <h4 className="text-3xl">Collateral</h4>
-        {collateral?.collateralReturn.map(({ txHash, index }, i) => (
-          <blockquote className="" key={i}>
-            <h4 className="text-3xl">Collateral Return</h4>
-            <PropBlock
-              title="UtxoRef Hash"
-              value={txHash}
-              description={i == 0 ? TOPICS.inputs_hash : ""}
-            />
-            <PropBlock
-              title="UtxoRef Index"
-              value={index}
-              description={i == 0 ? TOPICS.inputs_index : ""}
-            />
-          </blockquote>
-        ))}
-        <PropBlock title="Total" value={collateral?.total} />
-      </blockquote>
+      <h4 className="pt-10 text-4xl">Transaction Metadata</h4>
+      {collateral?.collateralReturn.map(({ txHash, index }, i) => (
+        <Section title="Collateral Return" key={i}>
+          <PropBlock
+            title="UtxoRef Hash"
+            value={txHash}
+            description={i == 0 ? TOPICS.inputs_hash : ""}
+          />
+          <PropBlock
+            title="UtxoRef Index"
+            value={index}
+            description={i == 0 ? TOPICS.inputs_index : ""}
+          />
+        </Section>
+      ))}
+      <PropBlock title="Total" value={collateral?.total} />
 
-      <h4 className="text-3xl">Witnesses</h4>
+      <h4 className="pt-10 text-4xl">Witnesses</h4>
       <P>{TOPICS.witnesses}</P>
+      <Section title="">
+        {witnesses?.vkeyWitnesses.map(({ hash, key, signature }, i) => (
+          <Section title="Verification Key Witness" key={i}>
+            <PropBlock
+              title="Key"
+              value={key}
+              description={i == 0 ? TOPICS.vkey_witness : ""}
+            />
+            <PropBlock title="Hash" value={hash} />
+            <PropBlock title="Signature" value={signature} />
+          </Section>
+        ))}
+        {witnesses?.vkeyWitnesses.length === 0 && (
+          <EmptyBlock title="Verification Key Witness" />
+        )}
 
-      {witnesses?.vkeyWitnesses.map(({ hash, key, signature }, i) => (
-        <Section title="Verification Key Witness" key={i}>
-          <PropBlock
-            title="Key"
-            value={key}
-            description={i == 0 ? TOPICS.vkey_witness : ""}
-          />
-          <PropBlock title="Hash" value={hash} />
-          <PropBlock title="Signature" value={signature} />
-        </Section>
-      ))}
-      {witnesses?.vkeyWitnesses.length === 0 && (
-        <EmptyBlock title="Verification Key Witness" />
-      )}
+        {witnesses?.redeemers.map(({ tag, index, dataJson, exUnits }, i) => (
+          <Section title="Redeemers" key={i}>
+            <PropBlock title="Tag" value={tag} />
+            <PropBlock title="Index" value={index} />
+            <PropBlock
+              title="Data"
+              value={JSONBIG.stringify(JSON.parse(dataJson), null, 2)}
+            />
+            <PropBlock title="Ex Mem Units" value={exUnits.mem} />
+            <PropBlock title="Ex Steps Units" value={exUnits.steps} />
+          </Section>
+        ))}
+        {witnesses?.redeemers.length === 0 && (
+          <EmptyBlock title="Verification Key Witness" />
+        )}
 
-      {witnesses?.plutusData.map(({ hash, bytes, json }, i) => (
-        <Section title="Transaction datum" key={i}>
-          <P>{TOPICS.datum}</P>
-          <PropBlock
-            title="Hash"
-            value={hash}
-            description={i == 0 ? TOPICS.datum_hash : ""}
-          />
-          <PropBlock title="Bytes" value={bytes} />
-          <PropBlock
-            title="JSON"
-            value={json}
-            description={i == 0 ? TOPICS.datum_json : ""}
-          />
-        </Section>
-      ))}
-      {witnesses?.plutusData.length === 0 && (
-        <EmptyBlock title="Transaction Datum" />
-      )}
+        {witnesses?.plutusData.map(({ hash, bytes, json }, i) => (
+          <Section title="Transaction datum" key={i}>
+            <P>{TOPICS.datum}</P>
+            <PropBlock
+              title="Hash"
+              value={hash}
+              description={i == 0 ? TOPICS.datum_hash : ""}
+            />
+            <PropBlock title="Bytes" value={bytes} />
+            <PropBlock
+              title="JSON"
+              value={json}
+              description={i == 0 ? TOPICS.datum_json : ""}
+            />
+          </Section>
+        ))}
+        {witnesses?.plutusData.length === 0 && (
+          <EmptyBlock title="Transaction Datum" />
+        )}
+      </Section>
     </div>
   );
 }
