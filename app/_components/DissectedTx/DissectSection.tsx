@@ -39,9 +39,27 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     { title: "Time to Live", value: ttl, description: TOPICS.ttl },
   ];
 
+  const vKeyWitnesses = witnesses?.vkeyWitnesses ?? [];
+  const plutusDataWitnesses = witnesses?.plutusData ?? [];
+
   return (
     <div className="flex h-screen flex-col gap-0 overflow-auto p-10 pt-32">
-      <Accordion defaultExpandedKeys={["valid-cbor"]}>
+      <Accordion
+        selectionMode="multiple"
+        variant="splitted"
+        defaultExpandedKeys={[
+          "valid-cbor",
+          "inputs",
+          "outputs",
+          "reference-inputs",
+          "certificates",
+          "withdrawals",
+          "mints",
+          "metadata",
+          "collateral",
+          "witnesses",
+        ]}
+      >
         <AccordionItem
           key="valid-cbor"
           title={<h4 className="text-3xl">Valid CBOR data</h4>}
@@ -61,9 +79,8 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             />
           ))}
         </AccordionItem>
-      </Accordion>
-      <Accordion>
         <AccordionItem
+          key="inputs"
           title={
             <h4 className="text-3xl font-bold text-blue-500 underline decoration-solid underline-offset-2">
               Transaction Inputs
@@ -72,29 +89,39 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           subtitle={<P>{TOPICS.inputs}</P>}
           textValue="Transaction Inputs"
         >
-          {inputs
-            .filter((i) => !i.isReferenceInput)
-            .map(({ txHash, index }, i) => (
-              <Section key={i} title="Input" titleClass="text-blue-500">
-                <PropBlock
-                  title="UtxoRef Hash"
-                  description={i == 0 ? TOPICS.inputs_hash : ""}
-                  value={txHash}
-                />
-                <PropBlock
-                  title="UtxoRef Index"
-                  description={i == 0 ? TOPICS.inputs_index : ""}
-                  value={index}
-                />
-              </Section>
-            ))}
-          {inputs.filter((i) => !i.isReferenceInput).length === 0 && (
+          {inputs.filter((i) => !i.isReferenceInput).length > 0 ? (
+            <Accordion selectionMode="multiple">
+              {inputs
+                .filter((i) => !i.isReferenceInput)
+                .map(({ txHash, index }, i) => (
+                  <AccordionItem
+                    key={i}
+                    title={
+                      <h4 className="text-2xl text-blue-500">Input {i + 1}</h4>
+                    }
+                    textValue={`Input ${i + 1}`}
+                  >
+                    <Section title="">
+                      <PropBlock
+                        title="UtxoRef Hash"
+                        description={i == 0 ? TOPICS.inputs_hash : ""}
+                        value={txHash}
+                      />
+                      <PropBlock
+                        title="UtxoRef Index"
+                        description={i == 0 ? TOPICS.inputs_index : ""}
+                        value={index}
+                      />
+                    </Section>
+                  </AccordionItem>
+                ))}
+            </Accordion>
+          ) : (
             <EmptyBlock />
           )}
         </AccordionItem>
-      </Accordion>
-      <Accordion>
         <AccordionItem
+          key="outputs"
           title={
             <h4 className="text-3xl font-bold text-red-500 underline decoration-solid underline-offset-2">
               Transaction Outputs
@@ -103,56 +130,75 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           subtitle={<P>{TOPICS.outputs}</P>}
           textValue="Transaction Outputs"
         >
-          {outputs.map(({ txHash, index, address, lovelace, assets }, i) => (
-            <Section title="Output" titleClass="text-red-500" key={i}>
-              <Section title="">
-                <PropBlock title="Tx Hash" value={txHash} />
-              </Section>
-              <Section title="">
-                <PropBlock title="Output Index" value={index} />
-              </Section>
-              <Section title="Address">
-                <PropBlock
-                  title="Bech32"
-                  value={address?.bech32}
-                  description={TOPICS.outputs_address}
-                />
-                <PropBlock title="Header Type" value={address?.headerType} />
-                <PropBlock title="Kind" value={address?.kind} />
-                <PropBlock title="Network Type" value={address?.netType} />
-                <PropBlock title="Payment" value={address?.payment} />
-              </Section>
-              <Section title="Assets">
-                <PropBlock
-                  title="Lovelace"
-                  value={lovelace}
-                  description={TOPICS.outputs_lovelace}
-                />
-                {assets.map(({ policyId, assetsPolicy }, j) => (
-                  <Section key={j} title="Assets">
-                    <PropBlock title="Policy Id" value={policyId} />
-                    {assetsPolicy.map(
-                      ({ assetName, assetNameAscii, amount }, k) => (
-                        <Section title="Asset" key={k}>
-                          <PropBlock title="Asset Name" value={assetName} />
-                          <PropBlock
-                            title="Asset Name (ASCII)"
-                            value={assetNameAscii}
-                          />
-                          <PropBlock title="Amount" value={amount} />
-                        </Section>
-                      ),
-                    )}
-                  </Section>
-                ))}
-              </Section>
-            </Section>
-          ))}
-          {outputs.length === 0 && <EmptyBlock />}
+          {outputs.length > 0 ? (
+            <Accordion selectionMode="multiple">
+              {outputs.map(
+                ({ txHash, index, address, lovelace, assets }, i) => (
+                  <AccordionItem
+                    key={i}
+                    title={
+                      <h4 className="text-2xl text-red-500">Output {i + 1}</h4>
+                    }
+                    textValue={`Output ${i + 1}`}
+                  >
+                    <Section title="">
+                      <PropBlock title="Tx Hash" value={txHash} />
+                      <PropBlock title="Output Index" value={index} />
+                      <Section title="Address">
+                        <PropBlock
+                          title="Bech32"
+                          value={address?.bech32}
+                          description={TOPICS.outputs_address}
+                        />
+                        <PropBlock
+                          title="Header Type"
+                          value={address?.headerType}
+                        />
+                        <PropBlock title="Kind" value={address?.kind} />
+                        <PropBlock
+                          title="Network Type"
+                          value={address?.netType}
+                        />
+                        <PropBlock title="Payment" value={address?.payment} />
+                      </Section>
+                      <Section title="Assets">
+                        <PropBlock
+                          title="Lovelace"
+                          value={lovelace}
+                          description={TOPICS.outputs_lovelace}
+                        />
+                        {assets.map(({ policyId, assetsPolicy }, j) => (
+                          <Section key={j} title="Assets">
+                            <PropBlock title="Policy Id" value={policyId} />
+                            {assetsPolicy.map(
+                              ({ assetName, assetNameAscii, amount }, k) => (
+                                <Section title="Asset" key={k}>
+                                  <PropBlock
+                                    title="Asset Name"
+                                    value={assetName}
+                                  />
+                                  <PropBlock
+                                    title="Asset Name (ASCII)"
+                                    value={assetNameAscii}
+                                  />
+                                  <PropBlock title="Amount" value={amount} />
+                                </Section>
+                              ),
+                            )}
+                          </Section>
+                        ))}
+                      </Section>
+                    </Section>
+                  </AccordionItem>
+                ),
+              )}
+            </Accordion>
+          ) : (
+            <EmptyBlock />
+          )}
         </AccordionItem>
-      </Accordion>
-      <Accordion>
         <AccordionItem
+          key="reference-inputs"
           title={
             <h4 className="text-3xl font-bold text-blue-500 underline decoration-dashed underline-offset-2">
               Reference Inputs
@@ -161,29 +207,41 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           subtitle={<P>{TOPICS.reference_inputs}</P>}
           textValue="Reference Inputs"
         >
-          {inputs
-            .filter((i) => i.isReferenceInput)
-            .map(({ txHash, index }, i) => (
-              <Section title="Input" titleClass="text-blue-500" key={i}>
-                <PropBlock
-                  title="UtxoRef Hash"
-                  value={txHash}
-                  description={i == 0 ? TOPICS.inputs_hash : ""}
-                />
-                <PropBlock
-                  title="UtxoRef Index"
-                  value={index}
-                  description={i == 0 ? TOPICS.inputs_index : ""}
-                />
-              </Section>
-            ))}
-          {inputs.filter((i) => i.isReferenceInput).length === 0 && (
+          {inputs.filter((i) => i.isReferenceInput).length > 0 ? (
+            <Accordion selectionMode="multiple">
+              {inputs
+                .filter((i) => i.isReferenceInput)
+                .map(({ txHash, index }, i) => (
+                  <AccordionItem
+                    key={i}
+                    title={
+                      <h4 className="text-2xl text-blue-500 underline decoration-dashed underline-offset-2">
+                        Reference Input {i + 1}
+                      </h4>
+                    }
+                    textValue={`Reference Input ${i + 1}`}
+                  >
+                    <Section title="">
+                      <PropBlock
+                        title="UtxoRef Hash"
+                        value={txHash}
+                        description={i == 0 ? TOPICS.inputs_hash : ""}
+                      />
+                      <PropBlock
+                        title="UtxoRef Index"
+                        value={index}
+                        description={i == 0 ? TOPICS.inputs_index : ""}
+                      />
+                    </Section>
+                  </AccordionItem>
+                ))}
+            </Accordion>
+          ) : (
             <EmptyBlock />
           )}
         </AccordionItem>
-      </Accordion>
-      <Accordion>
         <AccordionItem
+          key="certificates"
           title={<h4 className="f text-3xl">Certificates</h4>}
           textValue="Certificates"
         >
@@ -194,9 +252,8 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           ))}
           {certificates?.length === 0 && <EmptyBlock />}
         </AccordionItem>
-      </Accordion>
-      <Accordion>
         <AccordionItem
+          key="withdrawals"
           title={<h4 className="text-3xl">Withdrawals</h4>}
           textValue="Withdrawals"
         >
@@ -208,9 +265,8 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           ))}
           {withdrawals?.length === 0 && <EmptyBlock />}
         </AccordionItem>
-      </Accordion>
-      <Accordion>
         <AccordionItem
+          key="mints"
           title={<h4 className="text-3xl">Transaction Mints</h4>}
           textValue="Transaction Mints"
           subtitle={<P>{TOPICS.mints}</P>}
@@ -238,9 +294,8 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           })}
           {mints.length === 0 && <PropBlock value="No minting or burning" />}
         </AccordionItem>
-      </Accordion>
-      <Accordion>
         <AccordionItem
+          key="metadata"
           title={<h4 className="text-3xl">Transaction Metadata</h4>}
           textValue="Transaction Metadata"
           subtitle={<P>{TOPICS.metadata}</P>}
@@ -261,9 +316,8 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           ))}
           {metadata?.length === 0 && <EmptyBlock />}
         </AccordionItem>
-      </Accordion>
-      <Accordion>
         <AccordionItem
+          key="collateral"
           title={<h4 className="text-3xl">Collateral</h4>}
           textValue="Collateral"
         >
@@ -286,44 +340,67 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             <PropBlock title="Total" value={collateral?.total} />
           </blockquote>
         </AccordionItem>
-      </Accordion>
-      <Accordion>
         <AccordionItem
+          key="witnesses"
           title={<h4 className="text-3xl">Witnesses</h4>}
           textValue="Witnesses"
           subtitle={<P>{TOPICS.witnesses}</P>}
         >
-          {witnesses?.vkeyWitnesses.map(({ hash, key, signature }, i) => (
-            <Section title="Verification Key Witness" key={i}>
-              <PropBlock
-                title="Key"
-                value={key}
-                description={i == 0 ? TOPICS.vkey_witness : ""}
-              />
-              <PropBlock title="Hash" value={hash} />
-              <PropBlock title="Signature" value={signature} />
-            </Section>
-          ))}
-          {witnesses?.vkeyWitnesses.length === 0 && (
+          {vKeyWitnesses.length > 0 ? (
+            <Accordion selectionMode="multiple">
+              {vKeyWitnesses.map(({ hash, key, signature }, i) => (
+                <AccordionItem
+                  key={i}
+                  title={
+                    <h4 className="text-2xl">
+                      Verification Key Witness {i + 1}
+                    </h4>
+                  }
+                  textValue={`Verification Key Witness ${i + 1}`}
+                >
+                  <Section title="">
+                    <PropBlock
+                      title="Key"
+                      value={key}
+                      description={i == 0 ? TOPICS.vkey_witness : ""}
+                    />
+                    <PropBlock title="Hash" value={hash} />
+                    <PropBlock title="Signature" value={signature} />
+                  </Section>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          ) : (
             <EmptyBlock title="Verification Key Witness" />
           )}
-          {witnesses?.plutusData.map(({ hash, bytes, json }, i) => (
-            <Section title="Transaction datum" key={i}>
-              <P>{TOPICS.datum}</P>
-              <PropBlock
-                title="Hash"
-                value={hash}
-                description={i == 0 ? TOPICS.datum_hash : ""}
-              />
-              <PropBlock title="Bytes" value={bytes} />
-              <PropBlock
-                title="JSON"
-                value={json}
-                description={i == 0 ? TOPICS.datum_json : ""}
-              />
-            </Section>
-          ))}
-          {witnesses?.plutusData.length === 0 && (
+          {plutusDataWitnesses.length > 0 ? (
+            <Accordion selectionMode="multiple">
+              {plutusDataWitnesses.map(({ hash, bytes, json }, i) => (
+                <AccordionItem
+                  key={i}
+                  title={
+                    <h4 className="text-2xl">Transaction Datum {i + 1}</h4>
+                  }
+                  textValue={`Transaction Datum ${i + 1}`}
+                >
+                  <Section title="">
+                    <P>{TOPICS.datum}</P>
+                    <PropBlock
+                      title="Hash"
+                      value={hash}
+                      description={i === 0 ? TOPICS.datum_hash : ""}
+                    />
+                    <PropBlock title="Bytes" value={bytes} />
+                    <PropBlock
+                      title="JSON"
+                      value={json}
+                      description={i === 0 ? TOPICS.datum_json : ""}
+                    />
+                  </Section>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          ) : (
             <EmptyBlock title="Transaction Datum" />
           )}
         </AccordionItem>
