@@ -1,5 +1,3 @@
-import type { PropsWithChildren } from "react";
-
 export type TopicMeta = {
   title: string;
   description?: React.ReactElement;
@@ -18,7 +16,7 @@ export function PropBlock({
 }) {
   return (
     <div className="mb-4 w-full">
-      <P>{description}</P>
+      <p className="text-xl text-gray-600">{description}</p>
       {value?.toString() ? (
         <div
           className={
@@ -36,10 +34,6 @@ export function PropBlock({
   );
 }
 
-export function P(props: PropsWithChildren) {
-  return <p className="text-xl text-gray-600">{props.children}</p>;
-}
-
 export function EmptyBlock({
   title,
   description,
@@ -54,16 +48,3 @@ export function EmptyBlock({
     </div>
   );
 }
-
-interface ISection {
-  title: string;
-  children: React.ReactNode;
-  titleClass?: string;
-}
-
-export const Section = ({ title, children, titleClass }: ISection) => (
-  <blockquote className={`mt-4 border-dashed md:border-l-4 md:px-4`}>
-    <h4 className={`text-3xl ${titleClass || ""}`}>{title}</h4>
-    {children}
-  </blockquote>
-);
