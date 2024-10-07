@@ -87,7 +87,14 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           textValue="Transaction Inputs"
         >
           {inputs.filter((i) => !i.isReferenceInput).length > 0 ? (
-            <Accordion selectionMode="multiple">
+            <Accordion
+              selectionMode="multiple"
+              defaultExpandedKeys={[
+                ...Array(
+                  inputs.filter((i) => !i.isReferenceInput).length + 1,
+                ).keys(),
+              ].map(String)}
+            >
               {inputs
                 .filter((i) => !i.isReferenceInput)
                 .map(({ txHash, index }, i) => (
@@ -128,7 +135,12 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           textValue="Transaction Outputs"
         >
           {outputs.length > 0 ? (
-            <Accordion selectionMode="multiple">
+            <Accordion
+              selectionMode="multiple"
+              defaultExpandedKeys={[...Array(outputs.length + 1).keys()].map(
+                String,
+              )}
+            >
               {outputs.map(
                 ({ txHash, index, address, lovelace, assets }, i) => (
                   <AccordionItem
@@ -205,7 +217,14 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           textValue="Reference Inputs"
         >
           {inputs.filter((i) => i.isReferenceInput).length > 0 ? (
-            <Accordion selectionMode="multiple">
+            <Accordion
+              selectionMode="multiple"
+              defaultExpandedKeys={[
+                ...Array(
+                  inputs.filter((i) => i.isReferenceInput).length + 1,
+                ).keys(),
+              ].map(String)}
+            >
               {inputs
                 .filter((i) => i.isReferenceInput)
                 .map(({ txHash, index }, i) => (
@@ -243,11 +262,20 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           textValue="Certificates"
         >
           {(certificates ?? [])?.length > 0 ? (
-            <Accordion>
+            <Accordion
+              selectionMode="multiple"
+              defaultExpandedKeys={[
+                ...Array((certificates ?? []).length + 1).keys(),
+              ].map(String)}
+            >
               {(certificates ?? []).map(({ json }, i) => (
                 <AccordionItem
                   key={i}
-                  title={<h4 className="text-2xl">Certificate {i + 1}</h4>}
+                  title={
+                    <h4 className="text-2xl text-blue-500">
+                      Certificate {i + 1}
+                    </h4>
+                  }
                   textValue={`Certificate ${i + 1}`}
                 >
                   <Section title="">
@@ -266,7 +294,12 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           textValue="Withdrawals"
         >
           {(withdrawals ?? []).length > 0 ? (
-            <Accordion selectionMode="multiple">
+            <Accordion
+              selectionMode="multiple"
+              defaultExpandedKeys={[
+                ...Array((withdrawals ?? []).length + 1).keys(),
+              ].map(String)}
+            >
               {(withdrawals ?? []).map(({ rawAddress, amount }, i) => (
                 <AccordionItem
                   key={i}
@@ -291,7 +324,12 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           subtitle={<P>{TOPICS.mints}</P>}
         >
           {mints.length > 0 ? (
-            <Accordion>
+            <Accordion
+              selectionMode="multiple"
+              defaultExpandedKeys={[...Array(mints.length + 1).keys()].map(
+                String,
+              )}
+            >
               {mints.map(({ policyId, assetsPolicy }, i) => {
                 const mint = assetsPolicy.find((a) => a.amount && a.amount > 0);
                 return (
@@ -385,7 +423,12 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           subtitle={<P>{TOPICS.witnesses}</P>}
         >
           {(witnesses?.vkeyWitnesses ?? []).length > 0 ? (
-            <Accordion selectionMode="multiple">
+            <Accordion
+              selectionMode="multiple"
+              defaultExpandedKeys={[
+                ...Array((witnesses?.vkeyWitnesses ?? []).length + 1).keys(),
+              ].map(String)}
+            >
               {(witnesses?.vkeyWitnesses ?? []).map(
                 ({ hash, key, signature }, i) => (
                   <AccordionItem
@@ -414,7 +457,12 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             <EmptyBlock title="Verification Key Witness" />
           )}
           {(witnesses?.plutusData ?? []).length > 0 ? (
-            <Accordion selectionMode="multiple">
+            <Accordion
+              selectionMode="multiple"
+              defaultExpandedKeys={[
+                ...Array((witnesses?.plutusData ?? []).length + 1).keys(),
+              ].map(String)}
+            >
               {(witnesses?.plutusData ?? []).map(({ hash, bytes, json }, i) => (
                 <AccordionItem
                   key={i}
