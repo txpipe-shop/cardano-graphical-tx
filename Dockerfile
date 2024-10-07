@@ -7,10 +7,14 @@ RUN apk add python3 curl gcc make musl-dev build-base cairo-dev libjpeg-turbo-de
 # Install cargo
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 # Add cargo to path
-ENV PATH="/root/.cargo/bin:${PATH}"
+ENV PATH "/root/.cargo/bin:${PATH}"
+
+# Skip environment variable validation at buildtime
+ENV SKIP_VALIDATION true
 
 # Copy repo
 COPY . .
+
 
 # build and installs deps
 RUN yarn build:pallas
@@ -22,6 +26,8 @@ RUN yarn build
 FROM node:18-alpine
 WORKDIR /app
 
+# Validate environment variables at runtime
+ENV SKIP_VALIDATION false
 
 # Copy from builder image
 COPY --from=builder /app/package.json ./package.json
