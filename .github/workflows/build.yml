@@ -32,4 +32,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/cardano-graphical-tx:${{ env.SHA_SHORT }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/cardano-graphical-tx:${{ env.SHA_SHORT }}
