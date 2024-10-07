@@ -12,6 +12,12 @@ ENV PATH "/root/.cargo/bin:${PATH}"
 # Skip environment variable validation at buildtime
 ENV SKIP_VALIDATION true
 
+# Define an ARG for the NEXT_PUBLIC_CBOR_ENDPOINT
+ARG NEXT_PUBLIC_CBOR_ENDPOINT
+
+# Set the ARG value to ENV so that it's available during build
+ENV NEXT_PUBLIC_CBOR_ENDPOINT=${NEXT_PUBLIC_CBOR_ENDPOINT}
+
 # Copy repo
 COPY . .
 
@@ -25,9 +31,6 @@ RUN yarn build
 # Runner image
 FROM node:18-alpine
 WORKDIR /app
-
-# Validate environment variables at runtime
-ENV SKIP_VALIDATION false
 
 # Copy from builder image
 COPY --from=builder /app/package.json ./package.json
