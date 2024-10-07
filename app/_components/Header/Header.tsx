@@ -12,7 +12,7 @@ import { setCBOR } from "./header.helper";
 
 export const Header = () => {
   const router = useRouter();
-  const { setLoading, setError } = useUI();
+  const { setError } = useUI();
   const { transactions, setTransactionBox } = useGraphical();
   const { configs, updateConfigs } = useConfigs();
   const [raw, setRaw] = useState<string>(configs.query);
@@ -26,15 +26,9 @@ export const Header = () => {
     e.preventDefault();
     if (!raw) return;
     router.push(toGo);
-    setLoading(true);
     setError("");
     if (configs.option === OPTIONS.HASH) {
-      const { cbor } = await getCborFromHash(
-        raw,
-        configs.net,
-        setError,
-        setLoading,
-      );
+      const { cbor } = await getCborFromHash(raw, configs.net, setError);
       await setCBOR(
         configs.net,
         cbor,
@@ -54,7 +48,6 @@ export const Header = () => {
       );
     }
     updateConfigs("query", raw);
-    setLoading(false);
   }
   const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {
     if (!isEmpty(e.target.value))
@@ -94,7 +87,7 @@ export const Header = () => {
       >
         <Input
           name="tx-input"
-          value={raw}
+          value={raw ?? configs.query}
           onChange={changeRaw}
           placeholder="Enter CBOR or hash for any Cardano Tx"
           startContent={

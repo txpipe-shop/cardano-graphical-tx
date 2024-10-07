@@ -8,7 +8,7 @@ import { getCborFromHash, ROUTES } from "./_utils";
 
 export default function Index() {
   const router = useRouter();
-  const { setLoading, setError } = useUI();
+  const { setError } = useUI();
   const { updateConfigs } = useConfigs();
   const { transactions, setTransactionBox } = useGraphical();
   const cbor1 =
@@ -40,12 +40,7 @@ export default function Index() {
       title: "Draw Tx Hash",
       code: hash1,
       onclick: async () => {
-        const { cbor } = await getCborFromHash(
-          hash1,
-          "preprod",
-          setError,
-          setLoading,
-        );
+        const { cbor } = await getCborFromHash(hash1, "preprod", setError);
         await setCBOR(
           "preprod",
           cbor,
@@ -82,12 +77,7 @@ export default function Index() {
       title: "Dissect Tx Hash",
       code: hash2,
       onclick: async () => {
-        const { cbor } = await getCborFromHash(
-          hash2,
-          "preprod",
-          setError,
-          setLoading,
-        );
+        const { cbor } = await getCborFromHash(hash2, "preprod", setError);
         await setCBOR(
           "preprod",
           cbor,
