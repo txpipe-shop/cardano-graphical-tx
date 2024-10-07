@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use crate::{
-  Asset, Assets, CborResponse, Certificates, Collateral, Datum, Input, Metadata, Utxo, Withdrawal,
-  Witness, Witnesses,
+  Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
+  Utxo, Withdrawal, Witness, Witnesses,
 };
 
 use pallas::{
@@ -13,7 +13,11 @@ use pallas::{
   },
 };
 use pallas_codec::utils::KeyValuePairs;
-use pallas_primitives::{conway::Metadatum, Fragment};
+use pallas_primitives::{
+  alonzo::RedeemerTag,
+  conway::{Metadatum, RedeemerTag as RedeemerTagConway},
+  Fragment,
+};
 
 fn metadatum_to_string(metadatum: &Metadatum) -> String {
   match metadatum {
@@ -150,6 +154,48 @@ fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
         key: hex::encode(wit.vkey.as_slice()),
         hash: hex::encode(Hasher::<224>::hash(wit.vkey.as_slice())),
         signature: hex::encode(wit.signature.as_slice()),
+      })
+      .collect(),
+    redeemers: tx
+      .redeemers()
+      .iter()
+      .map(|x| match x {
+        pallas::ledger::traverse::MultiEraRedeemer::AlonzoCompatible(redeemer) => Redeemer {
+          tag: match &redeemer.tag {
+            RedeemerTag::Spend => "Spend".to_owned(),
+            RedeemerTag::Mint => "Mint".to_owned(),
+            RedeemerTag::Cert => "Cert".to_owned(),
+            RedeemerTag::Reward => "Reward".to_owned(),
+          },
+          index: redeemer.index,
+          data_json: redeemer.data.to_json().to_string(),
+          ex_units: ExUnits {
+            mem: redeemer.ex_units.mem as i64,
+            steps: redeemer.ex_units.steps as i64,
+          },
+        },
+        pallas::ledger::traverse::MultiEraRedeemer::Conway(key, data) => Redeemer {
+          tag: match key.tag {
+            RedeemerTagConway::Spend => "Spend".to_owned(),
+            RedeemerTagConway::Mint => "Mint".to_owned(),
+            RedeemerTagConway::Cert => "Cert".to_owned(),
+            RedeemerTagConway::Reward => "Reward".to_owned(),
+            RedeemerTagConway::Vote => "Vote".to_owned(),
+            RedeemerTagConway::Propose => "Propose".to_owned(),
+          },
+          index: key.index,
+          data_json: data.data.to_json().to_string(),
+          ex_units: ExUnits {
+            mem: data.ex_units.mem as i64,
+            steps: data.ex_units.steps as i64,
+          },
+        },
+        _ => Redeemer {
+          tag: "Redeemer structure not matched".to_string(),
+          index: 0,
+          data_json: "".to_string(),
+          ex_units: ExUnits { mem: 0, steps: 0 },
+        },
       })
       .collect(),
     plutus_data: tx
