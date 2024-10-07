@@ -44,6 +44,7 @@ export interface IGraphicalTransaction {
   witnesses?: Witnesses;
   size: number;
   alias: string;
+  warning: string;
 }
 
 export interface IGraphicalUtxo {
