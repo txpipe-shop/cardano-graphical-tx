@@ -52,7 +52,7 @@ export const UtxoInfo = () => {
     ),
   );
 
-  const redeemerInfo = txWichInputIsSelectedUtxo?.witnesses?.redeemers?.find(
+  const redeemerInfo = txWichInputIsSelectedUtxo?.witnesses?.redeemers.find(
     (redeemer) =>
       redeemer.tag === "Spend" && redeemer.index === selectedUtxo.index,
   );
