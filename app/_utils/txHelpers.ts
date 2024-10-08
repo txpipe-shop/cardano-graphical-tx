@@ -110,6 +110,7 @@ export const parseTxToGraphical = (
     );
     const existsTx = getTransaction(transactionBox)(cbor.txHash);
     const alias = existsTx ? existsTx.alias : "";
+    const warning = "";
 
     return {
       ...cbor,
@@ -119,5 +120,6 @@ export const parseTxToGraphical = (
       producedLines: [],
       consumedLines: [],
       alias,
+      warning,
     };
   });
