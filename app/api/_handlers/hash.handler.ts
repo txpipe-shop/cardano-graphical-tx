@@ -11,7 +11,6 @@ interface IHashHandler {
 export const hashHandler = async ({ network, hash }: IHashHandler) => {
   try {
     const apiKey = getApiKey(network);
-
     const cborRes = await fetch(getBlockfrostURL(network, hash), {
       headers: { project_id: apiKey },
       method: "GET",
@@ -32,6 +31,10 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
           statusText: `${ReasonPhrases.INTERNAL_SERVER_ERROR}: Server respond with invalid data`,
         },
       );
+    }
+
+    if (err instanceof TypeError) {
+      return Response.json({ cbor: "", warning: "Blockfrost Internal Error" });
     }
 
     if (err.status === StatusCodes.NOT_FOUND) {

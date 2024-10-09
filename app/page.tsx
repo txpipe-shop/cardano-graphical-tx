@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { Header } from "./_components";
 import { setCBOR } from "./_components/Header/header.helper";
 import { useConfigs, useGraphical, useUI } from "./_contexts";
-import { getCborFromHash, ROUTES, USER_CONFIGS } from "./_utils";
+import { getCborFromHash, KONVA_COLORS, ROUTES, USER_CONFIGS } from "./_utils";
+import toast from "react-hot-toast";
 
 export default function Index() {
   const router = useRouter();
@@ -40,7 +41,21 @@ export default function Index() {
       title: "Draw Tx Hash",
       code: hash1,
       onclick: async () => {
-        const { cbor } = await getCborFromHash(hash1, "preprod", setError);
+        const { cbor, warning } = await getCborFromHash(
+          hash1,
+          "preprod",
+          setError,
+        );
+        if (warning) {
+          toast.error(warning, {
+            style: {
+              fontWeight: "bold",
+              color: KONVA_COLORS.RED_WARNING,
+            },
+            duration: 5000,
+          });
+          return;
+        }
         await setCBOR(
           "preprod",
           cbor,

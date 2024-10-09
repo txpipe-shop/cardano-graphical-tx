@@ -11,10 +11,12 @@ import {
   OPTIONS,
   ROUTES,
   USER_CONFIGS,
+  KONVA_COLORS,
 } from "~/app/_utils";
 import TxPipeIcon from "~/public/txpipe_shop.svg";
 import { NetSelector } from "../NetSelector";
 import { setCBOR } from "./header.helper";
+import toast from "react-hot-toast";
 
 export const Header = () => {
   const router = useRouter();
@@ -33,11 +35,21 @@ export const Header = () => {
     router.push(toGo);
     setError("");
     if (configs.option === OPTIONS.HASH) {
-      const { cbor } = await getCborFromHash(
+      const { cbor, warning } = await getCborFromHash(
         configs.query,
         configs.net,
         setError,
       );
+      if (warning) {
+        toast.error(warning, {
+          style: {
+            fontWeight: "bold",
+            color: KONVA_COLORS.RED_WARNING,
+          },
+          duration: 5000,
+        });
+        return;
+      }
       await setCBOR(
         configs.net,
         cbor,
