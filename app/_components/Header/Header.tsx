@@ -5,7 +5,13 @@ import { useRouter } from "next/navigation";
 import { type ChangeEvent, useState } from "react";
 import { Button, Input } from "~/app/_components";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
-import { getCborFromHash, isEmpty, OPTIONS, ROUTES } from "~/app/_utils";
+import {
+  getCborFromHash,
+  isEmpty,
+  OPTIONS,
+  ROUTES,
+  USER_CONFIGS,
+} from "~/app/_utils";
 import TxPipeIcon from "~/public/txpipe_shop.svg";
 import { NetSelector } from "../NetSelector";
 import { setCBOR } from "./header.helper";
@@ -15,20 +21,23 @@ export const Header = () => {
   const { setError } = useUI();
   const { transactions, setTransactionBox } = useGraphical();
   const { configs, updateConfigs } = useConfigs();
-  const [raw, setRaw] = useState<string>(configs.query);
   const [toGo, setToGo] = useState<string>("");
 
   const changeRaw = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRaw(e.target.value);
+    updateConfigs(USER_CONFIGS.QUERY, e.target.value);
   };
 
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!raw) return;
+    if (!configs.query) return;
     router.push(toGo);
     setError("");
     if (configs.option === OPTIONS.HASH) {
-      const { cbor } = await getCborFromHash(raw, configs.net, setError);
+      const { cbor } = await getCborFromHash(
+        configs.query,
+        configs.net,
+        setError,
+      );
       await setCBOR(
         configs.net,
         cbor,
@@ -40,18 +49,18 @@ export const Header = () => {
     } else {
       await setCBOR(
         configs.net,
-        raw,
+        configs.query,
         transactions,
         setTransactionBox,
         setError,
         false,
       );
     }
-    updateConfigs("query", raw);
+    updateConfigs(USER_CONFIGS.QUERY, configs.query);
   }
   const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {
     if (!isEmpty(e.target.value))
-      updateConfigs("option", e.target.value as OPTIONS);
+      updateConfigs(USER_CONFIGS.OPTION, e.target.value as OPTIONS);
   };
 
   const changeGoTo = (route: string) => () => {
@@ -87,7 +96,7 @@ export const Header = () => {
       >
         <Input
           name="tx-input"
-          value={raw ?? configs.query}
+          value={configs.query}
           onChange={changeRaw}
           placeholder="Enter CBOR or hash for any Cardano Tx"
           startContent={

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Header } from "./_components";
 import { setCBOR } from "./_components/Header/header.helper";
 import { useConfigs, useGraphical, useUI } from "./_contexts";
-import { getCborFromHash, ROUTES } from "./_utils";
+import { getCborFromHash, ROUTES, USER_CONFIGS } from "./_utils";
 
 export default function Index() {
   const router = useRouter();
@@ -31,9 +31,9 @@ export default function Index() {
           true,
         );
         router.push(ROUTES.GRAPHER);
-        updateConfigs("query", cbor1);
-        updateConfigs("net", "preprod");
-        updateConfigs("option", "cbor");
+        updateConfigs(USER_CONFIGS.QUERY, cbor1);
+        updateConfigs(USER_CONFIGS.NET, "preprod");
+        updateConfigs(USER_CONFIGS.OPTION, "cbor");
       },
     },
     {
@@ -50,9 +50,9 @@ export default function Index() {
           true,
         );
         router.push(ROUTES.GRAPHER);
-        updateConfigs("query", hash1);
-        updateConfigs("net", "preprod");
-        updateConfigs("option", "hash");
+        updateConfigs(USER_CONFIGS.QUERY, hash1);
+        updateConfigs(USER_CONFIGS.NET, "preprod");
+        updateConfigs(USER_CONFIGS.OPTION, "hash");
       },
     },
     {
@@ -68,9 +68,9 @@ export default function Index() {
           true,
         );
         router.push(ROUTES.DISSECT);
-        updateConfigs("query", cbor1);
-        updateConfigs("net", "preprod");
-        updateConfigs("option", "cbor");
+        updateConfigs(USER_CONFIGS.QUERY, cbor1);
+        updateConfigs(USER_CONFIGS.NET, "preprod");
+        updateConfigs(USER_CONFIGS.OPTION, "cbor");
       },
     },
     {
@@ -87,9 +87,9 @@ export default function Index() {
           true,
         );
         router.push(ROUTES.DISSECT);
-        updateConfigs("query", hash2);
-        updateConfigs("net", "preprod");
-        updateConfigs("option", "hash");
+        updateConfigs(USER_CONFIGS.QUERY, hash2);
+        updateConfigs(USER_CONFIGS.NET, "preprod");
+        updateConfigs(USER_CONFIGS.OPTION, "hash");
       },
     },
   ];

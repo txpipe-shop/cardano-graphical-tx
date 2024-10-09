@@ -6,7 +6,7 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { useConfigs } from "../_contexts";
-import { NETWORK } from "../_utils";
+import { NETWORK, USER_CONFIGS } from "../_utils";
 
 interface NetSelectorProps {
   network: NETWORK;
@@ -17,7 +17,7 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
   const { isOpen, onClose, onOpenChange } = useDisclosure();
 
   const handleClick = (network: NETWORK) => () => {
-    updateConfigs("net", network);
+    updateConfigs(USER_CONFIGS.NET, network);
     onClose();
   };
 
