@@ -1,6 +1,11 @@
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
-import { getApiKey, getBlockfrostURL, type NETWORK } from "~/app/_utils";
+import {
+  ERRORS,
+  getApiKey,
+  getBlockfrostURL,
+  type NETWORK,
+} from "~/app/_utils";
 import { BlockfrostResponseSchema } from "~/app/_utils/schemas";
 
 interface IHashHandler {
@@ -34,7 +39,7 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
     }
 
     if (err instanceof TypeError) {
-      return Response.json({ cbor: "", warning: "Blockfrost Internal Error" });
+      return Response.json({ cbor: "", warning: ERRORS.internal_error });
     }
 
     if (err.status === StatusCodes.NOT_FOUND) {

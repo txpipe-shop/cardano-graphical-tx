@@ -42,6 +42,7 @@ export const Header = () => {
       );
       if (warning) {
         toast.error(warning, {
+          icon: "🚫",
           style: {
             fontWeight: "bold",
             color: KONVA_COLORS.RED_WARNING,

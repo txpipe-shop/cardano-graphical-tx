@@ -7,6 +7,7 @@ import pallas, {
   type Utxo,
 } from "napi-pallas";
 import {
+  ERRORS,
   getApiKey,
   getAssetName,
   getTransactionURL,
@@ -128,33 +129,45 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
 
     let warning = "";
     if (inputs.filter((input) => isEmpty(input.address)).length > 0) {
-      warning = "Inputs not found. \n If it is on purpose ignore this warning";
+      warning = ERRORS.inputs_not_found;
     }
 
-    const txInfoRes = await fetch(getTransactionURL(network, res.txHash), {
-      headers: { project_id: apiKey },
-      method: "GET",
-    });
+    try {
+      const txInfoRes = await fetch(getTransactionURL(network, res.txHash), {
+        headers: { project_id: apiKey },
+        method: "GET",
+      });
 
-    if (txInfoRes.status !== StatusCodes.OK)
+      if (txInfoRes.status !== StatusCodes.OK)
+        return Response.json({
+          ...res,
+          inputs,
+          referenceInputs,
+          warning,
+        });
+      const txInfo = await txInfoRes.json();
+
       return Response.json({
         ...res,
         inputs,
         referenceInputs,
+        blockHash: txInfo.block,
+        blockTxIndex: txInfo.index,
+        blockHeight: txInfo.block_height,
+        blockAbsoluteSlot: txInfo.slot,
         warning,
       });
-    const txInfo = await txInfoRes.json();
-
-    return Response.json({
-      ...res,
-      inputs,
-      referenceInputs,
-      blockHash: txInfo.block,
-      blockTxIndex: txInfo.index,
-      blockHeight: txInfo.block_height,
-      blockAbsoluteSlot: txInfo.slot,
-      warning,
-    });
+    } catch (error) {
+      if (error instanceof TypeError) {
+        return Response.json({
+          ...res,
+          inputs,
+          referenceInputs,
+          warning: ERRORS.internal_error,
+        });
+      }
+      throw error;
+    }
   } catch (error) {
     console.error(error);
     return Response.json(

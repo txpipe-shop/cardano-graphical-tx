@@ -92,4 +92,10 @@ export const OPTIONS = {
   CBOR: "cbor",
 } as const;
 
+export const ERRORS = {
+  internal_error: "Blockfrost Internal Error",
+  inputs_not_found:
+    "Inputs not found. \n If it is on purpose ignore this warning",
+};
+
 export type OPTIONS = (typeof OPTIONS)[keyof typeof OPTIONS];
