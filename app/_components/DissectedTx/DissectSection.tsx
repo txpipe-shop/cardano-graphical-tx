@@ -47,7 +47,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
   const referenceInputs = inputs.filter((i) => i.isReferenceInput);
 
   return (
-    <div className="flex h-screen flex-col gap-0 overflow-auto p-10 pt-32">
+    <div className="flex h-screen flex-col gap-0 overflow-auto overflow-y-auto p-10 pt-32 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-slate-400 [&::-webkit-scrollbar-track]:mt-28 [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-track]:bg-zinc-300 [&::-webkit-scrollbar]:w-2.5">
       <Accordion
         selectionMode="multiple"
         showDivider={false}
