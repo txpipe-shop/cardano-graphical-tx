@@ -126,8 +126,8 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       apiKey,
     });
 
-    let warning = null;
-    if (inputs.filter((input) => input.address === "").length > 0) {
+    let warning = "";
+    if (inputs.filter((input) => isEmpty(input.address)).length > 0) {
       warning = "Inputs not found. \n If it is on purpose ignore this warning";
     }
 
