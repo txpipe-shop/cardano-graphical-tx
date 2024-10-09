@@ -11,6 +11,12 @@ export const API_ROUTES = {
   HASH: "api/hash",
 };
 
+export const USER_CONFIGS = {
+  QUERY: "query",
+  OPTION: "option",
+  NET: "net",
+} as const;
+
 export const defaultPosition = { x: 0, y: 0 };
 
 export const TX_WIDTH = 125;

@@ -17,6 +17,17 @@ export const getUtxo =
     return transactionBox.utxos[utxoHash];
   };
 
+export const getUtxoIndex =
+  (transactions: IGraphicalTransaction[]) => (utxoHash: string) => {
+    const inputs = transactions.flatMap(({ inputs }) =>
+      inputs
+        .filter(({ isReferenceInput }) => !isReferenceInput)
+        .map(({ txHash }) => txHash),
+    );
+
+    return inputs.indexOf(utxoHash);
+  };
+
 /**
  * Updates the positions of produced and consumed lines (the outputs and inputs) in a transaction box,
  * based on a new position. Used when a transaction is dragged.

@@ -1,16 +1,15 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import {
   Header,
   InfoPanel,
-  Loading,
   Playground,
   TxInfo,
   UtxoInfo,
 } from "../_components";
-import { useUI } from "../_contexts";
 import { ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "../_utils";
+import Loading from "../loading";
 
 interface GrapherProps {
   searchParams?: {
@@ -22,7 +21,6 @@ export default function Index({ searchParams }: GrapherProps) {
   const { replace } = useRouter();
   const { [TX_URL_PARAM]: selectedTx, [UTXO_URL_PARAM]: selectedUtxo } =
     searchParams || {};
-  const { loading } = useUI();
 
   useEffect(() => {
     // Remove URL params when reloading the page
@@ -31,27 +29,23 @@ export default function Index({ searchParams }: GrapherProps) {
 
   return (
     <div className="overflow-hidden">
-      {loading ? (
-        <Loading />
-      ) : (
-        <>
-          <InfoPanel
-            isVisible={selectedTx !== undefined}
-            from="left"
-            title="TX Information"
-          >
-            <TxInfo />
-          </InfoPanel>
-          <InfoPanel
-            isVisible={selectedUtxo !== undefined}
-            from="right"
-            title="UTXO Information"
-          >
-            <UtxoInfo />
-          </InfoPanel>
-          <Playground />
-        </>
-      )}
+      <Suspense fallback={<Loading />}>
+        <InfoPanel
+          isVisible={selectedTx !== undefined}
+          from="left"
+          title="TX Information"
+        >
+          <TxInfo />
+        </InfoPanel>
+        <InfoPanel
+          isVisible={selectedUtxo !== undefined}
+          from="right"
+          title="UTXO Information"
+        >
+          <UtxoInfo />
+        </InfoPanel>
+        <Playground />
+      </Suspense>
       <Header />
     </div>
   );

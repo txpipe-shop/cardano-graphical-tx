@@ -13,6 +13,7 @@ import {
   JSONBIG,
   UTXO_URL_PARAM,
   getUtxo,
+  getUtxoIndex,
   handleCopy,
   trimString,
 } from "~/app/_utils";
@@ -43,7 +44,6 @@ export const UtxoInfo = () => {
 
   const txTrim = trimString(txHash, 12);
   const addrTrim = trimString(address?.bech32 || "", 20);
-
   const txWichInputIsSelectedUtxo = transactions.transactions.find((tx) =>
     tx.inputs.some(
       (input) =>
@@ -52,9 +52,9 @@ export const UtxoInfo = () => {
     ),
   );
 
+  const index = getUtxoIndex(transactions.transactions)(selectedUtxoHash!);
   const redeemerInfo = txWichInputIsSelectedUtxo?.witnesses?.redeemers?.find(
-    (redeemer) =>
-      redeemer.tag === "Spend" && redeemer.index === selectedUtxo.index,
+    (redeemer) => redeemer.tag === "Spend" && redeemer.index === index,
   );
 
   const disabledKeys = [

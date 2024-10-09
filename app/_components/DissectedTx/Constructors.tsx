@@ -15,7 +15,7 @@ export function PropBlock({
   color?: "green" | "red";
 }) {
   return (
-    <div className="mb-4">
+    <div className="mb-4 w-full">
       <p className="text-xl text-gray-600">{description}</p>
       {value?.toString() ? (
         <div

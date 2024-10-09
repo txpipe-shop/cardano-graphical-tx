@@ -47,7 +47,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
   const referenceInputs = inputs.filter((i) => i.isReferenceInput);
 
   return (
-    <div className="flex h-screen flex-col gap-0 overflow-auto p-10 pt-32">
+    <div className="flex h-screen flex-col gap-0 overflow-auto overflow-y-auto p-10 pt-32 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-slate-400 [&::-webkit-scrollbar-track]:mt-28 [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-track]:bg-zinc-300 [&::-webkit-scrollbar]:w-2.5">
       <Accordion
         selectionMode="multiple"
         showDivider={false}
@@ -254,7 +254,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                   )}
                   key={i}
                 >
-                  <PropBlock title="JSON" value={json} />
+                  <PropBlock title="JSON" value={JSON.parse(json)} />
                 </AccordionItem>
               ))}
             </Accordion>
@@ -383,7 +383,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                   <AccordionItem
                     {...accordionItemProps(
                       `Verification Key Witness ${i + 1}`,
-                      defaultStyle("text-2xl", "px-7"),
+                      defaultStyle("text-2xl", "px-5"),
                     )}
                     key={i}
                   >
@@ -401,13 +401,39 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           ) : (
             <EmptyBlock title="Verification Key Witness" />
           )}
+          {(witnesses?.redeemers ?? []).length > 0 ? (
+            <Accordion {...accordionProps(witnesses?.redeemers ?? [])}>
+              {(witnesses?.redeemers ?? []).map(
+                ({ tag, index, dataJson, exUnits }, i) => (
+                  <AccordionItem
+                    {...accordionItemProps(
+                      `Redeemer ${i + 1}`,
+                      defaultStyle("text-2xl", "px-5"),
+                    )}
+                    key={i}
+                  >
+                    <PropBlock title="Tag" value={tag} />
+                    <PropBlock title="Index" value={index} />
+                    <PropBlock
+                      title="Data"
+                      value={JSONBIG.stringify(JSON.parse(dataJson), null, 2)}
+                    />
+                    <PropBlock title="Ex Mem Units" value={exUnits.mem} />
+                    <PropBlock title="Ex Steps Units" value={exUnits.steps} />
+                  </AccordionItem>
+                ),
+              )}
+            </Accordion>
+          ) : (
+            <EmptyBlock title="Reedemers" />
+          )}
           {(witnesses?.plutusData ?? []).length > 0 ? (
             <Accordion {...accordionProps(witnesses?.plutusData ?? [])}>
               {(witnesses?.plutusData ?? []).map(({ hash, bytes, json }, i) => (
                 <AccordionItem
                   {...accordionItemProps(
                     `Plutus Data Witness ${i + 1}`,
-                    defaultStyle("text-2xl", "px-7"),
+                    defaultStyle("text-2xl", "px-5"),
                     TOPICS.datum,
                   )}
                   key={i}
