@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Layer, Stage } from "react-konva";
@@ -6,6 +7,7 @@ import { TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
 import { Error } from "../Error";
 import { Line, Transaction, Utxo } from "../Transaction";
 import { PlaygroundDefault } from "./PlaygroundDefault";
+import toast from "react-hot-toast";
 
 export function Playground() {
   const { transactions } = useGraphical();
@@ -13,6 +15,7 @@ export function Playground() {
   const pathname = usePathname();
   const { replace } = useRouter();
   const searchParams = useSearchParams();
+  const shownWarnings = useRef(new Set());
 
   const scaleBy = 1.05;
   const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
@@ -59,6 +62,18 @@ export function Playground() {
       replace(`${pathname}?${params.toString()}`);
     }
   };
+
+  useEffect(() => {
+    transactions.transactions.forEach((tx: any) => {
+      if (tx.warning) {
+        const warningKey = `${tx.txHash}-${tx.warning}`;
+        if (!shownWarnings.current.has(warningKey)) {
+          toast.error(tx.warning);
+          shownWarnings.current.add(warningKey);
+        }
+      }
+    });
+  }, [transactions.transactions]);
 
   if (error) return <Error action="fetching" />;
 

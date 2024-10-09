@@ -126,15 +126,22 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       apiKey,
     });
 
+    let warning = null;
+    if (inputs.filter((input) => input.address === "").length > 0) {
+      warning = "Inputs not found. \n If it is on purpose ignore this warning";
+    }
+
     const txInfoRes = await fetch(getTransactionURL(network, res.txHash), {
       headers: { project_id: apiKey },
       method: "GET",
     });
+
     if (txInfoRes.status !== StatusCodes.OK)
       return Response.json({
         ...res,
         inputs,
         referenceInputs,
+        warning,
       });
     const txInfo = await txInfoRes.json();
 
@@ -146,6 +153,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       blockTxIndex: txInfo.index,
       blockHeight: txInfo.block_height,
       blockAbsoluteSlot: txInfo.slot,
+      warning,
     });
   } catch (error) {
     console.error(error);
