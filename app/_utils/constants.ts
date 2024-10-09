@@ -46,6 +46,7 @@ export const KONVA_COLORS = {
   PURPLE_STROKE: "#893ec7",
   YELLOW_FILL: "#ffdd63",
   YELLOW_STROKE: "#fcd72c",
+  YELLOW_WARNING: "#fcefb4",
 };
 export type KONVA_COLORS = (typeof KONVA_COLORS)[keyof typeof KONVA_COLORS];
 
