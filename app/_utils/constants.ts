@@ -41,11 +41,13 @@ export const KONVA_COLORS = {
   GREEN_MINT_STROKE: "#77AD21",
   RED_BURN_FILL: "#FF3E45",
   RED_BURN_STROKE: "#FF262D",
+  RED_WARNING: "#ee6055",
   WHITE: "#FFFFFF",
   PURPLE_FILL: "#9d4edd",
   PURPLE_STROKE: "#893ec7",
   YELLOW_FILL: "#ffdd63",
   YELLOW_STROKE: "#fcd72c",
+  YELLOW_WARNING: "#fcefb4",
 };
 export type KONVA_COLORS = (typeof KONVA_COLORS)[keyof typeof KONVA_COLORS];
 
@@ -89,5 +91,11 @@ export const OPTIONS = {
   HASH: "hash",
   CBOR: "cbor",
 } as const;
+
+export const ERRORS = {
+  internal_error: "Blockfrost Internal Error",
+  inputs_not_found:
+    "Inputs not found. \n If it is on purpose ignore this warning",
+};
 
 export type OPTIONS = (typeof OPTIONS)[keyof typeof OPTIONS];

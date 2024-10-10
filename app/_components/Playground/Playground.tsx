@@ -3,7 +3,12 @@ import type { KonvaEventObject } from "konva/lib/Node";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Layer, Stage } from "react-konva";
 import { useGraphical, useUI } from "~/app/_contexts";
-import { TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
+import {
+  ERRORS,
+  KONVA_COLORS,
+  TX_URL_PARAM,
+  UTXO_URL_PARAM,
+} from "~/app/_utils";
 import { Error } from "../Error";
 import { Line, Transaction, Utxo } from "../Transaction";
 import { PlaygroundDefault } from "./PlaygroundDefault";
@@ -68,7 +73,27 @@ export function Playground() {
       if (tx.warning) {
         const warningKey = `${tx.txHash}-${tx.warning}`;
         if (!shownWarnings.current.has(warningKey)) {
-          toast.error(tx.warning);
+          let icon, backgroundColor, color;
+          if (tx.warning === ERRORS.inputs_not_found) {
+            icon = "⚠️";
+            color = KONVA_COLORS.BLACK;
+            backgroundColor = KONVA_COLORS.YELLOW_WARNING;
+          }
+          if (tx.warning === ERRORS.internal_error) {
+            icon = "🚫";
+            backgroundColor = "KONVA_COLORS.WHITE;";
+            color = KONVA_COLORS.RED_WARNING;
+          }
+
+          toast(tx.warning, {
+            icon,
+            style: {
+              backgroundColor,
+              fontWeight: "bold",
+              color,
+            },
+            duration: 5000,
+          });
           shownWarnings.current.add(warningKey);
         }
       }

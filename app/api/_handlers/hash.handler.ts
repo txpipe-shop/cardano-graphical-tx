@@ -1,6 +1,11 @@
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
-import { getApiKey, getBlockfrostURL, type NETWORK } from "~/app/_utils";
+import {
+  ERRORS,
+  getApiKey,
+  getBlockfrostURL,
+  type NETWORK,
+} from "~/app/_utils";
 import { BlockfrostResponseSchema } from "~/app/_utils/schemas";
 
 interface IHashHandler {
@@ -11,7 +16,6 @@ interface IHashHandler {
 export const hashHandler = async ({ network, hash }: IHashHandler) => {
   try {
     const apiKey = getApiKey(network);
-
     const cborRes = await fetch(getBlockfrostURL(network, hash), {
       headers: { project_id: apiKey },
       method: "GET",
@@ -32,6 +36,10 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
           statusText: `${ReasonPhrases.INTERNAL_SERVER_ERROR}: Server respond with invalid data`,
         },
       );
+    }
+
+    if (err instanceof TypeError) {
+      return Response.json({ cbor: "", warning: ERRORS.internal_error });
     }
 
     if (err.status === StatusCodes.NOT_FOUND) {
