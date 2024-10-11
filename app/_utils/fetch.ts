@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
 import type { IBlockfrostResponse, ITransaction } from "../_interfaces";
 import { env } from "../env.mjs";
-import { API_ROUTES, NETWORK } from "./constants";
+import { API_ROUTES, ERRORS, NETWORK } from "./constants";
 
 export const getApiKey = (network: NETWORK): string => {
   switch (network) {
@@ -77,8 +77,15 @@ export const getCborFromHash = async (
 
     return data as IBlockfrostResponse;
   } catch (error) {
-    console.error("Error processing Transaction Hash:", error);
-    setError("Error processing CBOR");
-    throw error;
+    if (error instanceof TypeError) {
+      return {
+        cbor: "",
+        warning: ERRORS.internal_error,
+      } as IBlockfrostResponse;
+    } else {
+      console.error("Error processing Transaction Hash:", error);
+      setError("Error processing CBOR");
+      throw error;
+    }
   }
 };
