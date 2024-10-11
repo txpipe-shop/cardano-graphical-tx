@@ -1,13 +1,13 @@
-import { useEffect, useRef } from "react";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 import { Layer, Stage } from "react-konva";
 import { useGraphical, useUI } from "~/app/_contexts";
 import { TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
 import { Error } from "../Error";
 import { Line, Transaction, Utxo } from "../Transaction";
 import { PlaygroundDefault } from "./PlaygroundDefault";
-import toast from "react-hot-toast";
 
 export function Playground() {
   const { transactions } = useGraphical();
@@ -83,7 +83,7 @@ export function Playground() {
       height={window.innerHeight}
       onWheel={handleWheel}
       draggable
-      className="overflow-hidden"
+      className="h-auto w-full"
     >
       <Layer>
         {transactions.transactions.map((tx, index) => (

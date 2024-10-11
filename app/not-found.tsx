@@ -132,7 +132,7 @@ export default function FourOhFour() {
             />
           </Layer>
         </Stage>
-        <div className={`flex w-full flex-col gap-10 px-10 pt-28`}>
+        <div className={`flex w-full flex-col gap-10 px-10`}>
           <PropBlock title="404" value="Page not found" color="red" />
           <div className="rotate-1">
             <PropBlock value="" />

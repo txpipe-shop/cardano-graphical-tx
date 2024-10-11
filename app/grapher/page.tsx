@@ -28,8 +28,11 @@ export default function Index({ searchParams }: GrapherProps) {
   }, [replace]);
 
   return (
-    <div className="overflow-hidden">
-      <Suspense fallback={<Loading />}>
+    <Suspense fallback={<Loading />}>
+      <div className="relative h-dvh overflow-hidden">
+        <div className="absolute w-full">
+          <Header />
+        </div>
         <InfoPanel
           isVisible={selectedTx !== undefined}
           from="left"
@@ -45,8 +48,7 @@ export default function Index({ searchParams }: GrapherProps) {
           <UtxoInfo />
         </InfoPanel>
         <Playground />
-      </Suspense>
-      <Header />
-    </div>
+      </div>
+    </Suspense>
   );
 }
