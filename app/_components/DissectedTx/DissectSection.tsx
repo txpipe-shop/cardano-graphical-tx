@@ -1,4 +1,5 @@
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
+import { Chip } from "@nextui-org/react";
 import type { IGraphicalTransaction } from "~/app/_interfaces";
 import { JSONBIG } from "~/app/_utils";
 import { EmptyBlock, PropBlock } from "./Constructors";
@@ -47,7 +48,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
   const referenceInputs = inputs.filter((i) => i.isReferenceInput);
 
   return (
-    <div className="flex h-screen flex-col gap-0 overflow-auto overflow-y-auto p-10 pt-32 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-slate-400 [&::-webkit-scrollbar-track]:mt-28 [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-track]:bg-zinc-300 [&::-webkit-scrollbar]:w-2.5">
+    <div className="flex flex-grow flex-col gap-0 p-5">
       <Accordion
         selectionMode="multiple"
         showDivider={false}
@@ -65,6 +66,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         ]}
       >
         <AccordionItem
+          key="Valid CBOR data"
           {...accordionItemProps(
             "Valid CBOR data",
             defaultStyle(),
@@ -81,6 +83,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           ))}
         </AccordionItem>
         <AccordionItem
+          key="Transaction Inputs"
           {...accordionItemProps(
             "Transaction Inputs",
             defaultStyle(
@@ -93,11 +96,32 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             <Accordion {...accordionProps(normalInputs)}>
               {normalInputs.map(({ txHash, index }, i) => (
                 <AccordionItem
+                  key={i}
                   {...accordionItemProps(
                     "Input " + (i + 1).toString(),
                     defaultStyle("text-2xl text-blue-500", "px-7"),
                   )}
-                  key={i}
+                  startContent={
+                    witnesses?.redeemers.find(
+                      (r) => r.index === i && r.tag === "Spend",
+                    ) && (
+                      <div
+                        onPointerDown={(e) => {
+                          e.stopPropagation();
+                          document
+                            .getElementById(`Spend-${i}`)
+                            ?.scrollIntoView({
+                              behavior: "smooth",
+                              block: "center",
+                            });
+                        }}
+                      >
+                        <Chip radius="sm" size="sm">
+                          Redeemer
+                        </Chip>
+                      </div>
+                    )
+                  }
                 >
                   <PropBlock
                     title="UtxoRef Hash"
@@ -117,6 +141,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           )}
         </AccordionItem>
         <AccordionItem
+          key="Transaction Outputs"
           {...accordionItemProps(
             "Transaction Outputs",
             defaultStyle(
@@ -130,11 +155,11 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
               {outputs.map(
                 ({ txHash, index, address, lovelace, assets }, i) => (
                   <AccordionItem
+                    key={i}
                     {...accordionItemProps(
                       "Output " + (i + 1).toString(),
                       defaultStyle("text-2xl text-red-500", "px-7"),
                     )}
-                    key={i}
                   >
                     <PropBlock title="Tx Hash" value={txHash} />
                     <PropBlock title="Output Index" value={index} />
@@ -158,15 +183,16 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                     <Accordion {...accordionProps(assets)}>
                       {assets.map(({ policyId, assetsPolicy }, j) => (
                         <AccordionItem
+                          key={j}
                           {...accordionItemProps(
                             "Policy Assets",
                             defaultStyle("text-2xl", "px-6"),
                           )}
-                          key={j}
                         >
                           <PropBlock title="Policy Id" value={policyId} />
                           <Accordion {...accordionProps(assetsPolicy)}>
                             <AccordionItem
+                              key={policyId + i}
                               {...accordionItemProps(
                                 `Assets (${assetsPolicy.length})`,
                                 defaultStyle("text-xl", "px-5"),
@@ -200,6 +226,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           )}
         </AccordionItem>
         <AccordionItem
+          key="Reference Inputs"
           {...accordionItemProps(
             "Reference Inputs",
             defaultStyle(
@@ -212,6 +239,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             <Accordion {...accordionProps(referenceInputs)}>
               {referenceInputs.map(({ txHash, index }, i) => (
                 <AccordionItem
+                  key={i}
                   {...accordionItemProps(
                     "Reference Input " + (i + 1).toString(),
                     defaultStyle(
@@ -219,7 +247,6 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                       "px-7",
                     ),
                   )}
-                  key={i}
                 >
                   <PropBlock
                     title="UtxoRef Hash"
@@ -238,7 +265,10 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             <EmptyBlock />
           )}
         </AccordionItem>
-        <AccordionItem {...accordionItemProps("Certificates", defaultStyle())}>
+        <AccordionItem
+          key="Certificates"
+          {...accordionItemProps("Certificates", defaultStyle())}
+        >
           {(certificates ?? [])?.length > 0 ? (
             <Accordion
               selectionMode="multiple"
@@ -248,11 +278,11 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             >
               {(certificates ?? []).map(({ json }, i) => (
                 <AccordionItem
+                  key={i}
                   {...accordionItemProps(
                     `Certificate ${i + 1}`,
                     defaultStyle("text-2xl", "px-7"),
                   )}
-                  key={i}
                 >
                   <PropBlock title="JSON" value={JSON.parse(json)} />
                 </AccordionItem>
@@ -262,16 +292,19 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             <EmptyBlock />
           )}
         </AccordionItem>
-        <AccordionItem {...accordionItemProps("Withdrawals", defaultStyle())}>
+        <AccordionItem
+          key="Withdrawals"
+          {...accordionItemProps("Withdrawals", defaultStyle())}
+        >
           {(withdrawals ?? []).length > 0 ? (
             <Accordion {...accordionProps(withdrawals ?? [])}>
               {(withdrawals ?? []).map(({ rawAddress, amount }, i) => (
                 <AccordionItem
+                  key={i}
                   {...accordionItemProps(
                     `Withdrawal ${i + 1}`,
                     defaultStyle("text-2xl", "px-7"),
                   )}
-                  key={i}
                 >
                   <PropBlock title="Raw Address" value={rawAddress} />
                   <PropBlock title="Amount" value={amount} />
@@ -283,6 +316,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           )}
         </AccordionItem>
         <AccordionItem
+          key="Transaction Mints"
           {...accordionItemProps(
             "Transaction Mints",
             defaultStyle(),
@@ -295,11 +329,11 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                 const mint = assetsPolicy.find((a) => a.amount && a.amount > 0);
                 return (
                   <AccordionItem
+                    key={i}
                     {...accordionItemProps(
                       `${mint ? "Minted" : "Burned"} token ${i + 1}`,
                       defaultStyle("text-2xl", "px-7"),
                     )}
-                    key={i}
                   >
                     <PropBlock
                       title="Policy Id"
@@ -327,6 +361,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           )}
         </AccordionItem>
         <AccordionItem
+          key="Transaction Metadata"
           {...accordionItemProps(
             "Transaction Metadata",
             defaultStyle(),
@@ -350,6 +385,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           {metadata?.length === 0 && <EmptyBlock />}
         </AccordionItem>
         <AccordionItem
+          key="Collateral"
           {...accordionItemProps("Collateral", defaultStyle("", "px-7"))}
         >
           {collateral?.collateralReturn.map(({ txHash, index }, i) => (
@@ -370,6 +406,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           <PropBlock title="Total" value={collateral?.total} />
         </AccordionItem>
         <AccordionItem
+          key="Transaction Witnesses"
           {...accordionItemProps(
             "Transaction Witnesses",
             defaultStyle("", "px-7"),
@@ -381,11 +418,11 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
               {(witnesses?.vkeyWitnesses ?? []).map(
                 ({ hash, key, signature }, i) => (
                   <AccordionItem
+                    key={i}
                     {...accordionItemProps(
                       `Verification Key Witness ${i + 1}`,
                       defaultStyle("text-2xl", "px-5"),
                     )}
-                    key={i}
                   >
                     <PropBlock
                       title="Key"
@@ -406,11 +443,12 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
               {(witnesses?.redeemers ?? []).map(
                 ({ tag, index, dataJson, exUnits }, i) => (
                   <AccordionItem
+                    key={i}
+                    id={tag + "-" + index}
                     {...accordionItemProps(
                       `Redeemer ${i + 1}`,
                       defaultStyle("text-2xl", "px-5"),
                     )}
-                    key={i}
                   >
                     <PropBlock title="Tag" value={tag} />
                     <PropBlock title="Index" value={index} />
@@ -431,12 +469,12 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             <Accordion {...accordionProps(witnesses?.plutusData ?? [])}>
               {(witnesses?.plutusData ?? []).map(({ hash, bytes, json }, i) => (
                 <AccordionItem
+                  key={i}
                   {...accordionItemProps(
                     `Plutus Data Witness ${i + 1}`,
                     defaultStyle("text-2xl", "px-5"),
                     TOPICS.datum,
                   )}
-                  key={i}
                 >
                   <PropBlock
                     title="Hash"
