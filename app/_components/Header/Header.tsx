@@ -81,7 +81,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="fixed left-0 top-0 z-10 box-border flex h-28 w-full flex-row items-center justify-between border-b-2 border-dashed border-b-gray-300 bg-white px-4 pb-4 pt-6 align-middle">
+    <header className="sticky top-0 z-10 box-border flex h-28 w-full flex-row items-center justify-between border-b-2 border-dashed border-b-gray-300 bg-white px-4 pb-4 pt-6 align-middle">
       <div className="flex flex-row items-center gap-4">
         <h3 className="flex items-center text-4xl text-gray-400">
           <Link href={ROUTES.HOME}>

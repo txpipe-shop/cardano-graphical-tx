@@ -1,4 +1,4 @@
-import type { SelectionMode } from "@nextui-org/react";
+import { type SelectionMode } from "@nextui-org/react";
 
 interface IAccordionStyle {
   title: string;
@@ -19,15 +19,14 @@ export const defaultStyle = (
 });
 
 export const accordionItemProps = (
-  key: string,
+  title: string,
   classNames: IAccordionStyle,
   subtitule?: string,
 ) => ({
-  key: key,
   classNames: { ...classNames },
-  title: key,
+  title: title,
   subtitle: subtitule,
-  textValue: key,
+  textValue: title,
 });
 
 export const accordionProps = (array: any[]) => ({
