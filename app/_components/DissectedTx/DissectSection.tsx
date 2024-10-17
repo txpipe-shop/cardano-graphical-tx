@@ -116,7 +116,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                             });
                         }}
                       >
-                        <Chip radius="sm" size="sm">
+                        <Chip color="primary" radius="sm" size="sm">
                           Redeemer
                         </Chip>
                       </div>
@@ -390,7 +390,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         >
           {collateral?.collateralReturn.map(({ txHash, index }, i) => (
             <div key={i}>
-              <h4 className="text-3xl">Collateral Return</h4>
+              <h4 className="text-2xl">Collateral Return</h4>
               <PropBlock
                 title="UtxoRef Hash"
                 value={txHash}
@@ -491,7 +491,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
               ))}
             </Accordion>
           ) : (
-            <EmptyBlock title="Transaction Datum" />
+            <EmptyBlock title="Plutus Data" />
           )}
         </AccordionItem>
       </Accordion>

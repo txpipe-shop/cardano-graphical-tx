@@ -29,7 +29,7 @@ export default function Index({ searchParams }: GrapherProps) {
 
   return (
     <Suspense fallback={<Loading />}>
-      <div className="relative h-dvh overflow-hidden">
+      <div className="relative h-dvh w-full overflow-hidden">
         <div className="absolute w-full">
           <Header />
         </div>

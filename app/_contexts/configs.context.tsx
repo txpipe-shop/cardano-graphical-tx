@@ -44,7 +44,7 @@ export const ConfigsProvider = ({ children }: { children: ReactNode }) => {
     configKey: T,
     value: IUserConfigs[T],
   ) => {
-    setConfigs({ ...configs, [configKey]: value });
+    setConfigs((prev) => ({ ...prev, [configKey]: value }));
   };
 
   return (
