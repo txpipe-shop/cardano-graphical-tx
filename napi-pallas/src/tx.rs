@@ -19,6 +19,8 @@ use pallas_primitives::{
   Fragment,
 };
 
+use serde_json::Value;
+
 fn metadatum_to_string(metadatum: &Metadatum) -> String {
   match metadatum {
     Metadatum::Text(text) => text.clone(),
@@ -342,4 +344,10 @@ pub fn parse_datum_info(raw: String) -> Option<Datum> {
     json: data.to_json().to_string(),
     bytes: raw.clone(),
   })
+}
+
+pub fn parse_dsl(raw: String) -> String {
+  let res: Value = serde_json::from_str(&raw).unwrap();
+  println!("{:?}", res);
+  res.to_string()
 }

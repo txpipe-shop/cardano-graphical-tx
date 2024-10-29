@@ -9,6 +9,7 @@ export const ROUTES = {
 export const API_ROUTES = {
   CBOR: "api/cbor",
   HASH: "api/hash",
+  DSL: "api/dsl",
 };
 
 export const USER_CONFIGS = {
