@@ -17,7 +17,6 @@ export default function Index() {
     if (!dsl) return;
     const res = await getDSLFromJSON(dsl, setError);
     setResponse(res);
-    console.log(res);
   }
 
   return (

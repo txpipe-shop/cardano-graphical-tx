@@ -102,8 +102,7 @@ export const getDSLFromJSON = async (
       body: formData,
     });
     if (res.status !== StatusCodes.OK) throw res;
-    const data = await res.json();
-    return data as string;
+    return JSON.stringify(res);
   } catch (error) {
     console.error("Error processing JSON:", error);
     setError("Error processing JSON");

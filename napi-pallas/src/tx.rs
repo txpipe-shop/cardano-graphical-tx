@@ -347,7 +347,6 @@ pub fn parse_datum_info(raw: String) -> Option<Datum> {
 }
 
 pub fn parse_dsl(raw: String) -> String {
-  let res: Value = serde_json::from_str(&raw).unwrap();
-  println!("{:?}", res);
+  let res: Value = serde_json::from_str(&raw).expect("JSON was not well-formatted");
   res.to_string()
 }

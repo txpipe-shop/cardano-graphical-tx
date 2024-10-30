@@ -198,6 +198,11 @@ pub fn cbor_parse(raw: String) -> CborResponse {
 }
 
 #[napi]
-pub fn napi_parse_datum_info(raw: String) -> Option<Datum> {
+pub fn parse_datum_info(raw: String) -> Option<Datum> {
   tx::parse_datum_info(raw)
+}
+
+#[napi]
+pub fn parse_dsl(raw: String) -> String {
+  tx::parse_dsl(raw)
 }

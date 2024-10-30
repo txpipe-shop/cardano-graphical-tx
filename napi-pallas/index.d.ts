@@ -105,6 +105,6 @@ export interface CborResponse {
   size: number
   error: string
 }
-export function cborParse(raw: string): CborResponse
-export function parseDatumInfo(raw: string): Datum | null
-export function parseDsl(raw: string): string
+export declare function cborParse(raw: string): CborResponse
+export declare function parseDatumInfo(raw: string): Datum | null
+export declare function parseDsl(raw: string): string
