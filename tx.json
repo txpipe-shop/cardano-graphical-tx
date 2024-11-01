@@ -1,0 +1,91 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Transaction Schema",
+    "description": "The specification of a transaction to be parsed by the DSL",
+    "type": "object",
+    "definitions": {
+        "Value": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "amount": {
+                        "type": "number"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "amount",
+                    "name"
+                ]
+            }
+        },
+        "Address": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_]+1[0-9a-zA-Z]{128}$"
+        },
+        "InputOutput": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "address": {
+                    "$ref": "#/definitions/Address"
+                },
+                "value": {
+                    "$ref": "#/definitions/Value"
+                }
+            }
+        }
+    },
+    "properties": {
+        "transaction": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "fee": {
+                    "type": "number"
+                },
+                "inputs": {
+                    "type": "array",
+                    "items": {
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/InputOutput"
+                            },
+                            {
+                                "properties": {
+                                    "txHash": {
+                                        "type": "string",
+                                        "pattern": "^[a-fA-F0-9]{64}$"
+                                    },
+                                    "index": {
+                                        "type": "integer"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                "outputs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/InputOutput"
+                    }
+                }
+            },
+            "required": [
+                "inputs",
+                "outputs"
+            ]
+        }
+    },
+    "required": [
+        "transaction"
+    ]
+}
