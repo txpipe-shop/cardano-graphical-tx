@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Transaction Schema",
-    "description": "The specification of a transaction to be parsed by the DSL",
+    "description": "The specification of a transaction.",
     "type": "object",
     "definitions": {
         "Value": {
@@ -14,17 +14,31 @@
                     },
                     "name": {
                         "type": "string"
+                    },
+                    "assetClass": {
+                        "type": "string"
                     }
                 },
+                "anyOf": [
+                    {
+                        "required": [
+                            "name"
+                        ]
+                    },
+                    {
+                        "required": [
+                            "assetClass"
+                        ]
+                    }
+                ],
                 "required": [
-                    "amount",
-                    "name"
+                    "amount"
                 ]
             }
         },
         "Address": {
             "type": "string",
-            "pattern": "^[a-zA-Z_]+1[0-9a-zA-Z]{128}$"
+            "pattern": "^[a-zA-Z_]+1[0-9a-zA-Z]{32, 128}$"
         },
         "InputOutput": {
             "type": "object",
