@@ -64,7 +64,7 @@ The minimal structure must specify the keywords “transaction”, “inputs”,
 
 Within the inputs and outputs, one or more structures can be specified with some (optional) fields as following:
 
-```json
+```yaml
 {
  "name": "descriptive name for input",
  "address": "address",
@@ -76,12 +76,12 @@ Within the inputs and outputs, one or more structures can be specified with some
 
 Inputs have some extra (also optional) fields that can be added:
 
-```json
+```yaml
 {
  ...
  "txHash": "hash of UTxO-Ref",
  "index": 0, // index in UTxO-Ref
- "redeemer": { "name": "r",... },
+ "redeemer": { "name": "r", ... },
 }
 ```
 
@@ -93,7 +93,7 @@ For datums, there are 3 variants:
 
 - As bytes:
 
-```json
+```yaml
 {
  "name": "descriptive name for input",
  . . .,
@@ -103,7 +103,7 @@ For datums, there are 3 variants:
 
 - As a JSON:
 
-```json
+```yaml
 {
  "name": "descriptive name for input",
  . . .,
@@ -113,7 +113,7 @@ For datums, there are 3 variants:
 
 - As an inline datum:
 
-```json
+```yaml
 {
  "name": "descriptive name for input",
  . . .,
@@ -125,7 +125,7 @@ For datums, there are 3 variants:
 
 This field is completed with one or more structures as follows:
 
-```json
+```yaml
 {
   "amount": "amount",
   "name": "name of token"
@@ -182,7 +182,7 @@ In addition to the inputs, outputs (with their respective internal fields), and 
 
 ## Name
 
-````json
+```json
 {
   "transaction": {
     "name": "descriptive name for transaction",
@@ -190,9 +190,9 @@ In addition to the inputs, outputs (with their respective internal fields), and 
     "outputs": []
   }
 }
-## ```
+```
 
-Fee
+## Fee
 
 ```json
 {
@@ -202,7 +202,7 @@ Fee
     "outputs": []
   }
 }
-````
+```
 
 ## Start
 
@@ -254,7 +254,7 @@ Fee
 
 ## Metadata
 
-```json
+```yaml
 {
  "transaction":
   {
