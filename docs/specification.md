@@ -1,6 +1,7 @@
 # Introduction
 
-The DSL aims to intuitively represent a transaction. Through this representation, the goal is to generate a CBOR.
+The DSL aims to intuitively represent a transaction. Through this representation, the goal is to generate a CBOR, that is not necessarily valid CBOR. It has a flexible syntax that allows certain elements to be specified in different ways.
+
 As an example, we can show how to build a simple transaction with this DSL. The following transaction represents a transfer of 9 ADA from "wallet-A" to "wallet-B", paying a fee of 1 ADA.
 
 ```json
@@ -14,14 +15,14 @@ As an example, we can show how to build a simple transaction with this DSL. The 
         "address": "addr_test1xq0pg5k3gc47qe8ntj25548dprlnmdyd44h7u653ply9pkw8yq3wjqnaym5vvm2sewd4m2xpwdhv69gqj62c5dxw5xwqm3j3fa",
         "txHash": "32252D31C9C9D49DC3326FC29343E63F180FDB3872C72BF36658C915E8B81BA3",
         "index": 0,
-        "value": [{ "amount": 10, "name": "ADA" }]
+        "values": [{ "amount": 10, "name": "ADA" }]
       }
     ],
     "outputs": [
       {
         "name": "wallet-B",
         "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk",
-        "value": [
+        "values": [
           {
             "amount": 9,
             "name": "ADA"
@@ -46,10 +47,10 @@ The CBOR generated from this structure written in the DSL would be the following
 ]
 ```
 
-## Specification of the DSL
+# Specification of the DSL
 
 The representation of the CBOR consists of a JSON structure that specifies the sections of the transaction with additional (descriptive) fields that aid in its comprehension.
-The minimal structure must specify the keywords “transaction”, “inputs”, and “outputs” in the following format:
+The minimal structure must specify the keywords `transaction`, `inputs`, and `outputs` in the following format:
 
 ```json
 {
@@ -62,21 +63,24 @@ The minimal structure must specify the keywords “transaction”, “inputs”,
 
 ## Inputs/Outputs
 
-Within the inputs and outputs, one or more structures can be specified with some (optional) fields as following:
+Given a transaction, its inputs are references to previous UTxOs (Unspent Transaction Outputs) that are being used (or spent) in the current transaction. Those references provide proof that the spender has ownership of the values specified in the input.
 
-```yaml
+On the other hand, outputs are created in the transaction to specify where the values of the inputs are going. They represent new UTXOs that can be spent in future transactions.
+Within the inputs and outputs lists, one or more structures can be specified with the following optional fields:
+
+```json
 {
- "name": "descriptive name for input",
- "address": "address",
- "value": [],
+ "name": "descriptive name for input or output",
+ "address": "address of the owner of the values",
+ "values": [],
  "script_ref": "string_hexa",
  "datum": *
 }
 ```
 
-Inputs have some extra (also optional) fields that can be added:
+Particularly, for the inputs there are some extra (also optional) fields that can be added:
 
-```yaml
+```json
 {
  ...
  "txHash": "hash of UTxO-Ref",
@@ -87,13 +91,68 @@ Inputs have some extra (also optional) fields that can be added:
 
 The following explains the mentioned fields that can be added to inputs and outputs.
 
+### Name
+
+The name is a string that can be used to have a better understanding of the input. It is not reflected on the CBOR.
+
+### Address
+
+The address is a string that represents the address of the owner that has the values specified on the values field (explained later).
+
+### Values
+
+This field details the tokens and their amount contained in the UTxO. It is a list filled with one or more structures as follows:
+
+```json
+{
+  "amount": 0,
+  "name": "name of token"
+}
+```
+
+The token name can be expressed either as an ASCII or in the format [PolicyID].[HexaName], for example:
+
+```json
+{
+  "amount": 10,
+  "name": "391589af6db9d9008e3e0952563f8d1d5c18cdb8ea0c300bfc1e60b6.414e4f4e3066396466613433" // [PolicyID].[HexaName] format
+}
+```
+
+Or as an ASCII:
+
+```json
+{
+  "amount": 10,
+  "name": "ADA"
+}
+```
+
+For outputs, the `minted` field can be (optionally) specified as follows:
+
+```json
+{
+  "amount": 0,
+  "name": "name of token",
+  "minted": "True"
+}
+```
+
+Alternatively, without specifying it in the output, another section can be added to the `transaction` structure (outside of the output section) where the minted tokens are specified (detailed later).
+
+### Script Reference
+
+Represents a reference to a smart contract (script).
+
 ### Datum
 
-For datums, there are 3 variants:
+The datum is a piece of data attached to a UTXO which provides context or information for how that UTXO can be used in future transactions.
+
+In the DSL the datum in the inputs/outputs have 3 variants:
 
 - As bytes:
 
-```yaml
+```json
 {
  "name": "descriptive name for input",
  . . .,
@@ -103,7 +162,7 @@ For datums, there are 3 variants:
 
 - As a JSON:
 
-```yaml
+```json
 {
  "name": "descriptive name for input",
  . . .,
@@ -113,7 +172,7 @@ For datums, there are 3 variants:
 
 - As an inline datum:
 
-```yaml
+```json
 {
  "name": "descriptive name for input",
  . . .,
@@ -121,66 +180,21 @@ For datums, there are 3 variants:
 }
 ```
 
-### Value
+### TxHash and Index (only for inputs)
 
-This field is completed with one or more structures as follows:
+They represent the UTxO-Ref: the original transaction that created the UTXO and the position of the UTxO in the original transaction.
 
-```yaml
-{
-  "amount": "amount",
-  "name": "name of token"
-}
-```
+### Redeemer (only for inputs)
 
-The token name can be expressed either as an ASCII name or in the format [PolicyID].[HexaName], for example:
-
-```json
-{
-  "amount": "amount",
-  "name": "391589af6db9d9008e3e0952563f8d1d5c18cdb8ea0c300bfc1e60b6.414e4f4e3066396466613433"
-}
-```
-
-For outputs, the optional extra field "minted" can be specified:
-
-```json
-{
-  "amount": "amount",
-  "name": "name of token",
-  "minted": "True"
-}
-```
-
-Alternatively, without specifying it in the output, another section can be added to the `transaction` structure (outside of the output section) where the minted tokens are specified (detailed below).
-
-## Minting
-
-This section consists of a list of token names that were minted in the transaction. It has the same structure as the value field in the inputs and outputs, indicating the amount and the name of the token, as follows:
-
-```json
-{
-  "transaction": {
-    "inputs": [
-      {
-        "name": "from x",
-        "value": [
-          { "amount": "N", "name": "ADA" },
-          { "amount": "K", "name": "TokenA" }
-        ],
-        "script_ref": "string_hexa"
-      }
-    ],
-    "outputs": [],
-    "minting": [{ "amount": "K", "name": "TokenA" }]
-  }
-}
-```
+The spent redeemer information that corresponds with the actual input.
 
 ---
 
-In addition to the inputs, outputs (with their respective internal fields), and minting sections (the latter being optional), the following optional sections can also be added to the transaction:
+In addition to the inputs and outputs (with their respective internal fields) sections, the following optional sections can also be added to the transaction:
 
 ## Name
+
+Similar to the `name` field in `inputs` and `outputs` section, the name is a string that describes the transaction. It is also not reflected in the cbor.
 
 ```json
 {
@@ -194,6 +208,8 @@ In addition to the inputs, outputs (with their respective internal fields), and 
 
 ## Fee
 
+It is a number that specifies the cost paid to the network for processing the transaction, based on size and complexity.
+
 ```json
 {
   "transaction": {
@@ -206,6 +222,8 @@ In addition to the inputs, outputs (with their respective internal fields), and 
 
 ## Start
 
+Number that states the earliest time or slot when the transaction is valid (a.k.a invalid before).
+
 ```json
 {
   "transaction": {
@@ -216,7 +234,9 @@ In addition to the inputs, outputs (with their respective internal fields), and 
 }
 ```
 
-## TTL
+## TTL (Time-to-Live)
+
+The expiration time after which the transaction is invalid (invalid hereafter).
 
 ```json
 {
@@ -230,6 +250,8 @@ In addition to the inputs, outputs (with their respective internal fields), and 
 
 ## Reference inputs
 
+Inputs that provide data from UTxOs without spending them. As the name indicates, it is only used for reference. It is a list field with `values`, the same way `values` field is completed in inputs.
+
 ```json
 {
   "transaction": {
@@ -240,21 +262,64 @@ In addition to the inputs, outputs (with their respective internal fields), and 
 }
 ```
 
+## Minting
+
+This section consists of a list of token names that were minted in the transaction. It is the alternative way for specifying minting (and/or burning). It has the same structure as the `values` field in the `inputs` section, indicating the amount and the name of the token, as follows:
+
+```json
+{
+  "transaction": {
+    "inputs": [
+      {
+        "name": "from x",
+        "values": [
+          { "amount": "N", "name": "ADA" },
+          { "amount": "K", "name": "TokenA" }
+        ],
+        "script_ref": "string_hexa"
+      }
+    ],
+    "outputs": [],
+    "minting": [{ "amount": "K", "name": "TokenA" }]
+  }
+}
+```
+
 ## Withdrawals
+
+Withdrawals refer to the action of moving rewards from a staking reward account to a spendable address.
+In the DSL this is specified as a list that contains one or more structures as follows:
+
+```json
+{
+  "raw_address": "spendable wallet's address",
+  "amount": 0
+}
+```
+
+Here we can see it in the complete `transaction` structure:
 
 ```json
 {
   "transaction": {
     "inputs": [],
     "outputs": [],
-    "withdrawals": []
+    "withdrawals": [
+      {
+        "raw_address": "spendable wallet's address",
+        "amount": 0
+      },
+      ...
+    ]
   }
 }
 ```
 
 ## Metadata
 
-```yaml
+It is the additional, arbitrary data attached to the transaction for identification, notes, or app-specific use. It is represented with a json structure:
+
+```json
 {
  "transaction":
   {
