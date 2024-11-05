@@ -16,10 +16,11 @@
                         "type": "string"
                     },
                     "assetClass": {
-                        "type": "string"
+                        "type": "string",
+                        "pattern": "^[0-9a-fA-F]{56}\\.[0-9a-fA-F]{0,64}$"
                     }
                 },
-                "anyOf": [
+                "oneOf": [
                     {
                         "required": [
                             "name"
@@ -38,7 +39,7 @@
         },
         "Address": {
             "type": "string",
-            "pattern": "^[a-zA-Z_]+1[0-9a-zA-Z]{32, 128}$"
+            "pattern": "^[a-zA-Z_]+1[0-9a-zA-Z]{32,128}$"
         },
         "InputOutput": {
             "type": "object",
