@@ -4,7 +4,7 @@
     "description": "The specification of a transaction.",
     "type": "object",
     "definitions": {
-        "Value": {
+        "Values": {
             "type": "array",
             "items": {
                 "type": "object",
@@ -50,8 +50,20 @@
                 "address": {
                     "$ref": "#/definitions/Address"
                 },
-                "value": {
-                    "$ref": "#/definitions/Value"
+                "script_ref": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{64}$"
+                },
+                "datum": {
+                    "oneOf": [
+                        {
+                            "type": "object"
+                        },
+                        {
+                            "type": "string",
+                            "pattern": "^[a-fA-F0-9]{64}$"
+                        }
+                    ]
                 }
             }
         }
@@ -65,6 +77,39 @@
                 },
                 "fee": {
                     "type": "number"
+                },
+                "start": {
+                    "type": "number"
+                },
+                "ttl": {
+                    "type": "number"
+                },
+                "refInputs": {
+                    "type": "array",
+                    "items": {
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/InputOutput"
+                            },
+                            {
+                                "properties": {
+                                    "txHash": {
+                                        "type": "string",
+                                        "pattern": "^[a-fA-F0-9]{64}$"
+                                    },
+                                    "index": {
+                                        "type": "integer"
+                                    },
+                                    "redeemer": {
+                                        "type": "object"
+                                    },
+                                    "values": {
+                                        "$ref": "#/definitions/Values"
+                                    }
+                                }
+                            }
+                        ]
+                    }
                 },
                 "inputs": {
                     "type": "array",
@@ -81,6 +126,12 @@
                                     },
                                     "index": {
                                         "type": "integer"
+                                    },
+                                    "redeemer": {
+                                        "type": "object"
+                                    },
+                                    "values": {
+                                        "$ref": "#/definitions/Values"
                                     }
                                 }
                             }
@@ -90,7 +141,29 @@
                 "outputs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/InputOutput"
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/InputOutput"
+                            },
+                            {
+                                "properties": {
+                                    "values": {
+                                        "allOf": [
+                                            {
+                                                "$ref": "#/definitions/Values"
+                                            },
+                                            {
+                                                "properties": {
+                                                    "minted": {
+                                                        "type": "boolean"
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        ]
                     }
                 }
             },
