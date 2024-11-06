@@ -115,7 +115,7 @@ The token name can be expressed either as an ASCII or in the format [PolicyID].[
 ```js
 {
   "amount": 10,
-  "name": "391589af6db9d9008e3e0952563f8d1d5c18cdb8ea0c300bfc1e60b6.414e4f4e3066396466613433" // [PolicyID].[HexaName] format
+  "assetClass": "391589af6db9d9008e3e0952563f8d1d5c18cdb8ea0c300bfc1e60b6.414e4f4e3066396466613433" // [PolicyID].[HexaName] format
 }
 ```
 
@@ -316,4 +316,5 @@ It is the additional, arbitrary data attached to the transaction for identificat
 
 ---
 
-The full specification of the DSL is in the following file: [Transaction Schema](tx.json)
+The full specification of the DSL is in the following file: [Transaction Schema](tx.json).
+An example accepted by the schema is as follows: [Transaction Example](tx_example.json).
