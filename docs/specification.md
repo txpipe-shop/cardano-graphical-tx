@@ -68,7 +68,7 @@ Given a transaction, its inputs are references to previous UTxOs (Unspent Transa
 On the other hand, outputs are created in the transaction to specify where the values of the inputs are going. They represent new UTXOs that can be spent in future transactions.
 Within the inputs and outputs lists, one or more structures can be specified with the following optional fields:
 
-```json
+```js
 {
  "name": "descriptive name for input or output",
  "address": "address of the owner of the values",
@@ -112,7 +112,7 @@ This field details the tokens and their amount contained in the UTxO. It is a li
 
 The token name can be expressed either as an ASCII or in the format [PolicyID].[HexaName], for example:
 
-```json
+```js
 {
   "amount": 10,
   "name": "391589af6db9d9008e3e0952563f8d1d5c18cdb8ea0c300bfc1e60b6.414e4f4e3066396466613433" // [PolicyID].[HexaName] format
