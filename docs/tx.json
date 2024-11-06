@@ -57,11 +57,30 @@
                 "datum": {
                     "oneOf": [
                         {
-                            "type": "object"
+                            "type": "object",
+                            "properties": {
+                                "hash": {
+                                    "type": "string",
+                                    "pattern": "^[a-fA-F0-9]{64}$"
+                                }
+                            }
                         },
                         {
-                            "type": "string",
-                            "pattern": "^[a-fA-F0-9]{64}$"
+                            "type": "object",
+                            "properties": {
+                                "bytes": {
+                                    "type": "string",
+                                    "pattern": "^[a-fA-F0-9]{2,}$"
+                                }
+                            }
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "json": {
+                                    "type": "object"
+                                }
+                            }
                         }
                     ]
                 }
@@ -84,7 +103,7 @@
                 "ttl": {
                     "type": "number"
                 },
-                "refInputs": {
+                "ref_inputs": {
                     "type": "array",
                     "items": {
                         "allOf": [
@@ -165,6 +184,26 @@
                             }
                         ]
                     }
+                },
+                "minting": {
+                    "$ref": "#/definitions/Values"
+                },
+                "withdrawals": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "raw_address": {
+                                "$ref": "#/definitions/Address"
+                            },
+                            "amount": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                },
+                "auxiliary_data": {
+                    "type": "object"
                 }
             },
             "required": [
