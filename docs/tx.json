@@ -3,11 +3,13 @@
     "title": "Transaction Schema",
     "description": "The specification of a transaction.",
     "type": "object",
+    "additionalProperties": false,
     "definitions": {
         "Values": {
             "type": "array",
             "items": {
                 "type": "object",
+                "additionalProperties": false,
                 "properties": {
                     "amount": {
                         "type": "number"
@@ -37,12 +39,63 @@
                 ]
             }
         },
+        "OutputValues": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/Values"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "properties": {
+                            "minted": {
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
         "Address": {
             "type": "string",
             "pattern": "^[a-zA-Z_]+1[0-9a-zA-Z]{32,128}$"
         },
-        "InputOutput": {
+        "Datum": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "hash": {
+                            "type": "string",
+                            "pattern": "^[a-fA-F0-9]{64}$"
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "bytes": {
+                            "type": "string",
+                            "pattern": "^([a-fA-F0-9][a-fA-F0-9])+$"
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "json": {
+                            "type": "object"
+                        }
+                    }
+                }
+            ]
+        },
+        "InputOutputBase": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "name": {
                     "type": "string"
@@ -55,34 +108,20 @@
                     "pattern": "^[a-fA-F0-9]{64}$"
                 },
                 "datum": {
-                    "oneOf": [
-                        {
-                            "type": "object",
-                            "properties": {
-                                "hash": {
-                                    "type": "string",
-                                    "pattern": "^[a-fA-F0-9]{64}$"
-                                }
-                            }
-                        },
-                        {
-                            "type": "object",
-                            "properties": {
-                                "bytes": {
-                                    "type": "string",
-                                    "pattern": "^([a-fA-F0-9][a-fA-F0-9])+$"
-                                }
-                            }
-                        },
-                        {
-                            "type": "object",
-                            "properties": {
-                                "json": {
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    ]
+                    "$ref": "#/definitions/Datum"
+                },
+                "txHash": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{64}$"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "redeemer": {
+                    "type": "object"
+                },
+                "values": {
+                    "$ref": "#/definitions/Values"
                 }
             }
         }
@@ -90,6 +129,7 @@
     "properties": {
         "transaction": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "name": {
                     "type": "string"
@@ -106,55 +146,13 @@
                 "ref_inputs": {
                     "type": "array",
                     "items": {
-                        "allOf": [
-                            {
-                                "$ref": "#/definitions/InputOutput"
-                            },
-                            {
-                                "properties": {
-                                    "txHash": {
-                                        "type": "string",
-                                        "pattern": "^[a-fA-F0-9]{64}$"
-                                    },
-                                    "index": {
-                                        "type": "integer"
-                                    },
-                                    "redeemer": {
-                                        "type": "object"
-                                    },
-                                    "values": {
-                                        "$ref": "#/definitions/Values"
-                                    }
-                                }
-                            }
-                        ]
+                        "$ref": "#/definitions/InputOutputBase"
                     }
                 },
                 "inputs": {
                     "type": "array",
                     "items": {
-                        "allOf": [
-                            {
-                                "$ref": "#/definitions/InputOutput"
-                            },
-                            {
-                                "properties": {
-                                    "txHash": {
-                                        "type": "string",
-                                        "pattern": "^[a-fA-F0-9]{64}$"
-                                    },
-                                    "index": {
-                                        "type": "integer"
-                                    },
-                                    "redeemer": {
-                                        "type": "object"
-                                    },
-                                    "values": {
-                                        "$ref": "#/definitions/Values"
-                                    }
-                                }
-                            }
-                        ]
+                        "$ref": "#/definitions/InputOutputBase"
                     }
                 },
                 "outputs": {
@@ -162,23 +160,12 @@
                     "items": {
                         "allOf": [
                             {
-                                "$ref": "#/definitions/InputOutput"
+                                "$ref": "#/definitions/InputOutputBase"
                             },
                             {
                                 "properties": {
                                     "values": {
-                                        "allOf": [
-                                            {
-                                                "$ref": "#/definitions/Values"
-                                            },
-                                            {
-                                                "properties": {
-                                                    "minted": {
-                                                        "type": "boolean"
-                                                    }
-                                                }
-                                            }
-                                        ]
+                                        "$ref": "#/definitions/OutputValues"
                                     }
                                 }
                             }
@@ -192,6 +179,7 @@
                     "type": "array",
                     "items": {
                         "type": "object",
+                        "additionalProperties": false,
                         "properties": {
                             "raw_address": {
                                 "$ref": "#/definitions/Address"
