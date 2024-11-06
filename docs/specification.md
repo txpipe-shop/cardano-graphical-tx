@@ -47,7 +47,7 @@ The CBOR generated from this structure written in the DSL would be the following
 ]
 ```
 
-# Specification of the DSL
+## Specification of the DSL
 
 The representation of the CBOR consists of a JSON structure that specifies the sections of the transaction with additional (descriptive) fields that aid in its comprehension.
 The minimal structure must specify the keywords `transaction`, `inputs`, and `outputs` in the following format:
@@ -80,7 +80,7 @@ Within the inputs and outputs lists, one or more structures can be specified wit
 
 Particularly, for the inputs there are some extra (also optional) fields that can be added:
 
-```json
+```js
 {
  ...
  "txHash": "hash of UTxO-Ref",
@@ -148,35 +148,19 @@ Represents a reference to a smart contract (script).
 
 The datum is a piece of data attached to a UTXO which provides context or information for how that UTXO can be used in future transactions.
 
-In the DSL the datum in the inputs/outputs have 3 variants:
+In the DSL the datum in the inputs/outputs can have any of these 3 fields:
 
-- As bytes:
-
-```json
+```js
 {
  "name": "descriptive name for input",
  . . .,
- "datum": "bytes"
-}
-```
-
-- As a JSON:
-
-```json
-{
- "name": "descriptive name for input",
- . . .,
- "datum": { "key": "value",... },
-}
-```
-
-- As an inline datum:
-
-```json
-{
- "name": "descriptive name for input",
- . . .,
- "datum": "hash",
+ "datum": {
+  "hash": "32 bytes hash", // Not inline datum
+  "bytes": "bytes",       // Inline datum
+  "json": {               // Inline datum
+    . . .,
+  }
+ },
 }
 ```
 
@@ -250,7 +234,7 @@ The expiration time after which the transaction is invalid (invalid hereafter).
 
 ## Reference inputs
 
-Inputs that provide data from UTxOs without spending them. As the name indicates, it is only used for reference. It is a list field with `values`, the same way `values` field is completed in inputs.
+Inputs that provide data from UTxOs without spending them. As the name indicates, it is only used for reference. It is a list field with structures, the same way inputs are filled.
 
 ```json
 {
@@ -299,7 +283,7 @@ In the DSL this is specified as a list that contains one or more structures as f
 
 Here we can see it in the complete `transaction` structure:
 
-```json
+```js
 {
   "transaction": {
     "inputs": [],
@@ -319,7 +303,7 @@ Here we can see it in the complete `transaction` structure:
 
 It is the additional, arbitrary data attached to the transaction for identification, notes, or app-specific use. It is represented with a json structure:
 
-```json
+```js
 {
  "transaction":
   {
