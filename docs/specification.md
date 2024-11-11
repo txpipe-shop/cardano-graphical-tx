@@ -2,13 +2,13 @@
 
 The DSL aims to intuitively represent a transaction. Through this representation, the goal is to generate a CBOR, that is not necessarily valid CBOR. It has a flexible syntax that allows certain elements to be specified in different ways.
 
-As an example, we can show how to build a simple transaction with this DSL. The following transaction represents a transfer of 9 ADA from "wallet-A" to "wallet-B", paying a fee of 1 ADA.
+As an example, we can show how to build a simple transaction with this DSL. The following transaction represents a transfer of 9 ADA from "wallet-A" to "wallet-B", paying a fee of 1 ADA (e.g 1.000.000 lovelace).
 
 ```json
 {
   "transaction": {
     "name": "example",
-    "fee": 1,
+    "fee": 1000000,
     "inputs": [
       {
         "name": "wallet-A",
@@ -34,7 +34,7 @@ As an example, we can show how to build a simple transaction with this DSL. The 
 }
 ```
 
-The CBOR generated from this structure written in the DSL would be the following:
+For our example, the CBOR generated from this structure written in the DSL would be the following:
 
 ```shell
 [{ 0: [[h'32252D31C9C9D49DC3326FC29343E63F180FDB3872C72BF36658C915E8B81BA3', 0]]
@@ -47,9 +47,14 @@ The CBOR generated from this structure written in the DSL would be the following
 ]
 ```
 
+One important consideration is that in CBOR, input references (UTxO-refs) are the primary identifiers for inputs. This means that any additional information about these inputs, is not directly represented in the CBOR output. This limitation is inherent to the nature of CBOR and how transactions are structured in blockchain systems. The DSL is designed to provide a more human-readable and intuitive way to represent transactions, but it is not a one-to-one mapping to the CBOR output.
+Take in count the following example:
+
+<!-- TODO: add examples where the json information is not reflected in the cbor -->
+
 ## Specification of the DSL
 
-The representation of the CBOR consists of a JSON structure that specifies the sections of the transaction with additional (descriptive) fields that aid in its comprehension.
+The representation of a transaction consists of a JSON structure that specifies its fields together with additional (descriptive) fields that aid in its comprehension.
 The minimal structure must specify the keywords `transaction`, `inputs`, and `outputs` in the following format:
 
 ```json
@@ -61,12 +66,15 @@ The minimal structure must specify the keywords `transaction`, `inputs`, and `ou
 }
 ```
 
+It is possible to verify that the JSON that represents a transaction is valid by checking some verifier, such as the following: [https://jsonschema.dev/s/fDQ7T](https://jsonschema.dev/s/fDQ7T)
+This can help ensure that the desired transaction can be translated into CBOR later on.
+
 ## Inputs/Outputs
 
-Given a transaction, its inputs are references to previous UTxOs (Unspent Transaction Outputs) that are being used (or spent) in the current transaction. Those references provide proof that the spender has ownership of the values specified in the input.
+Given a transaction, its inputs are references to current UTxOs (Unspent Transaction Outputs) that are being spent in the current transaction. Those references provide proof that the spender has ownership of the values specified in the input.
 
 On the other hand, outputs are created in the transaction to specify where the values of the inputs are going. They represent new UTXOs that can be spent in future transactions.
-Within the inputs and outputs lists, one or more structures can be specified with the following optional fields:
+Within the inputs and outputs lists, one or more objects can be specified with the following optional fields:
 
 ```js
 {
@@ -89,17 +97,20 @@ Particularly, for the inputs there are some extra (also optional) fields that ca
 }
 ```
 
-The following explains the mentioned fields that can be added to inputs and outputs.
+The following explains the mentioned fields that can be added:
 
-### Name
+#### Name
 
 The name is a string that can be used to have a better understanding of the input. It is not reflected on the CBOR.
 
-### Address
+#### Address
 
 The address is a string that represents the address of the owner that has the values specified on the values field (explained later).
+A valid address is a string that starts with a prefix, (e.g. `addr_test1` or `addr1` ), followed by a bech32 encoded string.
+For example: `addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk`.
+In general, any address that follows the format specified by Cardano will be valid, for a better understanding of this see [here](https://cips.cardano.org/cip/CIP-19).
 
-### Values
+#### Values
 
 This field details the tokens and their amount contained in the UTxO. It is a list filled with one or more structures as follows:
 
@@ -140,9 +151,9 @@ For outputs, the `minted` field can be (optionally) specified as follows:
 
 Alternatively, without specifying it in the output, another section can be added to the `transaction` structure (outside of the output section) where the minted tokens are specified (detailed later).
 
-### Script Reference
+#### Script Reference
 
-Represents a reference to a smart contract (script).
+The script reference is a string *(cbor hex)* that represents a reference to a smart contract.
 
 ### Datum
 
@@ -156,13 +167,15 @@ In the DSL the datum in the inputs/outputs can have any of these 3 fields:
  . . .,
  "datum": {
   "hash": "32 bytes hash", // Not inline datum
-  "bytes": "bytes",       // Inline datum
-  "json": {               // Inline datum
+  "bytes": "bytes",        // Inline datum
+  "json": {                // Inline datum
     . . .,
   }
  },
 }
 ```
+
+This field will be explained in more detail later.
 
 ### TxHash and Index (only for inputs)
 
@@ -170,13 +183,13 @@ They represent the UTxO-Ref: the original transaction that created the UTXO and 
 
 ### Redeemer (only for inputs)
 
-The spent redeemer information that corresponds with the actual input.
+The spent redeemer information that corresponds with the actual input. Is used for data validation. It is important to note that the specified redeemer will be placed in the corresponding field of the witnesses at the time of generating the CBOR.
 
 ---
 
 In addition to the inputs and outputs (with their respective internal fields) sections, the following optional sections can also be added to the transaction:
 
-## Name
+### Name
 
 Similar to the `name` field in `inputs` and `outputs` section, the name is a string that describes the transaction. It is also not reflected in the cbor.
 
@@ -190,7 +203,7 @@ Similar to the `name` field in `inputs` and `outputs` section, the name is a str
 }
 ```
 
-## Fee
+### Fee
 
 It is a number that specifies the cost paid to the network for processing the transaction, based on size and complexity.
 
@@ -204,7 +217,7 @@ It is a number that specifies the cost paid to the network for processing the tr
 }
 ```
 
-## Start
+### Start
 
 Number that states the earliest time or slot when the transaction is valid (a.k.a invalid before).
 
@@ -218,7 +231,7 @@ Number that states the earliest time or slot when the transaction is valid (a.k.
 }
 ```
 
-## TTL (Time-to-Live)
+### TTL (Time-to-Live)
 
 The expiration time after which the transaction is invalid (invalid hereafter).
 
@@ -232,7 +245,7 @@ The expiration time after which the transaction is invalid (invalid hereafter).
 }
 ```
 
-## Reference inputs
+### Reference inputs
 
 Inputs that provide data from UTxOs without spending them. As the name indicates, it is only used for reference. It is a list field with structures, the same way inputs are filled.
 
@@ -246,7 +259,7 @@ Inputs that provide data from UTxOs without spending them. As the name indicates
 }
 ```
 
-## Minting
+### Minting
 
 This section consists of a list of token names that were minted in the transaction. It is the alternative way for specifying minting (and/or burning). It has the same structure as the `values` field in the `inputs` section, indicating the amount and the name of the token, as follows:
 
@@ -269,7 +282,7 @@ This section consists of a list of token names that were minted in the transacti
 }
 ```
 
-## Withdrawals
+### Withdrawals
 
 Withdrawals refer to the action of moving rewards from a staking reward account to a spendable address.
 In the DSL this is specified as a list that contains one or more structures as follows:
@@ -299,7 +312,7 @@ Here we can see it in the complete `transaction` structure:
 }
 ```
 
-## Metadata
+### Metadata
 
 It is the additional, arbitrary data attached to the transaction for identification, notes, or app-specific use. It is represented with a json structure:
 
