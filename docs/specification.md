@@ -1,6 +1,8 @@
 # Introduction
 
-The DSL aims to intuitively represent a transaction. Through this representation, the goal is to generate a CBOR, that is not necessarily valid CBOR. It has a flexible syntax that allows certain elements to be specified in different ways.
+There is currently no language that allows transactions to be specified in a way that is both easy to read and write. Existing languages often have complex and rigid syntax, making them difficult to adapt to various transaction scenarios.
+Our DSL (domain-specific language) is designed to provide an intuitive representation of transactions, allowing users to define certain elements in flexible ways. Through this representation, the goal is to generate CBOR that may not be fully compliant with standard CBOR. This is because our DSL does not require users to specify every item in the CDDL (Concise Data Definition Language), meaning that the resulting CBOR might lack certain information necessary to construct a complete, precise transaction.
+For example, input references (UTxO-refs) are the primary identifiers for inputs in CBORs. This means that any additional information about these inputs, is not directly represented in the generated CBOR. This limitation is inherent to the nature of CBOR and how transactions are structured in blockchain systems. The DSL is designed to provide a more human-readable and intuitive way to represent transactions, but it is not a one-to-one mapping to the generated CBOR.
 
 As an example, we can show how to build a simple transaction with this DSL. The following transaction represents a transfer of 9 ADA from "wallet-A" to "wallet-B", paying a fee of 1 ADA (e.g 1.000.000 lovelace).
 
@@ -47,8 +49,9 @@ For our example, the CBOR generated from this structure written in the DSL would
 ]
 ```
 
-One important consideration is that in CBOR, input references (UTxO-refs) are the primary identifiers for inputs. This means that any additional information about these inputs, is not directly represented in the CBOR output. This limitation is inherent to the nature of CBOR and how transactions are structured in blockchain systems. The DSL is designed to provide a more human-readable and intuitive way to represent transactions, but it is not a one-to-one mapping to the CBOR output.
-Take in count the following example:
+Notice that in this CBOR, the information about the address, or the values are not reflected on the CBOR.
+
+We can also take in count the following examples:
 
 <!-- TODO: add examples where the json information is not reflected in the cbor -->
 
@@ -66,7 +69,7 @@ The minimal structure must specify the keywords `transaction`, `inputs`, and `ou
 }
 ```
 
-It is possible to verify that the JSON that represents a transaction is valid by checking some verifier, such as the following: [https://jsonschema.dev/s/fDQ7T](https://jsonschema.dev/s/fDQ7T)
+It is possible to verify that the JSON that represents a transaction is valid by checking some verifier, such as the following: [https://jsonschema.dev/s/fDQ7T](https://jsonschema.dev/s/fDQ7T).
 This can help ensure that the desired transaction can be translated into CBOR later on.
 
 ## Inputs/Outputs
@@ -105,10 +108,12 @@ The name is a string that can be used to have a better understanding of the inpu
 
 #### Address
 
-The address is a string that represents the address of the owner that has the values specified on the values field (explained later).
+The address is a string that represents the address of the owner that has the values specified on the `values` field (explained later).
+
 A valid address is a string that starts with a prefix, (e.g. `addr_test1` or `addr1` ), followed by a bech32 encoded string.
 For example: `addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk`.
-In general, any address that follows the format specified by Cardano will be valid, for a better understanding of this see [here](https://cips.cardano.org/cip/CIP-19).
+
+In general, any address that follows the format specified by Cardano will be valid. For a better understanding, see [here](https://cips.cardano.org/cip/CIP-19).
 
 #### Values
 
@@ -153,7 +158,7 @@ Alternatively, without specifying it in the output, another section can be added
 
 #### Script Reference
 
-The script reference is a string *(cbor hex)* that represents a reference to a smart contract.
+The script reference is a string _(cbor hex)_ that represents a reference to a smart contract.
 
 ### Datum
 
@@ -210,7 +215,7 @@ It is a number that specifies the cost paid to the network for processing the tr
 ```json
 {
   "transaction": {
-    "fee": 0,
+    "fee": 1000000,
     "inputs": [],
     "outputs": []
   }
