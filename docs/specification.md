@@ -74,7 +74,7 @@ This can help ensure that the desired transaction can be translated into CBOR la
 
 ## Inputs/Outputs
 
-Given a transaction, its inputs are references to current UTxOs (Unspent Transaction Outputs) that are being spent in the current transaction. Those references provide proof that the spender has ownership of the values specified in the input.
+Given a transaction, its inputs are references to existing UTxOs (Unspent Transaction Outputs) that are being spent in the current transaction. Those references provide proof that the spender has ownership of the values specified in the input.
 
 On the other hand, outputs are created in the transaction to specify where the values of the inputs are going. They represent new UTXOs that can be spent in future transactions.
 Within the inputs and outputs lists, one or more objects can be specified with the following optional fields:
