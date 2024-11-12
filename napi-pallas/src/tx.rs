@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use serde_json::{json, Value};
+use std::{collections::HashMap, fs, path::Path};
 
 use crate::{
   Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
@@ -18,8 +19,6 @@ use pallas_primitives::{
   conway::{Metadatum, RedeemerTag as RedeemerTagConway},
   Fragment,
 };
-
-use serde_json::Value;
 
 fn metadatum_to_string(metadatum: &Metadatum) -> String {
   match metadatum {
@@ -347,6 +346,19 @@ pub fn parse_datum_info(raw: String) -> Option<Datum> {
 }
 
 pub fn parse_dsl(raw: String) -> String {
+  let schema_path = Path::new("docs/schema.json").canonicalize().unwrap();
+  let schema_content = fs::read_to_string(schema_path).unwrap();
+  let schema: Value = serde_json::from_str(&schema_content).unwrap();
+
   let res: Value = serde_json::from_str(&raw).expect("JSON was not well-formatted");
-  res.to_string()
+  // TODO - handle error if is not a JSON
+
+  let validator = jsonschema::validator_for(&schema).unwrap();
+  let result = validator.validate(&res);
+
+  // FIXME - frontend shows {} instead of message
+  match result {
+    Ok(_) => "JSON is valid".to_string(),
+    Err(e) => format!("JSON is invalid: {}", e),
+  }
 }
