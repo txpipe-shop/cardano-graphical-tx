@@ -334,5 +334,5 @@ It is the additional, arbitrary data attached to the transaction for identificat
 
 ---
 
-The full specification of the DSL is in the following file: [Transaction Schema](tx.json).
+The full specification of the DSL is in the following file: [Transaction Schema](schema.json).
 An example accepted by the schema is as follows: [Transaction Example](tx_example.json).
