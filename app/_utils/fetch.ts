@@ -97,12 +97,15 @@ export const getDSLFromJSON = async (
   try {
     const formData = new FormData();
     formData.append("dsl", dsl.replace(/\s+/g, ""));
+
     const res = await fetch(parseQuery(API_ROUTES.DSL, {}), {
       method: "POST",
       body: formData,
     });
     if (res.status !== StatusCodes.OK) throw res;
-    return JSON.stringify(res);
+
+    const responseJson = await res.json();
+    return responseJson.dsl || "Unknown error";
   } catch (error) {
     console.error("Error processing JSON:", error);
     setError("Error processing JSON");

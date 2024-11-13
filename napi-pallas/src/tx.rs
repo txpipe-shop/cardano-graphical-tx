@@ -350,8 +350,10 @@ pub fn parse_dsl(raw: String) -> String {
   let schema_content = fs::read_to_string(schema_path).unwrap();
   let schema: Value = serde_json::from_str(&schema_content).unwrap();
 
-  let res: Value = serde_json::from_str(&raw).expect("JSON was not well-formatted");
-  // TODO - handle error if is not a JSON
+  let res: Value = match serde_json::from_str(&raw) {
+    Ok(json) => json,
+    Err(_) => return "Error: Input is not a valid JSON.".to_string(),
+  };
 
   let validator = jsonschema::validator_for(&schema).unwrap();
   let result = validator.validate(&res);
