@@ -1,4 +1,4 @@
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::{collections::HashMap, fs, path::Path};
 
 use crate::{
@@ -358,7 +358,6 @@ pub fn parse_dsl(raw: String) -> String {
   let validator = jsonschema::validator_for(&schema).unwrap();
   let result = validator.validate(&res);
 
-  // FIXME - frontend shows {} instead of message
   match result {
     Ok(_) => "JSON is valid".to_string(),
     Err(e) => format!("JSON is invalid: {}", e),
