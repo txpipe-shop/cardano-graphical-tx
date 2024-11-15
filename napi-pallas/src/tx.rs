@@ -1,4 +1,4 @@
-use serde_json::Value;
+use serde_json::{json, Value};
 use std::{collections::HashMap, fs, path::Path};
 
 use crate::{
@@ -352,7 +352,7 @@ pub fn parse_dsl(raw: String) -> String {
 
   let res: Value = match serde_json::from_str(&raw) {
     Ok(json) => json,
-    Err(_) => return "Error: Input is not a valid JSON.".to_string(),
+    Err(_) => return json!({ "error": "Input is not a valid JSON." }).to_string(),
   };
 
   let validator = jsonschema::validator_for(&schema).unwrap();
@@ -360,6 +360,16 @@ pub fn parse_dsl(raw: String) -> String {
 
   match result {
     Ok(_) => "JSON is valid".to_string(),
-    Err(e) => format!("JSON is invalid: {}", e),
+    Err(e) => json!(
+      {
+        "error": e.to_string(),
+        "info": {
+          "instance": e.instance.to_string(),
+          "instance_path": e.instance_path.to_string(),
+          "schema_path": e.schema_path.to_string()
+        }
+      }
+    )
+    .to_string(),
   }
 }
