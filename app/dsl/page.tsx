@@ -123,7 +123,7 @@ export default function Index() {
       normalizedCounter < normalizedIndex &&
       originalIndex < originalDoc.length
     ) {
-      if (originalIndex && !/\s/.test(originalDoc[originalIndex])) {
+      if (!/\s/.test(String(originalDoc[originalIndex]))) {
         normalizedCounter++;
       }
       originalIndex++;
