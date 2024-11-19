@@ -53,7 +53,69 @@ Notice that in this CBOR, the information about the address, or the values are n
 
 We can also take in count the following examples:
 
-<!-- TODO: add examples where the json information is not reflected in the cbor -->
+```json
+{
+  "transaction": {
+    "name": "example",
+    "inputs": [
+      {
+        "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk"
+      }
+    ],
+    "outputs": [{ "name": "A" }, { "name": "B" }]
+  }
+}
+```
+
+The transaction "example" will have the following resulting CBOR:
+
+```shell
+[{ 0: []
+ , 1: []
+ }
+, {}
+, true
+, null
+]
+```
+
+In this case, none of the specified field are contemplated on the resulting CBOR.
+
+For the following transaction:
+
+```json
+{
+  "transaction": {
+    "name": "example2",
+    "fee": 1000000,
+    "inputs": [
+      {
+        "name": "only input",
+        "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk",
+        "txHash": "32252D31C9C9D49DC3326FC29343E63F180FDB3872C72BF36658C915E8B81BA3",
+        "index": 0
+      }
+    ],
+    "outputs": [
+      {
+        "name": "A",
+        "values": [
+          {
+            "amount": 12,
+            "name": "ADA"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+it will be generated the subsequent CBOR:
+
+```shell
+# Complete
+```
 
 ## Specification of the DSL
 
