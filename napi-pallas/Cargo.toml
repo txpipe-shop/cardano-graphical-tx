@@ -17,6 +17,7 @@ pallas-codec = "0.29.0"
 serde_json = "1.0.64"
 pallas-crypto = "0.29.0"
 pallas-primitives = "0.29.0"
+jsonschema = "0.26.1"
 
 [build-dependencies]
 napi-build = "2.0.1"

@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import pallas, {
-  napiParseDatumInfo,
+import {
+  cborParse,
+  parseDatumInfo,
   type Assets,
   type CborResponse,
   type Input,
@@ -63,11 +64,9 @@ const inputsHandle = async ({
   return inputResponses.map((input) => {
     const datum = input.inline_datum
       ? {
-          hash: napiParseDatumInfo(input.inline_datum)?.hash || "",
-          bytes: napiParseDatumInfo(input.inline_datum)?.bytes || "",
-          json: JSON.parse(
-            napiParseDatumInfo(input.inline_datum)?.json || "null",
-          ),
+          hash: parseDatumInfo(input.inline_datum)?.hash || "",
+          bytes: parseDatumInfo(input.inline_datum)?.bytes || "",
+          json: JSON.parse(parseDatumInfo(input.inline_datum)?.json || "null"),
         }
       : undefined;
     return {
@@ -111,10 +110,7 @@ const inputsHandle = async ({
 
 export const cborHandler = async ({ cbor, network }: ICborHandler) => {
   try {
-    const formData = new FormData();
-    formData.append("raw", cbor);
-
-    const res: CborResponse = pallas.cborParse(cbor);
+    const res: CborResponse = cborParse(cbor);
 
     if (!isEmpty(res.error)) throw Error(res.error);
 

@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use serde_json::{json, Value};
+use std::{collections::HashMap, fs, path::Path};
 
 use crate::{
   Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
@@ -342,4 +343,29 @@ pub fn parse_datum_info(raw: String) -> Option<Datum> {
     json: data.to_json().to_string(),
     bytes: raw.clone(),
   })
+}
+
+pub fn parse_dsl(raw: String) -> String {
+  let schema_path = Path::new("docs/schema.json").canonicalize().unwrap();
+  let schema_content = fs::read_to_string(schema_path).unwrap();
+  let schema: Value = serde_json::from_str(&schema_content).unwrap();
+
+  let res: Value = match serde_json::from_str(&raw) {
+    Ok(json) => json,
+    Err(_) => return json!({ "error": "Input is not a valid JSON." }).to_string(),
+  };
+
+  let validator = jsonschema::validator_for(&schema).unwrap();
+  let result = validator.validate(&res);
+
+  match result {
+    Ok(_) => "JSON is valid".to_string(),
+    Err(e) => json!(
+      {
+        "error": e.to_string(),
+        "instance_path": e.instance_path.to_string(),
+      }
+    )
+    .to_string(),
+  }
 }

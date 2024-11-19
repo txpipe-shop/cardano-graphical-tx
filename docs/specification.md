@@ -2,7 +2,7 @@
 
 Our DSL (domain-specific language) is designed to provide an intuitive representation of transactions, allowing users to define certain elements in flexible ways. Through this representation, the goal is to generate CBOR that may not be fully compliant with standard CBOR. This is because our DSL does not require users to specify every item in the CDDL (Concise Data Definition Language), meaning that the resulting CBOR might lack certain information necessary to construct a complete, precise transaction.
 For example, input references (UTxO-refs) are the primary identifiers for inputs in CBORs. This means that any additional information about these inputs, is not directly represented in the generated CBOR. This limitation is inherent to the nature of CBOR and how transactions are structured in blockchain systems. The DSL is designed to provide a more human-readable and intuitive way to represent transactions, but it is not a one-to-one mapping to the generated CBOR.
-The full specification of the DSL can be found [here](tx.json), and [here](tx_example.json) is a complete compliance example with the especification.
+The full specification of the DSL can be found [here](schema.json), and [here](tx_example.json) is a complete compliance example with the especification.
 
 ---
 

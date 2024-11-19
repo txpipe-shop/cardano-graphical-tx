@@ -224,17 +224,32 @@ switch (platform) {
         }
         break
       case 'arm':
-        localFileExisted = existsSync(
-          join(__dirname, 'napi-pallas.linux-arm-gnueabihf.node')
-        )
-        try {
-          if (localFileExisted) {
-            nativeBinding = require('./napi-pallas.linux-arm-gnueabihf.node')
-          } else {
-            nativeBinding = require('napi-pallas-linux-arm-gnueabihf')
+        if (isMusl()) {
+          localFileExisted = existsSync(
+            join(__dirname, 'napi-pallas.linux-arm-musleabihf.node')
+          )
+          try {
+            if (localFileExisted) {
+              nativeBinding = require('./napi-pallas.linux-arm-musleabihf.node')
+            } else {
+              nativeBinding = require('napi-pallas-linux-arm-musleabihf')
+            }
+          } catch (e) {
+            loadError = e
           }
-        } catch (e) {
-          loadError = e
+        } else {
+          localFileExisted = existsSync(
+            join(__dirname, 'napi-pallas.linux-arm-gnueabihf.node')
+          )
+          try {
+            if (localFileExisted) {
+              nativeBinding = require('./napi-pallas.linux-arm-gnueabihf.node')
+            } else {
+              nativeBinding = require('napi-pallas-linux-arm-gnueabihf')
+            }
+          } catch (e) {
+            loadError = e
+          }
         }
         break
       case 'riscv64':
@@ -266,6 +281,20 @@ switch (platform) {
           }
         }
         break
+      case 's390x':
+        localFileExisted = existsSync(
+          join(__dirname, 'napi-pallas.linux-s390x-gnu.node')
+        )
+        try {
+          if (localFileExisted) {
+            nativeBinding = require('./napi-pallas.linux-s390x-gnu.node')
+          } else {
+            nativeBinding = require('napi-pallas-linux-s390x-gnu')
+          }
+        } catch (e) {
+          loadError = e
+        }
+        break
       default:
         throw new Error(`Unsupported architecture on Linux: ${arch}`)
     }
@@ -281,7 +310,8 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { cborParse, napiParseDatumInfo } = nativeBinding
+const { cborParse, parseDatumInfo, parseDsl } = nativeBinding
 
 module.exports.cborParse = cborParse
-module.exports.napiParseDatumInfo = napiParseDatumInfo
+module.exports.parseDatumInfo = parseDatumInfo
+module.exports.parseDsl = parseDsl
