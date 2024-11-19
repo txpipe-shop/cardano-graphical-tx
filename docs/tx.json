@@ -1,0 +1,207 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Transaction Schema",
+    "description": "The specification of a transaction.",
+    "type": "object",
+    "additionalProperties": false,
+    "definitions": {
+        "Values": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "amount": {
+                        "type": "number"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "assetClass": {
+                        "type": "string",
+                        "pattern": "^[0-9a-fA-F]{56}\\.[0-9a-fA-F]{0,64}$"
+                    }
+                },
+                "oneOf": [
+                    {
+                        "required": [
+                            "name"
+                        ]
+                    },
+                    {
+                        "required": [
+                            "assetClass"
+                        ]
+                    }
+                ],
+                "required": [
+                    "amount"
+                ]
+            }
+        },
+        "OutputValues": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/Values"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "properties": {
+                            "minted": {
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "Address": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_]+1[0-9a-zA-Z]{32,128}$"
+        },
+        "Datum": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "hash": {
+                            "type": "string",
+                            "pattern": "^[a-fA-F0-9]{64}$"
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "bytes": {
+                            "type": "string",
+                            "pattern": "^([a-fA-F0-9][a-fA-F0-9])+$"
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "json": {
+                            "type": "object"
+                        }
+                    }
+                }
+            ]
+        },
+        "InputOutputBase": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "address": {
+                    "$ref": "#/definitions/Address"
+                },
+                "script_ref": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{64}$"
+                },
+                "datum": {
+                    "$ref": "#/definitions/Datum"
+                },
+                "txHash": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{64}$"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "redeemer": {
+                    "type": "object"
+                },
+                "values": {
+                    "$ref": "#/definitions/Values"
+                }
+            }
+        }
+    },
+    "properties": {
+        "transaction": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "fee": {
+                    "type": "number"
+                },
+                "start": {
+                    "type": "number"
+                },
+                "ttl": {
+                    "type": "number"
+                },
+                "ref_inputs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/InputOutputBase"
+                    }
+                },
+                "inputs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/InputOutputBase"
+                    }
+                },
+                "outputs": {
+                    "type": "array",
+                    "items": {
+                        "allOf": [
+                            {
+                                "$ref": "#/definitions/InputOutputBase"
+                            },
+                            {
+                                "properties": {
+                                    "values": {
+                                        "$ref": "#/definitions/OutputValues"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                "minting": {
+                    "$ref": "#/definitions/Values"
+                },
+                "withdrawals": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "raw_address": {
+                                "$ref": "#/definitions/Address"
+                            },
+                            "amount": {
+                                "type": "number",
+                                "pattern": "[1-9][0-9]*"
+                            }
+                        }
+                    }
+                },
+                "auxiliary_data": {
+                    "type": "object"
+                }
+            },
+            "required": [
+                "inputs",
+                "outputs"
+            ]
+        }
+    },
+    "required": [
+        "transaction"
+    ]
+}
