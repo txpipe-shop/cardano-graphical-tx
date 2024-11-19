@@ -38,12 +38,13 @@ export default function Index() {
               <label htmlFor="dsl" className="mb-6 text-xl font-semibold">
                 Input DSL JSON
               </label>
-              <textarea
-                name="dsl"
+              <CodeMirror
                 value={dsl}
-                onChange={(e) => setDsl(e.target.value)}
+                height="650px"
+                extensions={[json()]}
+                onChange={(value) => setDsl(value)}
                 placeholder="Enter JSON here"
-                className="block min-h-[650px] w-full resize-none rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-3 text-lg text-black placeholder-gray-400 shadow shadow-black outline-none"
+                className="rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-1 text-lg placeholder-gray-400 shadow shadow-black outline-none"
               />
             </div>
 
@@ -51,12 +52,13 @@ export default function Index() {
               <label htmlFor="response" className="mb-6 text-xl font-semibold">
                 Parsed Response
               </label>
-              <textarea
-                name="response"
+              <CodeMirror
                 value={response}
+                height="650px"
+                extensions={[json()]}
+                editable={false}
                 placeholder="Response will be displayed here"
-                className="block min-h-[650px] w-full resize-none rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-3 text-lg placeholder-gray-400 shadow shadow-black outline-none"
-                disabled
+                className="rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-1 text-lg placeholder-gray-400 shadow shadow-black outline-none"
               />
             </div>
           </div>

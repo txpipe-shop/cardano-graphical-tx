@@ -363,11 +363,7 @@ pub fn parse_dsl(raw: String) -> String {
     Err(e) => json!(
       {
         "error": e.to_string(),
-        "info": {
-          "instance": e.instance.to_string(),
-          "instance_path": e.instance_path.to_string(),
-          "schema_path": e.schema_path.to_string()
-        }
+        "instance_path": e.instance_path.to_string(),
       }
     )
     .to_string(),
