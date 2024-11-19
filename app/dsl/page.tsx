@@ -10,21 +10,22 @@ import { json } from "@codemirror/lang-json";
 import type { EditorView } from "@codemirror/view";
 import { lintGutter, linter } from "@codemirror/lint";
 import type { Diagnostic } from "@codemirror/lint";
+import jsonpointer from "jsonpointer";
 
 export default function Index() {
   const { error, setError } = useUI();
   const [dsl, setDsl] = useState<string>("");
   const [response, setResponse] = useState<string>("");
+  const [customDiagnostics, setCustomDiagnostics] = useState<Diagnostic[]>([]);
 
   const customJsonLinter = linter((view: EditorView): Diagnostic[] => {
     const doc = view.state.doc.toString();
+    const baseDiagnostics: Diagnostic[] = [];
 
-    if (!doc.trim()) {
-      return [];
-    }
+    if (!doc.trim()) return baseDiagnostics;
+
     try {
       JSON.parse(doc);
-      return [];
     } catch (err: any) {
       const message = err.message;
       const match = message.match(/at line (\d+) column (\d+)/);
@@ -37,24 +38,22 @@ export default function Index() {
         const from = lineStart + (column - 1);
         const to = from + 1;
 
-        return [
-          {
-            from,
-            to,
-            severity: "error",
-            message,
-          },
-        ];
-      }
-      return [
-        {
+        baseDiagnostics.push({
+          from,
+          to,
+          severity: "error",
+          message,
+        });
+      } else {
+        baseDiagnostics.push({
           from: 0,
           to: doc.length,
           severity: "error",
           message,
-        },
-      ];
+        });
+      }
     }
+    return [...baseDiagnostics, ...customDiagnostics];
   });
 
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
@@ -63,13 +62,74 @@ export default function Index() {
       setResponse("Please enter DSL JSON to parse.");
       return;
     }
+
     const res = await getDSLFromJSON(dsl, setError);
     if (res.includes("error")) {
-      let parsed_res = await JSON.parse(res);
-      setResponse(`JSON is not valid: ${parsed_res.error}`);
+      const parsedRes = JSON.parse(res);
+      const { error, instance_path } = parsedRes;
+
+      if (instance_path) {
+        const parsedDSL = JSON.parse(dsl);
+        const position = getPositionFromPath(parsedDSL, instance_path);
+
+        const diagnostic: Diagnostic = {
+          from: position?.from || 0,
+          to: position?.to || dsl.length,
+          severity: "error",
+          message: `Error: ${error}`,
+        };
+        setResponse(`JSON is not valid!`);
+        setCustomDiagnostics([diagnostic]);
+      }
     } else {
       setResponse(res);
+      setCustomDiagnostics([]);
     }
+  }
+  function getPositionFromPath(json: object, path: string) {
+    try {
+      const value = jsonpointer.get(json, path);
+
+      if (value === undefined) {
+        console.error(`Path not found: ${path}`);
+        return null;
+      }
+
+      const valueString = JSON.stringify(value);
+      const normalizedDoc = dsl.replace(/\s+/g, "");
+
+      const index = normalizedDoc.indexOf(valueString);
+
+      if (index === -1) {
+        console.error(`Value not found in JSON document: ${valueString}`);
+        return null;
+      }
+
+      const from = findOriginalPosition(dsl, index);
+      const to = from + 1;
+
+      return { from, to };
+    } catch (err) {
+      console.error(`Error resolving path: ${path}`, err);
+      return null;
+    }
+  }
+
+  function findOriginalPosition(originalDoc: string, normalizedIndex: number) {
+    let originalIndex = 0;
+    let normalizedCounter = 0;
+
+    while (
+      normalizedCounter < normalizedIndex &&
+      originalIndex < originalDoc.length
+    ) {
+      if (originalIndex && !/\s/.test(originalDoc[originalIndex])) {
+        normalizedCounter++;
+      }
+      originalIndex++;
+    }
+
+    return originalIndex;
   }
 
   return (
@@ -93,7 +153,10 @@ export default function Index() {
                 value={dsl}
                 height="650px"
                 extensions={[json(), lintGutter(), customJsonLinter]}
-                onChange={(value) => setDsl(value)}
+                onChange={(value) => {
+                  setDsl(value);
+                  setCustomDiagnostics([]);
+                }}
                 placeholder="Enter JSON here"
                 className="rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-1 text-lg placeholder-gray-400 shadow shadow-black outline-none"
               />
