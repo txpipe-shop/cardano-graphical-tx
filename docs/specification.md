@@ -1,8 +1,10 @@
 # Introduction
 
-There is currently no language that allows transactions to be specified in a way that is both easy to read and write. Existing languages often have complex and rigid syntax, making them difficult to adapt to various transaction scenarios.
 Our DSL (domain-specific language) is designed to provide an intuitive representation of transactions, allowing users to define certain elements in flexible ways. Through this representation, the goal is to generate CBOR that may not be fully compliant with standard CBOR. This is because our DSL does not require users to specify every item in the CDDL (Concise Data Definition Language), meaning that the resulting CBOR might lack certain information necessary to construct a complete, precise transaction.
 For example, input references (UTxO-refs) are the primary identifiers for inputs in CBORs. This means that any additional information about these inputs, is not directly represented in the generated CBOR. This limitation is inherent to the nature of CBOR and how transactions are structured in blockchain systems. The DSL is designed to provide a more human-readable and intuitive way to represent transactions, but it is not a one-to-one mapping to the generated CBOR.
+The full specification of the DSL can be found [here](schema.json), and [here](tx_example.json) is a complete compliance example with the especification.
+
+---
 
 As an example, we can show how to build a simple transaction with this DSL. The following transaction represents a transfer of 9 ADA from "wallet-A" to "wallet-B", paying a fee of 1 ADA (e.g 1.000.000 lovelace).
 
@@ -53,7 +55,33 @@ Notice that in this CBOR, the information about the address, or the values are n
 
 We can also take in count the following examples:
 
-<!-- TODO: add examples where the json information is not reflected in the cbor -->
+```json
+{
+  "transaction": {
+    "name": "example",
+    "inputs": [
+      {
+        "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk"
+      }
+    ],
+    "outputs": [{ "name": "A" }, { "name": "B" }]
+  }
+}
+```
+
+The transaction "example" will have the following resulting CBOR:
+
+```shell
+[{ 0: []
+ , 1: []
+ }
+, {}
+, true
+, null
+]
+```
+
+In this case, none of the specified field are contemplated on the resulting CBOR.
 
 ## Specification of the DSL
 
@@ -185,6 +213,7 @@ This field will be explained in more detail later.
 ### TxHash and Index (only for inputs)
 
 They represent the UTxO-Ref: the original transaction that created the UTXO and the position of the UTxO in the original transaction.
+It is important to notice that, the UTxO-Ref information (`txHash` and `index` fields) will be the only information relfected on the inputs of the generated CBOR.
 
 ### Redeemer (only for inputs)
 
@@ -331,8 +360,3 @@ It is the additional, arbitrary data attached to the transaction for identificat
   }
 }
 ```
-
----
-
-The full specification of the DSL is in the following file: [Transaction Schema](schema.json).
-An example accepted by the schema is as follows: [Transaction Example](tx_example.json).
