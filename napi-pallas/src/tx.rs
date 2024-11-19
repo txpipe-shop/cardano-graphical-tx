@@ -359,7 +359,7 @@ pub fn parse_dsl(raw: String) -> String {
   let result = validator.validate(&res);
 
   match result {
-    Ok(_) => "JSON is valid".to_string(),
+    Ok(_) => "JSON is valid!".to_string(),
     Err(e) => json!(
       {
         "error": e.to_string(),

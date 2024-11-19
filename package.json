@@ -38,6 +38,7 @@
     "framer-motion": "^10.18.0",
     "http-status-codes": "^2.3.0",
     "json-bigint": "^1.0.0",
+    "jsonpointer": "^5.0.1",
     "konva": "^9.3.13",
     "napi-pallas": "./napi-pallas",
     "next": "latest",
