@@ -1,22 +1,26 @@
-use serde_json::{json, Value};
-use std::{collections::HashMap, fs, path::Path};
-
 use crate::{
   Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
   Utxo, Withdrawal, Witness, Witnesses,
 };
-
-use pallas::{
-  crypto::hash::Hasher,
-  ledger::{
-    primitives::{conway::PlutusData, ToCanonicalJson},
-    traverse::{ComputeHash, MultiEraTx},
-  },
+use pallas_crypto::hash::{Hash, Hasher};
+use pallas_primitives::conway::{
+  Coin, PostAlonzoTransactionOutput, PseudoTransactionOutput, RewardAccount,
+  Value as PrimitiveValue,
 };
-use pallas_codec::utils::KeyValuePairs;
+use serde_json::{json, Value};
+use std::{collections::HashMap, fmt::Debug, fs, path::Path};
+
+use pallas::ledger::{
+  primitives::{conway::PlutusData, ToCanonicalJson},
+  traverse::{ComputeHash, MultiEraTx},
+};
+use pallas_codec::utils::{Bytes, KeyValuePairs, Set};
 use pallas_primitives::{
   alonzo::RedeemerTag,
-  conway::{Metadatum, RedeemerTag as RedeemerTagConway},
+  conway::{
+    Metadatum, PseudoTransactionBody, RedeemerTag as RedeemerTagConway, TransactionInput,
+    TransactionOutput,
+  },
   Fragment,
 };
 
@@ -368,4 +372,222 @@ pub fn parse_dsl(raw: String) -> String {
     )
     .to_string(),
   }
+}
+
+pub fn json_to_serde(raw: String) -> Value {
+  let res: Value = match serde_json::from_str(&raw) {
+    Ok(json) => json,
+    Err(_) => return json!({ "error": "Input is not a valid JSON." }),
+  };
+
+  res
+}
+
+#[test]
+pub fn example() {
+  let raw = r#"{
+    "transaction": {
+        "name": "example",
+        "fee": 1,
+        "start": 123,
+        "ttl": 321,
+        "inputs": [
+            {
+                "name": "wallet-A",
+                "index": 0
+            },
+            {
+                "txHash": "49388b9499370a6ffd383fcde59a6a075192c73bb6fb08f93efcf24c6ddbcabb",
+                "index": 1
+            },
+            {
+                "address": "addr_test1xq0pg5k3gc47qe8ntj25548dprlnmdyd44h7u653ply9pkw8yq3wjqnaym5vvm2sewd4m2xpwdhv69gqj62c5dxw5xwqm3j3fa",
+                "redeemer": {
+                    "name": "r",
+                    "number": 1232112
+                }
+            },
+            {
+                "name": "wallet-A",
+                "values": [
+                    {
+                        "amount": 10,
+                        "name": "ADA"
+                    }
+                ]
+            },
+            {
+                "name": "wallet-A",
+                "address": "addr_test1xq0pg5k3gc47qe8ntj25548dprlnmdyd44h7u653ply9pkw8yq3wjqnaym5vvm2sewd4m2xpwdhv69gqj62c5dxw5xwqm3j3fa",
+                "values": [
+                    {
+                        "amount": 10,
+                        "name": "ADA"
+                    },
+                    {
+                        "amount": 10,
+                        "assetClass": "391589af6db9d9008e3e0952563f8d1d5c18cdb8ea0c300bfc1e60b6.414e4f4e3066396466613433"
+                    }
+                ]
+            }
+        ],
+        "outputs": [
+            {
+                "name": "wallet-de-sofi",
+                "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk",
+                "values": [
+                    {
+                        "amount": 9,
+                        "name": "ADA"
+                    },
+                    {
+                        "amount": 123,
+                        "name": "New Token"
+                    }
+                ]
+            },
+                        {
+                "name": "wallet-A",
+                "address": "addr_test1xq0pg5k3gc47qe8ntj25548dprlnmdyd44h7u653ply9pkw8yq3wjqnaym5vvm2sewd4m2xpwdhv69gqj62c5dxw5xwqm3j3fa",
+                "values": [
+                    {
+                        "amount": 10,
+                        "name": "ADA"
+                    },
+                    {
+                        "amount": 10,
+                        "assetClass": "391589af6db9d9008e3e0952563f8d1d5c18cdb8ea0c300bfc1e60b6.414e4f4e3066396466613433"
+                    }
+                ]
+            }
+        ],
+        "minting": [
+            {
+                "amount": 123,
+                "name": "New Token"
+            },
+            {
+                "amount": 1231,
+                "name": "Other Token"
+            }
+        ],
+        "withdrawals": [
+            {
+                "raw_address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk",
+                "amount": 123
+            }
+        ],
+        "auxiliary_data": {
+            "any": "thing",
+            "for example": 123
+        }
+    }
+}"#;
+  let res: Value = json_to_serde(raw.to_string());
+  let inputs = Set::from(
+    res["transaction"]["inputs"]
+      .as_array()
+      .unwrap_or(&vec![])
+      .iter()
+      .filter_map(|x| {
+        Some(TransactionInput {
+          transaction_id: match x["txHash"].as_str() {
+            Some(tx_hash_value) => {
+              let bytes = hex::decode(tx_hash_value).expect("Invalid hex string");
+              let array: [u8; 32] = bytes.try_into().expect("Expected 32 bytes");
+              Hash::<32>::new(array)
+            }
+            None => Hash::<32>::new([0; 32]), // REVIEW: Should we use a different value?
+          },
+          index: match x["index"].as_u64() {
+            Some(index) => index as u64,
+            None => u64::MAX, // REVIEW: Should we use a different value?
+          },
+        })
+      })
+      .collect::<Vec<TransactionInput>>(),
+  );
+  let outputs = res["transaction"]["outputs"]
+    .as_array()
+    .unwrap_or(&vec![])
+    .iter()
+    .map(|x| {
+      let address = x["address"].as_str().unwrap_or("").to_string().into_bytes();
+      let lovelace_amount = 0;
+      let mut assets: Vec<(Hash<28>, Vec<(Bytes, u64)>)> = vec![];
+      // let values = if x["values"].as_array().unwrap().len() > 0 {
+      //   x["values"]
+      //     .as_array()
+      //     .unwrap()
+      //     .iter()
+      //     .map(|x| {
+      //       let amount = x["amount"].as_u64().unwrap_or(0);
+      //       let asset_class = x["assetClass"]
+      //         .as_str()
+      //         .unwrap_or("")
+      //         .to_string()
+      //         .into_bytes();
+      //       PrimitiveValue::Multiasset((), ())
+      //     })
+      //     .collect::<Vec<PrimitiveValue>>()
+      // } else {
+      //   let amount = x["amount"].as_u64();
+      //   PrimitiveValue::Coin(amount)
+      // };
+
+      TransactionOutput::PostAlonzo(PostAlonzoTransactionOutput {
+        address: address.into(),
+        value: pallas_primitives::alonzo::Value::Coin(10),
+        datum_option: None,
+        script_ref: None,
+      })
+    })
+    .collect::<Vec<TransactionOutput>>();
+
+  let withdrawals: Option<KeyValuePairs<RewardAccount, Coin>> =
+    Some(KeyValuePairs::from(Vec::from(
+      res["transaction"]["withdrawals"]
+        .as_array()
+        .unwrap_or(&vec![]) // Maneja el caso de que no sea un array
+        .iter() // Itera sobre los elementos del array
+        .filter_map(|entry| {
+          let raw_address = entry["raw_address"].as_str()?; // Obtén el raw_address como &str
+          let amount = entry["amount"].as_u64()?; // Obtén el amount como u64
+
+          // Convierte raw_address a Bytes (RewardAccount)
+          let address_bytes = raw_address.as_bytes().to_vec(); // Convierte &str -> Vec<u8>
+          let reward_account = Bytes::from(address_bytes); // Vec<u8> -> Bytes
+
+          Some((reward_account, amount)) // Devuelve la tupla si todo es válido
+        })
+        .collect::<Vec<(RewardAccount, Coin)>>(), // Colecciona los resultados en un Vec
+    )));
+  let tx_body = PseudoTransactionBody::<TransactionOutput> {
+    inputs,
+    outputs,
+    fee: match res["transaction"]["fee"].as_i64() {
+      Some(fee) => fee as u64,
+      None => 0,
+    },
+    ttl: res["transaction"]["ttl"].as_u64(),
+    certificates: None,
+    withdrawals,
+    auxiliary_data_hash: None,
+    validity_interval_start: res["transaction"]["start"].as_u64(),
+    mint: None,
+    script_data_hash: None,
+    collateral: None,
+    required_signers: None,
+    network_id: None,
+    collateral_return: None,
+    total_collateral: None,
+    reference_inputs: None,
+    // -- NEW IN CONWAY
+    voting_procedures: None,
+    proposal_procedures: None,
+    treasury_value: None,
+    donation: None,
+  };
+
+  print!("\n {:?}", tx_body);
 }
