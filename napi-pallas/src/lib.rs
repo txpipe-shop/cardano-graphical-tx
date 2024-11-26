@@ -8,6 +8,7 @@ use pallas::ledger::traverse::MultiEraTx;
 extern crate napi_derive;
 
 mod address;
+mod constants;
 mod tx;
 
 #[derive(Clone)]

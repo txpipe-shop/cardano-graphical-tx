@@ -1,20 +1,22 @@
+use crate::constants::{FIXED_HASH, FIXED_INDEX, FIXED_POLICY};
 use crate::{
   Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
   Utxo, Withdrawal, Witness, Witnesses,
 };
 use pallas_crypto::hash::{Hash, Hasher};
+use pallas_primitives::alonzo::Value as AlonzoValue;
 use pallas_primitives::conway::{
-  Coin, PostAlonzoTransactionOutput, PseudoTransactionOutput, RewardAccount,
-  Value as PrimitiveValue,
+  Coin, Multiasset, PostAlonzoTransactionOutput, PseudoTransactionOutput, RewardAccount,
 };
 use serde_json::{json, Value};
-use std::{collections::HashMap, fmt::Debug, fs, path::Path};
+use std::str::FromStr;
+use std::{collections::HashMap, fs, path::Path};
 
 use pallas::ledger::{
   primitives::{conway::PlutusData, ToCanonicalJson},
   traverse::{ComputeHash, MultiEraTx},
 };
-use pallas_codec::utils::{Bytes, KeyValuePairs, Set};
+use pallas_codec::utils::{Bytes, KeyValuePairs, Nullable, Set};
 use pallas_primitives::{
   alonzo::RedeemerTag,
   conway::{
@@ -422,7 +424,7 @@ pub fn example() {
                 "values": [
                     {
                         "amount": 10,
-                        "name": "ADA"
+                        "name": "lovelace"
                     },
                     {
                         "amount": 10,
@@ -438,7 +440,7 @@ pub fn example() {
                 "values": [
                     {
                         "amount": 9,
-                        "name": "ADA"
+                        "name": "lovelace"
                     },
                     {
                         "amount": 123,
@@ -446,17 +448,26 @@ pub fn example() {
                     }
                 ]
             },
-                        {
+            {
                 "name": "wallet-A",
                 "address": "addr_test1xq0pg5k3gc47qe8ntj25548dprlnmdyd44h7u653ply9pkw8yq3wjqnaym5vvm2sewd4m2xpwdhv69gqj62c5dxw5xwqm3j3fa",
                 "values": [
                     {
-                        "amount": 10,
-                        "name": "ADA"
+                        "amount": 100,
+                        "name": "lovelace"
                     },
                     {
                         "amount": 10,
                         "assetClass": "391589af6db9d9008e3e0952563f8d1d5c18cdb8ea0c300bfc1e60b6.414e4f4e3066396466613433"
+                    }
+                ]
+            },
+            {
+                "name": "extra",
+                "values": [
+                    {
+                        "amount": 320,
+                        "name": "lovelace"
                     }
                 ]
             }
@@ -477,10 +488,14 @@ pub fn example() {
                 "amount": 123
             }
         ],
-        "auxiliary_data": {
-            "any": "thing",
-            "for example": 123
-        }
+        "metadata": [
+            {
+                "label": 674,
+                "json_metadata": {
+                    "key": "value"
+                }
+            }
+        ]
     }
 }"#;
   let res: Value = json_to_serde(raw.to_string());
@@ -497,47 +512,64 @@ pub fn example() {
               let array: [u8; 32] = bytes.try_into().expect("Expected 32 bytes");
               Hash::<32>::new(array)
             }
-            None => Hash::<32>::new([0; 32]), // REVIEW: Should we use a different value?
+            None => FIXED_HASH, // REVIEW: Should we use a different value?
           },
           index: match x["index"].as_u64() {
             Some(index) => index as u64,
-            None => u64::MAX, // REVIEW: Should we use a different value?
+            None => FIXED_INDEX, // REVIEW: Should we use a different value?
           },
         })
       })
       .collect::<Vec<TransactionInput>>(),
   );
+
   let outputs = res["transaction"]["outputs"]
     .as_array()
     .unwrap_or(&vec![])
     .iter()
     .map(|x| {
       let address = x["address"].as_str().unwrap_or("").to_string().into_bytes();
-      let lovelace_amount = 0;
-      let mut assets: Vec<(Hash<28>, Vec<(Bytes, u64)>)> = vec![];
-      // let values = if x["values"].as_array().unwrap().len() > 0 {
-      //   x["values"]
-      //     .as_array()
-      //     .unwrap()
-      //     .iter()
-      //     .map(|x| {
-      //       let amount = x["amount"].as_u64().unwrap_or(0);
-      //       let asset_class = x["assetClass"]
-      //         .as_str()
-      //         .unwrap_or("")
-      //         .to_string()
-      //         .into_bytes();
-      //       PrimitiveValue::Multiasset((), ())
-      //     })
-      //     .collect::<Vec<PrimitiveValue>>()
-      // } else {
-      //   let amount = x["amount"].as_u64();
-      //   PrimitiveValue::Coin(amount)
-      // };
+
+      let values = {
+        let values_array = x["values"].as_array().unwrap();
+        let mut lovelace_am = 0;
+        let mut policy_hash: Option<Hash<28>> = None;
+        if values_array.len() > 1 {
+          let transformed_assets: Vec<(Hash<28>, KeyValuePairs<Bytes, u64>)> = values_array
+            .iter()
+            .filter_map(|asset| {
+              let asset_name: Vec<u8>;
+              let amount = asset["amount"].as_u64().unwrap();
+              if asset["assetClass"].is_null() {
+                asset_name = asset["name"].as_str().unwrap().as_bytes().to_vec();
+                if asset["name"].as_str().unwrap() == "lovelace".to_string() {
+                  lovelace_am += amount;
+                } else {
+                  policy_hash = FIXED_POLICY;
+                }
+              } else {
+                asset_name = hex::decode(&asset["assetClass"].as_str().unwrap()[57..]).unwrap();
+                policy_hash = Hash::<28>::from_str(&asset["assetClass"].as_str()?[..56]).ok();
+              }
+
+              let kv_pairs = KeyValuePairs::from(vec![(Bytes::from(asset_name), amount)]);
+              let res = match policy_hash {
+                Some(hash) => Some((hash, kv_pairs)),
+                None => None,
+              };
+              res
+            })
+            .collect();
+
+          AlonzoValue::Multiasset(lovelace_am, KeyValuePairs::from(transformed_assets))
+        } else {
+          AlonzoValue::Coin(values_array[0]["amount"].as_u64().unwrap())
+        }
+      };
 
       TransactionOutput::PostAlonzo(PostAlonzoTransactionOutput {
         address: address.into(),
-        value: pallas_primitives::alonzo::Value::Coin(10),
+        value: values,
         datum_option: None,
         script_ref: None,
       })
@@ -562,6 +594,7 @@ pub fn example() {
         })
         .collect::<Vec<(RewardAccount, Coin)>>(), // Colecciona los resultados en un Vec
     )));
+
   let tx_body = PseudoTransactionBody::<TransactionOutput> {
     inputs,
     outputs,
@@ -589,5 +622,5 @@ pub fn example() {
     donation: None,
   };
 
-  print!("\n {:?}", tx_body);
+  print!("\n {:?}", tx_body.outputs);
 }
