@@ -217,8 +217,20 @@
                         }
                     }
                 },
-                "auxiliary_data": {
-                    "type": "object"
+                "metadata": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "label": {
+                                "type": "number"
+                            },
+                            "json_metadata": {
+                                "type": "object"
+                            }
+                        }
+                    }
                 }
             },
             "required": [
