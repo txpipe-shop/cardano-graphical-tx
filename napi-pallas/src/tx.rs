@@ -1,4 +1,4 @@
-use crate::constants::{FIXED_HASH, FIXED_INDEX, FIXED_POLICY};
+use crate::constants::{FIXED_HASH, FIXED_POLICY};
 use crate::{
   Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
   Utxo, Withdrawal, Witness, Witnesses,
@@ -498,27 +498,60 @@ pub fn example() {
         ]
     }
 }"#;
-  let res: Value = json_to_serde(raw.to_string());
+
+  fn preprocess_json(raw: &str) -> Result<Value, serde_json::Error> {
+    let mut res: Value = serde_json::from_str(raw)?;
+
+    if let Some(inputs) = res["transaction"]["inputs"].as_array_mut() {
+      let mut used_indices: HashSet<u64> = inputs
+        .iter()
+        .filter_map(|input| input["index"].as_u64())
+        .collect();
+
+      let mut next_index = *used_indices.iter().max().unwrap_or(&0) + 1;
+
+      for input in inputs.iter_mut() {
+        if input["txHash"].is_null() {
+          input["txHash"] = json!(FIXED_HASH);
+        }
+
+        if input["index"].is_null() {
+          while used_indices.contains(&next_index) {
+            next_index += 1;
+          }
+          input["index"] = json!(next_index);
+          used_indices.insert(next_index);
+        }
+      }
+
+      inputs.sort_by(|a, b| {
+        let tx_hash_a = a["txHash"].as_str().unwrap_or_default();
+        let tx_hash_b = b["txHash"].as_str().unwrap_or_default();
+
+        let index_a = a["index"].as_u64().unwrap_or_default();
+        let index_b = b["index"].as_u64().unwrap_or_default();
+
+        tx_hash_a.cmp(tx_hash_b).then(index_a.cmp(&index_b))
+      });
+    }
+
+    Ok(res)
+  }
+
+  let res: Value = preprocess_json(raw).unwrap();
   let inputs = Set::from(
     res["transaction"]["inputs"]
       .as_array()
       .unwrap_or(&vec![])
       .iter()
-      .filter_map(|x| {
-        Some(TransactionInput {
-          transaction_id: match x["txHash"].as_str() {
-            Some(tx_hash_value) => {
-              let bytes = hex::decode(tx_hash_value).expect("Invalid hex string");
-              let array: [u8; 32] = bytes.try_into().expect("Expected 32 bytes");
-              Hash::<32>::new(array)
-            }
-            None => FIXED_HASH, // REVIEW: Should we use a different value?
-          },
-          index: match x["index"].as_u64() {
-            Some(index) => index as u64,
-            None => FIXED_INDEX, // REVIEW: Should we use a different value?
-          },
-        })
+      .map(|x| TransactionInput {
+        transaction_id: {
+          let tx_hash_value = x["txHash"].as_str().unwrap();
+          let bytes = hex::decode(tx_hash_value).unwrap();
+          let array: [u8; 32] = bytes.try_into().unwrap();
+          Hash::<32>::new(array)
+        },
+        index: x["index"].as_u64().unwrap(),
       })
       .collect::<Vec<TransactionInput>>(),
   );
