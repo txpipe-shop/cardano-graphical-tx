@@ -595,7 +595,64 @@ pub fn example() {
         .collect::<Vec<(RewardAccount, Coin)>>(), // Colecciona los resultados en un Vec
     )));
 
-  let tx_body = PseudoTransactionBody::<TransactionOutput> {
+  let metadata = {
+    Some(KeyValuePairs::from(
+      res["transaction"]["metadata"]
+        .as_array()
+        .unwrap_or(&vec![])
+        .iter()
+        .filter_map(|entry| {
+          let label = entry["label"].as_u64()?;
+          let json_metadata = entry["json_metadata"].as_object()?;
+          let mut map_vec: Vec<(Metadatum, Metadatum)> = vec![];
+          for (key, value) in json_metadata.iter() {
+            let metadatum = match serde_json::from_value::<serde_json::Value>(value.clone()) {
+              Ok(serde_json::Value::String(s)) => Metadatum::Text(s),
+              Ok(serde_json::Value::Number(n)) => {
+                if let Some(i) = n.as_i64() {
+                  Metadatum::Int(i.into())
+                } else {
+                  Metadatum::Text(n.to_string())
+                }
+              }
+              Ok(serde_json::Value::Array(arr)) => Metadatum::Array(
+                arr
+                  .into_iter()
+                  .filter_map(|v| serde_json::to_string(&v).ok().map(Metadatum::Text))
+                  .collect(),
+              ),
+              Ok(serde_json::Value::Object(obj)) => Metadatum::Map(
+                obj
+                  .into_iter()
+                  .filter_map(|(k, v)| {
+                    serde_json::to_string(&v)
+                      .ok()
+                      .map(|vs| (Metadatum::Text(k), Metadatum::Text(vs)))
+                  })
+                  .collect::<Vec<_>>()
+                  .into(),
+              ),
+              _ => Metadatum::Text(value.to_string()),
+            };
+
+            map_vec.push((Metadatum::Text(key.clone()), metadatum));
+          }
+
+          Some((label, Metadatum::Map(map_vec.into())))
+        })
+        .collect::<Vec<(u64, Metadatum)>>(),
+    ))
+  };
+
+  let auxiliary_data: Nullable<AuxiliaryData> =
+    Some(AuxiliaryData::PostAlonzo(PostAlonzoAuxiliaryData {
+      metadata,
+      native_scripts: None,
+      plutus_scripts: None,
+    }))
+    .into();
+
+  let transaction_body = PseudoTransactionBody::<TransactionOutput> {
     inputs,
     outputs,
     fee: match res["transaction"]["fee"].as_i64() {
@@ -603,11 +660,11 @@ pub fn example() {
       None => 0,
     },
     ttl: res["transaction"]["ttl"].as_u64(),
-    certificates: None,
     withdrawals,
-    auxiliary_data_hash: None,
     validity_interval_start: res["transaction"]["start"].as_u64(),
-    mint: None,
+    mint,
+    auxiliary_data_hash: None,
+    certificates: None,
     script_data_hash: None,
     collateral: None,
     required_signers: None,
@@ -622,5 +679,22 @@ pub fn example() {
     donation: None,
   };
 
-  print!("\n {:?}", tx_body.outputs);
+  let tx = Tx {
+    transaction_body: transaction_body.clone(),
+    transaction_witness_set: WitnessSet {
+      vkeywitness: None,
+      native_script: None,
+      bootstrap_witness: None,
+      plutus_v1_script: None,
+      plutus_data: None,
+      redeemer: None, // TODO: Add inputs reedemers
+      plutus_v2_script: None,
+      plutus_v3_script: None,
+    },
+    success: true,
+    auxiliary_data,
+  };
+
+  print!("transaction_body \n {:?}", transaction_body);
+  println!("tx \n{:?}", tx);
 }
