@@ -4,11 +4,13 @@ use crate::{
   Utxo, Withdrawal, Witness, Witnesses,
 };
 use pallas_crypto::hash::{Hash, Hasher};
-use pallas_primitives::alonzo::Value as AlonzoValue;
+use pallas_primitives::alonzo::{PostAlonzoAuxiliaryData, Value as AlonzoValue};
 use pallas_primitives::conway::{
-  Coin, Multiasset, PostAlonzoTransactionOutput, PseudoTransactionOutput, RewardAccount,
+  AssetName, AuxiliaryData, Coin, Multiasset, PostAlonzoTransactionOutput, PseudoTransactionOutput,
+  RewardAccount, Tx, WitnessSet,
 };
 use serde_json::{json, Value};
+use std::collections::HashSet;
 use std::str::FromStr;
 use std::{collections::HashMap, fs, path::Path};
 
@@ -16,7 +18,7 @@ use pallas::ledger::{
   primitives::{conway::PlutusData, ToCanonicalJson},
   traverse::{ComputeHash, MultiEraTx},
 };
-use pallas_codec::utils::{Bytes, KeyValuePairs, Nullable, Set};
+use pallas_codec::utils::{Bytes, KeyValuePairs, NonEmptyKeyValuePairs, NonZeroInt, Nullable, Set};
 use pallas_primitives::{
   alonzo::RedeemerTag,
   conway::{
@@ -539,6 +541,7 @@ pub fn example() {
   }
 
   let res: Value = preprocess_json(raw).unwrap();
+
   let inputs = Set::from(
     res["transaction"]["inputs"]
       .as_array()
@@ -555,7 +558,8 @@ pub fn example() {
       })
       .collect::<Vec<TransactionInput>>(),
   );
-
+  let mut mint: Option<Multiasset<NonZeroInt>> = None;
+  let mut mint_kv_pairs: Vec<(Hash<28>, NonEmptyKeyValuePairs<Bytes, NonZeroInt>)> = vec![];
   let outputs = res["transaction"]["outputs"]
     .as_array()
     .unwrap_or(&vec![])
@@ -585,21 +589,26 @@ pub fn example() {
                 policy_hash = Hash::<28>::from_str(&asset["assetClass"].as_str()?[..56]).ok();
               }
 
-              let kv_pairs = KeyValuePairs::from(vec![(Bytes::from(asset_name), amount)]);
-              let res = match policy_hash {
-                Some(hash) => Some((hash, kv_pairs)),
+              let kv_pairs = KeyValuePairs::from(vec![(Bytes::from(asset_name.clone()), amount)]);
+              match policy_hash {
+                Some(hash) => {
+                  if !asset["minted"].is_null() {
+                    let am: NonZeroInt = TryFrom::try_from(amount as i64).unwrap();
+                    let pairs =
+                      NonEmptyKeyValuePairs::Def(vec![(AssetName::from(asset_name.clone()), am)]);
+                    mint_kv_pairs.push((hash, pairs));
+                  }
+                  Some((hash, kv_pairs))
+                }
                 None => None,
-              };
-              res
+              }
             })
             .collect();
-
           AlonzoValue::Multiasset(lovelace_am, KeyValuePairs::from(transformed_assets))
         } else {
           AlonzoValue::Coin(values_array[0]["amount"].as_u64().unwrap())
         }
       };
-
       TransactionOutput::PostAlonzo(PostAlonzoTransactionOutput {
         address: address.into(),
         value: values,
@@ -608,24 +617,49 @@ pub fn example() {
       })
     })
     .collect::<Vec<TransactionOutput>>();
+  if !mint_kv_pairs.is_empty() {
+    mint = Some(NonEmptyKeyValuePairs::Def(mint_kv_pairs));
+  } else if !res["transaction"]["minting"].is_null() {
+    mint = res["transaction"]["minting"].as_array().map(|mint| {
+      let mut mint_kv_pairs: Vec<(Hash<28>, NonEmptyKeyValuePairs<Bytes, NonZeroInt>)> = vec![];
+
+      let mut policy_hash: Option<Hash<28>> = None;
+      for asset in mint.iter() {
+        let asset_name: Vec<u8>;
+        if asset["assetClass"].is_null() {
+          asset_name = asset["name"].as_str().unwrap().as_bytes().to_vec();
+          policy_hash = FIXED_POLICY;
+        } else {
+          asset_name = hex::decode(&asset["assetClass"].as_str().unwrap()[57..]).unwrap();
+          policy_hash = Hash::<28>::from_str(&asset["assetClass"].as_str().unwrap()[..56]).ok();
+        }
+
+        let amount = asset["amount"].as_u64().unwrap();
+        let am: NonZeroInt = TryFrom::try_from(amount as i64).unwrap();
+        let pairs = NonEmptyKeyValuePairs::Def(vec![(AssetName::from(asset_name), am)]);
+        mint_kv_pairs.push((policy_hash.unwrap(), pairs))
+      }
+
+      Multiasset::Def(mint_kv_pairs)
+    });
+  }
 
   let withdrawals: Option<KeyValuePairs<RewardAccount, Coin>> =
     Some(KeyValuePairs::from(Vec::from(
       res["transaction"]["withdrawals"]
         .as_array()
-        .unwrap_or(&vec![]) // Maneja el caso de que no sea un array
-        .iter() // Itera sobre los elementos del array
+        .unwrap_or(&vec![])
+        .iter()
         .filter_map(|entry| {
-          let raw_address = entry["raw_address"].as_str()?; // Obtén el raw_address como &str
-          let amount = entry["amount"].as_u64()?; // Obtén el amount como u64
+          let raw_address = entry["raw_address"].as_str()?;
+          let amount = entry["amount"].as_u64()?;
 
-          // Convierte raw_address a Bytes (RewardAccount)
-          let address_bytes = raw_address.as_bytes().to_vec(); // Convierte &str -> Vec<u8>
-          let reward_account = Bytes::from(address_bytes); // Vec<u8> -> Bytes
+          let address_bytes = raw_address.as_bytes().to_vec();
+          let reward_account = Bytes::from(address_bytes);
 
-          Some((reward_account, amount)) // Devuelve la tupla si todo es válido
+          Some((reward_account, amount))
         })
-        .collect::<Vec<(RewardAccount, Coin)>>(), // Colecciona los resultados en un Vec
+        .collect::<Vec<(RewardAccount, Coin)>>(),
     )));
 
   let metadata = {
@@ -727,7 +761,5 @@ pub fn example() {
     success: true,
     auxiliary_data,
   };
-
-  print!("transaction_body \n {:?}", transaction_body);
   println!("tx \n{:?}", tx);
 }
