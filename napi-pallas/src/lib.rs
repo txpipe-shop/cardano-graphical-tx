@@ -8,9 +8,9 @@ use pallas::ledger::traverse::MultiEraTx;
 extern crate napi_derive;
 
 mod address;
+mod cbor;
 mod constants;
 mod tx;
-mod tx_cbor;
 
 #[derive(Clone)]
 #[napi(object)]
@@ -206,5 +206,5 @@ pub fn parse_datum_info(raw: String) -> Option<Datum> {
 
 #[napi]
 pub fn parse_dsl(raw: String) -> String {
-  tx_cbor::parse_dsl(raw)
+  cbor::parse_dsl(raw)
 }
