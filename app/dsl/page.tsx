@@ -64,10 +64,10 @@ export default function Index() {
     }
 
     const res = await getDSLFromJSON(dsl, setError);
-    if (res.includes("error")) {
-      const parsedRes = JSON.parse(res);
-      const { error, instance_path } = parsedRes;
+    const parsedRes = JSON.parse(res);
 
+    if (res.includes("error")) {
+      const { error, instance_path } = parsedRes;
       if (instance_path) {
         const parsedDSL = JSON.parse(dsl);
         const position = getPositionFromPath(parsedDSL, instance_path);
@@ -78,11 +78,11 @@ export default function Index() {
           severity: "error",
           message: `Error: ${error}`,
         };
-        setResponse(`JSON is not valid!`);
+        setResponse(`JSON is not valid! \nError: ${error}`);
         setCustomDiagnostics([diagnostic]);
       }
     } else {
-      setResponse(res);
+      setResponse(parsedRes.cbor_hex);
       setCustomDiagnostics([]);
     }
   }
