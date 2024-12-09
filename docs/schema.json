@@ -123,7 +123,33 @@
                 "values": {
                     "$ref": "#/definitions/Values"
                 }
-            }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "required": [
+                            "txHash"
+                        ]
+                    },
+                    "then": {
+                        "required": [
+                            "index"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "required": [
+                            "index"
+                        ]
+                    },
+                    "then": {
+                        "required": [
+                            "txHash"
+                        ]
+                    }
+                }
+            ]
         }
     },
     "properties": {
@@ -191,8 +217,20 @@
                         }
                     }
                 },
-                "auxiliary_data": {
-                    "type": "object"
+                "metadata": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "label": {
+                                "type": "number"
+                            },
+                            "json_metadata": {
+                                "type": "object"
+                            }
+                        }
+                    }
                 }
             },
             "required": [
