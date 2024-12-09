@@ -1,17 +1,16 @@
 "use client";
 
+import { json } from "@codemirror/lang-json";
+import type { Diagnostic } from "@codemirror/lint";
+import { lintGutter, linter } from "@codemirror/lint";
+import type { EditorView } from "@codemirror/view";
+import CodeMirror from "@uiw/react-codemirror";
+import jsonpointer from "jsonpointer";
 import { Suspense, useState } from "react";
-import { Header, Button } from "../_components";
+import { Button, Header } from "../_components";
 import { useUI } from "../_contexts";
 import { getDSLFromJSON, isEmpty } from "../_utils";
 import Loading from "../loading";
-import CodeMirror from "@uiw/react-codemirror";
-import { json } from "@codemirror/lang-json";
-import type { EditorView } from "@codemirror/view";
-import { lintGutter, linter } from "@codemirror/lint";
-import type { Diagnostic } from "@codemirror/lint";
-import jsonpointer from "jsonpointer";
-
 export default function Index() {
   const { error, setError } = useUI();
   const [dsl, setDsl] = useState<string>("");
@@ -142,9 +141,9 @@ export default function Index() {
 
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col items-center gap-4"
+          className="my-6 flex flex-col items-center gap-4"
         >
-          <div className="mt-16 flex w-full flex-grow gap-12">
+          <div className="flex w-full flex-grow gap-12">
             <div className="ml-10 flex w-1/2 flex-col">
               <label htmlFor="dsl" className="mb-6 text-xl font-semibold">
                 Input DSL JSON
@@ -177,7 +176,7 @@ export default function Index() {
             </div>
           </div>
 
-          <Button type="submit" className="mt-4 text-lg">
+          <Button type="submit" className="text-lg">
             Parse
           </Button>
         </form>

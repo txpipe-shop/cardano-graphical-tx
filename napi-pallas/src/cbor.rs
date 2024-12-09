@@ -1,18 +1,22 @@
 use crate::constants::{FIXED_HASH, FIXED_POLICY};
+use pallas_addresses::Address;
 use pallas_codec::minicbor::encode;
 use pallas_crypto::hash::Hash;
 use pallas_primitives::alonzo::{BoundedBytes, PostAlonzoAuxiliaryData, Value as AlonzoValue};
 use pallas_primitives::conway::{
-  AuxiliaryData, Coin, ExUnits as CExUnits, Multiasset, PostAlonzoTransactionOutput, RedeemersKey,
-  RedeemersValue, RewardAccount, Tx, WitnessSet,
+  AuxiliaryData, Coin, DatumOption, ExUnits as CExUnits, Multiasset, PostAlonzoTransactionOutput,
+  RedeemersKey, RedeemersValue, RewardAccount, Tx, WitnessSet,
 };
+use pallas_primitives::Fragment;
 use serde_json::{json, Value};
 use std::collections::HashSet;
 use std::str::FromStr;
 use std::{fs, path::Path};
 
 use pallas::ledger::primitives::conway::PlutusData;
-use pallas_codec::utils::{Bytes, KeyValuePairs, NonEmptyKeyValuePairs, NonZeroInt, Nullable, Set};
+use pallas_codec::utils::{
+  Bytes, CborWrap, KeyValuePairs, NonEmptyKeyValuePairs, NonZeroInt, Nullable, Set,
+};
 use pallas_primitives::conway::{
   AssetName, Metadatum, PseudoTransactionBody, RedeemerTag as RedeemerTagConway, TransactionInput,
   TransactionOutput,
@@ -137,7 +141,9 @@ pub fn dsl_to_tx(raw: String) -> Tx {
     .unwrap_or(&vec![])
     .iter()
     .map(|x| {
-      let address = x["address"].as_str().unwrap_or("").to_string().into_bytes();
+      let address = Address::from_bech32(x["address"].as_str().unwrap())
+        .unwrap()
+        .to_vec();
 
       let values = {
         let values_array = x["values"].as_array().unwrap();
@@ -181,10 +187,27 @@ pub fn dsl_to_tx(raw: String) -> Tx {
           AlonzoValue::Coin(values_array[0]["amount"].as_u64().unwrap())
         }
       };
+      let datum_option: Option<DatumOption> = if let Some(datum) = x.get("datum") {
+        if let Some(datum_hash) = datum.get("hash") {
+          let datum_hash = datum_hash.as_str().unwrap();
+          let bytes = hex::decode(datum_hash).unwrap();
+          let array: [u8; 32] = bytes.try_into().unwrap();
+          Some(DatumOption::Hash(Hash::<32>::new(array)))
+        } else if let Some(datum_bytes) = datum.get("bytes") {
+          let bytes = hex::decode(datum_bytes.as_str().unwrap()).unwrap();
+          Some(DatumOption::Data(CborWrap(
+            PlutusData::decode_fragment(&bytes).unwrap(),
+          )))
+        } else {
+          None
+        }
+      } else {
+        None
+      };
       TransactionOutput::PostAlonzo(PostAlonzoTransactionOutput {
         address: address.into(),
         value: values,
-        datum_option: None,
+        datum_option,
         script_ref: None,
       })
     })
