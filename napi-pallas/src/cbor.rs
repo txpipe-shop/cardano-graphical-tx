@@ -32,7 +32,7 @@ pub fn parse_dsl(raw: String) -> String {
   let result = validator.validate(&res);
 
   match result {
-    Ok(_) => json!({"cbor_hex": dsl_to_cbor_hex(raw).to_vec()}).to_string(),
+    Ok(_) => json!({"cbor_hex": dsl_to_cbor_hex(raw)}).to_string(),
     Err(e) => json!(
       {
         "error": e.to_string(),
@@ -335,16 +335,9 @@ pub fn dsl_to_tx(raw: String) -> Tx {
   }
 }
 
-pub fn dsl_to_cbor(raw: String) -> String {
+pub fn dsl_to_cbor_hex(raw: String) -> String {
   let tx = dsl_to_tx(raw.to_string());
   let mut tx_buf: Vec<u8> = Vec::new();
   let _ = encode(tx, &mut tx_buf);
   hex::encode(tx_buf.clone())
-}
-
-pub fn dsl_to_cbor_hex(raw: String) -> Vec<u8> {
-  let tx = dsl_to_tx(raw.to_string());
-  let mut tx_buf: Vec<u8> = Vec::new();
-  let _ = encode(tx, &mut tx_buf);
-  tx_buf
 }
