@@ -7,7 +7,8 @@ A webapp for drawing cardano txs and dissecting cbor information.
 ## Requirements
 
 It is recommended to use `Node v18.0.0` or higher.
-It is recommended to use bun to run this project.
+
+It is recommended to use yarn to run this project.
 
 # How To Run Locally
 
@@ -21,24 +22,50 @@ It is recommended to use bun to run this project.
 2. **Install Dependencies**
 
    ```bash
-   bun install
+   yarn install
    ```
 
-3. **Configure variables in .env**
+3. **Configure variables in .env.example**
 
    To ensure that the app works correctly, you need to set the appropriate values in the `.env` file.
-   <br>
 
-4. **Build**
+   ### Steps
+
+   1. **Open the .env.example File**:
+      Navigate to the root directory of your project and open the `.env.example` file in your preferred text editor.
+
+   2. **Set your database URLs**
+      Locate the lines `DATABASE_URL="<Your-DB-URL>"` & `DIRECT_URL="<Your-Direct-URL>"`. Replace `<Your-X-URL>` with your URLs.
+
+   3. **Set the Auth Providers keys**
+
+      1. Locate the Github token and secret `GITHUB_CLIENT_ID="<Your-Github-Client-ID>"` & `GITHUB_CLIENT_SECRET=<Your-Github-Client-Secret>`. Replace `<Your-Github-X>` with your Client ID and Client Secret. (You must create a [Github OAuth](https://github.com/settings/developers) App to get these values)
+
+      2. Locate the Google token and secret `GOOGLE_CLIENT_ID="<Your-Google-Client-ID>"` & `GOOGLE_CLIENT_SECRET=<Your-Google-Client-Secret>`. Replace `<Your-Google-X>` with your Client ID and Client Secret. (You must create a [Google OAuth](https://developers.google.com/identity/protocols/oauth2) App to get these values)
+
+   4. **Set the NextAuth Secret**
+      Locate the line `NEXTAUTH_SECRET="<Your-Next-Auth-Secret>"`. Replace `<Your-Next-Auth-Secret>` with some secret you have generated.
+      **_Make sure that `NEXTAUTH_URL` is correct for your app_**
+
+   5. **Set the Blockfrost keys**
+      Locate the following lines `MAINNET_BLOCKFROST_KEY="<Your-Mainnet-Blockfrost-Key>"` & `PREPROD_BLOCKFROST_KEY="<Your-Preprod-Blockfrost-Key>"` & `PREVIEW_BLOCKFROST_KEY="<Your-Preview-Blockfrost-Key>"`. Replace `<Your-X-Blockfrost-Key>` with your actual Blockfrost Keys.
+
+4. **Rename the .env.example file**
+
+   Since the `.env` file is gitignored, you need to rename the name of the file to `.env`.
+
+5. **Build**
 
    ```bash
-   bun run build
+   yarn run build:pallas
+   yarn install
+   yarn run build
    ```
 
-5. **Run the app**
+6. **Run the app**
 
    ```bash
-   bun run dev
+   yarn run dev
    ```
 
 ## Examples to test the app
@@ -53,10 +80,10 @@ The following transactions were made on the preprod network.
 
 **Tx Hash:**
 
-   ```bash
-   64403900eb882a71f9aae0569b422c0c31a1787092a877ead54afd1b1f713b13
-   ```
+```bash
+64403900eb882a71f9aae0569b422c0c31a1787092a877ead54afd1b1f713b13
+```
 
-   ```bash
-   d1ef2bf292694fbbdcc5855c040e5081e0a738701d1c3cb92410901f39504976
-   ```
+```bash
+d1ef2bf292694fbbdcc5855c040e5081e0a738701d1c3cb92410901f39504976
+```
