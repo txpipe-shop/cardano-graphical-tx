@@ -7,18 +7,21 @@ import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import jsonpointer from "jsonpointer";
 import Image from "next/image";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Button, Header } from "../_components";
 import { useUI } from "../_contexts";
 import { getDSLFromJSON, handleCopy, isEmpty } from "../_utils";
 import CopyIcon from "/public/copy.svg";
 
+import { useSearchParams } from "next/navigation";
 import Loading from "../loading";
 export default function Index() {
   const { error, setError } = useUI();
   const [dsl, setDsl] = useState<string>("");
   const [response, setResponse] = useState<string>("");
   const [customDiagnostics, setCustomDiagnostics] = useState<Diagnostic[]>([]);
+  const searchParams = useSearchParams();
+  const useExample = searchParams.get("example");
 
   const customJsonLinter = linter((view: EditorView): Diagnostic[] => {
     const doc = view.state.doc.toString();
@@ -141,7 +144,17 @@ export default function Index() {
       return value;
     }
   }
-
+  useEffect(() => {
+    const setExampleDSL = async () => {
+      console.log(useExample);
+      if (useExample) {
+        const res = await fetch("/tx_example.json");
+        const data = await res.json();
+        setDsl(JSON.stringify(data, null, 2));
+      }
+    };
+    setExampleDSL();
+  }, [useExample]);
   return (
     <div>
       <Header />

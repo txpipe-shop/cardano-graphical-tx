@@ -15,7 +15,11 @@ import {
   USER_CONFIGS,
 } from "./_utils";
 
-export default function Examples() {
+export default function Examples({
+  showDSLExample,
+}: {
+  showDSLExample: boolean;
+}) {
   const router = useRouter();
   const { setError } = useUI();
   const { configs, updateConfigs } = useConfigs();
@@ -144,6 +148,19 @@ export default function Examples() {
             </code>
           </button>
         ))}
+        {showDSLExample && (
+          <button
+            type="submit"
+            className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
+            onClick={() => router.push(ROUTES.DSL + "?example=true")}
+          >
+            <h3 className="text-xl">DSL Usage Example</h3>
+
+            <code className="mt-4 block w-full break-words text-gray-400">
+              {`{ "transaction": { "name": "example", "fee": 1,...`}
+            </code>
+          </button>
+        )}
       </div>
     </>
   );
