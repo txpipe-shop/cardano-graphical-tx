@@ -6,10 +6,11 @@ import {
   InfoPanel,
   Playground,
   TxInfo,
+  TxInput,
   UtxoInfo,
-} from "../_components";
-import { ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "../_utils";
-import Loading from "../loading";
+} from "../../_components";
+import { ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "../../_utils";
+import Loading from "../../loading";
 
 interface GrapherProps {
   searchParams?: {
@@ -30,9 +31,6 @@ export default function Index({ searchParams }: GrapherProps) {
   return (
     <Suspense fallback={<Loading />}>
       <div className="relative h-dvh w-full overflow-hidden">
-        <div className="absolute w-full">
-          <Header />
-        </div>
         <InfoPanel
           isVisible={selectedTx !== undefined}
           from="left"
@@ -48,6 +46,10 @@ export default function Index({ searchParams }: GrapherProps) {
           <UtxoInfo />
         </InfoPanel>
         <Playground />
+      </div>
+      <div className="absolute w-full">
+        <Header />
+        <TxInput />
       </div>
     </Suspense>
   );

@@ -3,13 +3,16 @@
 import { json } from "@codemirror/lang-json";
 import type { Diagnostic } from "@codemirror/lint";
 import { lintGutter, linter } from "@codemirror/lint";
-import type { EditorView } from "@codemirror/view";
+import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import jsonpointer from "jsonpointer";
+import Image from "next/image";
 import { Suspense, useState } from "react";
 import { Button, Header } from "../_components";
 import { useUI } from "../_contexts";
-import { getDSLFromJSON, isEmpty } from "../_utils";
+import { getDSLFromJSON, handleCopy, isEmpty } from "../_utils";
+import CopyIcon from "/public/copy.svg";
+
 import Loading from "../loading";
 export default function Index() {
   const { error, setError } = useUI();
@@ -131,6 +134,14 @@ export default function Index() {
     return originalIndex;
   }
 
+  function formatJson(value: string) {
+    try {
+      return JSON.stringify(JSON.parse(value), null, 2);
+    } catch (e) {
+      return value;
+    }
+  }
+
   return (
     <div>
       <Header />
@@ -141,44 +152,56 @@ export default function Index() {
 
         <form
           onSubmit={handleSubmit}
-          className="my-6 flex flex-col items-center gap-4"
+          className="mb-6 mt-2 flex flex-col items-center gap-4"
         >
           <div className="flex w-full flex-grow gap-12">
-            <div className="ml-10 flex w-1/2 flex-col">
-              <label htmlFor="dsl" className="mb-6 text-xl font-semibold">
-                Input DSL JSON
-              </label>
+            <div className="ml-10 flex w-1/2 flex-col gap-2">
+              <div className="flex h-14 items-center justify-between">
+                <label htmlFor="dsl" className="text-xl font-semibold">
+                  Input DSL JSON
+                </label>
+                <Button type="submit" className="h-10">
+                  Parse
+                </Button>
+              </div>
               <CodeMirror
                 value={dsl}
-                height="650px"
                 extensions={[json(), lintGutter(), customJsonLinter]}
                 onChange={(value) => {
-                  setDsl(value);
+                  setDsl(formatJson(value));
                   setCustomDiagnostics([]);
                 }}
                 placeholder="Enter JSON here"
-                className="rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-1 text-lg placeholder-gray-400 shadow shadow-black outline-none"
+                height="calc(100vh - 14rem)"
+                width="calc(50vw - 5rem)"
+                className="overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-2 text-lg placeholder-gray-400 shadow shadow-black outline-none"
               />
             </div>
 
-            <div className="mr-10 flex w-1/2 flex-col overflow-hidden">
-              <label htmlFor="response" className="mb-6 text-xl font-semibold">
-                Parsed Response
-              </label>
+            <div className="mr-10 flex w-1/2 flex-col gap-2">
+              <div className="flex h-14 items-center justify-between">
+                <label htmlFor="response" className="text-xl font-semibold">
+                  Parsed Response
+                </label>
+                <Button
+                  type="button"
+                  onClick={handleCopy(response || "")}
+                  className="flex h-10 cursor-pointer items-center justify-center gap-2"
+                >
+                  <div>Copy</div> <Image src={CopyIcon} alt="Copy" />
+                </Button>
+              </div>
               <CodeMirror
                 value={response}
-                height="650px"
-                extensions={[json()]}
+                extensions={[EditorView.lineWrapping]}
                 editable={false}
+                height="calc(100vh - 14rem)"
+                width="calc(50vw - 5rem)"
                 placeholder="Response will be displayed here"
-                className="overflow-auto rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-1 text-lg placeholder-gray-400 shadow shadow-black outline-none"
+                className="overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-2 text-lg placeholder-gray-400 shadow shadow-black outline-none"
               />
             </div>
           </div>
-
-          <Button type="submit" className="text-lg">
-            Parse
-          </Button>
         </form>
       </Suspense>
     </div>

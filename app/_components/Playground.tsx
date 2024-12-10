@@ -7,18 +7,18 @@ import { useGraphical, useUI } from "~/app/_contexts";
 import {
   ERRORS,
   KONVA_COLORS,
+  ROUTES,
   TX_URL_PARAM,
   UTXO_URL_PARAM,
 } from "~/app/_utils";
-import { Error } from "../Error";
-import { Line, Transaction, Utxo } from "../Transaction";
-import { PlaygroundDefault } from "./PlaygroundDefault";
+import { Error } from "./Error";
+import { Line, Transaction, Utxo } from "./Transaction";
 
 export function Playground() {
   const { transactions } = useGraphical();
   const { error } = useUI();
   const pathname = usePathname();
-  const { replace } = useRouter();
+  const { push, replace } = useRouter();
   const searchParams = useSearchParams();
   const shownWarnings = useRef(new Set());
 
@@ -101,8 +101,9 @@ export function Playground() {
   }, [transactions.transactions]);
 
   if (error) return <Error action="fetching" />;
+  if (!transactions.transactions.length) push(ROUTES.TX);
 
-  return transactions.transactions.length ? (
+  return (
     <Stage
       width={window.innerWidth}
       height={window.innerHeight}
@@ -149,7 +150,5 @@ export function Playground() {
         ))}
       </Layer>
     </Stage>
-  ) : (
-    <PlaygroundDefault />
   );
 }
