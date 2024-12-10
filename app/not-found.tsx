@@ -10,6 +10,7 @@ import {
   TX_WIDTH,
 } from "~/app/_utils";
 import { Header, PropBlock } from "./_components";
+import Loading from "./loading";
 
 export default function FourOhFour() {
   const [divSize, setDivSize] = useState({ width: 0, height: 0 });
@@ -85,11 +86,9 @@ export default function FourOhFour() {
   };
 
   return (
-    <main className="flex h-screen w-full gap-2 overflow-hidden">
-      <div
-        className={`flex h-full w-full ${divRef === null ? "hidden" : ""}`}
-        ref={divRef}
-      >
+    <main className="flex h-screen w-full flex-col gap-2 overflow-hidden">
+      <Header />
+      <div className="flex h-full w-full" ref={divRef}>
         <Stage width={divSize.width / 3} height={divSize.height}>
           <Layer>
             <Group x={txPos.x} y={txPos.y}>
@@ -132,20 +131,25 @@ export default function FourOhFour() {
             />
           </Layer>
         </Stage>
-        <div className={`flex w-full flex-col gap-10 px-10`}>
-          <PropBlock title="404" value="Page not found" color="red" />
-          <div className="rotate-1">
-            <PropBlock value="" />
+        {divSize.width === 0 ? (
+          <div className="mb-40 flex w-full items-center justify-center">
+            <Loading />
           </div>
-          <div className="mt-10 rotate-6">
-            <PropBlock value="" />
+        ) : (
+          <div className="flex w-full flex-col gap-10 px-10">
+            <PropBlock title="404" value="Page not found" color="red" />
+            <div className="rotate-1">
+              <PropBlock value="" />
+            </div>
+            <div className="mt-10 rotate-6">
+              <PropBlock value="" />
+            </div>
+            <div className="mt-10 rotate-12">
+              <PropBlock value="" />
+            </div>
           </div>
-          <div className="mt-10 rotate-12">
-            <PropBlock value="" />
-          </div>
-        </div>
+        )}
       </div>
-      <Header />
     </main>
   );
 }

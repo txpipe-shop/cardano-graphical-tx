@@ -10,42 +10,53 @@
 
 @layer components {
   .nav-item-active {
-    @apply text-xl bg-black text-white min-w-24 block rounded-xl p-2 ml-4 text-center shadow-md shadow-gray-300;
+    @apply ml-4 block min-w-24 rounded-xl bg-black p-2 text-center text-xl text-white shadow-md shadow-gray-300;
   }
 
   .nav-item-inactive {
-    @apply text-xl bg-gray-100 text-black min-w-24 block rounded-xl p-2 ml-4 text-center shadow-md shadow-gray-300;
-  }    
+    @apply ml-4 block min-w-24 rounded-xl bg-gray-100 p-2 text-center text-xl text-black shadow-md shadow-gray-300;
+  }
 }
 
 canvas {
   background: white !important;
-  background-image: radial-gradient(black  1px, transparent  0) !important;
+  background-image: radial-gradient(black 1px, transparent 0) !important;
   background-size: 40px 40px !important;
   background-position: -19px -19px !important;
 }
 
-
-body {
+* {
   box-sizing: border-box;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden; /* Desactiva desplazamiento horizontal */
+}
 
 body::-webkit-scrollbar {
-  width: 10px; 
+  width: 10px;
 }
 
 body::-webkit-scrollbar-track {
-  margin-top: 7rem;
+  margin-top: 6rem;
   border-radius: 5px;
-  background: #f1f1f1; 
+  background: #f1f1f1;
 }
 
 body::-webkit-scrollbar-thumb {
-  background: #888; 
-  border-radius: 5px; 
+  background: #888;
+  border-radius: 5px;
 }
 
 body::-webkit-scrollbar-thumb:hover {
-  background: #555; 
+  background: #555;
 }
