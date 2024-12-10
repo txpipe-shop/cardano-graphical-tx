@@ -75,9 +75,13 @@
                 "amount": 123
             }
         ],
-        "auxiliary_data": {
-            "any": "thing",
-            "for example": 123
-        }
+        "metadata": [
+            {
+                "label": 674,
+                "json_metadata": {
+                    "key": "value"
+                }
+            }
+        ]
     }
 }

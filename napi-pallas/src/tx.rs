@@ -1,17 +1,14 @@
-use serde_json::{json, Value};
-use std::{collections::HashMap, fs, path::Path};
-
 use crate::{
   Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
   Utxo, Withdrawal, Witness, Witnesses,
 };
+use pallas_crypto::hash::Hasher;
+use serde_json::{json, Value};
+use std::{collections::HashMap, fs, path::Path};
 
-use pallas::{
-  crypto::hash::Hasher,
-  ledger::{
-    primitives::{conway::PlutusData, ToCanonicalJson},
-    traverse::{ComputeHash, MultiEraTx},
-  },
+use pallas::ledger::{
+  primitives::{conway::PlutusData, ToCanonicalJson},
+  traverse::{ComputeHash, MultiEraTx},
 };
 use pallas_codec::utils::KeyValuePairs;
 use pallas_primitives::{
@@ -226,7 +223,7 @@ fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
   }
 }
 
-pub fn new_parse(raw: String) -> Result<CborResponse, CborResponse> {
+pub fn cbor_to_tx(raw: String) -> Result<CborResponse, CborResponse> {
   let out = CborResponse::new().try_build(|| {
     let cbor = hex::decode(raw)?;
     let tx = MultiEraTx::decode(&cbor)?;
@@ -343,29 +340,4 @@ pub fn parse_datum_info(raw: String) -> Option<Datum> {
     json: data.to_json().to_string(),
     bytes: raw.clone(),
   })
-}
-
-pub fn parse_dsl(raw: String) -> String {
-  let schema_path = Path::new("docs/schema.json").canonicalize().unwrap();
-  let schema_content = fs::read_to_string(schema_path).unwrap();
-  let schema: Value = serde_json::from_str(&schema_content).unwrap();
-
-  let res: Value = match serde_json::from_str(&raw) {
-    Ok(json) => json,
-    Err(_) => return json!({ "error": "Input is not a valid JSON." }).to_string(),
-  };
-
-  let validator = jsonschema::validator_for(&schema).unwrap();
-  let result = validator.validate(&res);
-
-  match result {
-    Ok(_) => "JSON is valid!".to_string(),
-    Err(e) => json!(
-      {
-        "error": e.to_string(),
-        "instance_path": e.instance_path.to_string(),
-      }
-    )
-    .to_string(),
-  }
 }
