@@ -218,7 +218,7 @@ pub fn dsl_to_tx(raw: String) -> Tx {
     mint = res["transaction"]["minting"].as_array().map(|mint| {
       let mut mint_kv_pairs: Vec<(Hash<28>, NonEmptyKeyValuePairs<Bytes, NonZeroInt>)> = vec![];
 
-      let mut policy_hash: Option<Hash<28>> = None;
+      let mut policy_hash: Option<Hash<28>>;
       for asset in mint.iter() {
         let asset_name: Vec<u8>;
         if asset["assetClass"].is_null() {
