@@ -335,14 +335,3 @@ pub fn cbor_to_tx(raw: String) -> Result<CborResponse, CborResponse> {
 
   Ok(out)
 }
-
-pub fn parse_datum_info(raw: String) -> Option<Datum> {
-  let cbor = hex::decode(raw.clone()).ok()?;
-  let data = PlutusData::decode_fragment(&cbor).ok()?;
-
-  Some(Datum {
-    hash: Hasher::<256>::hash(&cbor).to_string(),
-    json: data.to_json().to_string(),
-    bytes: raw.clone(),
-  })
-}
