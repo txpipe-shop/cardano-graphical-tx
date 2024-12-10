@@ -9,8 +9,8 @@ extern crate napi_derive;
 
 mod address;
 mod cbor;
-mod constants;
 mod tx;
+mod utils;
 
 #[derive(Clone)]
 #[napi(object)]
