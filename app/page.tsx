@@ -1,7 +1,6 @@
 "use client";
 
-import { Header } from "./_components";
-import Examples from "./examples";
+import { Examples, Header } from "./_components";
 
 export default function Index() {
   return (

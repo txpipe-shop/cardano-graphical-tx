@@ -1,8 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { Header, TxInput } from "../_components";
-import Examples from "../examples";
+import { Examples, Header, TxInput } from "../_components";
 import Loading from "../loading";
 
 export default function Index() {

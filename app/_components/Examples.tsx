@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { setCBOR } from "./_components/Header/header.helper";
-import { useConfigs, useGraphical, useUI } from "./_contexts";
+import { useConfigs, useGraphical, useUI } from "../_contexts";
 import {
   cbor1,
   getCborFromHash,
@@ -13,12 +12,13 @@ import {
   KONVA_COLORS,
   ROUTES,
   USER_CONFIGS,
-} from "./_utils";
+} from "../_utils";
+import { setCBOR } from "./Header/header.helper";
 
-export default function Examples({
-  showDSLExample,
+export function Examples({
+  showDSLExample = false,
 }: {
-  showDSLExample: boolean;
+  showDSLExample?: boolean;
 }) {
   const router = useRouter();
   const { setError } = useUI();
