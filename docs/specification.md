@@ -356,7 +356,15 @@ It is the additional, arbitrary data attached to the transaction for identificat
   {
     "inputs": [],
     "outputs": [],
-    "auxiliary_data": {“json”: “value”, …}
+    "metadata": [
+            {
+                "label": 674,
+                "json_metadata": {
+                    "key": "value"
+                }
+            },
+            ...
+        ]
   }
 }
 ```
