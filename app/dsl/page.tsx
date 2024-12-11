@@ -8,7 +8,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import jsonpointer from "jsonpointer";
 import Image from "next/image";
 import { Tabs, Tab } from "@nextui-org/tabs";
-import { Suspense, useEffect, useState } from "react";
+import { MouseEventHandler, Suspense, useEffect, useState } from "react";
 import { Button, Header } from "../_components";
 import { useUI } from "../_contexts";
 import { getDSLFromJSON, handleCopy, isEmpty } from "../_utils";
@@ -163,6 +163,47 @@ export default function Index() {
     setExampleDSL();
   }, [useExample]);
 
+  const renderTabContent = (
+    content: string | undefined,
+    handleCopyFunc: MouseEventHandler<HTMLButtonElement> | undefined,
+  ) => (
+    <>
+      <div className="absolute right-8 top-[7rem]">
+        <Button
+          type="button"
+          onClick={handleCopyFunc}
+          className="flex h-10 cursor-pointer items-center justify-center gap-2"
+        >
+          <div>Copy</div> <Image src={CopyIcon} alt="Copy" />
+        </Button>
+      </div>
+      <CodeMirror
+        value={content}
+        extensions={[EditorView.lineWrapping]}
+        editable={false}
+        height="calc(100vh - 14rem)"
+        width="calc(50vw - 5rem)"
+        placeholder="Response will be displayed here"
+        className="overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-2 text-lg placeholder-gray-400 shadow shadow-black outline-none"
+      />
+    </>
+  );
+
+  const TabContent = [
+    {
+      key: "hex",
+      title: "CBOR Hex",
+      content: cborHex,
+      handleCopyFunc: handleCopy(cborHex),
+    },
+    {
+      key: "diagnostic",
+      title: "CBOR Diagnostic",
+      content: cborDiagnostic,
+      handleCopyFunc: handleCopy(cborDiagnostic),
+    },
+  ];
+
   return (
     <div>
       <Header />
@@ -199,66 +240,24 @@ export default function Index() {
               />
             </div>
 
-            <div className="mr-10 flex w-1/2 flex-col gap-2">
+            <div className="mr-10 flex w-1/2 flex-col">
               <Tabs
                 aria-label="CBOR types"
                 variant="bordered"
                 color="primary"
                 size="lg"
-                className="mt-2"
+                className="mt-1"
               >
-                <Tab
-                  key="hex"
-                  title={
-                    <span className="text-lg font-semibold">CBOR Hex</span>
-                  }
-                >
-                  <div className="flex h-14 items-center justify-between">
-                    <Button
-                      type="button"
-                      onClick={handleCopy(cborHex || "")}
-                      className="flex h-10 cursor-pointer items-center justify-center gap-2"
-                    >
-                      <div>Copy</div> <Image src={CopyIcon} alt="Copy" />
-                    </Button>
-                  </div>
-                  <CodeMirror
-                    value={cborHex}
-                    extensions={[EditorView.lineWrapping]}
-                    editable={false}
-                    height="calc(100vh - 14rem)"
-                    width="calc(50vw - 5rem)"
-                    placeholder="Response will be displayed here"
-                    className="overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-2 text-lg placeholder-gray-400 shadow shadow-black outline-none"
-                  />
-                </Tab>
-                <Tab
-                  key="diagnostic"
-                  title={
-                    <span className="text-lg font-semibold">
-                      CBOR Diagnostic
-                    </span>
-                  }
-                >
-                  <div className="flex h-14 items-center justify-between">
-                    <Button
-                      type="button"
-                      onClick={handleCopy(cborDiagnostic || "")}
-                      className="flex h-10 cursor-pointer items-center justify-center gap-2"
-                    >
-                      <div>Copy</div> <Image src={CopyIcon} alt="Copy" />
-                    </Button>
-                  </div>
-                  <CodeMirror
-                    value={cborDiagnostic}
-                    extensions={[EditorView.lineWrapping]}
-                    editable={false}
-                    height="calc(100vh - 14rem)"
-                    width="calc(50vw - 5rem)"
-                    placeholder="Response will be displayed here"
-                    className="overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-2 text-lg placeholder-gray-400 shadow shadow-black outline-none"
-                  />
-                </Tab>
+                {TabContent.map(({ key, title, content, handleCopyFunc }) => (
+                  <Tab
+                    key={key}
+                    title={
+                      <span className="text-lg font-semibold">{title}</span>
+                    }
+                  >
+                    {renderTabContent(content, handleCopyFunc)}
+                  </Tab>
+                ))}
               </Tabs>
             </div>
           </div>
