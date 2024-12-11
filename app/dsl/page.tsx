@@ -93,7 +93,7 @@ export default function Index() {
       }
     } else {
       setCborHex(parsedRes.cbor_hex);
-      setCborDiagnostic(parsedRes.cbor_diagnostic);
+      setCborDiagnostic(parsedRes.cbor_diagnostic.replace(/\s+/g, ""));
       setCustomDiagnostics([]);
     }
   }
