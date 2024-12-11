@@ -3,8 +3,7 @@ use crate::{
   Utxo, Withdrawal, Witness, Witnesses,
 };
 use pallas_crypto::hash::Hasher;
-use serde_json::{json, Value};
-use std::{collections::HashMap, fs, path::Path};
+use std::collections::HashMap;
 
 use pallas::ledger::{
   primitives::{conway::PlutusData, ToCanonicalJson},
