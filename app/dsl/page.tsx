@@ -7,6 +7,7 @@ import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
 import jsonpointer from "jsonpointer";
 import Image from "next/image";
+import { Tabs, Tab } from "@nextui-org/tabs";
 import { Suspense, useEffect, useState } from "react";
 import { Button, Header } from "../_components";
 import { useUI } from "../_contexts";
@@ -15,10 +16,12 @@ import CopyIcon from "/public/copy.svg";
 
 import { useSearchParams } from "next/navigation";
 import Loading from "../loading";
+
 export default function Index() {
   const { error, setError } = useUI();
   const [dsl, setDsl] = useState<string>("");
-  const [response, setResponse] = useState<string>("");
+  const [cborHex, setCborHex] = useState<string>("");
+  const [cborDiagnostic, setCborDiagnostic] = useState<string>("");
   const [customDiagnostics, setCustomDiagnostics] = useState<Diagnostic[]>([]);
   const searchParams = useSearchParams();
   const useExample = searchParams.get("example");
@@ -64,7 +67,8 @@ export default function Index() {
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!dsl.trim()) {
-      setResponse("Please enter DSL JSON to parse.");
+      setCborHex("Please enter DSL JSON to parse.");
+      setCborDiagnostic("Please enter DSL JSON to parse.");
       return;
     }
 
@@ -83,14 +87,17 @@ export default function Index() {
           severity: "error",
           message: `Error: ${error}`,
         };
-        setResponse(`JSON is not valid! \nError: ${error}`);
+        setCborHex(`JSON is not valid! \nError: ${error}`);
+        setCborDiagnostic(`JSON is not valid! \nError: ${error}`);
         setCustomDiagnostics([diagnostic]);
       }
     } else {
-      setResponse(parsedRes.cbor_hex);
+      setCborHex(parsedRes.cbor_hex);
+      setCborDiagnostic(parsedRes.cbor_diagnostic);
       setCustomDiagnostics([]);
     }
   }
+
   function getPositionFromPath(json: object, path: string) {
     try {
       const value = jsonpointer.get(json, path);
@@ -155,6 +162,7 @@ export default function Index() {
     };
     setExampleDSL();
   }, [useExample]);
+
   return (
     <div>
       <Header />
@@ -192,27 +200,66 @@ export default function Index() {
             </div>
 
             <div className="mr-10 flex w-1/2 flex-col gap-2">
-              <div className="flex h-14 items-center justify-between">
-                <label htmlFor="response" className="text-xl font-semibold">
-                  Parsed Response
-                </label>
-                <Button
-                  type="button"
-                  onClick={handleCopy(response || "")}
-                  className="flex h-10 cursor-pointer items-center justify-center gap-2"
+              <Tabs
+                aria-label="CBOR types"
+                variant="bordered"
+                color="primary"
+                size="lg"
+                className="mt-2"
+              >
+                <Tab
+                  key="hex"
+                  title={
+                    <span className="text-lg font-semibold">CBOR Hex</span>
+                  }
                 >
-                  <div>Copy</div> <Image src={CopyIcon} alt="Copy" />
-                </Button>
-              </div>
-              <CodeMirror
-                value={response}
-                extensions={[EditorView.lineWrapping]}
-                editable={false}
-                height="calc(100vh - 14rem)"
-                width="calc(50vw - 5rem)"
-                placeholder="Response will be displayed here"
-                className="overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-2 text-lg placeholder-gray-400 shadow shadow-black outline-none"
-              />
+                  <div className="flex h-14 items-center justify-between">
+                    <Button
+                      type="button"
+                      onClick={handleCopy(cborHex || "")}
+                      className="flex h-10 cursor-pointer items-center justify-center gap-2"
+                    >
+                      <div>Copy</div> <Image src={CopyIcon} alt="Copy" />
+                    </Button>
+                  </div>
+                  <CodeMirror
+                    value={cborHex}
+                    extensions={[EditorView.lineWrapping]}
+                    editable={false}
+                    height="calc(100vh - 14rem)"
+                    width="calc(50vw - 5rem)"
+                    placeholder="Response will be displayed here"
+                    className="overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-2 text-lg placeholder-gray-400 shadow shadow-black outline-none"
+                  />
+                </Tab>
+                <Tab
+                  key="diagnostic"
+                  title={
+                    <span className="text-lg font-semibold">
+                      CBOR Diagnostic
+                    </span>
+                  }
+                >
+                  <div className="flex h-14 items-center justify-between">
+                    <Button
+                      type="button"
+                      onClick={handleCopy(cborDiagnostic || "")}
+                      className="flex h-10 cursor-pointer items-center justify-center gap-2"
+                    >
+                      <div>Copy</div> <Image src={CopyIcon} alt="Copy" />
+                    </Button>
+                  </div>
+                  <CodeMirror
+                    value={cborDiagnostic}
+                    extensions={[EditorView.lineWrapping]}
+                    editable={false}
+                    height="calc(100vh - 14rem)"
+                    width="calc(50vw - 5rem)"
+                    placeholder="Response will be displayed here"
+                    className="overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-gray-100 p-2 text-lg placeholder-gray-400 shadow shadow-black outline-none"
+                  />
+                </Tab>
+              </Tabs>
             </div>
           </div>
         </form>
