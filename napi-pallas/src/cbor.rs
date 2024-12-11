@@ -1,6 +1,6 @@
-use crate::constants::{FIXED_HASH, FIXED_POLICY};
+use crate::utils::{FIXED_HASH, FIXED_POLICY};
 use pallas_addresses::Address;
-use pallas_codec::minicbor::encode;
+use pallas_codec::minicbor::{display, encode};
 use pallas_crypto::hash::Hash;
 use pallas_primitives::alonzo::{BoundedBytes, PostAlonzoAuxiliaryData, Value as AlonzoValue};
 use pallas_primitives::conway::{
@@ -22,70 +22,46 @@ use pallas_primitives::conway::{
   TransactionOutput,
 };
 
-pub fn parse_dsl(raw: String) -> String {
-  let schema_path = Path::new("docs/schema.json").canonicalize().unwrap();
-  let schema_content = fs::read_to_string(schema_path).unwrap();
-  let schema: Value = serde_json::from_str(&schema_content).unwrap();
+pub fn preprocess_json(raw: &str) -> Result<Value, serde_json::Error> {
+  let mut res: Value = serde_json::from_str(raw)?;
 
-  let res: Value = match serde_json::from_str(&raw) {
-    Ok(json) => json,
-    Err(_) => return json!({ "error": "Input is not a valid JSON." }).to_string(),
-  };
+  if let Some(inputs) = res["transaction"]["inputs"].as_array_mut() {
+    let mut used_indices: HashSet<u64> = inputs
+      .iter()
+      .filter_map(|input| input["index"].as_u64())
+      .collect();
 
-  let validator = jsonschema::validator_for(&schema).unwrap();
-  let result = validator.validate(&res);
+    let mut next_index = *used_indices.iter().max().unwrap_or(&0) + 1;
 
-  match result {
-    Ok(_) => json!({"cbor_hex": dsl_to_cbor_hex(raw)}).to_string(),
-    Err(e) => json!(
-      {
-        "error": e.to_string(),
-        "instance_path": e.instance_path.to_string(),
+    for input in inputs.iter_mut() {
+      if input["txHash"].is_null() {
+        input["txHash"] = json!(FIXED_HASH);
       }
-    )
-    .to_string(),
+
+      if input["index"].is_null() {
+        while used_indices.contains(&next_index) {
+          next_index += 1;
+        }
+        input["index"] = json!(next_index);
+        used_indices.insert(next_index);
+      }
+    }
+
+    inputs.sort_by(|a, b| {
+      let tx_hash_a = a["txHash"].as_str().unwrap_or_default();
+      let tx_hash_b = b["txHash"].as_str().unwrap_or_default();
+
+      let index_a = a["index"].as_u64().unwrap_or_default();
+      let index_b = b["index"].as_u64().unwrap_or_default();
+
+      tx_hash_a.cmp(tx_hash_b).then(index_a.cmp(&index_b))
+    });
   }
+
+  Ok(res)
 }
 
 pub fn dsl_to_tx(raw: String) -> Tx {
-  fn preprocess_json(raw: &str) -> Result<Value, serde_json::Error> {
-    let mut res: Value = serde_json::from_str(raw)?;
-
-    if let Some(inputs) = res["transaction"]["inputs"].as_array_mut() {
-      let mut used_indices: HashSet<u64> = inputs
-        .iter()
-        .filter_map(|input| input["index"].as_u64())
-        .collect();
-
-      let mut next_index = *used_indices.iter().max().unwrap_or(&0) + 1;
-
-      for input in inputs.iter_mut() {
-        if input["txHash"].is_null() {
-          input["txHash"] = json!(FIXED_HASH);
-        }
-
-        if input["index"].is_null() {
-          while used_indices.contains(&next_index) {
-            next_index += 1;
-          }
-          input["index"] = json!(next_index);
-          used_indices.insert(next_index);
-        }
-      }
-
-      inputs.sort_by(|a, b| {
-        let tx_hash_a = a["txHash"].as_str().unwrap_or_default();
-        let tx_hash_b = b["txHash"].as_str().unwrap_or_default();
-
-        let index_a = a["index"].as_u64().unwrap_or_default();
-        let index_b = b["index"].as_u64().unwrap_or_default();
-
-        tx_hash_a.cmp(tx_hash_b).then(index_a.cmp(&index_b))
-      });
-    }
-
-    Ok(res)
-  }
   let res: Value = preprocess_json(&raw).unwrap();
 
   let mut redeemers_vec: Vec<(RedeemersKey, RedeemersValue)> = vec![];
@@ -363,4 +339,39 @@ pub fn dsl_to_cbor_hex(raw: String) -> String {
   let mut tx_buf: Vec<u8> = Vec::new();
   let _ = encode(tx, &mut tx_buf);
   hex::encode(tx_buf.clone())
+}
+
+pub fn dsl_to_cbor_diagnostic(raw: String) -> String {
+  let tx = dsl_to_tx(raw.to_string());
+  let mut tx_buf: Vec<u8> = Vec::new();
+  let _ = encode(tx, &mut tx_buf);
+  format!("{}", display(&tx_buf))
+}
+
+pub fn parse_dsl(raw: String) -> String {
+  let schema_path = Path::new("docs/schema.json").canonicalize().unwrap();
+  let schema_content = fs::read_to_string(schema_path).unwrap();
+  let schema: Value = serde_json::from_str(&schema_content).unwrap();
+
+  let res: Value = match serde_json::from_str(&raw) {
+    Ok(json) => json,
+    Err(_) => return json!({ "error": "Input is not a valid JSON." }).to_string(),
+  };
+
+  let validator = jsonschema::validator_for(&schema).unwrap();
+  let result = validator.validate(&res);
+
+  match result {
+    Ok(_) => {
+      json!({"cbor_hex": dsl_to_cbor_hex(raw.clone()), "cbor_diagnostic": dsl_to_cbor_diagnostic(raw.clone())})
+        .to_string()
+    }
+    Err(e) => json!(
+      {
+        "error": e.to_string(),
+        "instance_path": e.instance_path.to_string(),
+      }
+    )
+    .to_string(),
+  }
 }
