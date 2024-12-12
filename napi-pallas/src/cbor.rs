@@ -386,6 +386,7 @@ fn build_metadata(metadata: &Value) -> Option<KeyValuePairs<u64, Metadatum>> {
           let label = entry["label"].as_u64()?;
           let json_metadata = entry["json_metadata"].as_object()?;
           let mut map_vec: Vec<(Metadatum, Metadatum)> = vec![];
+
           for (key, value) in json_metadata.iter() {
             map_vec.push((Metadatum::Text(key.clone()), get_metadata_metadatum(value)));
           }
