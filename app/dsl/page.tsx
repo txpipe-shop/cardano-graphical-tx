@@ -8,7 +8,8 @@ import CodeMirror from "@uiw/react-codemirror";
 import jsonpointer from "jsonpointer";
 import Image from "next/image";
 import { Tabs, Tab } from "@nextui-org/tabs";
-import { MouseEventHandler, Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import type { MouseEventHandler } from "react";
 import { Button, Header } from "../_components";
 import { useUI } from "../_contexts";
 import { getDSLFromJSON, handleCopy, isEmpty } from "../_utils";
@@ -16,6 +17,15 @@ import CopyIcon from "/public/copy.svg";
 
 import { useSearchParams } from "next/navigation";
 import Loading from "../loading";
+
+function formatHexString(input: any) {
+  const hexPattern = /h'([0-9a-fA-F\s]+)'/g;
+  const formattedString = input.replace(hexPattern, (_: any, hex: string) => {
+    const cleanedHex = hex.replace(/\s+/g, "").toUpperCase();
+    return `h'${cleanedHex}'`;
+  });
+  return formattedString;
+}
 
 export default function Index() {
   const { error, setError } = useUI();
@@ -93,7 +103,7 @@ export default function Index() {
       }
     } else {
       setCborHex(parsedRes.cbor_hex);
-      setCborDiagnostic(parsedRes.cbor_diagnostic.replace(/\s+/g, ""));
+      setCborDiagnostic(formatHexString(parsedRes.cbor_diagnostic));
       setCustomDiagnostics([]);
     }
   }
