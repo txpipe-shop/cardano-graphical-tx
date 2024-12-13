@@ -108,7 +108,15 @@ pub fn dsl_to_tx(raw: String) -> Tx {
       .collect::<Vec<TransactionInput>>(),
   );
 
-  let redeemers = NonEmptyKeyValuePairs::try_from(redeemers_vec).unwrap();
+  let redeemers = if redeemers_vec.is_empty() {
+    None
+  } else {
+    Some(
+      NonEmptyKeyValuePairs::try_from(redeemers_vec)
+        .unwrap()
+        .into(),
+    )
+  };
 
   let mut mint: Option<Multiasset<NonZeroInt>> = None;
   let mut mint_kv_pairs: Vec<(Hash<28>, NonEmptyKeyValuePairs<Bytes, NonZeroInt>)> = vec![];
@@ -193,10 +201,9 @@ pub fn dsl_to_tx(raw: String) -> Tx {
   } else if !res["transaction"]["minting"].is_null() {
     mint = res["transaction"]["minting"].as_array().map(|mint| {
       let mut mint_kv_pairs: Vec<(Hash<28>, NonEmptyKeyValuePairs<Bytes, NonZeroInt>)> = vec![];
-
-      let mut policy_hash: Option<Hash<28>> = None;
       for asset in mint.iter() {
         let asset_name: Vec<u8>;
+        let policy_hash: Option<Hash<28>>;
         if asset["assetClass"].is_null() {
           asset_name = asset["name"].as_str().unwrap().as_bytes().to_vec();
           policy_hash = FIXED_POLICY;
@@ -216,28 +223,34 @@ pub fn dsl_to_tx(raw: String) -> Tx {
   }
 
   let withdrawals: Option<KeyValuePairs<RewardAccount, Coin>> =
-    Some(KeyValuePairs::from(Vec::from(
-      res["transaction"]["withdrawals"]
-        .as_array()
-        .unwrap_or(&vec![])
-        .iter()
-        .filter_map(|entry| {
-          let raw_address = entry["raw_address"].as_str()?;
-          let amount = entry["amount"].as_u64()?;
+    if res["transaction"]["withdrawals"].is_null() {
+      None
+    } else {
+      Some(KeyValuePairs::from(Vec::from(
+        res["transaction"]["withdrawals"]
+          .as_array()
+          .unwrap()
+          .iter()
+          .filter_map(|entry| {
+            let raw_address = entry["raw_address"].as_str()?;
+            let amount = entry["amount"].as_u64()?;
 
-          let address_bytes = raw_address.as_bytes().to_vec();
-          let reward_account = Bytes::from(address_bytes);
+            let address_bytes = raw_address.as_bytes().to_vec();
+            let reward_account = Bytes::from(address_bytes);
 
-          Some((reward_account, amount))
-        })
-        .collect::<Vec<(RewardAccount, Coin)>>(),
-    )));
+            Some((reward_account, amount))
+          })
+          .collect::<Vec<(RewardAccount, Coin)>>(),
+      )))
+    };
 
-  let metadata = {
+  let metadata = if res["transaction"]["metadata"].is_null() {
+    None
+  } else {
     Some(KeyValuePairs::from(
       res["transaction"]["metadata"]
         .as_array()
-        .unwrap_or(&vec![])
+        .unwrap()
         .iter()
         .filter_map(|entry| {
           let label = entry["label"].as_u64()?;
@@ -282,13 +295,16 @@ pub fn dsl_to_tx(raw: String) -> Tx {
     ))
   };
 
-  let auxiliary_data: Nullable<AuxiliaryData> =
+  let auxiliary_data: Nullable<AuxiliaryData> = if metadata.is_none() {
+    Nullable::Null
+  } else {
     Some(AuxiliaryData::PostAlonzo(PostAlonzoAuxiliaryData {
       metadata,
       native_scripts: None,
       plutus_scripts: None,
     }))
-    .into();
+    .into()
+  };
 
   let transaction_body = PseudoTransactionBody::<TransactionOutput> {
     inputs,
@@ -325,7 +341,7 @@ pub fn dsl_to_tx(raw: String) -> Tx {
       bootstrap_witness: None,
       plutus_v1_script: None,
       plutus_data: None,
-      redeemer: Some(redeemers.into()),
+      redeemer: redeemers,
       plutus_v2_script: None,
       plutus_v3_script: None,
     },
