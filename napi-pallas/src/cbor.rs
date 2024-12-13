@@ -1,6 +1,6 @@
-use crate::constants::{FIXED_HASH, FIXED_POLICY};
+use crate::utils::{FIXED_HASH, FIXED_POLICY};
 use pallas_addresses::Address;
-use pallas_codec::minicbor::encode;
+use pallas_codec::minicbor::{display, encode};
 use pallas_crypto::hash::Hash;
 use pallas_primitives::alonzo::{BoundedBytes, PostAlonzoAuxiliaryData, Value as AlonzoValue};
 use pallas_primitives::conway::{
@@ -22,70 +22,46 @@ use pallas_primitives::conway::{
   TransactionOutput,
 };
 
-pub fn parse_dsl(raw: String) -> String {
-  let schema_path = Path::new("docs/schema.json").canonicalize().unwrap();
-  let schema_content = fs::read_to_string(schema_path).unwrap();
-  let schema: Value = serde_json::from_str(&schema_content).unwrap();
+pub fn preprocess_json(raw: &str) -> Result<Value, serde_json::Error> {
+  let mut res: Value = serde_json::from_str(raw)?;
 
-  let res: Value = match serde_json::from_str(&raw) {
-    Ok(json) => json,
-    Err(_) => return json!({ "error": "Input is not a valid JSON." }).to_string(),
-  };
+  if let Some(inputs) = res["transaction"]["inputs"].as_array_mut() {
+    let mut used_indices: HashSet<u64> = inputs
+      .iter()
+      .filter_map(|input| input["index"].as_u64())
+      .collect();
 
-  let validator = jsonschema::validator_for(&schema).unwrap();
-  let result = validator.validate(&res);
+    let mut next_index = *used_indices.iter().max().unwrap_or(&0) + 1;
 
-  match result {
-    Ok(_) => json!({"cbor_hex": dsl_to_cbor_hex(raw)}).to_string(),
-    Err(e) => json!(
-      {
-        "error": e.to_string(),
-        "instance_path": e.instance_path.to_string(),
+    for input in inputs.iter_mut() {
+      if input["txHash"].is_null() {
+        input["txHash"] = json!(FIXED_HASH);
       }
-    )
-    .to_string(),
+
+      if input["index"].is_null() {
+        while used_indices.contains(&next_index) {
+          next_index += 1;
+        }
+        input["index"] = json!(next_index);
+        used_indices.insert(next_index);
+      }
+    }
+
+    inputs.sort_by(|a, b| {
+      let tx_hash_a = a["txHash"].as_str().unwrap_or_default();
+      let tx_hash_b = b["txHash"].as_str().unwrap_or_default();
+
+      let index_a = a["index"].as_u64().unwrap_or_default();
+      let index_b = b["index"].as_u64().unwrap_or_default();
+
+      tx_hash_a.cmp(tx_hash_b).then(index_a.cmp(&index_b))
+    });
   }
+
+  Ok(res)
 }
 
 pub fn dsl_to_tx(raw: String) -> Tx {
-  fn preprocess_json(raw: &str) -> Result<Value, serde_json::Error> {
-    let mut res: Value = serde_json::from_str(raw)?;
-
-    if let Some(inputs) = res["transaction"]["inputs"].as_array_mut() {
-      let mut used_indices: HashSet<u64> = inputs
-        .iter()
-        .filter_map(|input| input["index"].as_u64())
-        .collect();
-
-      let mut next_index = *used_indices.iter().max().unwrap_or(&0) + 1;
-
-      for input in inputs.iter_mut() {
-        if input["txHash"].is_null() {
-          input["txHash"] = json!(FIXED_HASH);
-        }
-
-        if input["index"].is_null() {
-          while used_indices.contains(&next_index) {
-            next_index += 1;
-          }
-          input["index"] = json!(next_index);
-          used_indices.insert(next_index);
-        }
-      }
-
-      inputs.sort_by(|a, b| {
-        let tx_hash_a = a["txHash"].as_str().unwrap_or_default();
-        let tx_hash_b = b["txHash"].as_str().unwrap_or_default();
-
-        let index_a = a["index"].as_u64().unwrap_or_default();
-        let index_b = b["index"].as_u64().unwrap_or_default();
-
-        tx_hash_a.cmp(tx_hash_b).then(index_a.cmp(&index_b))
-      });
-    }
-
-    Ok(res)
-  }
   let res: Value = preprocess_json(&raw).unwrap();
 
   let mut redeemers_vec: Vec<(RedeemersKey, RedeemersValue)> = vec![];
@@ -132,7 +108,15 @@ pub fn dsl_to_tx(raw: String) -> Tx {
       .collect::<Vec<TransactionInput>>(),
   );
 
-  let redeemers = NonEmptyKeyValuePairs::try_from(redeemers_vec).unwrap();
+  let redeemers = if redeemers_vec.is_empty() {
+    None
+  } else {
+    Some(
+      NonEmptyKeyValuePairs::try_from(redeemers_vec)
+        .unwrap()
+        .into(),
+    )
+  };
 
   let mut mint: Option<Multiasset<NonZeroInt>> = None;
   let mut mint_kv_pairs: Vec<(Hash<28>, NonEmptyKeyValuePairs<Bytes, NonZeroInt>)> = vec![];
@@ -217,10 +201,9 @@ pub fn dsl_to_tx(raw: String) -> Tx {
   } else if !res["transaction"]["minting"].is_null() {
     mint = res["transaction"]["minting"].as_array().map(|mint| {
       let mut mint_kv_pairs: Vec<(Hash<28>, NonEmptyKeyValuePairs<Bytes, NonZeroInt>)> = vec![];
-
-      let mut policy_hash: Option<Hash<28>> = None;
       for asset in mint.iter() {
         let asset_name: Vec<u8>;
+        let policy_hash: Option<Hash<28>>;
         if asset["assetClass"].is_null() {
           asset_name = asset["name"].as_str().unwrap().as_bytes().to_vec();
           policy_hash = FIXED_POLICY;
@@ -240,28 +223,34 @@ pub fn dsl_to_tx(raw: String) -> Tx {
   }
 
   let withdrawals: Option<KeyValuePairs<RewardAccount, Coin>> =
-    Some(KeyValuePairs::from(Vec::from(
-      res["transaction"]["withdrawals"]
-        .as_array()
-        .unwrap_or(&vec![])
-        .iter()
-        .filter_map(|entry| {
-          let raw_address = entry["raw_address"].as_str()?;
-          let amount = entry["amount"].as_u64()?;
+    if res["transaction"]["withdrawals"].is_null() {
+      None
+    } else {
+      Some(KeyValuePairs::from(Vec::from(
+        res["transaction"]["withdrawals"]
+          .as_array()
+          .unwrap()
+          .iter()
+          .filter_map(|entry| {
+            let raw_address = entry["raw_address"].as_str()?;
+            let amount = entry["amount"].as_u64()?;
 
-          let address_bytes = raw_address.as_bytes().to_vec();
-          let reward_account = Bytes::from(address_bytes);
+            let address_bytes = raw_address.as_bytes().to_vec();
+            let reward_account = Bytes::from(address_bytes);
 
-          Some((reward_account, amount))
-        })
-        .collect::<Vec<(RewardAccount, Coin)>>(),
-    )));
+            Some((reward_account, amount))
+          })
+          .collect::<Vec<(RewardAccount, Coin)>>(),
+      )))
+    };
 
-  let metadata = {
+  let metadata = if res["transaction"]["metadata"].is_null() {
+    None
+  } else {
     Some(KeyValuePairs::from(
       res["transaction"]["metadata"]
         .as_array()
-        .unwrap_or(&vec![])
+        .unwrap()
         .iter()
         .filter_map(|entry| {
           let label = entry["label"].as_u64()?;
@@ -306,13 +295,16 @@ pub fn dsl_to_tx(raw: String) -> Tx {
     ))
   };
 
-  let auxiliary_data: Nullable<AuxiliaryData> =
+  let auxiliary_data: Nullable<AuxiliaryData> = if metadata.is_none() {
+    Nullable::Null
+  } else {
     Some(AuxiliaryData::PostAlonzo(PostAlonzoAuxiliaryData {
       metadata,
       native_scripts: None,
       plutus_scripts: None,
     }))
-    .into();
+    .into()
+  };
 
   let transaction_body = PseudoTransactionBody::<TransactionOutput> {
     inputs,
@@ -349,7 +341,7 @@ pub fn dsl_to_tx(raw: String) -> Tx {
       bootstrap_witness: None,
       plutus_v1_script: None,
       plutus_data: None,
-      redeemer: Some(redeemers.into()),
+      redeemer: redeemers,
       plutus_v2_script: None,
       plutus_v3_script: None,
     },
@@ -363,4 +355,39 @@ pub fn dsl_to_cbor_hex(raw: String) -> String {
   let mut tx_buf: Vec<u8> = Vec::new();
   let _ = encode(tx, &mut tx_buf);
   hex::encode(tx_buf.clone())
+}
+
+pub fn dsl_to_cbor_diagnostic(raw: String) -> String {
+  let tx = dsl_to_tx(raw.to_string());
+  let mut tx_buf: Vec<u8> = Vec::new();
+  let _ = encode(tx, &mut tx_buf);
+  format!("{}", display(&tx_buf))
+}
+
+pub fn parse_dsl(raw: String) -> String {
+  let schema_path = Path::new("docs/schema.json").canonicalize().unwrap();
+  let schema_content = fs::read_to_string(schema_path).unwrap();
+  let schema: Value = serde_json::from_str(&schema_content).unwrap();
+
+  let res: Value = match serde_json::from_str(&raw) {
+    Ok(json) => json,
+    Err(_) => return json!({ "error": "Input is not a valid JSON." }).to_string(),
+  };
+
+  let validator = jsonschema::validator_for(&schema).unwrap();
+  let result = validator.validate(&res);
+
+  match result {
+    Ok(_) => {
+      json!({"cbor_hex": dsl_to_cbor_hex(raw.clone()), "cbor_diagnostic": dsl_to_cbor_diagnostic(raw.clone())})
+        .to_string()
+    }
+    Err(e) => json!(
+      {
+        "error": e.to_string(),
+        "instance_path": e.instance_path.to_string(),
+      }
+    )
+    .to_string(),
+  }
 }
