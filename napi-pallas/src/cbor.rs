@@ -11,7 +11,6 @@ use pallas_primitives::Fragment;
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
-use std::{fs, path::Path};
 
 use pallas::ledger::primitives::conway::PlutusData;
 use pallas_codec::utils::{
@@ -21,6 +20,8 @@ use pallas_primitives::conway::{
   AssetName, Metadatum, PseudoTransactionBody, RedeemerTag as RedeemerTagConway, TransactionInput,
   TransactionOutput,
 };
+
+static SCHEMA_JSON: &str = include_str!("../.././docs/schema.json");
 
 pub fn preprocess_json(raw: &str) -> Result<Value, serde_json::Error> {
   let mut res: Value = serde_json::from_str(raw)?;
@@ -485,9 +486,7 @@ pub fn dsl_to_cbor_diagnostic(raw: String) -> String {
 }
 
 pub fn parse_dsl(raw: String) -> String {
-  let schema_path = Path::new("docs/schema.json").canonicalize().unwrap();
-  let schema_content = fs::read_to_string(schema_path).unwrap();
-  let schema: Value = serde_json::from_str(&schema_content).unwrap();
+  let schema: Value = serde_json::from_str(&SCHEMA_JSON).unwrap();
 
   let res: Value = match serde_json::from_str(&raw) {
     Ok(json) => json,
