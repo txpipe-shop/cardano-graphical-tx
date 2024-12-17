@@ -7,11 +7,9 @@ use napi_pallas::cbor;
 
 #[test]
 fn test_empty_params() {
-  println!("Running test_empty_params");
   let empty_params_json = EMPTY_PARAMS_JSON.to_owned();
 
   let result = cbor::parse_dsl(empty_params_json);
-
   let parsed_result: serde_json::Value = serde_json::from_str(&result).unwrap();
 
   assert!(
@@ -41,11 +39,9 @@ fn test_empty_params() {
 
 #[test]
 fn test_all_params() {
-  println!("Running test_all_params");
   let all_params_json = ALL_PARAMS_JSON.to_owned();
 
   let result = cbor::parse_dsl(all_params_json);
-
   let parsed_result: serde_json::Value = serde_json::from_str(&result).unwrap();
 
   assert!(
@@ -74,11 +70,9 @@ fn test_all_params() {
 }
 #[test]
 fn test_100_inputs_outputs() {
-  println!("Running test_100_inputs_outputs");
   let input_output_json = INPUT_OUTPUT_JSON.to_owned();
 
   let result = cbor::parse_dsl(input_output_json);
-
   let parsed_result: serde_json::Value = serde_json::from_str(&result).unwrap();
 
   assert!(
