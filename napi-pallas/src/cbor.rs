@@ -8,6 +8,7 @@ use pallas_primitives::conway::{
   Redeemers, RedeemersKey, RedeemersValue, RewardAccount, Tx, WitnessSet,
 };
 use pallas_primitives::Fragment;
+use regex::Regex;
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -482,7 +483,17 @@ pub fn dsl_to_cbor_diagnostic(raw: String) -> String {
   let tx = dsl_to_tx(raw.to_string());
   let mut tx_buf: Vec<u8> = Vec::new();
   let _ = encode(tx, &mut tx_buf);
-  format!("{}", display(&tx_buf))
+
+  let diagnostic = display(&tx_buf).to_string();
+  // Format hex strings in diagnostic notation
+  let hex_pattern = Regex::new(r"h'([0-9a-fA-F\s]+)'").unwrap();
+  let formatted_diagnostic = hex_pattern.replace_all(&diagnostic, |caps: &regex::Captures| {
+    let hex = &caps[1];
+    let cleaned_hex = hex.replace(' ', "").to_uppercase();
+    format!("h'{}'", cleaned_hex)
+  });
+
+  formatted_diagnostic.to_string()
 }
 
 pub fn parse_dsl(raw: String) -> String {
