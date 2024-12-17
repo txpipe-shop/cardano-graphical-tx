@@ -242,7 +242,7 @@ fn build_output_datum(output: &Value) -> Option<DatumOption> {
 fn get_output_address(address: &Value) -> Bytes {
   match address {
     Value::String(address) => Address::from_bech32(address).unwrap().to_vec().into(),
-    _ => Bytes::from(vec![]),
+    _ => Bytes::from(vec![]), //TODO: Use fixed address
   }
 }
 
@@ -406,7 +406,7 @@ pub fn dsl_to_tx(raw: String) -> Tx {
 
   let (inputs, redeemers) = build_inputs_and_redeemers(&res["transaction"]["inputs"]);
 
-  let reference_inputs = build_ref_inputs(&res["transaction"]["inputs"]);
+  let reference_inputs = build_ref_inputs(&res["transaction"]["ref_inputs"]);
 
   let (outputs, mut mint) = build_outputs_and_maybe_mints(&res["transaction"]["outputs"]);
 
