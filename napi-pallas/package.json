@@ -31,7 +31,7 @@
     "build": "napi build --platform --release",
     "build:debug": "napi build --platform",
     "prepublishOnly": "napi prepublish -t npm",
-    "test": "cargo test --features test-build",
+    "test": "RUST_BACKTRACE=1 && cargo test --features test-build",
     "universal": "napi universal",
     "version": "napi version"
   },
