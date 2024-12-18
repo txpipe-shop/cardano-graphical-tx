@@ -120,8 +120,8 @@ fn build_inputs_and_redeemers(inputs: &Value) -> (Set<TransactionInput>, Option<
   (inputs, redeemers)
 }
 
-fn build_ref_inputs(inputs: &Value) -> Option<NonEmptySet<TransactionInput>> {
-  let inputs_iter: Vec<TransactionInput> = inputs
+fn build_ref_inputs(ref_inputs: &Value) -> Option<NonEmptySet<TransactionInput>> {
+  let inputs_iter: Vec<TransactionInput> = ref_inputs
     .as_array()
     .unwrap_or(&vec![])
     .iter()
