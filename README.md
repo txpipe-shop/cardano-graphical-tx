@@ -10,7 +10,7 @@ It is recommended to use `Node v18.0.0` or higher.
 
 It is recommended to use yarn to run this project.
 
-# How To Run Locally
+## How to tun locally
 
 1. **Clone the Repository**
 
@@ -86,4 +86,12 @@ The following transactions were made on the preprod network.
 
 ```bash
 d1ef2bf292694fbbdcc5855c040e5081e0a738701d1c3cb92410901f39504976
+```
+
+## How to run tests
+
+Inside the `napi-pallas` folder, run the following command:
+
+```bash
+yarn run test
 ```

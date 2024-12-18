@@ -96,7 +96,7 @@ export const getDSLFromJSON = async (
 ): Promise<string> => {
   try {
     const formData = new FormData();
-    formData.append("dsl", dsl.replace(/\s+/g, ""));
+    formData.append("dsl", dsl);
 
     const res = await fetch(parseQuery(API_ROUTES.DSL, {}), {
       method: "POST",
