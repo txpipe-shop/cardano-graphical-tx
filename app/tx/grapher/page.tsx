@@ -8,9 +8,9 @@ import {
   TxInfo,
   TxInput,
   UtxoInfo,
-} from "../../_components";
-import { ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "../../_utils";
-import Loading from "../../loading";
+} from "~/app/_components";
+import { ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
+import Loading from "~/app/loading";
 
 interface GrapherProps {
   searchParams?: {
@@ -18,6 +18,7 @@ interface GrapherProps {
     [UTXO_URL_PARAM]?: string;
   };
 }
+
 export default function Index({ searchParams }: GrapherProps) {
   const { replace } = useRouter();
   const { [TX_URL_PARAM]: selectedTx, [UTXO_URL_PARAM]: selectedUtxo } =

@@ -1,26 +1,26 @@
 import type { KonvaEventObject } from "konva/lib/Node";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Layer, Stage } from "react-konva";
 import { useGraphical, useUI } from "~/app/_contexts";
 import {
   ERRORS,
   KONVA_COLORS,
-  ROUTES,
   TX_URL_PARAM,
   UTXO_URL_PARAM,
 } from "~/app/_utils";
+import Loading from "../loading";
 import { Error } from "./Error";
 import { Line, Transaction, Utxo } from "./Transaction";
-
 export function Playground() {
   const { transactions } = useGraphical();
   const { error } = useUI();
   const pathname = usePathname();
-  const { push, replace } = useRouter();
+  const { replace } = useRouter();
   const searchParams = useSearchParams();
   const shownWarnings = useRef(new Set());
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const scaleBy = 1.05;
   const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
@@ -69,6 +69,13 @@ export function Playground() {
   };
 
   useEffect(() => {
+    setDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  }, []);
+
+  useEffect(() => {
     transactions.transactions.forEach((tx: any) => {
       if (tx.warning) {
         const warningKey = `${tx.txHash}-${tx.warning}`;
@@ -101,12 +108,12 @@ export function Playground() {
   }, [transactions.transactions]);
 
   if (error) return <Error action="fetching" />;
-  if (!transactions.transactions.length) push(ROUTES.TX);
+  if (dimensions.height == 0 || dimensions.width == 0) return <Loading />;
 
   return (
     <Stage
-      width={window.innerWidth}
-      height={window.innerHeight}
+      width={dimensions.width}
+      height={dimensions.height}
       onWheel={handleWheel}
       draggable
       className="h-auto w-full"

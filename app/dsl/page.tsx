@@ -11,7 +11,7 @@ import Image from "next/image";
 import { type MouseEventHandler, Suspense, useEffect, useState } from "react";
 import { Button, Header } from "../_components";
 import { useUI } from "../_contexts";
-import { getDSLFromJSON, handleCopy, isEmpty } from "../_utils";
+import { dslExample, getDSLFromJSON, handleCopy, isEmpty } from "../_utils";
 import CopyIcon from "/public/copy.svg";
 
 import { useSearchParams } from "next/navigation";
@@ -161,15 +161,9 @@ export default function Index() {
     }
   }
   useEffect(() => {
-    const setExampleDSL = async () => {
-      console.log(useExample);
-      if (useExample) {
-        const res = await fetch("/tx_example.json");
-        const data = await res.json();
-        setDsl(JSON.stringify(data, null, 2));
-      }
-    };
-    setExampleDSL();
+    if (useExample) {
+      setDsl(dslExample);
+    }
   }, [useExample]);
 
   const renderTabContent = (
