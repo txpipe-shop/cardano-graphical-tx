@@ -1,9 +1,20 @@
 # Building phase
 # Change it so that it uses node 18
-FROM node:18-alpine as builder
+FROM node:18-bullseye as builder
 WORKDIR /app
 # Install cargo deps
-RUN apk add python3 curl gcc make musl-dev build-base cairo-dev libjpeg-turbo-dev pango-dev giflib-dev
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  python3 \
+  curl \
+  gcc \
+  make \
+  libc6-dev \
+  build-essential \
+  libcairo2-dev \
+  libjpeg62-turbo-dev \
+  libpango1.0-dev \
+  libgif-dev
+
 # Install cargo
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 # Add cargo to path
@@ -29,7 +40,7 @@ RUN yarn install --immutable
 RUN yarn build
 
 # Runner image
-FROM node:18-alpine
+FROM node:18-bullseye
 WORKDIR /app
 
 # Copy from builder image
@@ -37,8 +48,8 @@ COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/docs/schema.json ./docs/schema.json
 
 
 EXPOSE 3000
 CMD ["yarn", "start"]
-
