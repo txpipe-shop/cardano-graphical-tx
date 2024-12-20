@@ -37,7 +37,8 @@
                 "required": [
                     "amount"
                 ]
-            }
+            },
+            "minItems": 1
         },
         "OutputValues": {
             "allOf": [
@@ -193,7 +194,10 @@
                                     "values": {
                                         "$ref": "#/definitions/OutputValues"
                                     }
-                                }
+                                },
+                                "required": [
+                                    "values"
+                                ]
                             }
                         ]
                     }

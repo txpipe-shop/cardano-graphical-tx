@@ -19,7 +19,7 @@ As an example, we can show how to build a simple transaction with this DSL. The 
         "address": "addr_test1xq0pg5k3gc47qe8ntj25548dprlnmdyd44h7u653ply9pkw8yq3wjqnaym5vvm2sewd4m2xpwdhv69gqj62c5dxw5xwqm3j3fa",
         "txHash": "32252D31C9C9D49DC3326FC29343E63F180FDB3872C72BF36658C915E8B81BA3",
         "index": 0,
-        "values": [{ "amount": 10, "name": "ADA" }]
+        "values": [{ "amount": 10000000, "name": "lovelace" }]
       }
     ],
     "outputs": [
@@ -28,8 +28,8 @@ As an example, we can show how to build a simple transaction with this DSL. The 
         "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk",
         "values": [
           {
-            "amount": 9,
-            "name": "ADA"
+            "amount": 9000000,
+            "name": "lovelace"
           }
         ]
       }
@@ -64,7 +64,16 @@ We can also take in count the following examples:
         "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk"
       }
     ],
-    "outputs": [{ "name": "A" }, { "name": "B" }]
+    "outputs": [
+      {
+        "name": "A",
+        "values": [{ "amount": 10000000, "name": "lovelace" }]
+      },
+      {
+        "name": "B",
+        "values": [{ "amount": 10000000, "name": "lovelace" }]
+      }
+    ]
   }
 }
 ```
@@ -72,12 +81,12 @@ We can also take in count the following examples:
 The transaction "example" will have the following resulting CBOR:
 
 ```shell
-[{ 0: []
- , 1: []
- }
-, {}
-, true
-, null
+[{0: 258([[h'0000000000000000000000000000000000000000000000000000000000000000', 1]])
+ , 1: [{0: h'', 1: 10000000}, {0: h'', 1: 10000000}]
+ , 2: 0}
+ , {}
+ , true
+ , null
 ]
 ```
 
@@ -167,8 +176,8 @@ Or as an ASCII:
 
 ```json
 {
-  "amount": 10,
-  "name": "ADA"
+  "amount": 10000000,
+  "name": "lovelace"
 }
 ```
 
@@ -304,7 +313,7 @@ This section consists of a list of token names that were minted in the transacti
       {
         "name": "from x",
         "values": [
-          { "amount": "N", "name": "ADA" },
+          { "amount": "N", "name": "lovelace" },
           { "amount": "K", "name": "TokenA" }
         ],
         "script_ref": "string_hexa"
@@ -357,13 +366,13 @@ It is the additional, arbitrary data attached to the transaction for identificat
     "inputs": [],
     "outputs": [],
     "metadata": [
-            {
-                "label": 674,
-                "json_metadata": {
-                    "key": "value"
-                }
-            },
-            ...
+          {
+              "label": 674,
+              "json_metadata": {
+                  "key": "value"
+              }
+          },
+          ...
         ]
   }
 }
