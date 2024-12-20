@@ -1,4 +1,4 @@
-import { Button, Link as NextLink } from "@nextui-org/react";
+import { Badge, Button, Link as NextLink } from "@nextui-org/react";
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "~/app/_utils";
@@ -36,14 +36,16 @@ export const Header = () => {
         >
           Transaction
         </Button>
-        <Button
-          variant="flat"
-          className="p-5 font-mono text-lg shadow-md"
-          as={NextLink}
-          href={ROUTES.DSL}
-        >
-          DSL
-        </Button>
+        <Badge color="danger" content="Beta">
+          <Button
+            variant="flat"
+            className="p-5 font-mono text-lg shadow-md"
+            as={NextLink}
+            href={ROUTES.DSL}
+          >
+            DSL
+          </Button>
+        </Badge>
         <Button
           variant="flat"
           className="p-5 font-mono text-lg shadow-md"
