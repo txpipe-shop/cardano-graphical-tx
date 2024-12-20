@@ -201,7 +201,7 @@ pub fn cbor_parse(raw: String) -> CborResponse {
 
 #[napi]
 pub fn parse_datum_info(raw: String) -> Option<Datum> {
-  tx::parse_datum_info(raw)
+  utils::parse_datum_info(raw)
 }
 
 #[napi]
