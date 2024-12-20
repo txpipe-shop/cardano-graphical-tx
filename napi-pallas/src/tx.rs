@@ -7,6 +7,7 @@ use pallas::ledger::traverse::{
   MultiEraCert, MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer,
 };
 use pallas_crypto::hash::Hasher;
+use pallas_primitives::conway::{PseudoDatumOption, VKeyWitness};
 use std::collections::HashMap;
 
 use pallas::ledger::{
