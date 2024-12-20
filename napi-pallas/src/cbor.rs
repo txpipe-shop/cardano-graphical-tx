@@ -203,18 +203,18 @@ fn build_output_values_and_mint(
   mut mint_kv_map: &mut HashMap<Hash<28>, NonEmptyKeyValuePairs<Bytes, NonZeroInt>>,
 ) -> AlonzoValue {
   let mut lovelace_am = 0;
-  if values_array.len() > 1 {
-    let mut transformed_assets: HashMap<Hash<28>, KeyValuePairs<Bytes, u64>> = HashMap::new();
+  let mut transformed_assets: HashMap<Hash<28>, KeyValuePairs<Bytes, u64>> = HashMap::new();
 
-    values_array.iter().for_each(|asset| {
-      get_asset_info_and_build_mint(
-        asset,
-        &mut lovelace_am,
-        &mut transformed_assets,
-        &mut mint_kv_map,
-      );
-    });
+  values_array.iter().for_each(|asset| {
+    get_asset_info_and_build_mint(
+      asset,
+      &mut lovelace_am,
+      &mut transformed_assets,
+      &mut mint_kv_map,
+    );
+  });
 
+  if transformed_assets.len() > 0 {
     AlonzoValue::Multiasset(
       lovelace_am,
       KeyValuePairs::from(transformed_assets.into_iter().collect::<Vec<_>>()),
