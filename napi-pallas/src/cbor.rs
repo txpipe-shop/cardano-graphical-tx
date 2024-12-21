@@ -8,10 +8,10 @@ use pallas_primitives::conway::{
   Redeemers, RedeemersKey, RedeemersValue, RewardAccount, Tx, WitnessSet,
 };
 use pallas_primitives::Fragment;
+use regex::Regex;
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
-use std::{fs, path::Path};
 
 use pallas::ledger::primitives::conway::PlutusData;
 use pallas_codec::utils::{
@@ -21,6 +21,8 @@ use pallas_primitives::conway::{
   AssetName, Metadatum, PseudoTransactionBody, RedeemerTag as RedeemerTagConway, TransactionInput,
   TransactionOutput,
 };
+
+static SCHEMA_JSON: &str = include_str!("../.././docs/schema.json");
 
 pub fn preprocess_json(raw: &str) -> Result<Value, serde_json::Error> {
   let mut res: Value = serde_json::from_str(raw)?;
@@ -384,6 +386,7 @@ fn build_metadata(metadata: &Value) -> Option<KeyValuePairs<u64, Metadatum>> {
           let label = entry["label"].as_u64()?;
           let json_metadata = entry["json_metadata"].as_object()?;
           let mut map_vec: Vec<(Metadatum, Metadatum)> = vec![];
+
           for (key, value) in json_metadata.iter() {
             map_vec.push((Metadatum::Text(key.clone()), get_metadata_metadatum(value)));
           }
@@ -481,13 +484,21 @@ pub fn dsl_to_cbor_diagnostic(raw: String) -> String {
   let tx = dsl_to_tx(raw.to_string());
   let mut tx_buf: Vec<u8> = Vec::new();
   let _ = encode(tx, &mut tx_buf);
-  format!("{}", display(&tx_buf))
+
+  let diagnostic = display(&tx_buf).to_string();
+  // Format hex strings in diagnostic notation
+  let hex_pattern = Regex::new(r"h'([0-9a-fA-F\s]+)'").unwrap();
+  let formatted_diagnostic = hex_pattern.replace_all(&diagnostic, |caps: &regex::Captures| {
+    let hex = &caps[1];
+    let cleaned_hex = hex.replace(' ', "").to_uppercase();
+    format!("h'{}'", cleaned_hex)
+  });
+
+  formatted_diagnostic.to_string()
 }
 
 pub fn parse_dsl(raw: String) -> String {
-  let schema_path = Path::new("docs/schema.json").canonicalize().unwrap();
-  let schema_content = fs::read_to_string(schema_path).unwrap();
-  let schema: Value = serde_json::from_str(&schema_content).unwrap();
+  let schema: Value = serde_json::from_str(&SCHEMA_JSON).unwrap();
 
   let res: Value = match serde_json::from_str(&raw) {
     Ok(json) => json,

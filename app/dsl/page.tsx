@@ -17,15 +17,6 @@ import CopyIcon from "/public/copy.svg";
 import { useSearchParams } from "next/navigation";
 import Loading from "../loading";
 
-function formatHexString(input: any) {
-  const hexPattern = /h'([0-9a-fA-F\s]+)'/g;
-  const formattedString = input.replace(hexPattern, (_: any, hex: string) => {
-    const cleanedHex = hex.replace(/\s+/g, "").toUpperCase();
-    return `h'${cleanedHex}'`;
-  });
-  return formattedString;
-}
-
 export default function Index() {
   const { error, setError } = useUI();
   const [dsl, setDsl] = useState<string>("");
@@ -102,7 +93,7 @@ export default function Index() {
       }
     } else {
       setCborHex(parsedRes.cbor_hex);
-      setCborDiagnostic(formatHexString(parsedRes.cbor_diagnostic));
+      setCborDiagnostic(parsedRes.cbor_diagnostic);
       setCustomDiagnostics([]);
     }
   }
