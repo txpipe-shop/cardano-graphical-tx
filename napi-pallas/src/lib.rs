@@ -8,7 +8,7 @@ use pallas::ledger::traverse::MultiEraTx;
 extern crate napi_derive;
 
 mod address;
-mod cbor;
+pub mod cbor;
 mod tx;
 mod utils;
 
