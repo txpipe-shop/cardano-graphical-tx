@@ -11,7 +11,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "dev": "next dev",
-    "build:docker": "docker build -t graphical-tx .",
+    "build:docker": "docker build --build-arg NEXT_PUBLIC_CBOR_ENDPOINT='https://laceanatomy.com/tx?_data=routes%2Ftx' -t graphical-tx .",
     "run:docker": "docker run -p 3000:3000 graphical-tx",
     "push:docker": "npm run build:docker && docker tag graphical-tx graphicaltx/cardano-graphical-tx:latest && docker push graphicaltx/cardano-graphical-tx:latest",
     "lint": "next lint",
