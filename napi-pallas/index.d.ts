@@ -108,3 +108,4 @@ export interface CborResponse {
 export declare function cborParse(raw: string): CborResponse
 export declare function parseDatumInfo(raw: string): Datum | null
 export declare function parseDsl(raw: string): string
+export declare function parseAddress(raw: string): Output
