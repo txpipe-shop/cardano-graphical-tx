@@ -27,7 +27,7 @@ export function Examples({
   const [query, setQuery] = useState<string>("");
   const [toGo, setToGo] = useState<string>("");
 
-  const examples = [
+  const examples_tx = [
     {
       title: "Draw CBOR",
       code: cbor1,
@@ -134,7 +134,7 @@ export function Examples({
     <>
       <div className="mb-6 mt-10 text-3xl">Try one of these examples</div>
       <div className="flex w-full basis-1/4 flex-wrap justify-between gap-3">
-        {examples.map((example, index) => (
+        {examples_tx.map((example, index) => (
           <button
             key={index}
             type="submit"
@@ -161,6 +161,81 @@ export function Examples({
             </code>
           </button>
         )}
+      </div>
+    </>
+  );
+}
+
+export function ExamplesAddress(): JSX.Element {
+  const router = useRouter();
+  const { setError } = useUI();
+  const { configs, updateConfigs } = useConfigs();
+  const [query, setQuery] = useState<string>("");
+  const [toGo, setToGo] = useState<string>("");
+
+  const examples_address = [
+    {
+      title: "Mainnet address in Bech32",
+      address:
+        "addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3n0d3vllmyqwsx5wktcd8cc3sq835lu7drv2xwl2wywfgse35a3x",
+      onclick: async () => {},
+    },
+    {
+      title: "A script address",
+      address: "addr1w8phkx6acpnf78fuvxn0mkew3l0fd058hzquvz7w36x4gtcyjy7wx",
+      onclick: async () => {},
+    },
+    {
+      title: "An address without delegation part",
+      address: "addr1vx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzers66hrl8",
+      onclick: async () => {},
+    },
+    {
+      title: "A Byron address",
+      address:
+        "37btjrVyb4KDXBNC4haBVPCrro8AQPHwvCMp3RFhhSVWwfFmZ6wwzSK6JK1hY6wHNmtrpTf1kdbva8TCneM2YsiXT7mrzT21EacHnPpz5YyUdj64na",
+      onclick: async () => {},
+    },
+
+    {
+      title: "A stake addresss",
+      address:
+        "37btjrVyb4KDXBNC4haBVPCrro8AQPHwvCMp3RFhhSVWwfFmZ6wwzSK6JK1hY6wHNmtrpTf1kdbva8TCneM2YsiXT7mrzT21EacHnPpz5YyUdj64na",
+      onclick: async () => {},
+    },
+    {
+      title: "A rare address using a pointer to the delegation cert",
+      address:
+        "addr1gx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer5pnz75xxcrzqf96k",
+      onclick: async () => {},
+    },
+  ];
+
+  useEffect(() => {
+    if (configs.query === query) {
+      router.push(toGo);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, query, toGo]);
+
+  return (
+    <>
+      <div className="mb-6 mt-10 text-3xl">Try one of these examples</div>
+      <div className="flex w-full basis-1/4 flex-wrap justify-between gap-3">
+        {examples_address.map((example, index) => (
+          <button
+            key={index}
+            type="submit"
+            className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
+            onClick={example.onclick}
+          >
+            <h3 className="text-xl">{example.title}</h3>
+
+            <code className="mt-4 block w-full break-words text-gray-400">
+              {example.address.substring(0, 30)}...
+            </code>
+          </button>
+        ))}
       </div>
     </>
   );
