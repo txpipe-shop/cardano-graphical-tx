@@ -1,11 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useConfigs, useGraphical, useUI } from "../_contexts";
 import {
+  addr1,
+  addr2,
+  addr3,
+  addr4,
+  addr5,
+  addr6,
   cbor1,
+  getAddressInfo,
   getCborFromHash,
   hash1,
   hash2,
@@ -14,6 +21,7 @@ import {
   USER_CONFIGS,
 } from "../_utils";
 import { setCBOR } from "./Header/header.helper";
+import { Output } from "~/napi-pallas";
 
 export function Examples({
   showDSLExample = false,
@@ -166,7 +174,11 @@ export function Examples({
   );
 }
 
-export function ExamplesAddress(): JSX.Element {
+export function ExamplesAddress({
+  setAddressInfo,
+}: {
+  setAddressInfo: Dispatch<SetStateAction<Output>>;
+}): JSX.Element {
   const router = useRouter();
   const { setError } = useUI();
   const { configs, updateConfigs } = useConfigs();
@@ -176,38 +188,88 @@ export function ExamplesAddress(): JSX.Element {
   const examples_address = [
     {
       title: "Mainnet address in Bech32",
-      address:
-        "addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3n0d3vllmyqwsx5wktcd8cc3sq835lu7drv2xwl2wywfgse35a3x",
-      onclick: async () => {},
+      address: addr1,
+      onclick: async () => {
+        const res = await getAddressInfo(addr1, setError);
+        if (res.error) {
+          setError(res.error);
+          return;
+        }
+        setQuery(addr1);
+        updateConfigs(USER_CONFIGS.QUERY, addr1);
+        setAddressInfo(res);
+      },
     },
     {
       title: "A script address",
-      address: "addr1w8phkx6acpnf78fuvxn0mkew3l0fd058hzquvz7w36x4gtcyjy7wx",
-      onclick: async () => {},
+      address: addr2,
+      onclick: async () => {
+        const res = await getAddressInfo(addr2, setError);
+        if (res.error) {
+          setError(res.error);
+          return;
+        }
+        setQuery(addr2);
+        updateConfigs(USER_CONFIGS.QUERY, addr2);
+        setAddressInfo(res);
+      },
     },
     {
       title: "An address without delegation part",
-      address: "addr1vx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzers66hrl8",
-      onclick: async () => {},
+      address: addr3,
+      onclick: async () => {
+        const res = await getAddressInfo(addr3, setError);
+        if (res.error) {
+          setError(res.error);
+          return;
+        }
+        setQuery(addr3);
+        updateConfigs(USER_CONFIGS.QUERY, addr3);
+        setAddressInfo(res);
+      },
     },
     {
       title: "A Byron address",
-      address:
-        "37btjrVyb4KDXBNC4haBVPCrro8AQPHwvCMp3RFhhSVWwfFmZ6wwzSK6JK1hY6wHNmtrpTf1kdbva8TCneM2YsiXT7mrzT21EacHnPpz5YyUdj64na",
-      onclick: async () => {},
+      address: addr4,
+      onclick: async () => {
+        const res = await getAddressInfo(addr4, setError);
+        if (res.error) {
+          setError(res.error);
+          return;
+        }
+        setQuery(addr4);
+        updateConfigs(USER_CONFIGS.QUERY, addr4);
+        setAddressInfo(res);
+      },
     },
 
     {
       title: "A stake addresss",
-      address:
-        "37btjrVyb4KDXBNC4haBVPCrro8AQPHwvCMp3RFhhSVWwfFmZ6wwzSK6JK1hY6wHNmtrpTf1kdbva8TCneM2YsiXT7mrzT21EacHnPpz5YyUdj64na",
-      onclick: async () => {},
+      address: addr5,
+      onclick: async () => {
+        const res = await getAddressInfo(addr5, setError);
+        if (res.error) {
+          setError(res.error);
+          return;
+        }
+        setQuery(addr5);
+        updateConfigs(USER_CONFIGS.QUERY, addr5);
+        setAddressInfo(res);
+      },
     },
     {
       title: "A rare address using a pointer to the delegation cert",
-      address:
-        "addr1gx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer5pnz75xxcrzqf96k",
-      onclick: async () => {},
+      address: addr6,
+      onclick: async () => {
+        const res = await getAddressInfo(addr6, setError);
+        if (res.error) {
+          setError(res.error);
+          return;
+        }
+        setQuery(addr6);
+        updateConfigs(USER_CONFIGS.QUERY, addr6);
+        setAddressInfo(res);
+      },
     },
   ];
 
