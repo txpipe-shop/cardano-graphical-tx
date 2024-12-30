@@ -12,13 +12,13 @@ import {
 import Loading from "~/app/loading";
 
 import { ExamplesAddress } from "../_components/Examples";
-import { AddressInfo } from "../_interfaces/address.interface";
 import { useUI } from "../_contexts";
 import { isEmpty } from "~/app/_utils";
+import type { Output } from "~/napi-pallas";
 
 export default function Index() {
   const { error } = useUI();
-  const [addressInfo, setAddressInfo] = useState<AddressInfo>({});
+  const [addressInfo, setAddressInfo] = useState<Output>({});
 
   return (
     <div>
@@ -44,7 +44,7 @@ export default function Index() {
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center">
             <div className="w-2/3 text-center">
-              <ExamplesAddress />
+              <ExamplesAddress setAddressInfo={setAddressInfo} />
             </div>
           </div>
         )}

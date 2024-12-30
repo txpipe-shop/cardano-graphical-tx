@@ -2,7 +2,7 @@
 
 import { Select, SelectItem } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
-import { type ChangeEvent, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Button, Input } from "../_components";
 import { setCBOR } from "../_components/Header/header.helper";
@@ -27,7 +27,9 @@ export const TxInput = () => {
   const changeRaw = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateConfigs(USER_CONFIGS.QUERY, e.target.value);
   };
-
+  useEffect(() => {
+    updateConfigs(USER_CONFIGS.QUERY, configs.query);
+  }, []);
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!configs.query) return;

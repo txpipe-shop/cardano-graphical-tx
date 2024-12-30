@@ -1,64 +1,61 @@
 "use client";
 
-import { Dispatch, SetStateAction, Suspense, useContext } from "react";
-import { Button, PropBlock, EmptyBlock } from "~/app/_components";
-import Loading from "~/app/loading";
-import { parseAddress } from "~/napi-pallas";
+import { useEffect, type Dispatch, type SetStateAction } from "react";
+import { Button, Input } from "~/app/_components";
 
-import { ExamplesAddress } from "./Examples";
-import { isEmpty } from "~/app/_utils";
-import { useUI } from "~/app/_contexts";
-
-// export async function action({ request }: ActionFunctionArgs) {
-//   const formData = await request.formData();
-//   let raw = formData.get("raw");
-
-//   if (!!raw) {
-//     const res = parseAddress(raw.toString());
-//     return json({ ...res, raw });
-//   } else {
-//     return json({ error: "an empty value? seriously?" });
-//   }
-// }
+import { getAddressInfo, USER_CONFIGS } from "~/app/_utils";
+import { useConfigs, useUI } from "~/app/_contexts";
+import type { Output } from "~/napi-pallas";
 
 export const AddressInput = ({
   setAddressInfo,
 }: {
-  setAddressInfo: Dispatch<SetStateAction<any>>;
+  setAddressInfo: Dispatch<SetStateAction<Output>>;
 }) => {
-  const { error } = useUI();
-  const data: any = [];
+  const { setError } = useUI();
+  const { configs, updateConfigs } = useConfigs();
+
+  const changeRaw = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateConfigs(USER_CONFIGS.QUERY, e.target.value);
+  };
+
+  useEffect(() => {
+    updateConfigs(USER_CONFIGS.QUERY, configs.query);
+  }, []);
+
+  async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (!configs.query) return;
+
+    const res = await getAddressInfo(configs.query, setError);
+
+    if (res.error) {
+      setError(res.error);
+      return;
+    }
+
+    setAddressInfo(res);
+    updateConfigs(USER_CONFIGS.QUERY, configs.query);
+    setError("");
+  }
 
   return (
     <div>
-      <Suspense fallback={<Loading />}>
-        {!isEmpty(error) && (
-          <div className="mb-4 text-lg text-red-500">{error}</div>
-        )}
-
-        <main className="mt-10 px-4">
-          <h1 className="text-5xl text-black lg:text-7xl">Cardano Address</h1>
-          <p className="text-xl text-gray-600">
-            Lets dissect a Cardano address. Enter any valid address to inspect
-            its contents.
-          </p>
-          <div className="mt-8 block">
-            <form method="POST">
-              <input
-                type="text"
-                autoComplete="off"
-                defaultValue={data?.raw}
-                name="raw"
-                className="mt-4 block h-16 w-full appearance-none rounded-lg rounded-b-xl border-2 border-b-8 border-black bg-white px-4 py-2 text-2xl text-black placeholder-gray-400 shadow shadow-black outline-none"
-                placeholder="Enter any Cardano address in Bech32, Base58 or Hex encoding"
-              />
-              <div className="mt-4 flex flex-row justify-end">
-                <Button type="submit">Dissect</Button>
-              </div>
-            </form>
-          </div>
-        </main>
-      </Suspense>
+      <div className="z-40 flex items-center justify-end pt-2">
+        <form
+          onSubmit={handleSubmit}
+          className="mr-3 flex w-full items-center justify-center gap-4"
+        >
+          <Input
+            name="tx-input"
+            value={configs.query}
+            onChange={changeRaw}
+            placeholder="Enter any Cardano address in Bech32, Base58 or Hex encoding."
+          />
+          <Button type="submit">Dissect</Button>
+        </form>
+      </div>
     </div>
   );
 };
