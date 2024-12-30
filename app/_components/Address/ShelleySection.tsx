@@ -1,6 +1,7 @@
-import { EmptyBlock, PropBlock, Section } from "../DissectedTx/Constructors";
+import type { Output } from "~/napi-pallas";
+import { PropBlock, Section, EmptyBlock } from "../DissectedTx/Constructors";
 
-export function ShelleySection(props: { data: any }) {
+export function ShelleySection(props: { data: Output }) {
   const { data } = props;
 
   return (
@@ -13,11 +14,12 @@ export function ShelleySection(props: { data: any }) {
           className="text-blue-700 underline hover:text-blue-500"
           href="https://cips.cardano.org/cip/CIP-0019"
           target="_blank"
+          rel="noopener noreferrer"
         >
           CIP-0019
         </a>
         . The CIP explains that there are 3 types of possible address, each one
-        following a different encoding format: Shelley, Stake or Byron.
+        following a different encoding format: Shelley, Stake, or Byron.
       </p>
       <PropBlock
         color="green"
@@ -28,17 +30,17 @@ export function ShelleySection(props: { data: any }) {
         <p className="text-xl text-gray-600">
           The address entered is of type&nbsp;
           <code>Shelley</code>. Shelley addresses contain three pieces of
-          information: network id, payment part and a delegation part.
+          information: network id, payment part, and a delegation part.
         </p>
-        <PropBlock title="type" value={data?.address.kind} />
+        <PropBlock title="type" value={data?.address?.kind} />
         <Section title="Network Id">
           <p className="text-xl text-gray-600">
-            The netword id is a flag to indicate to which network it belongs
+            The network id is a flag to indicate to which network it belongs
             (either mainnet or a testnet).
           </p>
-          <PropBlock title="network id" value={data?.address.network} />
+          <PropBlock title="network id" value={data?.address?.network} />
         </Section>
-        {!!data.address.paymentPart && (
+        {!!data.address?.paymentPart && (
           <Section title="Payment Part">
             <p className="text-xl text-gray-600">
               The payment part describes who has control of the ownership of the
@@ -60,8 +62,8 @@ export function ShelleySection(props: { data: any }) {
             />
           </Section>
         )}
-        {(!!data.address.delegationPart.hash ||
-          !!data.address.delegationPart.pointer) && (
+        {(!!data.address?.delegationPart?.hash ||
+          !!data.address?.delegationPart?.pointer) && (
           <Section title="Delegation Part">
             <p className="text-xl text-gray-600">
               The delegation part describes who has control of the staking of
@@ -92,14 +94,14 @@ export function ShelleySection(props: { data: any }) {
             )}
           </Section>
         )}
-        {!data.address.delegationPart.hash &&
-          !data.address.delegationPart.pointer && (
+        {!data.address?.delegationPart?.hash &&
+          !data.address?.delegationPart?.pointer && (
             <Section title="Delegation Part">
               <p className="text-xl text-gray-600">
                 The delegation part describes who has control of the staking of
-                the locked values. This address doesn't specify a delegation
-                part, this means there's no way to delegate the locked values of
-                this address.
+                the locked values. This address doesn&apos;t specify a
+                delegation part, which means there&apos;s no way to delegate the
+                locked values of this address.
               </p>
               <EmptyBlock />
             </Section>

@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type { IBlockfrostResponse, ITransaction } from "../_interfaces";
 import { env } from "../env.mjs";
 import { API_ROUTES, ERRORS, NETWORK } from "./constants";
+import type { Output } from "~/napi-pallas";
 
 export const getApiKey = (network: NETWORK): string => {
   switch (network) {
@@ -109,6 +110,29 @@ export const getDSLFromJSON = async (
   } catch (error) {
     console.error("Error processing JSON:", error);
     setError("Error processing JSON");
+    throw error;
+  }
+};
+
+export const getAddressInfo = async (
+  raw: string,
+  setError: Dispatch<SetStateAction<string>>,
+): Promise<Output> => {
+  try {
+    const formData = new FormData();
+    formData.append("raw", raw);
+
+    const res = await fetch(parseQuery(API_ROUTES.ADDRESS, {}), {
+      method: "POST",
+      body: formData,
+    });
+    if (res.status !== StatusCodes.OK) throw res;
+
+    const responseJson = await res.json();
+    return responseJson || "Unknown error";
+  } catch (error) {
+    console.error("Error processing Address:", error);
+    setError("Error processing Address");
     throw error;
   }
 };

@@ -1,6 +1,7 @@
+import type { Output } from "~/napi-pallas";
 import { PropBlock, Section } from "../DissectedTx/Constructors";
 
-export function ByronSection(props: { data: any }) {
+export function ByronSection(props: { data: Output }) {
   const { data } = props;
 
   return (
@@ -13,11 +14,12 @@ export function ByronSection(props: { data: any }) {
           className="text-blue-700 underline hover:text-blue-500"
           href="https://cips.cardano.org/cip/CIP-0019"
           target="_blank"
+          rel="noopener noreferrer"
         >
           CIP-0019
         </a>
         . The CIP explains that there are 3 types of possible address, each one
-        following a different encoding format: Shelley, Stake or Byron.
+        following a different encoding format: Shelley, Stake, or Byron.
       </p>
       <PropBlock
         title="address bytes (hex)"
@@ -29,19 +31,19 @@ export function ByronSection(props: { data: any }) {
           The address entered is of type&nbsp;
           <code>Byron</code>. Byron addresses are actually CBOR structures with
           several pieces of information. Since Byron addresses are deprecated
-          and kept only for backward compatibility, we won't go into much more
-          detail.
+          and kept only for backward compatibility, we won&apos;t go into much
+          more detail.
         </p>
-        <PropBlock title="type" value={data?.address.kind} />
+        <PropBlock title="type" value={data?.address?.kind} />
         <Section title="CBOR">
           <p className="text-xl text-gray-600">
-            The following bytes are CBOR-encoded structures, you can continue
+            The following bytes are CBOR-encoded structures. You can continue
             your decoding journey using these (hex-encoded) bytes and a CBOR
             decoder.
           </p>
           <PropBlock
-            title="CBOR (hex) "
-            value={data?.address.byronCbor}
+            title="CBOR (hex)"
+            value={data?.address?.byronCbor}
             color="green"
           />
         </Section>

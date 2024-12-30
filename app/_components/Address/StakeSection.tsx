@@ -1,6 +1,7 @@
+import type { Output } from "~/napi-pallas";
 import { PropBlock, Section } from "../DissectedTx/Constructors";
 
-export function StakeSection(props: { data: any }) {
+export function StakeSection(props: { data: Output }) {
   const { data } = props;
 
   return (
@@ -30,16 +31,16 @@ export function StakeSection(props: { data: any }) {
           <code>Stake</code>. Stake addresses contain two pieces of information:
           network tag and delegation info.
         </p>
-        <PropBlock title="type" value={data?.address.kind} />
+        <PropBlock title="type" value={data?.address?.kind} />
         <Section title="Network Tag">
           <p className="text-xl text-gray-600">
             The netword tag is a flag to indicate to which network it belongs
             (either mainnet or a testnet).
           </p>
-          <PropBlock title="network tag" value={data?.address.network} />
+          <PropBlock title="network tag" value={data?.address?.network} />
         </Section>
-        {(!!data.address.delegationPart.hash ||
-          !!data.address.delegationPart.pointer) && (
+        {(!!data.address?.delegationPart?.hash ||
+          !!data.address?.delegationPart?.pointer) && (
           <Section title="Delegation Info">
             <p className="text-xl text-gray-600">
               The delegation part describes who has control of the staking of
