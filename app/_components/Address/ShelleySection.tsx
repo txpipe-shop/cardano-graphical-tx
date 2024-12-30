@@ -1,6 +1,6 @@
 import { EmptyBlock, PropBlock, Section } from "../DissectedTx/Constructors";
 
-function ShelleySection(props: { data: any }) {
+export function ShelleySection(props: { data: any }) {
   const { data } = props;
 
   return (
