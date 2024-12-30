@@ -20,3 +20,7 @@ export const getTxFromHashSchema = z.object({
 export const getDSLFromSchema = z.object({
   dsl: z.string({ required_error: "JSON is required" }),
 });
+
+export const getAddressFromScema = z.object({
+  raw: z.string({ required_error: "Address is required" }),
+});

@@ -1,3 +1,5 @@
+import type { PropsWithChildren } from "react";
+
 export type TopicMeta = {
   title: string;
   description?: React.ReactElement;
@@ -46,5 +48,15 @@ export function EmptyBlock({
       <div className="text-sm text-gray-600">{title}</div>
       {description ?? "Empty"}
     </div>
+  );
+}
+
+// REVIEW: replace with accordion?
+export function Section(props: PropsWithChildren<{ title: string }>) {
+  return (
+    <blockquote className="mt-6 border-dashed py-4 md:border-l-4 md:px-10">
+      <h4 className="text-3xl">{props.title}</h4>
+      {props.children}
+    </blockquote>
   );
 }
