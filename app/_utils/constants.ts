@@ -13,6 +13,7 @@ export const API_ROUTES = {
   CBOR: "api/cbor",
   HASH: "api/hash",
   DSL: "api/dsl",
+  ADDRESS: "api/address",
 };
 
 export const USER_CONFIGS = {
