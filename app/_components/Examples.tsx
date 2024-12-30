@@ -1,11 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useConfigs, useGraphical, useUI } from "../_contexts";
 import {
   cbor1,
+  examples_address,
+  getAddressInfo,
   getCborFromHash,
   hash1,
   hash2,
@@ -14,6 +16,7 @@ import {
   USER_CONFIGS,
 } from "../_utils";
 import { setCBOR } from "./Header/header.helper";
+import type { Output } from "~/napi-pallas";
 
 export function Examples({
   showDSLExample = false,
@@ -27,7 +30,7 @@ export function Examples({
   const [query, setQuery] = useState<string>("");
   const [toGo, setToGo] = useState<string>("");
 
-  const examples = [
+  const examples_tx = [
     {
       title: "Draw CBOR",
       code: cbor1,
@@ -134,7 +137,7 @@ export function Examples({
     <>
       <div className="mb-6 mt-10 text-3xl">Try one of these examples</div>
       <div className="flex w-full basis-1/4 flex-wrap justify-between gap-3">
-        {examples.map((example, index) => (
+        {examples_tx.map((example, index) => (
           <button
             key={index}
             type="submit"
@@ -161,6 +164,57 @@ export function Examples({
             </code>
           </button>
         )}
+      </div>
+    </>
+  );
+}
+
+export function ExamplesAddress({
+  setAddressInfo,
+}: {
+  setAddressInfo: Dispatch<SetStateAction<Output>>;
+}): JSX.Element {
+  const router = useRouter();
+  const { setError } = useUI();
+  const { configs, updateConfigs } = useConfigs();
+  const [query, setQuery] = useState<string>("");
+  const [toGo] = useState<string>("");
+
+  const handleAddressClick = async (raw: string) => {
+    const res = await getAddressInfo(raw, setError);
+    if (res.error) {
+      setError(res.error);
+      return;
+    }
+    setQuery(raw);
+    updateConfigs(USER_CONFIGS.QUERY, raw);
+    setAddressInfo(res);
+  };
+
+  useEffect(() => {
+    if (configs.query === query) {
+      router.push(toGo);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, query, toGo]);
+
+  return (
+    <>
+      <div className="mb-6 mt-10 text-3xl">Try one of these examples</div>
+      <div className="flex w-full basis-1/4 flex-wrap justify-start gap-3">
+        {examples_address.map((example, index) => (
+          <button
+            key={index}
+            type="submit"
+            className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
+            onClick={() => handleAddressClick(example.address)}
+          >
+            <h3 className="text-xl">{example.title}</h3>
+            <code className="mt-4 block w-full break-words text-gray-400">
+              {example.address.substring(0, 30)}...
+            </code>
+          </button>
+        ))}
       </div>
     </>
   );

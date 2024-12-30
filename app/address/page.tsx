@@ -1,18 +1,53 @@
 "use client";
 
-import { Suspense } from "react";
-import { Header, PropBlock } from "~/app/_components";
+import { Suspense, useState } from "react";
+import {
+  Header,
+  AddressInput,
+  ShelleySection,
+  StakeSection,
+  ByronSection,
+  Error,
+} from "~/app/_components";
 import Loading from "~/app/loading";
 
+import { ExamplesAddress } from "../_components/Examples";
+import { useUI } from "../_contexts";
+import { isEmpty } from "~/app/_utils";
+import type { Output } from "~/napi-pallas";
+
 export default function Index() {
+  const { error } = useUI();
+  const [addressInfo, setAddressInfo] = useState<Output>({});
+
   return (
     <div>
       <Header />
+      <AddressInput setAddressInfo={setAddressInfo} />
       <Suspense fallback={<Loading />}>
-        <div className="p-5">
-          <div className="text-center text-6xl">Address</div>
-          <PropBlock title="Coming soon" value="COmiNg SoOn" color="green" />
-        </div>
+        {Object.keys(addressInfo).length > 0 ? (
+          !isEmpty(error) ? (
+            <Error action="dissecting" />
+          ) : (
+            <>
+              {addressInfo?.address?.kind == "Shelley" && (
+                <ShelleySection data={addressInfo} />
+              )}
+              {addressInfo?.address?.kind == "Stake" && (
+                <StakeSection data={addressInfo} />
+              )}
+              {addressInfo?.address?.kind == "Byron" && (
+                <ByronSection data={addressInfo} />
+              )}
+            </>
+          )
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center">
+            <div className="w-2/3 text-center">
+              <ExamplesAddress setAddressInfo={setAddressInfo} />
+            </div>
+          </div>
+        )}
       </Suspense>
     </div>
   );

@@ -1,6 +1,6 @@
 #![deny(clippy::all)]
 
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 use pallas::ledger::traverse::MultiEraTx;
 
@@ -207,4 +207,20 @@ pub fn parse_datum_info(raw: String) -> Option<Datum> {
 #[napi]
 pub fn parse_dsl(raw: String) -> String {
   cbor::parse_dsl(raw)
+}
+
+#[napi]
+pub fn parse_address(raw: String) -> address::Output {
+  match address::Address::from_str(&raw) {
+    Ok(addr) => address::Output {
+      error: None,
+      bytes: Some(hex::encode(addr.to_vec())),
+      address: Some(addr.into()),
+    },
+    Err(err) => address::Output {
+      error: Some(err.to_string()),
+      bytes: None,
+      address: None,
+    },
+  }
 }
