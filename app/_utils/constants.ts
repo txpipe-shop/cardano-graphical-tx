@@ -125,6 +125,18 @@ export const addr5 =
 export const addr6 =
   "addr1gx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer5pnz75xxcrzqf96k";
 
+export const examples_address = [
+  { title: "Mainnet address in Bech32", address: addr1 },
+  { title: "A script address", address: addr2 },
+  { title: "An address without delegation part", address: addr3 },
+  { title: "A Byron address", address: addr4 },
+  { title: "A stake addresss", address: addr5 },
+  {
+    title: "A rare address using a pointer to the delegation cert",
+    address: addr6,
+  },
+];
+
 export const dslExample = `{
   "transaction": {
     "name": "example",

@@ -27,9 +27,12 @@ export const TxInput = () => {
   const changeRaw = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateConfigs(USER_CONFIGS.QUERY, e.target.value);
   };
+
   useEffect(() => {
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!configs.query) return;

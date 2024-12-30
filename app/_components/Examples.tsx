@@ -1,17 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useConfigs, useGraphical, useUI } from "../_contexts";
 import {
-  addr1,
-  addr2,
-  addr3,
-  addr4,
-  addr5,
-  addr6,
   cbor1,
+  examples_address,
   getAddressInfo,
   getCborFromHash,
   hash1,
@@ -21,7 +16,7 @@ import {
   USER_CONFIGS,
 } from "../_utils";
 import { setCBOR } from "./Header/header.helper";
-import { Output } from "~/napi-pallas";
+import type { Output } from "~/napi-pallas";
 
 export function Examples({
   showDSLExample = false,
@@ -183,95 +178,18 @@ export function ExamplesAddress({
   const { setError } = useUI();
   const { configs, updateConfigs } = useConfigs();
   const [query, setQuery] = useState<string>("");
-  const [toGo, setToGo] = useState<string>("");
+  const [toGo] = useState<string>("");
 
-  const examples_address = [
-    {
-      title: "Mainnet address in Bech32",
-      address: addr1,
-      onclick: async () => {
-        const res = await getAddressInfo(addr1, setError);
-        if (res.error) {
-          setError(res.error);
-          return;
-        }
-        setQuery(addr1);
-        updateConfigs(USER_CONFIGS.QUERY, addr1);
-        setAddressInfo(res);
-      },
-    },
-    {
-      title: "A script address",
-      address: addr2,
-      onclick: async () => {
-        const res = await getAddressInfo(addr2, setError);
-        if (res.error) {
-          setError(res.error);
-          return;
-        }
-        setQuery(addr2);
-        updateConfigs(USER_CONFIGS.QUERY, addr2);
-        setAddressInfo(res);
-      },
-    },
-    {
-      title: "An address without delegation part",
-      address: addr3,
-      onclick: async () => {
-        const res = await getAddressInfo(addr3, setError);
-        if (res.error) {
-          setError(res.error);
-          return;
-        }
-        setQuery(addr3);
-        updateConfigs(USER_CONFIGS.QUERY, addr3);
-        setAddressInfo(res);
-      },
-    },
-    {
-      title: "A Byron address",
-      address: addr4,
-      onclick: async () => {
-        const res = await getAddressInfo(addr4, setError);
-        if (res.error) {
-          setError(res.error);
-          return;
-        }
-        setQuery(addr4);
-        updateConfigs(USER_CONFIGS.QUERY, addr4);
-        setAddressInfo(res);
-      },
-    },
-
-    {
-      title: "A stake addresss",
-      address: addr5,
-      onclick: async () => {
-        const res = await getAddressInfo(addr5, setError);
-        if (res.error) {
-          setError(res.error);
-          return;
-        }
-        setQuery(addr5);
-        updateConfigs(USER_CONFIGS.QUERY, addr5);
-        setAddressInfo(res);
-      },
-    },
-    {
-      title: "A rare address using a pointer to the delegation cert",
-      address: addr6,
-      onclick: async () => {
-        const res = await getAddressInfo(addr6, setError);
-        if (res.error) {
-          setError(res.error);
-          return;
-        }
-        setQuery(addr6);
-        updateConfigs(USER_CONFIGS.QUERY, addr6);
-        setAddressInfo(res);
-      },
-    },
-  ];
+  const handleAddressClick = async (raw: string) => {
+    const res = await getAddressInfo(raw, setError);
+    if (res.error) {
+      setError(res.error);
+      return;
+    }
+    setQuery(raw);
+    updateConfigs(USER_CONFIGS.QUERY, raw);
+    setAddressInfo(res);
+  };
 
   useEffect(() => {
     if (configs.query === query) {
@@ -283,16 +201,15 @@ export function ExamplesAddress({
   return (
     <>
       <div className="mb-6 mt-10 text-3xl">Try one of these examples</div>
-      <div className="flex w-full basis-1/4 flex-wrap justify-between gap-3">
+      <div className="flex w-full basis-1/4 flex-wrap justify-start gap-3">
         {examples_address.map((example, index) => (
           <button
             key={index}
             type="submit"
             className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
-            onClick={example.onclick}
+            onClick={() => handleAddressClick(example.address)}
           >
             <h3 className="text-xl">{example.title}</h3>
-
             <code className="mt-4 block w-full break-words text-gray-400">
               {example.address.substring(0, 30)}...
             </code>
