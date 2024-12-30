@@ -41,7 +41,7 @@
     "jsonpointer": "^5.0.1",
     "konva": "^9.3.13",
     "napi-pallas": "./napi-pallas",
-    "next": "latest",
+    "next": "^14.2.22",
     "next-auth": "^4.24.7",
     "next-themes": "^0.2.1",
     "react": "latest",
