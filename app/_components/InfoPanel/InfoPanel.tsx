@@ -65,7 +65,7 @@ export const InfoPanel = ({
   return (
     <section
       ref={panelRef}
-      className={`fixed top-0 flex flex-col gap-6 overflow-y-auto ${panelPosition} z-40 h-screen w-1/3 bg-gray-200 p-6 dark:bg-content1 ${roundedCorner} transform transition-transform duration-300 ${
+      className={`fixed top-0 flex flex-col gap-6 overflow-y-auto ${panelPosition} z-50 h-screen w-1/3 bg-gray-200 p-6 dark:bg-content1 ${roundedCorner} transform transition-transform duration-300 ${
         isVisible ? "translate-x-0" : transition
       }`}
     >

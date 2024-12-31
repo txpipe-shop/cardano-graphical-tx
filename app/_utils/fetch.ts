@@ -106,7 +106,7 @@ export const getDSLFromJSON = async (
     if (res.status !== StatusCodes.OK) throw res;
 
     const responseJson = await res.json();
-    return responseJson.dsl || "Unknown error";
+    return responseJson || "Unknown error";
   } catch (error) {
     console.error("Error processing JSON:", error);
     setError("Error processing JSON");

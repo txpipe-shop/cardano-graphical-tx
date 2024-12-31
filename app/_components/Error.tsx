@@ -2,8 +2,15 @@ import Image from "next/image";
 import { useUI } from "~/app/_contexts";
 import Error500Icon from "~/public/error.svg";
 import NotFoundIcon from "~/public/not-found.svg";
+import { OPTIONS } from "../_utils";
 
-export const Error = ({ action }: { action: string }) => {
+export const Error = ({
+  action,
+  option,
+}: {
+  action: string;
+  option: OPTIONS;
+}) => {
   const { error } = useUI();
   const getError = () =>
     error === "Internal server error" ? Error500Icon : NotFoundIcon;
@@ -13,7 +20,8 @@ export const Error = ({ action }: { action: string }) => {
       <Image src={getError()} alt="ERROR" />
       There was an error {action} the transaction: <br />
       {error} <br /> <br />
-      Try using another network, or check your hash/CBOR.
+      Try using another network, or check your&nbsp;
+      {option == OPTIONS.CBOR ? "CBOR" : "hash"}.
     </div>
   );
 };

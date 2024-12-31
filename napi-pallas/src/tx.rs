@@ -1,11 +1,13 @@
+use crate::utils::FIXED_ADDRESS;
 use crate::{
   Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
-  Utxo, Withdrawal, Witness, Witnesses,
+  SafeCborResponse, Utxo, Withdrawal, Witness, Witnesses,
 };
 use pallas::ledger::primitives::conway::PseudoDatumOption::{Data, Hash};
 use pallas::ledger::traverse::{
   MultiEraCert, MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer,
 };
+use pallas_addresses::Address;
 use pallas_crypto::hash::Hasher;
 use pallas_primitives::conway::{PseudoDatumOption, VKeyWitness};
 use std::collections::HashMap;
@@ -69,7 +71,10 @@ fn get_outputs(tx: &MultiEraTx<'_>) -> Vec<Utxo> {
       tx_hash: tx.hash().to_string(),
       index: index as i64,
       bytes: hex::encode(o.encode()),
-      address: o.address().unwrap().to_string(),
+      address: o
+        .address()
+        .unwrap_or_else(|_| Address::from_bech32(FIXED_ADDRESS).unwrap())
+        .to_string(),
       lovelace: o.lovelace_amount() as i64,
       datum: o
         .datum()
@@ -134,11 +139,9 @@ fn map_to_hashmap(map: &KeyValuePairs<Metadatum, Metadatum>) -> HashMap<String, 
     .iter()
     .filter_map(|(key, value)| {
       if let Metadatum::Text(key_str) = key {
-        let value_str = metadatum_to_string(value);
-        Some((key_str.clone(), value_str))
+        Some((key_str.clone(), metadatum_to_string(value)))
       } else {
-        // Ignore non-text keys
-        None
+        None // Ignore non-text keys
       }
     })
     .collect()
@@ -303,10 +306,16 @@ fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
   }
 }
 
-pub fn cbor_to_tx(raw: String) -> Result<CborResponse, CborResponse> {
-  let out = CborResponse::new().try_build(|| {
-    let cbor = hex::decode(raw)?;
-    let tx: MultiEraTx<'_> = MultiEraTx::decode(&cbor)?;
+pub fn cbor_to_tx(raw: String) -> SafeCborResponse {
+  SafeCborResponse::new().try_build(|| {
+    let cbor = match hex::decode(raw) {
+      Ok(cbor) => cbor,
+      Err(e) => return Err(format!("Failed to decode hex: {}", e)),
+    };
+    let tx = match MultiEraTx::decode(&cbor) {
+      Ok(tx) => tx,
+      Err(e) => return Err(format!("Failed to decode tx: {}", e)),
+    };
 
     let inputs: Vec<Input> = get_inputs(&tx.inputs());
     let reference_inputs: Vec<Input> = get_inputs(&tx.reference_inputs());
@@ -318,7 +327,7 @@ pub fn cbor_to_tx(raw: String) -> Result<CborResponse, CborResponse> {
     let collateral = get_collaterals(&tx);
     let witnesses = get_witnesses(&tx);
 
-    let parsed_cbor = CborResponse::new().with_cbor_attr(
+    Ok(CborResponse::new().with_cbor_attr(
       tx,
       inputs,
       reference_inputs,
@@ -329,10 +338,6 @@ pub fn cbor_to_tx(raw: String) -> Result<CborResponse, CborResponse> {
       certificates,
       collateral,
       witnesses,
-    );
-
-    Ok(parsed_cbor)
-  });
-
-  Ok(out)
+    ))
+  })
 }
