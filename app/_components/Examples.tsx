@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import type { Output } from "~/napi-pallas";
 import { useConfigs, useGraphical, useUI } from "../_contexts";
 import {
   cbor1,
@@ -12,11 +13,11 @@ import {
   hash1,
   hash2,
   KONVA_COLORS,
+  OPTIONS,
   ROUTES,
   USER_CONFIGS,
 } from "../_utils";
 import { setCBOR } from "./Header/header.helper";
-import type { Output } from "~/napi-pallas";
 
 export function Examples({
   showDSLExample = false,
@@ -24,48 +25,26 @@ export function Examples({
   showDSLExample?: boolean;
 }) {
   const router = useRouter();
-  const { setError } = useUI();
+  const { setError, setLoading } = useUI();
   const { configs, updateConfigs } = useConfigs();
   const { transactions, setTransactionBox } = useGraphical();
   const [query, setQuery] = useState<string>("");
   const [toGo, setToGo] = useState<string>("");
 
-  const examples_tx = [
-    {
-      title: "Draw CBOR",
-      code: cbor1,
-      onclick: async () => {
-        await setCBOR(
-          "preprod",
-          cbor1,
-          transactions,
-          setTransactionBox,
-          setError,
-          true,
-        );
-        setQuery(cbor1);
-        updateConfigs(USER_CONFIGS.QUERY, cbor1);
-        updateConfigs(USER_CONFIGS.NET, "preprod");
-        updateConfigs(USER_CONFIGS.OPTION, "cbor");
-        setToGo(ROUTES.GRAPHER);
-      },
-    },
-    {
-      title: "Draw Tx Hash",
-      code: hash1,
-      onclick: async () => {
+  const handleClick =
+    (title: string, option: OPTIONS, tx: string) => async () => {
+      setLoading(true);
+      setError("");
+      if (option === OPTIONS.HASH) {
         const { cbor, warning } = await getCborFromHash(
-          hash1,
+          tx,
           "preprod",
           setError,
         );
         if (warning) {
           toast.error(warning, {
             icon: "🚫",
-            style: {
-              fontWeight: "bold",
-              color: KONVA_COLORS.RED_WARNING,
-            },
+            style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
             duration: 5000,
           });
           return;
@@ -76,60 +55,27 @@ export function Examples({
           transactions,
           setTransactionBox,
           setError,
-          true,
         );
-        setQuery(hash1);
-        updateConfigs(USER_CONFIGS.QUERY, hash1);
-        updateConfigs(USER_CONFIGS.NET, "preprod");
-        updateConfigs(USER_CONFIGS.OPTION, "hash");
-        setToGo(ROUTES.GRAPHER);
-      },
-    },
-    {
-      title: "Dissect CBOR",
-      code: cbor1,
-      onclick: async () => {
-        await setCBOR(
-          "preprod",
-          cbor1,
-          transactions,
-          setTransactionBox,
-          setError,
-          true,
-        );
-        setQuery(cbor1);
-        updateConfigs(USER_CONFIGS.QUERY, cbor1);
-        updateConfigs(USER_CONFIGS.NET, "preprod");
-        updateConfigs(USER_CONFIGS.OPTION, "cbor");
-        setToGo(ROUTES.DISSECT);
-      },
-    },
-    {
-      title: "Dissect Tx Hash",
-      code: hash2,
-      onclick: async () => {
-        const { cbor } = await getCborFromHash(hash2, "preprod", setError);
-        await setCBOR(
-          "preprod",
-          cbor,
-          transactions,
-          setTransactionBox,
-          setError,
-          true,
-        );
-        setQuery(hash2);
-        updateConfigs(USER_CONFIGS.QUERY, hash2);
-        updateConfigs(USER_CONFIGS.NET, "preprod");
-        updateConfigs(USER_CONFIGS.OPTION, "hash");
-        setToGo(ROUTES.DISSECT);
-      },
-    },
+      } else {
+        await setCBOR("preprod", tx, transactions, setTransactionBox, setError);
+      }
+      setQuery(tx);
+      updateConfigs(USER_CONFIGS.QUERY, tx);
+      updateConfigs(USER_CONFIGS.NET, "preprod");
+      updateConfigs(USER_CONFIGS.OPTION, option);
+      setToGo(title.startsWith("Draw") ? ROUTES.GRAPHER : ROUTES.DISSECT);
+      setLoading(false);
+    };
+
+  const examples_tx = [
+    { title: "Draw CBOR", code: cbor1 },
+    { title: "Draw Tx Hash", code: hash1 },
+    { title: "Dissect CBOR", code: cbor1 },
+    { title: "Dissect Tx Hash", code: hash2 },
   ];
 
   useEffect(() => {
-    if (configs.query === query) {
-      router.push(toGo);
-    }
+    if (configs.query === query) router.push(toGo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, query, toGo]);
 
@@ -142,7 +88,11 @@ export function Examples({
             key={index}
             type="submit"
             className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
-            onClick={example.onclick}
+            onClick={handleClick(
+              example.title,
+              example.title.endsWith("CBOR") ? OPTIONS.CBOR : OPTIONS.HASH,
+              example.code,
+            )}
           >
             <h3 className="text-xl">{example.title}</h3>
 

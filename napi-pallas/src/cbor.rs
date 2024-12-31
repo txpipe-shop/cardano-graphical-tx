@@ -1,4 +1,6 @@
-use crate::utils::{FIXED_HASH, FIXED_POLICY};
+use crate::utils::{FIXED_HASH, FIXED_INDEX, FIXED_POLICY, FIXED_STRING_HASH};
+use crate::{DslResponse, SafeDslResponse};
+use core::panic;
 use pallas_addresses::Address;
 use pallas_codec::minicbor::{display, encode};
 use pallas_crypto::hash::Hash;
@@ -12,6 +14,7 @@ use regex::Regex;
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
+use std::vec;
 
 use pallas::ledger::primitives::conway::PlutusData;
 use pallas_codec::utils::{
@@ -66,7 +69,7 @@ pub fn preprocess_json(raw: &str) -> Result<Value, serde_json::Error> {
 fn build_redeemer(input: &Value, redeemers_vec: &mut Vec<(RedeemersKey, RedeemersValue)>) {
   if let Some(redeemer) = input["redeemer"].as_object() {
     let tag = RedeemerTagConway::Spend;
-    let index = input["index"].as_u64().unwrap() as u32;
+    let index = input["index"].as_u64().unwrap_or_else(|| 0) as u32;
 
     let mut data_vec: Vec<(PlutusData, PlutusData)> = vec![];
     for (key, value) in redeemer.iter() {
@@ -99,12 +102,12 @@ fn build_inputs_and_redeemers(inputs: &Value) -> (Set<TransactionInput>, Option<
         build_redeemer(x, &mut redeemers_vec);
         TransactionInput {
           transaction_id: {
-            let tx_hash_value = x["txHash"].as_str().unwrap();
+            let tx_hash_value = x["txHash"].as_str().unwrap_or_else(|| FIXED_STRING_HASH);
             let bytes = hex::decode(tx_hash_value).unwrap();
             let array: [u8; 32] = bytes.try_into().unwrap();
             Hash::<32>::new(array)
           },
-          index: x["index"].as_u64().unwrap(),
+          index: x["index"].as_u64().unwrap_or_else(|| FIXED_INDEX),
         }
       })
       .collect::<Vec<TransactionInput>>(),
@@ -129,12 +132,12 @@ fn build_ref_inputs(ref_inputs: &Value) -> Option<NonEmptySet<TransactionInput>>
     .iter()
     .map(|x| TransactionInput {
       transaction_id: {
-        let tx_hash_value = x["txHash"].as_str().unwrap();
+        let tx_hash_value = x["txHash"].as_str().unwrap_or_else(|| FIXED_STRING_HASH);
         let bytes = hex::decode(tx_hash_value).unwrap();
         let array: [u8; 32] = bytes.try_into().unwrap();
         Hash::<32>::new(array)
       },
-      index: x["index"].as_u64().unwrap(),
+      index: x["index"].as_u64().unwrap_or_else(|| FIXED_INDEX),
     })
     .into_iter()
     .collect();
@@ -152,13 +155,15 @@ fn get_asset_info_and_build_mint(
   mint_kv_map: &mut HashMap<Hash<28>, NonEmptyKeyValuePairs<Bytes, NonZeroInt>>,
 ) {
   let asset_name: Vec<u8>;
-  let amount = asset["amount"].as_u64().unwrap();
+  let amount = asset["amount"].as_u64().unwrap_or_else(|| 0);
   let policy_hash: Hash<28>;
 
   if asset["assetClass"].is_null() {
+    // Unwrap safe because it is ensured by the schema
     asset_name = asset["name"].as_str().unwrap().as_bytes().to_vec();
     policy_hash = FIXED_POLICY;
   } else {
+    // Unwrap safe because it is ensured by the schema
     asset_name = hex::decode(&asset["assetClass"].as_str().unwrap()[57..]).unwrap();
     policy_hash = Hash::<28>::from_str(&asset["assetClass"].as_str().unwrap()[..56]).unwrap();
   }
@@ -182,7 +187,8 @@ fn get_asset_info_and_build_mint(
 
     // TODO: Check when "minted" field is available
     if !asset["minted"].is_null() {
-      let am: NonZeroInt = TryFrom::try_from(amount as i64).unwrap();
+      let am: NonZeroInt =
+        TryFrom::try_from(amount as i64).unwrap_or_else(|_| TryFrom::try_from(1).unwrap());
       mint_kv_map
         .entry(policy_hash)
         .and_modify(|existing| {
@@ -222,7 +228,7 @@ fn build_output_values_and_mint(
       KeyValuePairs::from(transformed_assets.into_iter().collect::<Vec<_>>()),
     )
   } else {
-    AlonzoValue::Coin(values_array[0]["amount"].as_u64().unwrap())
+    AlonzoValue::Coin(values_array[0]["amount"].as_u64().unwrap_or_else(|| 0))
   }
 }
 
@@ -249,8 +255,9 @@ fn build_output_datum(output: &Value) -> Option<DatumOption> {
 
 fn get_output_address(address: &Value) -> Bytes {
   match address {
-    Value::String(address) => Address::from_bech32(address).unwrap().to_vec().into(),
-    _ => Bytes::from(vec![]), //TODO: Use fixed address
+    Value::String(address) => Address::from_bech32(address).unwrap().to_vec().into(), // Ensured by schema that works
+    Value::Null => Bytes::from(vec![0; 32]),
+    _ => panic!("Invalid address"), // Should never happen
   }
 }
 
@@ -265,9 +272,13 @@ fn build_outputs_and_maybe_mints(
     .unwrap_or(&vec![])
     .iter()
     .map(|x| {
+      let default = Vec::new() as Vec<Value>;
       TransactionOutput::PostAlonzo(PostAlonzoTransactionOutput {
         address: get_output_address(&x["address"]),
-        value: build_output_values_and_mint(x["values"].as_array().unwrap(), &mut mint_kv_map),
+        value: build_output_values_and_mint(
+          x["values"].as_array().unwrap_or_else(|| &default),
+          &mut mint_kv_map,
+        ),
         datum_option: build_output_datum(x),
         script_ref: None,
       })
@@ -293,13 +304,16 @@ fn build_mints(
       let asset_name: Vec<u8>;
       let mut policy_hash: Hash<28> = FIXED_POLICY;
       if asset["assetClass"].is_null() {
+        // Ensured by schema
         asset_name = asset["name"].as_str().unwrap().as_bytes().to_vec();
       } else {
+        // Ensured by schema
         asset_name = hex::decode(&asset["assetClass"].as_str().unwrap()[57..]).unwrap();
         policy_hash = Hash::<28>::from_str(&asset["assetClass"].as_str().unwrap()[..56]).unwrap();
       }
 
-      let am: NonZeroInt = TryFrom::try_from(asset["amount"].as_i64().unwrap()).unwrap();
+      let am: NonZeroInt =
+        TryFrom::try_from(asset["amount"].as_i64().unwrap_or_else(|| 1)).unwrap();
       mint_kv_map
         .entry(policy_hash)
         .and_modify(|existing| {
@@ -497,28 +511,25 @@ pub fn dsl_to_cbor_diagnostic(raw: String) -> String {
   formatted_diagnostic.to_string()
 }
 
-pub fn parse_dsl(raw: String) -> String {
+pub fn parse_dsl(raw: String) -> SafeDslResponse {
   let schema: Value = serde_json::from_str(&SCHEMA_JSON).unwrap();
 
   let res: Value = match serde_json::from_str(&raw) {
     Ok(json) => json,
-    Err(_) => return json!({ "error": "Input is not a valid JSON." }).to_string(),
+    Err(_) => {
+      return SafeDslResponse::new()
+        .try_build(|| Err(("Input is not a valid JSON.".to_string(), "".to_string())))
+    }
   };
 
   let validator = jsonschema::validator_for(&schema).unwrap();
   let result = validator.validate(&res);
 
-  match result {
-    Ok(_) => {
-      json!({"cbor_hex": dsl_to_cbor_hex(raw.clone()), "cbor_diagnostic": dsl_to_cbor_diagnostic(raw.clone())})
-        .to_string()
-    }
-    Err(e) => json!(
-      {
-        "error": e.to_string(),
-        "instance_path": e.instance_path.to_string(),
-      }
-    )
-    .to_string(),
-  }
+  SafeDslResponse::new().try_build(|| match result {
+    Ok(_) => Ok(DslResponse {
+      cbor_hex: dsl_to_cbor_hex(raw.clone()),
+      cbor_diagnostic: dsl_to_cbor_diagnostic(raw.clone()),
+    }),
+    Err(e) => Err((e.to_string(), e.instance_path.to_string())),
+  })
 }

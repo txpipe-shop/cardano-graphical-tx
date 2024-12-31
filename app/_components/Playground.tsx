@@ -3,10 +3,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Layer, Stage } from "react-konva";
-import { useGraphical, useUI } from "~/app/_contexts";
+import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   ERRORS,
   KONVA_COLORS,
+  ROUTES,
   TX_URL_PARAM,
   UTXO_URL_PARAM,
 } from "~/app/_utils";
@@ -15,9 +16,10 @@ import { Error } from "./Error";
 import { Line, Transaction, Utxo } from "./Transaction";
 export function Playground() {
   const { transactions } = useGraphical();
-  const { error } = useUI();
+  const { error, loading } = useUI();
+  const { configs } = useConfigs();
   const pathname = usePathname();
-  const { replace } = useRouter();
+  const { replace, push } = useRouter();
   const searchParams = useSearchParams();
   const shownWarnings = useRef(new Set());
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -76,6 +78,7 @@ export function Playground() {
   }, []);
 
   useEffect(() => {
+    if (transactions.transactions.length == 0) push(ROUTES.TX);
     transactions.transactions.forEach((tx: any) => {
       if (tx.warning) {
         const warningKey = `${tx.txHash}-${tx.warning}`;
@@ -105,10 +108,11 @@ export function Playground() {
         }
       }
     });
-  }, [transactions.transactions]);
+  }, [transactions.transactions, push]);
 
-  if (error) return <Error action="fetching" />;
-  if (dimensions.height == 0 || dimensions.width == 0) return <Loading />;
+  if (error) return <Error action="fetching" option={configs.option} />;
+  if (dimensions.height == 0 || dimensions.width == 0 || loading)
+    return <Loading />;
 
   return (
     <Stage

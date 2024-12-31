@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { useEffect } from "react";
 import {
   Header,
   InfoPanel,
@@ -9,6 +9,7 @@ import {
   TxInput,
   UtxoInfo,
 } from "~/app/_components";
+import { useUI } from "~/app/_contexts";
 import { ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
 import Loading from "~/app/loading";
 
@@ -21,6 +22,7 @@ interface GrapherProps {
 
 export default function Index({ searchParams }: GrapherProps) {
   const { replace } = useRouter();
+  const { loading } = useUI();
   const { [TX_URL_PARAM]: selectedTx, [UTXO_URL_PARAM]: selectedUtxo } =
     searchParams || {};
 
@@ -29,8 +31,10 @@ export default function Index({ searchParams }: GrapherProps) {
     replace(ROUTES.GRAPHER);
   }, [replace]);
 
+  if (loading) return <Loading />;
+
   return (
-    <Suspense fallback={<Loading />}>
+    <>
       <div className="relative h-dvh w-full overflow-hidden">
         <InfoPanel
           isVisible={selectedTx !== undefined}
@@ -52,6 +56,6 @@ export default function Index({ searchParams }: GrapherProps) {
         <Header />
         <TxInput />
       </div>
-    </Suspense>
+    </>
   );
 }

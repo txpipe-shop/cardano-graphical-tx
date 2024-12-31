@@ -20,7 +20,7 @@ import {
 export const TxInput = () => {
   const { transactions, setTransactionBox } = useGraphical();
   const router = useRouter();
-  const { setError } = useUI();
+  const { setError, setLoading } = useUI();
   const { configs, updateConfigs } = useConfigs();
   const [toGo, setToGo] = useState<string>("");
 
@@ -37,6 +37,7 @@ export const TxInput = () => {
     e.preventDefault();
     if (!configs.query) return;
     router.push(toGo);
+    setLoading(true);
     setError("");
     if (configs.option === OPTIONS.HASH) {
       const { cbor, warning } = await getCborFromHash(
@@ -47,10 +48,7 @@ export const TxInput = () => {
       if (warning) {
         toast.error(warning, {
           icon: "🚫",
-          style: {
-            fontWeight: "bold",
-            color: KONVA_COLORS.RED_WARNING,
-          },
+          style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
           duration: 5000,
         });
         return;
@@ -74,7 +72,9 @@ export const TxInput = () => {
       );
     }
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
+    setLoading(false);
   }
+
   const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {
     if (!isEmpty(e.target.value))
       updateConfigs(USER_CONFIGS.OPTION, e.target.value as OPTIONS);

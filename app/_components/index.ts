@@ -1,6 +1,6 @@
 export { Button } from "./Button";
-export * from "./DissectedTx/Constructors";
-export { DissectSection } from "./DissectedTx/DissectSection";
+export * from "./DissectTx/Constructors";
+export { DissectSection } from "./DissectTx/DissectSection";
 export { Error } from "./Error";
 export { Examples } from "./Examples";
 export { Header } from "./Header/Header";
