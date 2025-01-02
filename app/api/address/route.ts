@@ -1,6 +1,6 @@
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
-import { addressHandler } from "../_handlers";
 import { getAddressFromScema, getQuery } from "~/app/_utils";
+import { addressHandler } from "~/app/api/_handlers";
 
 export async function POST(req: Request) {
   try {

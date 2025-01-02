@@ -1,5 +1,5 @@
+import { PropBlock, Section } from "~/app/_components";
 import type { Output } from "~/napi-pallas";
-import { PropBlock, Section } from "../DissectedTx/Constructors";
 
 export function ByronSection(props: { data: Output }) {
   const { data } = props;

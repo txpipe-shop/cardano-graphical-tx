@@ -1,5 +1,12 @@
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
+import type {
+  Address,
+  IGraphicalTransaction,
+  IGraphicalUtxo,
+  ITransaction,
+  TransactionsBox,
+} from "~/app/_interfaces";
 import type { Utxo } from "~/napi-pallas";
 import {
   POLICY_LENGTH,
@@ -8,13 +15,6 @@ import {
   getUtxo,
   isEmpty,
 } from ".";
-import type {
-  Address,
-  IGraphicalTransaction,
-  IGraphicalUtxo,
-  ITransaction,
-  TransactionsBox,
-} from "../_interfaces";
 
 interface IGenerateUTXO extends Utxo {
   transactionBox: TransactionsBox;

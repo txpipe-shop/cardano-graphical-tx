@@ -1,9 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
-import type { IBlockfrostResponse, ITransaction } from "../_interfaces";
-import { env } from "../env.mjs";
-import { API_ROUTES, ERRORS, NETWORK } from "./constants";
+import type { IBlockfrostResponse, ITransaction } from "~/app/_interfaces";
+import { env } from "~/app/env.mjs";
 import type { Output } from "~/napi-pallas";
+import { API_ROUTES, ERRORS, NETWORK } from "./constants";
 
 export const getApiKey = (network: NETWORK): string => {
   switch (network) {

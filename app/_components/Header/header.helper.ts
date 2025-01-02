@@ -3,14 +3,14 @@ import type {
   IGraphicalTransaction,
   TransactionsBox,
   UtxoObject,
-} from "../../_interfaces";
+} from "~/app/_interfaces";
 import {
   getTxFromCbor,
   isHexa,
   type NETWORK,
   parseTxToGraphical,
   setPosition,
-} from "../../_utils";
+} from "~/app/_utils";
 
 export const setCBOR = async (
   network: NETWORK,
