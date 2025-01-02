@@ -40,60 +40,6 @@
             },
             "minItems": 1
         },
-        "OutputValues": {
-            "allOf": [
-                {
-                    "$ref": "#/definitions/Values"
-                },
-                {
-                    "type": "array",
-                    "items": {
-                        "properties": {
-                            "minted": {
-                                "type": "boolean"
-                            }
-                        }
-                    }
-                }
-            ]
-        },
-        "Address": {
-            "type": "string",
-            "pattern": "^[a-zA-Z_]+1[0-9a-zA-Z]{32,128}$"
-        },
-        "Datum": {
-            "oneOf": [
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "hash": {
-                            "type": "string",
-                            "pattern": "^[a-fA-F0-9]{64}$"
-                        }
-                    }
-                },
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "bytes": {
-                            "type": "string",
-                            "pattern": "^([a-fA-F0-9][a-fA-F0-9])+$"
-                        }
-                    }
-                },
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "json": {
-                            "type": "object"
-                        }
-                    }
-                }
-            ]
-        },
         "InputOutputBase": {
             "type": "object",
             "additionalProperties": false,
@@ -151,6 +97,43 @@
                     }
                 }
             ]
+        },
+        "Address": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_]+1[0-9a-zA-Z]{32,128}$"
+        },
+        "Datum": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "hash": {
+                            "type": "string",
+                            "pattern": "^[a-fA-F0-9]{64}$"
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "bytes": {
+                            "type": "string",
+                            "pattern": "^([a-fA-F0-9][a-fA-F0-9])+$"
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "json": {
+                            "type": "object"
+                        }
+                    }
+                }
+            ]
         }
     },
     "properties": {
@@ -184,23 +167,99 @@
                 },
                 "outputs": {
                     "type": "array",
-                    "items": {
-                        "allOf": [
-                            {
-                                "$ref": "#/definitions/InputOutputBase"
-                            },
-                            {
+                    "additionalProperties": false,
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "address": {
+                            "$ref": "#/definitions/Address"
+                        },
+                        "script_ref": {
+                            "type": "string",
+                            "pattern": "^[a-fA-F0-9]{64}$"
+                        },
+                        "datum": {
+                            "$ref": "#/definitions/Datum"
+                        },
+                        "txHash": {
+                            "type": "string",
+                            "pattern": "^[a-fA-F0-9]{64}$"
+                        },
+                        "index": {
+                            "type": "integer"
+                        },
+                        "redeemer": {
+                            "type": "object"
+                        },
+                        "values": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
-                                    "values": {
-                                        "$ref": "#/definitions/OutputValues"
+                                    "amount": {
+                                        "type": "number"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "assetClass": {
+                                        "type": "string",
+                                        "pattern": "^[0-9a-fA-F]{56}\\.[0-9a-fA-F]{0,64}$"
+                                    },
+                                    "minted": {
+                                        "type": "boolean"
                                     }
                                 },
+                                "oneOf": [
+                                    {
+                                        "required": [
+                                            "name"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "assetClass"
+                                        ]
+                                    }
+                                ],
                                 "required": [
-                                    "values"
+                                    "amount"
+                                ]
+                            },
+                            "minItems": 1
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "if": {
+                                "required": [
+                                    "txHash"
+                                ]
+                            },
+                            "then": {
+                                "required": [
+                                    "index"
                                 ]
                             }
-                        ]
-                    }
+                        },
+                        {
+                            "if": {
+                                "required": [
+                                    "index"
+                                ]
+                            },
+                            "then": {
+                                "required": [
+                                    "txHash"
+                                ]
+                            }
+                        }
+                    ],
+                    "required": [
+                        "values"
+                    ]
                 },
                 "minting": {
                     "$ref": "#/definitions/Values"
