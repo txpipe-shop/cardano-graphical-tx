@@ -1,10 +1,10 @@
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
 import { Chip } from "@nextui-org/react";
+import { EmptyBlock, PropBlock } from "~/app/_components";
 import { useUI } from "~/app/_contexts";
 import type { IGraphicalTransaction } from "~/app/_interfaces";
 import { JSONBIG } from "~/app/_utils";
 import Loading from "~/app/loading";
-import { EmptyBlock, PropBlock } from "./Constructors";
 import {
   accordionItemProps,
   accordionProps,

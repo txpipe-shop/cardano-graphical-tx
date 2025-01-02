@@ -11,7 +11,7 @@ import {
   TX_URL_PARAM,
   UTXO_URL_PARAM,
 } from "~/app/_utils";
-import Loading from "../loading";
+import Loading from "~/app/loading";
 import { Error } from "./Error";
 import { Line, Transaction, Utxo } from "./Transaction";
 export function Playground() {

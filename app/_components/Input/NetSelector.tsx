@@ -5,8 +5,8 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from "@nextui-org/react";
-import { useConfigs } from "../_contexts";
-import { NETWORK, USER_CONFIGS } from "../_utils";
+import { useConfigs } from "~/app/_contexts";
+import { NETWORK, USER_CONFIGS } from "~/app/_utils";
 
 interface NetSelectorProps {
   network: NETWORK;

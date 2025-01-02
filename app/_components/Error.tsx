@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { useUI } from "~/app/_contexts";
+import { OPTIONS } from "~/app/_utils";
 import Error500Icon from "~/public/error.svg";
 import NotFoundIcon from "~/public/not-found.svg";
-import { OPTIONS } from "../_utils";
 
 export const Error = ({
   action,

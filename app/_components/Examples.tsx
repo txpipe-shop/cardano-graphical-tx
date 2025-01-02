@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import type { Output } from "~/napi-pallas";
-import { useConfigs, useGraphical, useUI } from "../_contexts";
+import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   cbor1,
   examples_address,
@@ -16,7 +15,8 @@ import {
   OPTIONS,
   ROUTES,
   USER_CONFIGS,
-} from "../_utils";
+} from "~/app/_utils";
+import type { Output } from "~/napi-pallas";
 import { setCBOR } from "./Header/header.helper";
 
 export function Examples({

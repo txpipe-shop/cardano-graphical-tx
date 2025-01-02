@@ -1,8 +1,8 @@
 "use client";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { createContext, useContext } from "react";
-import { useLocalStorage } from "../_hooks/useLocalStorage";
-import { NETWORK, OPTIONS } from "../_utils";
+import { useLocalStorage } from "~/app/_hooks/useLocalStorage";
+import { NETWORK, OPTIONS } from "~/app/_utils";
 
 interface IUserConfigs {
   net: NETWORK;

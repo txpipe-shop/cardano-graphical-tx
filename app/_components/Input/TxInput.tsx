@@ -4,10 +4,8 @@ import { Select, SelectItem } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { type ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Button, Input } from "../_components";
-import { setCBOR } from "../_components/Header/header.helper";
-import { NetSelector } from "../_components/NetSelector";
-import { useConfigs, useGraphical, useUI } from "../_contexts";
+import { Button, Input, setCBOR } from "~/app/_components";
+import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   getCborFromHash,
   isEmpty,
@@ -15,7 +13,8 @@ import {
   OPTIONS,
   ROUTES,
   USER_CONFIGS,
-} from "../_utils";
+} from "~/app/_utils";
+import { NetSelector } from "./NetSelector";
 
 export const TxInput = () => {
   const { transactions, setTransactionBox } = useGraphical();
