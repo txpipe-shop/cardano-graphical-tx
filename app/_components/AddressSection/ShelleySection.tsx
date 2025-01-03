@@ -1,9 +1,7 @@
 import { EmptyBlock, PropBlock, Section } from "~/app/_components";
 import type { AddressDiagnostic } from "~/napi-pallas";
 
-export function ShelleySection(props: { data: AddressDiagnostic }) {
-  const { data } = props;
-
+export function ShelleySection({ data }: { data: AddressDiagnostic }) {
   return (
     <Section title="Decoded Bech32">
       <p className="text-xl text-gray-600">
