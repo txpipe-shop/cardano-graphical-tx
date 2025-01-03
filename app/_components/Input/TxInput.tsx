@@ -36,7 +36,6 @@ export const TxInput = () => {
     e.preventDefault();
     if (!configs.query) return;
     router.push(toGo);
-    setLoading(true);
     setError("");
     if (configs.option === OPTIONS.HASH) {
       const { cbor, warning } = await getCborFromHash(
@@ -58,6 +57,7 @@ export const TxInput = () => {
         transactions,
         setTransactionBox,
         setError,
+        setLoading,
         true,
       );
     } else {
@@ -67,11 +67,11 @@ export const TxInput = () => {
         transactions,
         setTransactionBox,
         setError,
+        setLoading,
         false,
       );
     }
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
-    setLoading(false);
   }
 
   const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {

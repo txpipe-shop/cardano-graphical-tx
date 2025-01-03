@@ -179,7 +179,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       { error },
       {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
-        statusText: `CBOR Error: ${error}`,
+        statusText: `${error}`,
       },
     );
   }

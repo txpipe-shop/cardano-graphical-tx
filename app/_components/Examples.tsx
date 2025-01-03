@@ -16,7 +16,7 @@ import {
   ROUTES,
   USER_CONFIGS,
 } from "~/app/_utils";
-import type { Output } from "~/napi-pallas";
+import type { SafeAddressResponse } from "~/napi-pallas";
 import { setCBOR } from "./Header/header.helper";
 
 export function Examples({
@@ -55,9 +55,17 @@ export function Examples({
           transactions,
           setTransactionBox,
           setError,
+          setLoading,
         );
       } else {
-        await setCBOR("preprod", tx, transactions, setTransactionBox, setError);
+        await setCBOR(
+          "preprod",
+          tx,
+          transactions,
+          setTransactionBox,
+          setError,
+          setLoading,
+        );
       }
       updateConfigs(USER_CONFIGS.QUERY, tx);
       updateConfigs(USER_CONFIGS.NET, "preprod");
@@ -122,7 +130,7 @@ export function Examples({
 export function ExamplesAddress({
   setAddressInfo,
 }: {
-  setAddressInfo: Dispatch<SetStateAction<Output>>;
+  setAddressInfo: Dispatch<SetStateAction<SafeAddressResponse>>;
 }): JSX.Element {
   const router = useRouter();
   const { setError } = useUI();

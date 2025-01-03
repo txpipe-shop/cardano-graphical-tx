@@ -5,12 +5,12 @@ import { Button, Input } from "~/app/_components";
 
 import { useConfigs, useUI } from "~/app/_contexts";
 import { getAddressInfo, USER_CONFIGS } from "~/app/_utils";
-import type { Output } from "~/napi-pallas";
+import type { SafeAddressResponse } from "~/napi-pallas";
 
 export const AddressInput = ({
   setAddressInfo,
 }: {
-  setAddressInfo: Dispatch<SetStateAction<Output>>;
+  setAddressInfo: Dispatch<SetStateAction<SafeAddressResponse>>;
 }) => {
   const { setError } = useUI();
   const { configs, updateConfigs } = useConfigs();

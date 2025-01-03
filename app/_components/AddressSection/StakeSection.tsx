@@ -1,7 +1,7 @@
 import { PropBlock, Section } from "~/app/_components";
-import type { Output } from "~/napi-pallas";
+import type { SafeAddressResponse } from "~/napi-pallas";
 
-export function StakeSection(props: { data: Output }) {
+export function StakeSection(props: { data: SafeAddressResponse }) {
   const { data } = props;
 
   return (

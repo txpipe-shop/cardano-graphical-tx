@@ -18,9 +18,11 @@ export const setCBOR = async (
   transactions: TransactionsBox,
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
   setError: Dispatch<SetStateAction<string>>,
+  setLoading: Dispatch<SetStateAction<boolean>>,
   fromHash?: boolean,
 ) => {
   try {
+    setLoading(true);
     const isInvalid = !isHexa(uniqueInput);
     if (isInvalid) throw new Error("Invalid CBOR");
 
@@ -45,8 +47,13 @@ export const setCBOR = async (
       transactions: newTransactionsList,
       utxos: newUtxosObject,
     });
-  } catch (error) {
+  } catch (error: Response | any) {
     console.error(`Error processing ${fromHash ? "hash" : "CBOR"}:`, error);
-    setError(`Error processing ${fromHash ? "hash" : "CBOR"}`);
+    setError(
+      `Error processing ${fromHash ? "hash" : "CBOR"}: ` +
+        error.statusText.slice(7),
+    );
+  } finally {
+    setLoading(false);
   }
 };

@@ -114,7 +114,7 @@ impl From<Address> for AddressDiagnostic {
 }
 
 #[napi(object)]
-pub struct Output {
+pub struct SafeAddressResponse {
   pub error: Option<String>,
   pub bytes: Option<String>,
   pub address: Option<AddressDiagnostic>,

@@ -1,4 +1,3 @@
-use crate::utils::FIXED_ADDRESS;
 use crate::{
   Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
   SafeCborResponse, Utxo, Withdrawal, Witness, Witnesses,
@@ -7,7 +6,6 @@ use pallas::ledger::primitives::conway::PseudoDatumOption::{Data, Hash};
 use pallas::ledger::traverse::{
   MultiEraCert, MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer,
 };
-use pallas_addresses::Address;
 use pallas_crypto::hash::Hasher;
 use pallas_primitives::conway::{PseudoDatumOption, VKeyWitness};
 use std::collections::HashMap;
@@ -63,31 +61,34 @@ fn build_assets_with_same_policy(asset: MultiEraPolicyAssets<'_>) -> Assets {
   }
 }
 
-fn get_outputs(tx: &MultiEraTx<'_>) -> Vec<Utxo> {
+fn get_outputs(tx: &MultiEraTx<'_>) -> Result<Vec<Utxo>, String> {
   tx.outputs()
     .iter()
     .enumerate()
-    .map(|(index, o)| Utxo {
-      tx_hash: tx.hash().to_string(),
-      index: index as i64,
-      bytes: hex::encode(o.encode()),
-      address: o
+    .map(|(index, o)| {
+      let address = o
         .address()
-        .unwrap_or_else(|_| Address::from_bech32(FIXED_ADDRESS).unwrap())
-        .to_string(),
-      lovelace: o.lovelace_amount() as i64,
-      datum: o
-        .datum()
-        .map(|x: PseudoDatumOption<KeepRaw<'_, PlutusData>>| build_datum(x)),
-      script_ref: o
-        .script_ref()
-        .map(|x| x.encode_fragment().ok().map(hex::encode))
-        .flatten(),
-      assets: o
-        .non_ada_assets()
-        .into_iter()
-        .map(|x| build_assets_with_same_policy(x))
-        .collect(),
+        .map_err(|_| format!("Failed to parse output address at index {index}"))?;
+
+      Ok(Utxo {
+        tx_hash: tx.hash().to_string(),
+        index: index as i64,
+        bytes: hex::encode(o.encode()),
+        address: address.to_string(),
+        lovelace: o.lovelace_amount() as i64,
+        datum: o
+          .datum()
+          .map(|x: PseudoDatumOption<KeepRaw<'_, PlutusData>>| build_datum(x)),
+        script_ref: o
+          .script_ref()
+          .map(|x| x.encode_fragment().ok().map(hex::encode))
+          .flatten(),
+        assets: o
+          .non_ada_assets()
+          .into_iter()
+          .map(|x| build_assets_with_same_policy(x))
+          .collect(),
+      })
     })
     .collect()
 }
@@ -308,18 +309,12 @@ fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
 
 pub fn cbor_to_tx(raw: String) -> SafeCborResponse {
   SafeCborResponse::new().try_build(|| {
-    let cbor = match hex::decode(raw) {
-      Ok(cbor) => cbor,
-      Err(e) => return Err(format!("Failed to decode hex: {}", e)),
-    };
-    let tx = match MultiEraTx::decode(&cbor) {
-      Ok(tx) => tx,
-      Err(e) => return Err(format!("Failed to decode tx: {}", e)),
-    };
+    let cbor = hex::decode(raw).map_err(|e| format!("Failed to decode hex: {}", e))?;
+    let tx = MultiEraTx::decode(&cbor).map_err(|e| format!("Failed to decode tx: {}", e))?;
 
     let inputs: Vec<Input> = get_inputs(&tx.inputs());
     let reference_inputs: Vec<Input> = get_inputs(&tx.reference_inputs());
-    let outputs: Vec<Utxo> = get_outputs(&tx);
+    let outputs: Vec<Utxo> = get_outputs(&tx)?;
     let mints: Vec<Assets> = get_mints(&tx);
     let metadata: Vec<Metadata> = get_metadata(&tx);
     let withdrawals: Vec<Withdrawal> = get_withdrawals(&tx);
