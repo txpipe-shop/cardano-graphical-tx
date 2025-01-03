@@ -69,7 +69,8 @@ pub fn preprocess_json(raw: &str) -> Result<Value, serde_json::Error> {
 fn build_redeemer(input: &Value, redeemers_vec: &mut Vec<(RedeemersKey, RedeemersValue)>) {
   if let Some(redeemer) = input["redeemer"].as_object() {
     let tag = RedeemerTagConway::Spend;
-    let index = input["index"].as_u64().unwrap_or_else(|| 0) as u32;
+    // Ensured by preprocess_json
+    let index = input["index"].as_u64().unwrap() as u32;
 
     let mut data_vec: Vec<(PlutusData, PlutusData)> = vec![];
     for (key, value) in redeemer.iter() {
@@ -100,14 +101,15 @@ fn build_inputs_and_redeemers(inputs: &Value) -> (Set<TransactionInput>, Option<
       .iter()
       .map(|x| {
         build_redeemer(x, &mut redeemers_vec);
+        // Unwrap safe because it is ensured by the preprocess_json function
         TransactionInput {
           transaction_id: {
-            let tx_hash_value = x["txHash"].as_str().unwrap_or_else(|| FIXED_STRING_HASH);
+            let tx_hash_value = x["txHash"].as_str().unwrap();
             let bytes = hex::decode(tx_hash_value).unwrap();
             let array: [u8; 32] = bytes.try_into().unwrap();
             Hash::<32>::new(array)
           },
-          index: x["index"].as_u64().unwrap_or_else(|| FIXED_INDEX),
+          index: x["index"].as_u64().unwrap(),
         }
       })
       .collect::<Vec<TransactionInput>>(),

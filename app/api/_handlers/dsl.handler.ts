@@ -17,7 +17,7 @@ export const dslHandler = async ({ dsl }: IDslHandler) => {
       { error },
       {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
-        statusText: `DSL Error: ${error}`,
+        statusText: `${error}`,
       },
     );
   }

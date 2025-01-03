@@ -25,7 +25,7 @@ export default function Index() {
       <TxInput />
 
       {!isEmpty(error) ? (
-        <Error action="dissecting" option={configs.option} />
+        <Error action="dissecting" goal="transaction" option={configs.option} />
       ) : (
         transactions.transactions[0] && (
           <DissectSection tx={transactions.transactions[0]} />

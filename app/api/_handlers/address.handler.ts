@@ -13,7 +13,7 @@ export const addressHandler = async (raw: string) => {
       { error },
       {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
-        statusText: `Address Error: ${error}`,
+        statusText: `${error}`,
       },
     );
   }

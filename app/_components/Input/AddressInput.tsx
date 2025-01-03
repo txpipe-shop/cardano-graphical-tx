@@ -5,12 +5,12 @@ import { Button, Input } from "~/app/_components";
 
 import { useConfigs, useUI } from "~/app/_contexts";
 import { getAddressInfo, USER_CONFIGS } from "~/app/_utils";
-import type { SafeAddressResponse } from "~/napi-pallas";
+import type { AddressDiagnostic, SafeAddressResponse } from "~/napi-pallas";
 
 export const AddressInput = ({
   setAddressInfo,
 }: {
-  setAddressInfo: Dispatch<SetStateAction<SafeAddressResponse>>;
+  setAddressInfo: Dispatch<SetStateAction<AddressDiagnostic | undefined>>;
 }) => {
   const { setError } = useUI();
   const { configs, updateConfigs } = useConfigs();
@@ -26,19 +26,17 @@ export const AddressInput = ({
 
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
-
+    setError("");
     if (!configs.query) return;
 
-    const res = await getAddressInfo(configs.query, setError);
-
-    if (res.error) {
-      setError(res.error);
-      return;
+    const res: SafeAddressResponse = await getAddressInfo(
+      configs.query,
+      setError,
+    );
+    if (res.address) {
+      setAddressInfo(res.address);
     }
-
-    setAddressInfo(res);
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
-    setError("");
   }
 
   return (

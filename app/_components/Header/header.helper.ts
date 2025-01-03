@@ -49,10 +49,7 @@ export const setCBOR = async (
     });
   } catch (error: Response | any) {
     console.error(`Error processing ${fromHash ? "hash" : "CBOR"}:`, error);
-    setError(
-      `Error processing ${fromHash ? "hash" : "CBOR"}: ` +
-        error.statusText.slice(7),
-    );
+    setError(error.statusText);
   } finally {
     setLoading(false);
   }
