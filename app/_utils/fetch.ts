@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
 import type { IBlockfrostResponse, ITransaction } from "~/app/_interfaces";
 import { env } from "~/app/env.mjs";
-import type { Output } from "~/napi-pallas";
+import type { SafeAddressResponse } from "~/napi-pallas";
 import { API_ROUTES, ERRORS, NETWORK } from "./constants";
 
 export const getApiKey = (network: NETWORK): string => {
@@ -83,9 +83,13 @@ export const getCborFromHash = async (
         cbor: "",
         warning: ERRORS.internal_error,
       } as IBlockfrostResponse;
+    } else if (error instanceof Response) {
+      console.error("Error processing Transaction Hash:", error);
+      setError(error.statusText);
+      throw error;
     } else {
       console.error("Error processing Transaction Hash:", error);
-      setError("Error processing CBOR");
+      setError("Error processing Transaction Hash");
       throw error;
     }
   }
@@ -109,7 +113,7 @@ export const getDSLFromJSON = async (
     return responseJson || "Unknown error";
   } catch (error) {
     console.error("Error processing JSON:", error);
-    setError("Error processing JSON");
+    setError("Error processing JSON: " + error);
     throw error;
   }
 };
@@ -117,7 +121,7 @@ export const getDSLFromJSON = async (
 export const getAddressInfo = async (
   raw: string,
   setError: Dispatch<SetStateAction<string>>,
-): Promise<Output> => {
+): Promise<SafeAddressResponse> => {
   try {
     const formData = new FormData();
     formData.append("raw", raw);
@@ -130,9 +134,9 @@ export const getAddressInfo = async (
 
     const responseJson = await res.json();
     return responseJson || "Unknown error";
-  } catch (error) {
+  } catch (error: Response | any) {
     console.error("Error processing Address:", error);
-    setError("Error processing Address");
+    setError(error.statusText);
     throw error;
   }
 };

@@ -9,7 +9,6 @@ pub const FIXED_POLICY: Hash<28> = Hash::<28>::new([0; 28]);
 pub const FIXED_HASH: Hash<32> = Hash::<32>::new([0; 32]);
 pub const FIXED_STRING_HASH: &str =
   "0000000000000000000000000000000000000000000000000000000000000000";
-pub const FIXED_ADDRESS: &str = "addr_test1vp70fyy0h84kvklacem6r3k5esxqa0a2vcg8wkjqstsyudc6vuue8";
 
 pub const FIXED_INDEX: u64 = 1000000;
 

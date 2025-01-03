@@ -13,12 +13,12 @@ import {
 import { useConfigs, useUI } from "~/app/_contexts";
 import { isEmpty } from "~/app/_utils";
 import Loading from "~/app/loading";
-import type { Output } from "~/napi-pallas";
+import type { SafeAddressResponse } from "~/napi-pallas";
 
 export default function Index() {
   const { error, loading } = useUI();
   const { configs } = useConfigs();
-  const [addressInfo, setAddressInfo] = useState<Output>({});
+  const [addressInfo, setAddressInfo] = useState<SafeAddressResponse>({});
 
   if (loading) return <Loading />;
   return (

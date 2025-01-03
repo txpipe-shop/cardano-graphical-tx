@@ -1,9 +1,11 @@
 import { StatusCodes } from "http-status-codes";
-import { parseAddress } from "napi-pallas";
+import { parseAddress, type SafeAddressResponse } from "napi-pallas";
+import { isEmpty } from "~/app/_utils";
 
 export const addressHandler = async (raw: string) => {
   try {
-    const res = parseAddress(raw);
+    const res: SafeAddressResponse = parseAddress(raw);
+    if (res.error && !isEmpty(res.error)) throw new Error(res.error);
     return Response.json({ ...res, raw });
   } catch (error) {
     console.error(error);

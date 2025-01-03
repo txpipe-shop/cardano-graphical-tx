@@ -26,13 +26,18 @@ export function Playground() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const scaleBy = 1.05;
+  const MIN_SCALE = 0.1;
+  const MAX_SCALE = 5;
+
   const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
     const stage = e.target.getStage();
     if (!stage) return;
+
     const oldScale = stage.scaleX();
     const pointer = stage.getPointerPosition();
     if (!pointer) return;
+
     const mousePointTo = {
       x: (pointer.x - stage.x()) / oldScale,
       y: (pointer.y - stage.y()) / oldScale,
@@ -40,12 +45,14 @@ export function Playground() {
 
     let direction = e.evt.deltaY > 0 ? 1 : -1;
 
-    // when e.evt.ctrlKey is true, revert direction
+    // When e.evt.ctrlKey is true, revert direction
     if (e.evt.ctrlKey) {
       direction = -direction;
     }
 
-    const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    let newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+
+    newScale = Math.max(MIN_SCALE, Math.min(newScale, MAX_SCALE));
 
     stage.scale({ x: newScale, y: newScale });
 
@@ -53,6 +60,7 @@ export function Playground() {
       x: pointer.x - mousePointTo.x * newScale,
       y: pointer.y - mousePointTo.y * newScale,
     };
+
     stage.position(newPos);
   };
 

@@ -1,7 +1,7 @@
 import { EmptyBlock, PropBlock, Section } from "~/app/_components";
-import type { Output } from "~/napi-pallas";
+import type { SafeAddressResponse } from "~/napi-pallas";
 
-export function ShelleySection(props: { data: Output }) {
+export function ShelleySection(props: { data: SafeAddressResponse }) {
   const { data } = props;
 
   return (
