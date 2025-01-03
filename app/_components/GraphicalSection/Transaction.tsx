@@ -15,10 +15,12 @@ import {
   trimString,
   updateLines,
 } from "~/app/_utils";
-import { BurningIcon } from "./BurningIcon";
-import { CertificateIcon } from "./CertificateIcon";
-import { MintingIcon } from "./MintingIcon";
-import { WithdrawalIcon } from "./WithdrawalIcon";
+import {
+  BurningIcon,
+  CertificateIcon,
+  MintingIcon,
+  WithdrawalIcon,
+} from "./Icons";
 
 interface TransactionProps {
   txHash: string;

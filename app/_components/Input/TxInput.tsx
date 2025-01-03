@@ -28,7 +28,7 @@ export const TxInput = () => {
   };
 
   useEffect(() => {
-    updateConfigs(USER_CONFIGS.QUERY, configs.query);
+    updateConfigs(USER_CONFIGS.QUERY, "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -100,16 +100,16 @@ export const TxInput = () => {
               aria-label="Close"
               selectedKeys={[configs.option]}
               size="sm"
-              className="w-1/5"
+              className="w-1/6"
               onChange={changeSelectedOption}
               color="primary"
               labelPlacement="outside"
             >
               <SelectItem key={OPTIONS.HASH} value={OPTIONS.HASH}>
-                Search by Hash
+                TxHash
               </SelectItem>
               <SelectItem key={OPTIONS.CBOR} value={OPTIONS.CBOR}>
-                Search by CBOR
+                CBOR
               </SelectItem>
             </Select>
           }
