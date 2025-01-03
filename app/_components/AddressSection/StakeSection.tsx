@@ -1,9 +1,7 @@
 import { PropBlock, Section } from "~/app/_components";
 import type { AddressDiagnostic } from "~/napi-pallas";
 
-export function StakeSection(props: { data: AddressDiagnostic }) {
-  const { data } = props;
-
+export function StakeSection({ data }: { data: AddressDiagnostic }) {
   return (
     <Section title="Decoded Bech32">
       <p className="text-xl text-gray-600">
