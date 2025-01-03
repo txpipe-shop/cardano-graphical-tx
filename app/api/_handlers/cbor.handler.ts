@@ -116,15 +116,15 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
 
     const apiKey = getApiKey(network);
 
-    const cbor_res = res.cborRes!;
+    const cborRes = res.cborRes!;
 
     const inputs = await inputsHandle({
-      inputs: cbor_res.inputs,
+      inputs: cborRes.inputs,
       network,
       apiKey,
     });
     const referenceInputs = await inputsHandle({
-      inputs: cbor_res.referenceInputs,
+      inputs: cborRes.referenceInputs,
       network,
       apiKey,
     });
@@ -136,7 +136,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
 
     try {
       const txInfoRes = await fetch(
-        getTransactionURL(network, cbor_res.txHash),
+        getTransactionURL(network, cborRes.txHash),
         {
           headers: { project_id: apiKey },
           method: "GET",
@@ -145,7 +145,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
 
       if (txInfoRes.status !== StatusCodes.OK)
         return Response.json({
-          ...cbor_res,
+          ...cborRes,
           inputs,
           referenceInputs,
           warning,
@@ -153,7 +153,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       const txInfo = await txInfoRes.json();
 
       return Response.json({
-        ...cbor_res,
+        ...cborRes,
         inputs,
         referenceInputs,
         blockHash: txInfo.block,
@@ -165,7 +165,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
     } catch (error) {
       if (error instanceof TypeError) {
         return Response.json({
-          ...cbor_res,
+          ...cborRes,
           inputs,
           referenceInputs,
           warning: ERRORS.internal_error,

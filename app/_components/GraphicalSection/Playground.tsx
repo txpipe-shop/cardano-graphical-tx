@@ -125,7 +125,10 @@ export function Playground() {
   )
     push(ROUTES.TX);
 
-  if (error) return <Error action="fetching" option={configs.option} />;
+  if (error)
+    return (
+      <Error action="fetching" goal="transaction" option={configs.option} />
+    );
   if (dimensions.height == 0 || dimensions.width == 0) return <Loading />;
 
   return (

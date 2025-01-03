@@ -259,12 +259,10 @@ pub fn parse_address(raw: String) -> address::SafeAddressResponse {
   match address::Address::from_str(&raw) {
     Ok(addr) => address::SafeAddressResponse {
       error: None,
-      bytes: Some(hex::encode(addr.to_vec())),
       address: Some(addr.into()),
     },
     Err(err) => address::SafeAddressResponse {
       error: Some(err.to_string()),
-      bytes: None,
       address: None,
     },
   }

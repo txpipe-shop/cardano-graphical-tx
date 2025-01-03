@@ -14,10 +14,10 @@ export interface AddressDiagnostic {
   paymentPart?: ShelleyPart
   delegationPart?: ShelleyPart
   byronCbor?: string
+  bytes?: string
 }
 export interface SafeAddressResponse {
   error?: string
-  bytes?: string
   address?: AddressDiagnostic
 }
 export interface Datum {

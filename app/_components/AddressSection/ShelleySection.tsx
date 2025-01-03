@@ -1,7 +1,7 @@
 import { EmptyBlock, PropBlock, Section } from "~/app/_components";
-import type { SafeAddressResponse } from "~/napi-pallas";
+import type { AddressDiagnostic } from "~/napi-pallas";
 
-export function ShelleySection(props: { data: SafeAddressResponse }) {
+export function ShelleySection(props: { data: AddressDiagnostic }) {
   const { data } = props;
 
   return (
@@ -32,15 +32,15 @@ export function ShelleySection(props: { data: SafeAddressResponse }) {
           <code>Shelley</code>. Shelley addresses contain three pieces of
           information: network id, payment part, and a delegation part.
         </p>
-        <PropBlock title="type" value={data?.address?.kind} />
+        <PropBlock title="type" value={data?.kind} />
         <Section title="Network Id">
           <p className="text-xl text-gray-600">
             The network id is a flag to indicate to which network it belongs
             (either mainnet or a testnet).
           </p>
-          <PropBlock title="network id" value={data?.address?.network} />
+          <PropBlock title="network id" value={data?.network} />
         </Section>
-        {!!data.address?.paymentPart && (
+        {!!data.paymentPart && (
           <Section title="Payment Part">
             <p className="text-xl text-gray-600">
               The payment part describes who has control of the ownership of the
@@ -49,21 +49,16 @@ export function ShelleySection(props: { data: SafeAddressResponse }) {
             </p>
             <PropBlock
               title="kind"
-              value={
-                data.address.paymentPart.isScript
-                  ? "script"
-                  : "verification key"
-              }
+              value={data.paymentPart.isScript ? "script" : "verification key"}
             />
             <PropBlock
               color="green"
               title="hash"
-              value={data.address.paymentPart.hash}
+              value={data.paymentPart.hash}
             />
           </Section>
         )}
-        {(!!data.address?.delegationPart?.hash ||
-          !!data.address?.delegationPart?.pointer) && (
+        {(!!data.delegationPart?.hash || !!data.delegationPart?.pointer) && (
           <Section title="Delegation Part">
             <p className="text-xl text-gray-600">
               The delegation part describes who has control of the staking of
@@ -73,39 +68,36 @@ export function ShelleySection(props: { data: SafeAddressResponse }) {
             <PropBlock
               title="kind"
               value={
-                data.address.delegationPart.isScript
-                  ? "script"
-                  : "verification key"
+                data.delegationPart.isScript ? "script" : "verification key"
               }
             />
-            {data.address.delegationPart.hash && (
+            {data.delegationPart.hash && (
               <PropBlock
                 color="green"
                 title="hash"
-                value={data.address.delegationPart.hash}
+                value={data.delegationPart.hash}
               />
             )}
-            {data.address.delegationPart.pointer && (
+            {data.delegationPart.pointer && (
               <PropBlock
                 color="green"
                 title="pointer"
-                value={data.address.delegationPart.pointer}
+                value={data.delegationPart.pointer}
               />
             )}
           </Section>
         )}
-        {!data.address?.delegationPart?.hash &&
-          !data.address?.delegationPart?.pointer && (
-            <Section title="Delegation Part">
-              <p className="text-xl text-gray-600">
-                The delegation part describes who has control of the staking of
-                the locked values. This address doesn&apos;t specify a
-                delegation part, which means there&apos;s no way to delegate the
-                locked values of this address.
-              </p>
-              <EmptyBlock />
-            </Section>
-          )}
+        {!data.delegationPart?.hash && !data.delegationPart?.pointer && (
+          <Section title="Delegation Part">
+            <p className="text-xl text-gray-600">
+              The delegation part describes who has control of the staking of
+              the locked values. This address doesn&apos;t specify a delegation
+              part, which means there&apos;s no way to delegate the locked
+              values of this address.
+            </p>
+            <EmptyBlock />
+          </Section>
+        )}
       </Section>
     </Section>
   );

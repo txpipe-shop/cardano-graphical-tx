@@ -9,7 +9,7 @@ export default function Index() {
       <TxInput />
       <div className="flex h-full w-full flex-col items-center justify-center">
         <div className="w-2/3 text-center">
-          <Examples />
+          <Examples showTxExamples />
         </div>
       </div>
     </div>
