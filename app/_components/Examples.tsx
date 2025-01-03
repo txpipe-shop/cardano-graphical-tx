@@ -59,10 +59,10 @@ export function Examples({
       } else {
         await setCBOR("preprod", tx, transactions, setTransactionBox, setError);
       }
-      setQuery(tx);
       updateConfigs(USER_CONFIGS.QUERY, tx);
       updateConfigs(USER_CONFIGS.NET, "preprod");
       updateConfigs(USER_CONFIGS.OPTION, option);
+      setQuery(tx);
       setToGo(title.startsWith("Draw") ? ROUTES.GRAPHER : ROUTES.DISSECT);
       setLoading(false);
     };
