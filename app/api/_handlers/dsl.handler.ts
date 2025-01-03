@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
-import { parseDsl } from "napi-pallas";
+import { parseDsl, type SafeDslResponse } from "napi-pallas";
+import { isEmpty } from "~/app/_utils";
 
 interface IDslHandler {
   dsl: string;
@@ -7,15 +8,16 @@ interface IDslHandler {
 
 export const dslHandler = async ({ dsl }: IDslHandler) => {
   try {
-    const res: string = parseDsl(dsl);
-    return Response.json({ dsl: res });
+    const res: SafeDslResponse = parseDsl(dsl);
+    if (!isEmpty(res.error)) throw new Error(res.error);
+    return Response.json(res);
   } catch (error) {
     console.error(error);
     return Response.json(
       { error },
       {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
-        statusText: `DSL Error: ${error}`,
+        statusText: `${error}`,
       },
     );
   }

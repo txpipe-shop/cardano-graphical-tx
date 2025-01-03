@@ -1,21 +1,17 @@
 "use client";
 
-import { Suspense } from "react";
-import { Examples, Header, TxInput } from "../_components";
-import Loading from "../loading";
+import { Examples, Header, TxInput } from "~/app/_components";
 
 export default function Index() {
   return (
     <div>
       <Header />
       <TxInput />
-      <Suspense fallback={<Loading />}>
-        <div className="flex h-full w-full flex-col items-center justify-center">
-          <div className="w-2/3 text-center">
-            <Examples />
-          </div>
+      <div className="flex h-full w-full flex-col items-center justify-center">
+        <div className="w-2/3 text-center">
+          <Examples showTxExamples />
         </div>
-      </Suspense>
+      </div>
     </div>
   );
 }

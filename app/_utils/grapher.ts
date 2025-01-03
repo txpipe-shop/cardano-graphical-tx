@@ -1,11 +1,11 @@
 import type { Vector2d } from "konva/lib/types";
 import type { Dispatch, SetStateAction } from "react";
-import { KONVA_COLORS, TX_HEIGHT, TX_WIDTH, UTXO_LINE_GAP } from ".";
 import type {
   IGraphicalTransaction,
   IGraphicalUtxo,
   TransactionsBox,
-} from "../_interfaces";
+} from "~/app/_interfaces";
+import { KONVA_COLORS, TX_HEIGHT, TX_WIDTH, UTXO_LINE_GAP } from ".";
 
 export const getTransaction =
   (transactionBox: TransactionsBox) => (txHash: string) => {

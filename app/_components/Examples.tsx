@@ -1,71 +1,48 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useConfigs, useGraphical, useUI } from "../_contexts";
+import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
-  cbor1,
-  examples_address,
-  getAddressInfo,
+  AddressExamples,
   getCborFromHash,
-  hash1,
-  hash2,
   KONVA_COLORS,
+  OPTIONS,
   ROUTES,
+  TxExamples,
   USER_CONFIGS,
-} from "../_utils";
+} from "~/app/_utils";
 import { setCBOR } from "./Header/header.helper";
-import type { Output } from "~/napi-pallas";
 
 export function Examples({
+  showTxExamples,
   showDSLExample = false,
+  showAddressesExamples = false,
 }: {
+  showTxExamples?: boolean;
   showDSLExample?: boolean;
+  showAddressesExamples?: boolean;
 }) {
   const router = useRouter();
-  const { setError } = useUI();
+  const { setError, setLoading } = useUI();
   const { configs, updateConfigs } = useConfigs();
   const { transactions, setTransactionBox } = useGraphical();
   const [query, setQuery] = useState<string>("");
   const [toGo, setToGo] = useState<string>("");
 
-  const examples_tx = [
-    {
-      title: "Draw CBOR",
-      code: cbor1,
-      onclick: async () => {
-        await setCBOR(
-          "preprod",
-          cbor1,
-          transactions,
-          setTransactionBox,
-          setError,
-          true,
-        );
-        setQuery(cbor1);
-        updateConfigs(USER_CONFIGS.QUERY, cbor1);
-        updateConfigs(USER_CONFIGS.NET, "preprod");
-        updateConfigs(USER_CONFIGS.OPTION, "cbor");
-        setToGo(ROUTES.GRAPHER);
-      },
-    },
-    {
-      title: "Draw Tx Hash",
-      code: hash1,
-      onclick: async () => {
+  const handleClick =
+    (title: string, option: OPTIONS, tx: string) => async () => {
+      if (option === OPTIONS.HASH) {
         const { cbor, warning } = await getCborFromHash(
-          hash1,
+          tx,
           "preprod",
           setError,
         );
         if (warning) {
           toast.error(warning, {
             icon: "🚫",
-            style: {
-              fontWeight: "bold",
-              color: KONVA_COLORS.RED_WARNING,
-            },
+            style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
             duration: 5000,
           });
           return;
@@ -76,81 +53,58 @@ export function Examples({
           transactions,
           setTransactionBox,
           setError,
-          true,
+          setLoading,
         );
-        setQuery(hash1);
-        updateConfigs(USER_CONFIGS.QUERY, hash1);
-        updateConfigs(USER_CONFIGS.NET, "preprod");
-        updateConfigs(USER_CONFIGS.OPTION, "hash");
-        setToGo(ROUTES.GRAPHER);
-      },
-    },
-    {
-      title: "Dissect CBOR",
-      code: cbor1,
-      onclick: async () => {
+      } else {
         await setCBOR(
           "preprod",
-          cbor1,
+          tx,
           transactions,
           setTransactionBox,
           setError,
-          true,
+          setLoading,
         );
-        setQuery(cbor1);
-        updateConfigs(USER_CONFIGS.QUERY, cbor1);
-        updateConfigs(USER_CONFIGS.NET, "preprod");
-        updateConfigs(USER_CONFIGS.OPTION, "cbor");
-        setToGo(ROUTES.DISSECT);
-      },
-    },
-    {
-      title: "Dissect Tx Hash",
-      code: hash2,
-      onclick: async () => {
-        const { cbor } = await getCborFromHash(hash2, "preprod", setError);
-        await setCBOR(
-          "preprod",
-          cbor,
-          transactions,
-          setTransactionBox,
-          setError,
-          true,
-        );
-        setQuery(hash2);
-        updateConfigs(USER_CONFIGS.QUERY, hash2);
-        updateConfigs(USER_CONFIGS.NET, "preprod");
-        updateConfigs(USER_CONFIGS.OPTION, "hash");
-        setToGo(ROUTES.DISSECT);
-      },
-    },
-  ];
+      }
+      updateConfigs(USER_CONFIGS.QUERY, tx);
+      updateConfigs(USER_CONFIGS.NET, "preprod");
+      updateConfigs(USER_CONFIGS.OPTION, option);
+      setQuery(tx);
+      setToGo(title.startsWith("Draw") ? ROUTES.GRAPHER : ROUTES.DISSECT);
+    };
+
+  const handleAddressClick = async (raw: string) => {
+    updateConfigs(USER_CONFIGS.QUERY, raw);
+    router.push(ROUTES.ADDRESS + "?example=" + raw);
+  };
 
   useEffect(() => {
-    if (configs.query === query) {
-      router.push(toGo);
-    }
+    if (configs.query === query) router.push(toGo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, query, toGo]);
 
   return (
     <>
       <div className="mb-6 mt-10 text-3xl">Try one of these examples</div>
-      <div className="flex w-full basis-1/4 flex-wrap justify-between gap-3">
-        {examples_tx.map((example, index) => (
-          <button
-            key={index}
-            type="submit"
-            className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
-            onClick={example.onclick}
-          >
-            <h3 className="text-xl">{example.title}</h3>
+      <div className="flex w-full basis-1/4 flex-wrap justify-start gap-3">
+        {showTxExamples &&
+          TxExamples.map((example, index) => (
+            <button
+              key={index}
+              type="submit"
+              className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
+              onClick={handleClick(
+                example.title,
+                example.title.endsWith("CBOR") ? OPTIONS.CBOR : OPTIONS.HASH,
+                example.code,
+              )}
+            >
+              <h3 className="text-xl">{example.title}</h3>
 
-            <code className="mt-4 block w-full break-words text-gray-400">
-              {example.code.substring(0, 30)}...
-            </code>
-          </button>
-        ))}
+              <code className="mt-4 block w-full break-words text-gray-400">
+                {example.code.substring(0, 30)}...
+              </code>
+            </button>
+          ))}
         {showDSLExample && (
           <button
             type="submit"
@@ -164,57 +118,20 @@ export function Examples({
             </code>
           </button>
         )}
-      </div>
-    </>
-  );
-}
-
-export function ExamplesAddress({
-  setAddressInfo,
-}: {
-  setAddressInfo: Dispatch<SetStateAction<Output>>;
-}): JSX.Element {
-  const router = useRouter();
-  const { setError } = useUI();
-  const { configs, updateConfigs } = useConfigs();
-  const [query, setQuery] = useState<string>("");
-  const [toGo] = useState<string>("");
-
-  const handleAddressClick = async (raw: string) => {
-    const res = await getAddressInfo(raw, setError);
-    if (res.error) {
-      setError(res.error);
-      return;
-    }
-    setQuery(raw);
-    updateConfigs(USER_CONFIGS.QUERY, raw);
-    setAddressInfo(res);
-  };
-
-  useEffect(() => {
-    if (configs.query === query) {
-      router.push(toGo);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router, query, toGo]);
-
-  return (
-    <>
-      <div className="mb-6 mt-10 text-3xl">Try one of these examples</div>
-      <div className="flex w-full basis-1/4 flex-wrap justify-start gap-3">
-        {examples_address.map((example, index) => (
-          <button
-            key={index}
-            type="submit"
-            className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
-            onClick={() => handleAddressClick(example.address)}
-          >
-            <h3 className="text-xl">{example.title}</h3>
-            <code className="mt-4 block w-full break-words text-gray-400">
-              {example.address.substring(0, 30)}...
-            </code>
-          </button>
-        ))}
+        {showAddressesExamples &&
+          AddressExamples.map((example, index) => (
+            <button
+              key={index}
+              type="submit"
+              className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
+              onClick={() => handleAddressClick(example.address)}
+            >
+              <h3 className="text-xl">{example.title}</h3>
+              <code className="mt-4 block w-full break-words text-gray-400">
+                {example.address.substring(0, 30)}...
+              </code>
+            </button>
+          ))}
       </div>
     </>
   );

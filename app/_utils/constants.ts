@@ -125,7 +125,7 @@ export const addr5 =
 export const addr6 =
   "addr1gx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer5pnz75xxcrzqf96k";
 
-export const examples_address = [
+export const AddressExamples = [
   { title: "Mainnet address in Bech32", address: addr1 },
   { title: "A script address", address: addr2 },
   { title: "An address without delegation part", address: addr3 },
@@ -135,6 +135,13 @@ export const examples_address = [
     title: "A rare address using a pointer to the delegation cert",
     address: addr6,
   },
+];
+
+export const TxExamples = [
+  { title: "Draw CBOR", code: cbor1 },
+  { title: "Draw Tx Hash", code: hash1 },
+  { title: "Dissect CBOR", code: cbor1 },
+  { title: "Dissect Tx Hash", code: hash2 },
 ];
 
 export const dslExample = `{

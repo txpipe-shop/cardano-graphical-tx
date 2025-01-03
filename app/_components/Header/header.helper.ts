@@ -3,24 +3,26 @@ import type {
   IGraphicalTransaction,
   TransactionsBox,
   UtxoObject,
-} from "../../_interfaces";
+} from "~/app/_interfaces";
 import {
   getTxFromCbor,
   isHexa,
   type NETWORK,
   parseTxToGraphical,
   setPosition,
-} from "../../_utils";
+} from "~/app/_utils";
 
 export const setCBOR = async (
   network: NETWORK,
   uniqueInput: string,
   transactions: TransactionsBox,
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
-  setFetchError: Dispatch<SetStateAction<string>>,
-  fromHash: boolean,
+  setError: Dispatch<SetStateAction<string>>,
+  setLoading: Dispatch<SetStateAction<boolean>>,
+  fromHash?: boolean,
 ) => {
   try {
+    setLoading(true);
     const isInvalid = !isHexa(uniqueInput);
     if (isInvalid) throw new Error("Invalid CBOR");
 
@@ -45,8 +47,10 @@ export const setCBOR = async (
       transactions: newTransactionsList,
       utxos: newUtxosObject,
     });
-  } catch (error) {
+  } catch (error: Response | any) {
     console.error(`Error processing ${fromHash ? "hash" : "CBOR"}:`, error);
-    setFetchError(`Error processing ${fromHash ? "hash" : "CBOR"}`);
+    setError(error.statusText);
+  } finally {
+    setLoading(false);
   }
 };

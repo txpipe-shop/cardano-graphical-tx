@@ -1,30 +1,36 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Suspense } from "react";
 import { DissectSection, Error, Header, TxInput } from "~/app/_components";
-import { useGraphical, useUI } from "~/app/_contexts";
+import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import { isEmpty, ROUTES } from "~/app/_utils";
 import Loading from "~/app/loading";
 
 export default function Index() {
   const { transactions } = useGraphical();
-  const { error } = useUI();
+  const { error, loading } = useUI();
+  const { configs } = useConfigs();
   const router = useRouter();
-  if (isEmpty(error) && !transactions.transactions[0]) router.push(ROUTES.TX);
+  if (
+    typeof window !== "undefined" &&
+    isEmpty(error) &&
+    !transactions.transactions[0]
+  )
+    router.push(ROUTES.TX);
+
+  if (loading) return <Loading />;
   return (
     <div>
       <Header />
       <TxInput />
-      <Suspense fallback={<Loading />}>
-        {!isEmpty(error) ? (
-          <Error action="dissecting" />
-        ) : (
-          transactions.transactions[0] && (
-            <DissectSection tx={transactions.transactions[0]} />
-          )
-        )}
-      </Suspense>
+
+      {!isEmpty(error) ? (
+        <Error action="dissecting" goal="transaction" option={configs.option} />
+      ) : (
+        transactions.transactions[0] && (
+          <DissectSection tx={transactions.transactions[0]} />
+        )
+      )}
     </div>
   );
 }

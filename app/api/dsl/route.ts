@@ -1,6 +1,6 @@
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { getDSLFromSchema, getQuery } from "~/app/_utils";
-import { dslHandler } from "../_handlers";
+import { dslHandler } from "~/app/api/_handlers";
 
 export async function POST(req: Request) {
   try {

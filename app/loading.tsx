@@ -3,15 +3,17 @@ import TxPipeIcon from "~/public/txpipe.png";
 
 export default function Loading() {
   return (
-    <div className="flex h-screen flex-col items-center justify-center">
-      <div className="animate-ping text-center text-2xl">
-        <Image
-          src={TxPipeIcon}
-          alt="TxPipe Shop Logo"
-          width={110}
-          className="m-auto"
-        />
-        Loading ...
+    <div className="absolute inset-0 -z-30 overflow-hidden">
+      <div className="flex h-screen flex-col items-center justify-center gap-14 text-center text-2xl">
+        <div className="animate-ping">
+          <Image
+            src={TxPipeIcon}
+            alt="TxPipe Shop Logo"
+            width={110}
+            className="m-auto"
+          />
+        </div>
+        <div className="animate-ping">Loading</div>
       </div>
     </div>
   );

@@ -1,9 +1,7 @@
-import type { Output } from "~/napi-pallas";
-import { PropBlock, Section } from "../DissectedTx/Constructors";
+import { PropBlock, Section } from "~/app/_components";
+import type { AddressDiagnostic } from "~/napi-pallas";
 
-export function ByronSection(props: { data: Output }) {
-  const { data } = props;
-
+export function ByronSection({ data }: { data: AddressDiagnostic }) {
   return (
     <Section title="Decoded Base58">
       <p className="text-xl text-gray-600">
@@ -34,18 +32,14 @@ export function ByronSection(props: { data: Output }) {
           and kept only for backward compatibility, we won&apos;t go into much
           more detail.
         </p>
-        <PropBlock title="type" value={data?.address?.kind} />
+        <PropBlock title="type" value={data?.kind} />
         <Section title="CBOR">
           <p className="text-xl text-gray-600">
             The following bytes are CBOR-encoded structures. You can continue
             your decoding journey using these (hex-encoded) bytes and a CBOR
             decoder.
           </p>
-          <PropBlock
-            title="CBOR (hex)"
-            value={data?.address?.byronCbor}
-            color="green"
-          />
+          <PropBlock title="CBOR (hex)" value={data?.byronCbor} color="green" />
         </Section>
       </Section>
     </Section>

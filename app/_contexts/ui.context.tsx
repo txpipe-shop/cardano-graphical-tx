@@ -5,9 +5,16 @@ import { createContext, useContext, useState } from "react";
 interface IUIContext {
   error: string;
   setError: Dispatch<SetStateAction<string>>;
+  loading: boolean;
+  setLoading: Dispatch<SetStateAction<boolean>>;
 }
 
-const UIContext = createContext<IUIContext>({ error: "", setError: () => {} });
+const UIContext = createContext<IUIContext>({
+  error: "",
+  setError: () => {},
+  loading: false,
+  setLoading: () => {},
+});
 
 export const useUI = () => {
   const context = useContext(UIContext);
@@ -17,8 +24,9 @@ export const useUI = () => {
 
 export const UIProvider = ({ children }: { children: React.ReactNode }) => {
   const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   return (
-    <UIContext.Provider value={{ error, setError }}>
+    <UIContext.Provider value={{ error, setError, loading, setLoading }}>
       {children}
     </UIContext.Provider>
   );

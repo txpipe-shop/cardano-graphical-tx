@@ -14,10 +14,10 @@ export interface AddressDiagnostic {
   paymentPart?: ShelleyPart
   delegationPart?: ShelleyPart
   byronCbor?: string
-}
-export interface Output {
-  error?: string
   bytes?: string
+}
+export interface SafeAddressResponse {
+  error?: string
   address?: AddressDiagnostic
 }
 export interface Datum {
@@ -103,9 +103,21 @@ export interface CborResponse {
   collateral: Collateral
   witnesses: Witnesses
   size: number
+}
+export interface SafeCborResponse {
+  cborRes?: CborResponse
   error: string
 }
-export declare function cborParse(raw: string): CborResponse
-export declare function parseDatumInfo(raw: string): Datum | null
-export declare function parseDsl(raw: string): string
-export declare function parseAddress(raw: string): Output
+export function cborParse(raw: string): SafeCborResponse
+export function parseDatumInfo(raw: string): Datum | null
+export interface DslResponse {
+  cborHex: string
+  cborDiagnostic: string
+}
+export interface SafeDslResponse {
+  dslRes?: DslResponse
+  error: string
+  instancePath: string
+}
+export function parseDsl(raw: string): SafeDslResponse
+export function parseAddress(raw: string): SafeAddressResponse

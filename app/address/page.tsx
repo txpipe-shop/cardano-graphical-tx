@@ -1,54 +1,68 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
-  Header,
   AddressInput,
-  ShelleySection,
-  StakeSection,
   ByronSection,
   Error,
+  Examples,
+  Header,
+  ShelleySection,
+  StakeSection,
 } from "~/app/_components";
+import { useConfigs, useUI } from "~/app/_contexts";
+import { getAddressInfo, isEmpty } from "~/app/_utils";
 import Loading from "~/app/loading";
-
-import { ExamplesAddress } from "../_components/Examples";
-import { useUI } from "../_contexts";
-import { isEmpty } from "~/app/_utils";
-import type { Output } from "~/napi-pallas";
+import type { AddressDiagnostic } from "~/napi-pallas";
 
 export default function Index() {
-  const { error } = useUI();
-  const [addressInfo, setAddressInfo] = useState<Output>({});
+  const { error, loading, setError } = useUI();
+  const { configs } = useConfigs();
+  const [addressInfo, setAddressInfo] = useState<AddressDiagnostic>();
+  const searchParams = useSearchParams();
+  const useExample = searchParams.get("example");
 
+  useEffect(() => {
+    const parseExample = async () => {
+      if (useExample) {
+        const res = await getAddressInfo(useExample, setError);
+        setAddressInfo(res.address);
+      }
+    };
+
+    parseExample();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useExample]);
+
+  if (loading) return <Loading />;
   return (
     <div>
       <Header />
       <AddressInput setAddressInfo={setAddressInfo} />
-      <Suspense fallback={<Loading />}>
-        {Object.keys(addressInfo).length > 0 ? (
-          !isEmpty(error) ? (
-            <Error action="dissecting" />
-          ) : (
-            <>
-              {addressInfo?.address?.kind == "Shelley" && (
-                <ShelleySection data={addressInfo} />
-              )}
-              {addressInfo?.address?.kind == "Stake" && (
-                <StakeSection data={addressInfo} />
-              )}
-              {addressInfo?.address?.kind == "Byron" && (
-                <ByronSection data={addressInfo} />
-              )}
-            </>
-          )
+      {isEmpty(error) ? (
+        addressInfo ? (
+          <>
+            {addressInfo?.kind == "Shelley" && (
+              <ShelleySection data={addressInfo} />
+            )}
+            {addressInfo?.kind == "Stake" && (
+              <StakeSection data={addressInfo} />
+            )}
+            {addressInfo?.kind == "Byron" && (
+              <ByronSection data={addressInfo} />
+            )}
+          </>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center">
             <div className="w-2/3 text-center">
-              <ExamplesAddress setAddressInfo={setAddressInfo} />
+              <Examples showAddressesExamples />
             </div>
           </div>
-        )}
-      </Suspense>
+        )
+      ) : (
+        <Error action="dissecting" goal="address" option={configs.option} />
+      )}
     </div>
   );
 }
