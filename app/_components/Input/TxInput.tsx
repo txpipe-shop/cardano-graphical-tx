@@ -28,7 +28,7 @@ export const TxInput = () => {
   };
 
   useEffect(() => {
-    updateConfigs(USER_CONFIGS.QUERY, "");
+    updateConfigs(USER_CONFIGS.QUERY, configs.query);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

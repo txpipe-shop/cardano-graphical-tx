@@ -6,6 +6,7 @@ import { Layer, Stage } from "react-konva";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   ERRORS,
+  isEmpty,
   KONVA_COLORS,
   ROUTES,
   TX_URL_PARAM,
@@ -16,7 +17,7 @@ import { Line, Transaction, Utxo } from ".";
 import { Error } from "../Error";
 export function Playground() {
   const { transactions } = useGraphical();
-  const { error, loading } = useUI();
+  const { error } = useUI();
   const { configs } = useConfigs();
   const pathname = usePathname();
   const { replace, push } = useRouter();
@@ -78,7 +79,6 @@ export function Playground() {
   }, []);
 
   useEffect(() => {
-    if (transactions.transactions.length == 0) push(ROUTES.TX);
     transactions.transactions.forEach((tx: any) => {
       if (tx.warning) {
         const warningKey = `${tx.txHash}-${tx.warning}`;
@@ -91,7 +91,7 @@ export function Playground() {
           }
           if (tx.warning === ERRORS.internal_error) {
             icon = "🚫";
-            backgroundColor = "KONVA_COLORS.WHITE;";
+            backgroundColor = KONVA_COLORS.WHITE;
             color = KONVA_COLORS.RED_WARNING;
           }
 
@@ -108,11 +108,17 @@ export function Playground() {
         }
       }
     });
-  }, [transactions.transactions, push]);
+  }, [transactions.transactions]);
+
+  if (
+    typeof window !== "undefined" &&
+    isEmpty(error) &&
+    !transactions.transactions[0]
+  )
+    push(ROUTES.TX);
 
   if (error) return <Error action="fetching" option={configs.option} />;
-  if (dimensions.height == 0 || dimensions.width == 0 || loading)
-    return <Loading />;
+  if (dimensions.height == 0 || dimensions.width == 0) return <Loading />;
 
   return (
     <Stage
