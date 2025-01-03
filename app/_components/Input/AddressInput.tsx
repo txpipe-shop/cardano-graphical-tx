@@ -3,8 +3,8 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 import { Button, Input } from "~/app/_components";
 
-import { getAddressInfo, USER_CONFIGS } from "~/app/_utils";
 import { useConfigs, useUI } from "~/app/_contexts";
+import { getAddressInfo, USER_CONFIGS } from "~/app/_utils";
 import type { Output } from "~/napi-pallas";
 
 export const AddressInput = ({
@@ -20,7 +20,7 @@ export const AddressInput = ({
   };
 
   useEffect(() => {
-    updateConfigs(USER_CONFIGS.QUERY, configs.query);
+    updateConfigs(USER_CONFIGS.QUERY, "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

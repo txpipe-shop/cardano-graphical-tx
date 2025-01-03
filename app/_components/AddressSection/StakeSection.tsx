@@ -1,5 +1,5 @@
+import { PropBlock, Section } from "~/app/_components";
 import type { Output } from "~/napi-pallas";
-import { PropBlock, Section } from "../Constructors";
 
 export function StakeSection(props: { data: Output }) {
   const { data } = props;

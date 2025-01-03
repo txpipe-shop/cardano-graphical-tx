@@ -12,8 +12,8 @@ import {
   UTXO_URL_PARAM,
 } from "~/app/_utils";
 import Loading from "~/app/loading";
-import { Error } from "./Error";
-import { Line, Transaction, Utxo } from "./Transaction";
+import { Line, Transaction, Utxo } from ".";
+import { Error } from "../Error";
 export function Playground() {
   const { transactions } = useGraphical();
   const { error, loading } = useUI();
