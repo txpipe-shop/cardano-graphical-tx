@@ -62,7 +62,7 @@ export default function Index() {
             </a>
           </div>
         </div>
-        <Examples showDSLExample={true} />
+        <Examples showTxExamples showDSLExample showAddressesExamples />
       </div>
     </div>
   );

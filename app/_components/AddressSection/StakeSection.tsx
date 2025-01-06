@@ -1,9 +1,7 @@
-import type { Output } from "~/napi-pallas";
-import { PropBlock, Section } from "../DissectedTx/Constructors";
+import { PropBlock, Section } from "~/app/_components";
+import type { AddressDiagnostic } from "~/napi-pallas";
 
-export function StakeSection(props: { data: Output }) {
-  const { data } = props;
-
+export function StakeSection({ data }: { data: AddressDiagnostic }) {
   return (
     <Section title="Decoded Bech32">
       <p className="text-xl text-gray-600">
@@ -31,16 +29,15 @@ export function StakeSection(props: { data: Output }) {
           <code>Stake</code>. Stake addresses contain two pieces of information:
           network tag and delegation info.
         </p>
-        <PropBlock title="type" value={data?.address?.kind} />
+        <PropBlock title="type" value={data?.kind} />
         <Section title="Network Tag">
           <p className="text-xl text-gray-600">
             The netword tag is a flag to indicate to which network it belongs
             (either mainnet or a testnet).
           </p>
-          <PropBlock title="network tag" value={data?.address?.network} />
+          <PropBlock title="network tag" value={data?.network} />
         </Section>
-        {(!!data.address?.delegationPart?.hash ||
-          !!data.address?.delegationPart?.pointer) && (
+        {(!!data?.delegationPart?.hash || !!data?.delegationPart?.pointer) && (
           <Section title="Delegation Info">
             <p className="text-xl text-gray-600">
               The delegation part describes who has control of the staking of
@@ -50,23 +47,21 @@ export function StakeSection(props: { data: Output }) {
             <PropBlock
               title="kind"
               value={
-                data.address.delegationPart.isScript
-                  ? "script"
-                  : "verification key"
+                data.delegationPart.isScript ? "script" : "verification key"
               }
             />
-            {data.address.delegationPart.hash && (
+            {data.delegationPart.hash && (
               <PropBlock
                 color="green"
                 title="hash"
-                value={data.address.delegationPart.hash}
+                value={data.delegationPart.hash}
               />
             )}
-            {data.address.delegationPart.pointer && (
+            {data.delegationPart.pointer && (
               <PropBlock
                 color="green"
                 title="pointer"
-                value={data.address.delegationPart.pointer}
+                value={data.delegationPart.pointer}
               />
             )}
           </Section>

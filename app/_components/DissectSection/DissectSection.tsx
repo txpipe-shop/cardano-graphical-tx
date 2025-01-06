@@ -1,8 +1,10 @@
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
 import { Chip } from "@nextui-org/react";
+import { EmptyBlock, PropBlock } from "~/app/_components";
+import { useUI } from "~/app/_contexts";
 import type { IGraphicalTransaction } from "~/app/_interfaces";
 import { JSONBIG } from "~/app/_utils";
-import { EmptyBlock, PropBlock } from "./Constructors";
+import Loading from "~/app/loading";
 import {
   accordionItemProps,
   accordionProps,
@@ -11,6 +13,7 @@ import {
 import TOPICS from "./topics";
 
 export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
+  const { loading } = useUI();
   const {
     era,
     txHash,
@@ -46,6 +49,8 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
   ];
   const normalInputs = inputs.filter((i) => !i.isReferenceInput);
   const referenceInputs = inputs.filter((i) => i.isReferenceInput);
+
+  if (loading) return <Loading />;
 
   return (
     <div className="flex flex-grow flex-col gap-0 p-5">

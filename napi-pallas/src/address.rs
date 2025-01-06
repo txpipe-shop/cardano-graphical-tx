@@ -83,12 +83,14 @@ pub struct AddressDiagnostic {
   pub payment_part: Option<ShelleyPart>,
   pub delegation_part: Option<ShelleyPart>,
   pub byron_cbor: Option<String>,
+  pub bytes: Option<String>,
 }
 
 impl From<Address> for AddressDiagnostic {
   fn from(value: Address) -> Self {
     match value {
       Address::Byron(x) => Self {
+        bytes: Some(hex::encode(x.to_vec())),
         kind: "Byron".into(),
         network: None,
         payment_part: None,
@@ -96,6 +98,7 @@ impl From<Address> for AddressDiagnostic {
         byron_cbor: Some(hex::encode(x.payload.as_slice())),
       },
       Address::Shelley(x) => Self {
+        bytes: Some(hex::encode(x.to_vec())),
         kind: "Shelley".into(),
         network: Some(network_to_string(x.network())),
         payment_part: Some(x.payment().into()),
@@ -103,6 +106,7 @@ impl From<Address> for AddressDiagnostic {
         byron_cbor: None,
       },
       Address::Stake(x) => Self {
+        bytes: Some(hex::encode(x.to_vec())),
         kind: "Stake".into(),
         network: Some(network_to_string(x.network())),
         payment_part: None,
@@ -114,8 +118,7 @@ impl From<Address> for AddressDiagnostic {
 }
 
 #[napi(object)]
-pub struct Output {
+pub struct SafeAddressResponse {
   pub error: Option<String>,
-  pub bytes: Option<String>,
   pub address: Option<AddressDiagnostic>,
 }

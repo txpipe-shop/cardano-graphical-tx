@@ -4,10 +4,8 @@ import { Select, SelectItem } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { type ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Button, Input } from "../_components";
-import { setCBOR } from "../_components/Header/header.helper";
-import { NetSelector } from "../_components/NetSelector";
-import { useConfigs, useGraphical, useUI } from "../_contexts";
+import { Button, Input, setCBOR } from "~/app/_components";
+import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   getCborFromHash,
   isEmpty,
@@ -15,12 +13,13 @@ import {
   OPTIONS,
   ROUTES,
   USER_CONFIGS,
-} from "../_utils";
+} from "~/app/_utils";
+import { NetSelector } from "./NetSelector";
 
 export const TxInput = () => {
   const { transactions, setTransactionBox } = useGraphical();
   const router = useRouter();
-  const { setError } = useUI();
+  const { setError, setLoading } = useUI();
   const { configs, updateConfigs } = useConfigs();
   const [toGo, setToGo] = useState<string>("");
 
@@ -47,10 +46,7 @@ export const TxInput = () => {
       if (warning) {
         toast.error(warning, {
           icon: "🚫",
-          style: {
-            fontWeight: "bold",
-            color: KONVA_COLORS.RED_WARNING,
-          },
+          style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
           duration: 5000,
         });
         return;
@@ -61,6 +57,7 @@ export const TxInput = () => {
         transactions,
         setTransactionBox,
         setError,
+        setLoading,
         true,
       );
     } else {
@@ -70,11 +67,13 @@ export const TxInput = () => {
         transactions,
         setTransactionBox,
         setError,
+        setLoading,
         false,
       );
     }
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
   }
+
   const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {
     if (!isEmpty(e.target.value))
       updateConfigs(USER_CONFIGS.OPTION, e.target.value as OPTIONS);
@@ -101,16 +100,16 @@ export const TxInput = () => {
               aria-label="Close"
               selectedKeys={[configs.option]}
               size="sm"
-              className="w-1/5"
+              className="w-1/6"
               onChange={changeSelectedOption}
               color="primary"
               labelPlacement="outside"
             >
               <SelectItem key={OPTIONS.HASH} value={OPTIONS.HASH}>
-                Search by Hash
+                TxHash
               </SelectItem>
               <SelectItem key={OPTIONS.CBOR} value={OPTIONS.CBOR}>
-                Search by CBOR
+                CBOR
               </SelectItem>
             </Select>
           }

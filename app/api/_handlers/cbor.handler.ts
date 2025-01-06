@@ -3,8 +3,8 @@ import {
   cborParse,
   parseDatumInfo,
   type Assets,
-  type CborResponse,
   type Input,
+  type SafeCborResponse,
   type Utxo,
 } from "napi-pallas";
 import {
@@ -110,15 +110,21 @@ const inputsHandle = async ({
 
 export const cborHandler = async ({ cbor, network }: ICborHandler) => {
   try {
-    const res: CborResponse = cborParse(cbor);
+    const res: SafeCborResponse = cborParse(cbor);
 
     if (!isEmpty(res.error)) throw Error(res.error);
 
     const apiKey = getApiKey(network);
 
-    const inputs = await inputsHandle({ inputs: res.inputs, network, apiKey });
+    const cborRes = res.cborRes!;
+
+    const inputs = await inputsHandle({
+      inputs: cborRes.inputs,
+      network,
+      apiKey,
+    });
     const referenceInputs = await inputsHandle({
-      inputs: res.referenceInputs,
+      inputs: cborRes.referenceInputs,
       network,
       apiKey,
     });
@@ -129,14 +135,17 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
     }
 
     try {
-      const txInfoRes = await fetch(getTransactionURL(network, res.txHash), {
-        headers: { project_id: apiKey },
-        method: "GET",
-      });
+      const txInfoRes = await fetch(
+        getTransactionURL(network, cborRes.txHash),
+        {
+          headers: { project_id: apiKey },
+          method: "GET",
+        },
+      );
 
       if (txInfoRes.status !== StatusCodes.OK)
         return Response.json({
-          ...res,
+          ...cborRes,
           inputs,
           referenceInputs,
           warning,
@@ -144,7 +153,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       const txInfo = await txInfoRes.json();
 
       return Response.json({
-        ...res,
+        ...cborRes,
         inputs,
         referenceInputs,
         blockHash: txInfo.block,
@@ -156,7 +165,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
     } catch (error) {
       if (error instanceof TypeError) {
         return Response.json({
-          ...res,
+          ...cborRes,
           inputs,
           referenceInputs,
           warning: ERRORS.internal_error,
@@ -170,7 +179,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
       { error },
       {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
-        statusText: `CBOR Error: ${error}`,
+        statusText: `${error}`,
       },
     );
   }
