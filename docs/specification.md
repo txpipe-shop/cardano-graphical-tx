@@ -106,7 +106,7 @@ The minimal structure must specify the keywords `transaction`, `inputs`, and `ou
 }
 ```
 
-It is possible to verify that the JSON that represents a transaction is valid by checking some verifier, such as the following: [https://jsonschema.dev/s/3P1sI](https://jsonschema.dev/s/3P1sI).
+It is possible to verify that the JSON that represents a transaction is valid by checking some verifier, such as the following: [https://jsonschema.dev/s/CsTl1](https://jsonschema.dev/s/CsTl1).
 This can help ensure that the desired transaction can be translated into CBOR later on.
 
 ## Inputs/Outputs
