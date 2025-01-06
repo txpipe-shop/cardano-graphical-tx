@@ -40,7 +40,7 @@
             },
             "minItems": 1
         },
-        "InputOutputBase": {
+        "Inputs": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -66,6 +66,61 @@
                 },
                 "redeemer": {
                     "type": "object"
+                },
+                "values": {
+                    "$ref": "#/definitions/Values"
+                }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "required": [
+                            "txHash"
+                        ]
+                    },
+                    "then": {
+                        "required": [
+                            "index"
+                        ]
+                    }
+                },
+                {
+                    "if": {
+                        "required": [
+                            "index"
+                        ]
+                    },
+                    "then": {
+                        "required": [
+                            "txHash"
+                        ]
+                    }
+                }
+            ]
+        },
+        "RefInputs": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "address": {
+                    "$ref": "#/definitions/Address"
+                },
+                "script_ref": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{64}$"
+                },
+                "datum": {
+                    "$ref": "#/definitions/Datum"
+                },
+                "txHash": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{64}$"
+                },
+                "index": {
+                    "type": "integer"
                 },
                 "values": {
                     "$ref": "#/definitions/Values"
@@ -156,13 +211,13 @@
                 "ref_inputs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/InputOutputBase"
+                        "$ref": "#/definitions/RefInputs"
                     }
                 },
                 "inputs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/InputOutputBase"
+                        "$ref": "#/definitions/Inputs"
                     }
                 },
                 "outputs": {
