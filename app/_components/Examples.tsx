@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { setCBORs } from "~/app/_components";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   AddressExamples,
@@ -13,7 +14,6 @@ import {
   TxExamples,
   USER_CONFIGS,
 } from "~/app/_utils";
-import { setCBOR } from "./Header/header.helper";
 
 export function Examples({
   showTxExamples,
@@ -47,18 +47,18 @@ export function Examples({
           });
           return;
         }
-        await setCBOR(
+        await setCBORs(
           "preprod",
-          cbor,
+          [cbor],
           transactions,
           setTransactionBox,
           setError,
           setLoading,
         );
       } else {
-        await setCBOR(
+        await setCBORs(
           "preprod",
-          tx,
+          [tx],
           transactions,
           setTransactionBox,
           setError,

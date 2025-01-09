@@ -47,3 +47,14 @@ export const handleCopy = (text: string) => () => {
   navigator.clipboard.writeText(text);
   toast.success("Copied to clipboard");
 };
+
+export const checkIfHash = (hash: string): boolean => {
+  if (hash.length === 64) {
+    return isHexa(hash);
+  } else {
+    const [hashString, hashNumber] = hash.split("#");
+    if (!hashNumber || isEmpty(hashNumber) || Number.isNaN(Number(hashNumber)))
+      return false;
+    return !!hashString && checkIfHash(hashString);
+  }
+};
