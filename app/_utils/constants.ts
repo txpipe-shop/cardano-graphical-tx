@@ -9,6 +9,8 @@ export const ROUTES = {
   DSL: "/dsl",
 };
 
+export type ROUTES = (typeof ROUTES)[keyof typeof ROUTES];
+
 export const API_ROUTES = {
   CBOR: "api/cbor",
   HASH: "api/hash",
@@ -112,6 +114,9 @@ export const hash1 =
 export const hash2 =
   "d1ef2bf292694fbbdcc5855c040e5081e0a738701d1c3cb92410901f39504976";
 
+export const multipleHashes =
+  "c97154477f9bb04a7af4dab18ddff4f68dbd4a0871f362b26baf75352b8079cf,d8988f87cfb7b6751ca1f012cbc4dad92daca948b4f595de69b6e411bb116f07,23f407f1020d0acd93b58631b77509c789691c19834a2b6bdc3ea7c382939a4a,e714001a9e8661821ff796b8a0b1712274466416bd1635bc8e80710abe848cb6,40cd76968363bb0ce68f491a44d218fa569edb18ca18a219931f564d2c5203e0,77cf92fb5a6ee3423230a07f06f9edab6b4177a7c8ba6ed57e3d866553cb1e55,c97154477f9bb04a7af4dab18ddff4f68dbd4a0871f362b26baf75352b8079cf";
+
 export const addr1 =
   "addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3n0d3vllmyqwsx5wktcd8cc3sq835lu7drv2xwl2wywfgse35a3x";
 export const addr2 =
@@ -142,6 +147,7 @@ export const TxExamples = [
   { title: "Draw Tx Hash", code: hash1 },
   { title: "Dissect CBOR", code: cbor1 },
   { title: "Dissect Tx Hash", code: hash2 },
+  { title: "Draw Multiple Tx Hashes", code: multipleHashes },
 ];
 
 export const dslExample = `{

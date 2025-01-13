@@ -32,24 +32,29 @@ export function Examples({
   const [toGo, setToGo] = useState<string>("");
 
   const handleClick =
-    (title: string, option: OPTIONS, tx: string) => async () => {
+    (title: string, option: OPTIONS, txs: string) => async () => {
+      const multiplesInputs = txs.split(",").map((tx) => tx.trim());
+      const uniqueInputs = Array.from(new Set(multiplesInputs));
       if (option === OPTIONS.HASH) {
-        const { cbor, warning } = await getCborFromHash(
-          tx,
-          "preprod",
-          setError,
+        const hashesPromises = uniqueInputs.map((hash) =>
+          getCborFromHash(hash, configs.net, setError),
         );
-        if (warning) {
-          toast.error(warning, {
-            icon: "🚫",
-            style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
-            duration: 5000,
-          });
-          return;
-        }
+        const cbors = await Promise.all(hashesPromises);
+        const cborsToSet: string[] = [];
+        cbors.map(({ warning, cbor }) => {
+          if (warning) {
+            toast.error(warning, {
+              icon: "🚫",
+              style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
+              duration: 5000,
+            });
+            return;
+          }
+          cborsToSet.push(cbor);
+        });
         await setCBORs(
           "preprod",
-          [cbor],
+          cborsToSet,
           transactions,
           setTransactionBox,
           setError,
@@ -58,17 +63,17 @@ export function Examples({
       } else {
         await setCBORs(
           "preprod",
-          [tx],
+          uniqueInputs,
           transactions,
           setTransactionBox,
           setError,
           setLoading,
         );
       }
-      updateConfigs(USER_CONFIGS.QUERY, tx);
+      updateConfigs(USER_CONFIGS.QUERY, txs);
       updateConfigs(USER_CONFIGS.NET, "preprod");
       updateConfigs(USER_CONFIGS.OPTION, option);
-      setQuery(tx);
+      setQuery(txs);
       setToGo(title.startsWith("Draw") ? ROUTES.GRAPHER : ROUTES.DISSECT);
     };
 
