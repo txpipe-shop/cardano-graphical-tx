@@ -2,18 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { setCBORs } from "~/app/_components";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   AddressExamples,
-  getCborFromHash,
-  KONVA_COLORS,
+  NETWORK,
   OPTIONS,
   ROUTES,
   TxExamples,
   USER_CONFIGS,
 } from "~/app/_utils";
+import addCBORsToContext from "./Input/TxInput/txInput.helper";
 
 export function Examples({
   showTxExamples,
@@ -35,41 +33,15 @@ export function Examples({
     (title: string, option: OPTIONS, txs: string) => async () => {
       const multiplesInputs = txs.split(",").map((tx) => tx.trim());
       const uniqueInputs = Array.from(new Set(multiplesInputs));
-      if (option === OPTIONS.HASH) {
-        const hashesPromises = uniqueInputs.map((hash) =>
-          getCborFromHash(hash, configs.net, setError),
-        );
-        const cbors = await Promise.all(hashesPromises);
-        const cborsToSet: string[] = [];
-        cbors.map(({ warning, cbor }) => {
-          if (warning) {
-            toast.error(warning, {
-              icon: "🚫",
-              style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
-              duration: 5000,
-            });
-            return;
-          }
-          cborsToSet.push(cbor);
-        });
-        await setCBORs(
-          "preprod",
-          cborsToSet,
-          transactions,
-          setTransactionBox,
-          setError,
-          setLoading,
-        );
-      } else {
-        await setCBORs(
-          "preprod",
-          uniqueInputs,
-          transactions,
-          setTransactionBox,
-          setError,
-          setLoading,
-        );
-      }
+      addCBORsToContext(
+        option,
+        uniqueInputs,
+        NETWORK.PREPROD,
+        setError,
+        transactions,
+        setTransactionBox,
+        setLoading,
+      );
       updateConfigs(USER_CONFIGS.QUERY, txs);
       updateConfigs(USER_CONFIGS.NET, "preprod");
       updateConfigs(USER_CONFIGS.OPTION, option);

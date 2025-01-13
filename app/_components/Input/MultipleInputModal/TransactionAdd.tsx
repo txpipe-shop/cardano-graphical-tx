@@ -18,7 +18,7 @@ interface TransactionAddProps {
 }
 
 export const TransactionAdd = ({ inputs, setInputs }: TransactionAddProps) => {
-  const [tx, setTx] = useState("");
+  const [txs, setTxs] = useState("");
   const [option, setOption] = useState<OPTIONS>(OPTIONS.HASH);
   const { setError, error } = useUI();
 
@@ -26,40 +26,38 @@ export const TransactionAdd = ({ inputs, setInputs }: TransactionAddProps) => {
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setError("");
-    setTx(e.target.value);
+    setTxs(e.target.value);
   };
 
   const handleAddInput = () => {
-    switch (option) {
-      case OPTIONS.HASH:
+    const multiplesInputs = txs.split(",").map((tx) => tx.trim());
+    const uniqueInputs = Array.from(new Set(multiplesInputs));
+    setInputs((prev) => {
+      const filteredInputs = uniqueInputs.filter((tx) => {
+        if (isEmpty(tx)) return false;
         if (inputs.find((i) => i.value === tx)) {
           setError("Transaction already added");
-          return;
+          return false;
         }
-        if (!tx || !checkIfHash(tx)) {
-          setError(!tx ? "Tx Id should not be empty" : "Invalid Tx Id");
-          return;
+        if (
+          (option == OPTIONS.HASH && !checkIfHash(tx)) ||
+          (option == OPTIONS.CBOR && !isHexa(tx))
+        ) {
+          setError("Invalid Transaction");
+          return false;
         }
-        setTx("");
-        break;
-      case OPTIONS.CBOR:
-        if (inputs.find((i) => i.value === tx)) {
-          setError("Cbor already added");
-          return;
-        }
-        if (!tx || !isHexa(tx)) {
-          setError(!tx ? "Cbor should not be empty" : "Invalid Cbor");
-          return;
-        }
-        setTx("");
-        break;
-      default:
-        break;
-    }
-    setInputs((prev) => {
-      if (prev.find((input) => input.value === tx)) return prev;
-      return [...prev, { type: option, value: tx, isNew: true }];
+        return true;
+      });
+      return [
+        ...prev,
+        ...filteredInputs.map((input) => ({
+          type: option,
+          value: input,
+          isNew: true,
+        })),
+      ];
     });
+    setTxs("");
   };
 
   const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -75,7 +73,7 @@ export const TransactionAdd = ({ inputs, setInputs }: TransactionAddProps) => {
           size="md"
           onChange={handleInputChange}
           placeholder="Enter TxHash or CBOR"
-          value={tx}
+          value={txs}
           isInvalid={!isEmpty(error)}
           errorMessage={error}
           startContent={

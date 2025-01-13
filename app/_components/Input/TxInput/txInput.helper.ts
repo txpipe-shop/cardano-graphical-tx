@@ -6,12 +6,15 @@ import type {
   UtxoObject,
 } from "~/app/_interfaces";
 import {
+  KONVA_COLORS,
+  OPTIONS,
   POINT_SIZE,
   POLICY_LENGTH,
   TX_HEIGHT,
   TX_WIDTH,
   UTXO_LINE_GAP,
   defaultPosition,
+  getCborFromHash,
   getTransaction,
   getTxFromCbor,
   getUtxo,
@@ -22,6 +25,7 @@ import {
 
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
+import toast from "react-hot-toast";
 import type { Address, IGraphicalUtxo } from "~/app/_interfaces";
 import type { Utxo } from "~/napi-pallas";
 
@@ -185,7 +189,6 @@ const setPositions = (
   const maxAmountOfTxsInBLock = Math.max(
     ...Object.values(normalizedBlockIndex).map((txs) => txs.length),
   );
-  console.log(blocks.size);
   const boxSizeX = blockWidth * blocks.size - (1 / 2) * blockWidth;
   const boxSizeY =
     TX_HEIGHT * maxAmountOfTxsInBLock + 0.05 * window.innerHeight;
@@ -217,7 +220,7 @@ const setPositions = (
   });
 };
 
-export const setCBORs = async (
+const setCBORs = async (
   network: NETWORK,
   uniqueInputs: string[],
   existingTxs: TransactionsBox,
@@ -285,3 +288,51 @@ export const setCBORs = async (
     setLoading(false);
   }
 };
+
+export default async function addCBORsToContext(
+  option: OPTIONS,
+  uniqueInputs: string[],
+  net: NETWORK,
+  setError: Dispatch<SetStateAction<string>>,
+  transactions: TransactionsBox,
+  setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
+  setLoading: Dispatch<SetStateAction<boolean>>,
+) {
+  if (option === OPTIONS.HASH) {
+    const hashesPromises = uniqueInputs.map((hash) =>
+      getCborFromHash(hash, net, setError),
+    );
+    const cbors = await Promise.all(hashesPromises);
+    const cborsToSet: string[] = [];
+    cbors.map(({ warning, cbor }) => {
+      if (warning) {
+        toast.error(warning, {
+          icon: "🚫",
+          style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
+          duration: 5000,
+        });
+        return;
+      }
+      cborsToSet.push(cbor);
+    });
+    await setCBORs(
+      net,
+      cborsToSet,
+      transactions,
+      setTransactionBox,
+      setError,
+      setLoading,
+      true,
+    );
+  } else {
+    await setCBORs(
+      net,
+      uniqueInputs,
+      transactions,
+      setTransactionBox,
+      setError,
+      setLoading,
+      false,
+    );
+  }
+}

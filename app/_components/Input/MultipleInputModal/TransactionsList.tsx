@@ -3,19 +3,18 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type Dispatch, type SetStateAction } from "react";
 import toast from "react-hot-toast";
-import { setCBORs } from "~/app/_components";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   getCborFromHash,
   getTransaction,
   isInputUtxo,
   isOutputUtxo,
-  KONVA_COLORS,
   OPTIONS,
   ROUTES,
 } from "~/app/_utils";
 import TrashRedIcon from "~/public/delete-red.svg";
 import NoContractsIcon from "~/public/no-contract.svg";
+import addCBORsToContext from "../TxInput/txInput.helper";
 import { type INewTx } from "./multipleInputModal.interface";
 
 export interface TransactionsListProps {
@@ -80,26 +79,15 @@ export const TransactionsList = ({
       const hashesPromises = newHashes.map((hash) =>
         getCborFromHash(hash.value, configs.net, setError),
       );
-      const cbors = await Promise.all(hashesPromises);
-      cbors.map((cbor) => {
-        if (cbor.warning) {
-          toast.error(cbor.warning, {
-            icon: "🚫",
-            style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
-            duration: 5000,
-          });
-          return;
-        }
-        newCbors.push(cbor.cbor);
-      });
-      await setCBORs(
+      const cbors = (await Promise.all(hashesPromises)).map(({ cbor }) => cbor);
+      addCBORsToContext(
+        OPTIONS.CBOR,
+        [...newCbors, ...cbors],
         configs.net,
-        newCbors,
+        setError,
         transactions,
         setTransactionBox,
-        setError,
         setLoading,
-        true,
       );
       setError("");
       router.push(ROUTES.GRAPHER);

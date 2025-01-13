@@ -9,21 +9,13 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type ChangeEvent, useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import { Button, Input } from "~/app/_components";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
-import {
-  getCborFromHash,
-  isEmpty,
-  KONVA_COLORS,
-  OPTIONS,
-  ROUTES,
-  USER_CONFIGS,
-} from "~/app/_utils";
+import { isEmpty, OPTIONS, ROUTES, USER_CONFIGS } from "~/app/_utils";
 import MultipleTxIcon from "~/public/multiple-txs.svg";
 import { MultipleInputModal } from "../MultipleInputModal/MultipleInputModal";
 import { NetSelector } from "../NetSelector";
-import { setCBORs } from "./txInput.helper";
+import addCBORsToContext from "./txInput.helper";
 
 export const TxInput = () => {
   const { transactions, setTransactionBox } = useGraphical();
@@ -49,43 +41,15 @@ export const TxInput = () => {
     setError("");
     const multiplesInputs = configs.query.split(",").map((tx) => tx.trim());
     const uniqueInputs = Array.from(new Set(multiplesInputs));
-    if (configs.option === OPTIONS.HASH) {
-      const hashesPromises = uniqueInputs.map((hash) =>
-        getCborFromHash(hash, configs.net, setError),
-      );
-      const cbors = await Promise.all(hashesPromises);
-      const cborsToSet: string[] = [];
-      cbors.map(({ warning, cbor }) => {
-        if (warning) {
-          toast.error(warning, {
-            icon: "🚫",
-            style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
-            duration: 5000,
-          });
-          return;
-        }
-        cborsToSet.push(cbor);
-      });
-      await setCBORs(
-        configs.net,
-        cborsToSet,
-        transactions,
-        setTransactionBox,
-        setError,
-        setLoading,
-        true,
-      );
-    } else {
-      await setCBORs(
-        configs.net,
-        uniqueInputs,
-        transactions,
-        setTransactionBox,
-        setError,
-        setLoading,
-        false,
-      );
-    }
+    addCBORsToContext(
+      configs.option,
+      uniqueInputs,
+      configs.net,
+      setError,
+      transactions,
+      setTransactionBox,
+      setLoading,
+    );
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
   }
 
