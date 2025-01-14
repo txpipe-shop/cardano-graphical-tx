@@ -1,20 +1,21 @@
 "use client";
 
-import { Select, SelectItem } from "@nextui-org/react";
+import {
+  Button as NextButton,
+  Select,
+  SelectItem,
+  useDisclosure,
+} from "@nextui-org/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type ChangeEvent, useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { Button, Input, setCBOR } from "~/app/_components";
+import { Button, Input } from "~/app/_components";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
-import {
-  getCborFromHash,
-  isEmpty,
-  KONVA_COLORS,
-  OPTIONS,
-  ROUTES,
-  USER_CONFIGS,
-} from "~/app/_utils";
-import { NetSelector } from "./NetSelector";
+import { isEmpty, OPTIONS, ROUTES, USER_CONFIGS } from "~/app/_utils";
+import MultipleTxIcon from "~/public/multiple-txs.svg";
+import { MultipleInputModal } from "../MultipleInputModal/MultipleInputModal";
+import { NetSelector } from "../NetSelector";
+import addCBORsToContext from "./txInput.helper";
 
 export const TxInput = () => {
   const { transactions, setTransactionBox } = useGraphical();
@@ -22,6 +23,7 @@ export const TxInput = () => {
   const { setError, setLoading } = useUI();
   const { configs, updateConfigs } = useConfigs();
   const [toGo, setToGo] = useState<string>("");
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const changeRaw = (e: React.ChangeEvent<HTMLInputElement>) => {
     updateConfigs(USER_CONFIGS.QUERY, e.target.value);
@@ -37,40 +39,17 @@ export const TxInput = () => {
     if (!configs.query) return;
     router.push(toGo);
     setError("");
-    if (configs.option === OPTIONS.HASH) {
-      const { cbor, warning } = await getCborFromHash(
-        configs.query,
-        configs.net,
-        setError,
-      );
-      if (warning) {
-        toast.error(warning, {
-          icon: "🚫",
-          style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
-          duration: 5000,
-        });
-        return;
-      }
-      await setCBOR(
-        configs.net,
-        cbor,
-        transactions,
-        setTransactionBox,
-        setError,
-        setLoading,
-        true,
-      );
-    } else {
-      await setCBOR(
-        configs.net,
-        configs.query,
-        transactions,
-        setTransactionBox,
-        setError,
-        setLoading,
-        false,
-      );
-    }
+    const multiplesInputs = configs.query.split(",").map((tx) => tx.trim());
+    const uniqueInputs = Array.from(new Set(multiplesInputs));
+    addCBORsToContext(
+      configs.option,
+      uniqueInputs,
+      configs.net,
+      setError,
+      transactions,
+      setTransactionBox,
+      setLoading,
+    );
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
   }
 
@@ -114,6 +93,18 @@ export const TxInput = () => {
             </Select>
           }
         />
+        <abbr title="Add multiple transactions">
+          <NextButton
+            isIconOnly
+            size="md"
+            variant="flat"
+            radius="sm"
+            onPress={onOpen}
+          >
+            <Image src={MultipleTxIcon} alt="Search" />
+          </NextButton>
+        </abbr>
+        <MultipleInputModal isOpen={isOpen} onOpenChange={onOpenChange} />
         <Button type="submit" onClick={changeGoTo(ROUTES.GRAPHER)}>
           Draw
         </Button>

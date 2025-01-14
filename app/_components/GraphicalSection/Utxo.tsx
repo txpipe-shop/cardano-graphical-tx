@@ -60,10 +60,7 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
         ...prev,
         utxos: {
           ...prev.utxos,
-          [utxoHash]: {
-            ...prev.utxos[utxoHash]!,
-            pos: { x, y },
-          },
+          [utxoHash]: { ...prev.utxos[utxoHash]!, pos: { x, y } },
         },
       }));
     };
@@ -78,38 +75,23 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
         ...prev,
         transactions: prev.transactions.map((tx) => {
           const newPos = { x: x - tx.pos.x, y: y - tx.pos.y };
-          const txHasUtxoAsInput = tx.inputs.find(
-            (utxo) => utxo.txHash === utxoHashMap,
-          );
-          if (txHasUtxoAsInput)
-            return {
-              ...tx,
-              inputs: tx.inputs.map((utxo) => {
-                if (utxo.txHash === utxoHashMap)
-                  return { ...utxo, distance: newPos };
-                return utxo;
-              }),
-            };
-          const txHasUtxoAsOutput = tx.outputs.find(
-            (utxo) => utxo.txHash === utxoHashMap,
-          );
-          if (txHasUtxoAsOutput)
-            return {
-              ...tx,
-              outputs: tx.outputs.map((utxo) => {
-                if (utxo.txHash === utxoHashMap)
-                  return { ...utxo, distance: newPos };
-                return utxo;
-              }),
-            };
-          return tx;
+          return {
+            ...tx,
+            inputs: tx.inputs.map((utxo) =>
+              utxo.txHash === utxoHashMap
+                ? { ...utxo, distance: newPos }
+                : utxo,
+            ),
+            outputs: tx.outputs.map((utxo) =>
+              utxo.txHash === utxoHashMap
+                ? { ...utxo, distance: newPos }
+                : utxo,
+            ),
+          };
         }),
         utxos: {
           ...prev.utxos,
-          [utxoHash]: {
-            ...prev.utxos[utxoHash]!,
-            pos: { x, y },
-          },
+          [utxoHash]: { ...prev.utxos[utxoHash]!, pos: { x, y } },
         },
       }));
     };
@@ -144,6 +126,11 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
 
   const handleMouseEnter = () => {
     setColor((prev) => {
+      if (
+        isInputUtxo(transactions)(utxoHash) &&
+        isOutputUtxo(transactions)(utxoHash)
+      )
+        return { stroke: KONVA_COLORS.PINK, fill: KONVA_COLORS.LIGHT_BLUE };
       if (isInputUtxo(transactions)(utxoHash))
         return { stroke: prev.stroke, fill: KONVA_COLORS.LIGHT_BLUE };
       return { stroke: prev.stroke, fill: KONVA_COLORS.PINK };
@@ -152,6 +139,11 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
 
   const handleMouseLeave = () => {
     setColor((prev) => {
+      if (
+        isInputUtxo(transactions)(utxoHash) &&
+        isOutputUtxo(transactions)(utxoHash)
+      )
+        return { stroke: KONVA_COLORS.RED, fill: KONVA_COLORS.BLUE };
       if (isInputUtxo(transactions)(utxoHash))
         return { stroke: prev.stroke, fill: KONVA_COLORS.BLUE };
       return { stroke: prev.stroke, fill: KONVA_COLORS.RED };

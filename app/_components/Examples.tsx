@@ -2,18 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   AddressExamples,
-  getCborFromHash,
-  KONVA_COLORS,
+  NETWORK,
   OPTIONS,
   ROUTES,
   TxExamples,
   USER_CONFIGS,
 } from "~/app/_utils";
-import { setCBOR } from "./Header/header.helper";
+import addCBORsToContext from "./Input/TxInput/txInput.helper";
 
 export function Examples({
   showTxExamples,
@@ -32,43 +30,22 @@ export function Examples({
   const [toGo, setToGo] = useState<string>("");
 
   const handleClick =
-    (title: string, option: OPTIONS, tx: string) => async () => {
-      if (option === OPTIONS.HASH) {
-        const { cbor, warning } = await getCborFromHash(
-          tx,
-          "preprod",
-          setError,
-        );
-        if (warning) {
-          toast.error(warning, {
-            icon: "🚫",
-            style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
-            duration: 5000,
-          });
-          return;
-        }
-        await setCBOR(
-          "preprod",
-          cbor,
-          transactions,
-          setTransactionBox,
-          setError,
-          setLoading,
-        );
-      } else {
-        await setCBOR(
-          "preprod",
-          tx,
-          transactions,
-          setTransactionBox,
-          setError,
-          setLoading,
-        );
-      }
-      updateConfigs(USER_CONFIGS.QUERY, tx);
+    (title: string, option: OPTIONS, txs: string) => async () => {
+      const multiplesInputs = txs.split(",").map((tx) => tx.trim());
+      const uniqueInputs = Array.from(new Set(multiplesInputs));
+      addCBORsToContext(
+        option,
+        uniqueInputs,
+        NETWORK.PREPROD,
+        setError,
+        transactions,
+        setTransactionBox,
+        setLoading,
+      );
+      updateConfigs(USER_CONFIGS.QUERY, txs);
       updateConfigs(USER_CONFIGS.NET, "preprod");
       updateConfigs(USER_CONFIGS.OPTION, option);
-      setQuery(tx);
+      setQuery(txs);
       setToGo(title.startsWith("Draw") ? ROUTES.GRAPHER : ROUTES.DISSECT);
     };
 

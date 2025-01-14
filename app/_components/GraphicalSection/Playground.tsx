@@ -6,9 +6,7 @@ import { Layer, Stage } from "react-konva";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   ERRORS,
-  isEmpty,
   KONVA_COLORS,
-  ROUTES,
   TX_URL_PARAM,
   UTXO_URL_PARAM,
 } from "~/app/_utils";
@@ -20,7 +18,7 @@ export function Playground() {
   const { error } = useUI();
   const { configs } = useConfigs();
   const pathname = usePathname();
-  const { replace, push } = useRouter();
+  const { replace } = useRouter();
   const searchParams = useSearchParams();
   const shownWarnings = useRef(new Set());
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -46,9 +44,7 @@ export function Playground() {
     let direction = e.evt.deltaY > 0 ? 1 : -1;
 
     // When e.evt.ctrlKey is true, revert direction
-    if (e.evt.ctrlKey) {
-      direction = -direction;
-    }
+    if (e.evt.ctrlKey) direction = -direction;
 
     let newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
 
@@ -74,9 +70,7 @@ export function Playground() {
   const txInfoVisible = (txHash: string) => () => {
     const params = new URLSearchParams(searchParams);
     params.set(TX_URL_PARAM, txHash);
-    if (params) {
-      replace(`${pathname}?${params.toString()}`);
-    }
+    if (params) replace(`${pathname}?${params.toString()}`);
   };
 
   useEffect(() => {
@@ -105,11 +99,7 @@ export function Playground() {
 
           toast(tx.warning, {
             icon,
-            style: {
-              backgroundColor,
-              fontWeight: "bold",
-              color,
-            },
+            style: { backgroundColor, fontWeight: "bold", color },
             duration: 5000,
           });
           shownWarnings.current.add(warningKey);
@@ -117,13 +107,6 @@ export function Playground() {
       }
     });
   }, [transactions.transactions]);
-
-  if (
-    typeof window !== "undefined" &&
-    isEmpty(error) &&
-    !transactions.transactions[0]
-  )
-    push(ROUTES.TX);
 
   if (error)
     return (
@@ -140,13 +123,6 @@ export function Playground() {
       className="h-auto w-full"
     >
       <Layer>
-        {transactions.transactions.map((tx, index) => (
-          <Transaction
-            key={index}
-            txHash={tx.txHash}
-            txInfoVisible={txInfoVisible(tx.txHash)}
-          />
-        ))}
         {transactions.transactions.map((tx) => {
           return tx.outputs.map((utxo, index) => (
             <Line
@@ -174,6 +150,13 @@ export function Playground() {
             key={index}
             utxoHash={utxoHash}
             utxoInfoVisible={utxoInfoVisible(utxoHash)}
+          />
+        ))}
+        {transactions.transactions.map((tx, index) => (
+          <Transaction
+            key={index}
+            txHash={tx.txHash}
+            txInfoVisible={txInfoVisible(tx.txHash)}
           />
         ))}
       </Layer>

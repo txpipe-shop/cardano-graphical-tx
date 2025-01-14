@@ -1,123 +1,54 @@
-import { bech32 } from "bech32";
-import type { Vector2d } from "konva/lib/types";
-import type {
-  Address,
-  IGraphicalTransaction,
-  IGraphicalUtxo,
-  ITransaction,
-  TransactionsBox,
-} from "~/app/_interfaces";
-import type { Utxo } from "~/napi-pallas";
-import {
-  POLICY_LENGTH,
-  defaultPosition,
-  getTransaction,
-  getUtxo,
-  isEmpty,
-} from ".";
+import type { IGraphicalTransaction, TransactionsBox } from "../_interfaces";
 
-interface IGenerateUTXO extends Utxo {
-  transactionBox: TransactionsBox;
-  position?: Vector2d;
-  isReferenceInput?: boolean;
-  distance?: Vector2d;
-}
-
-/**
- * Given a bech32 address, returns an object with the full address information.
- *
- * @param address - A string representing an address in bech32 format.
- * @returns - An object containing the bech32 address, the header type, the network type,
- * the payment part, and the kind of address (key or script).
- */
-const formatAddress = (address: string): Address | undefined => {
-  let hexAddress = "";
-  if (!isEmpty(address)) {
-    // TODO: Add base58 address decoding for byron addresses
-    const result = bech32.decodeUnsafe(address, 108);
-    if (!result) return undefined;
-    const unwords = bech32.fromWords(result.words);
-    hexAddress = Buffer.from(unwords).toString("hex");
-  }
-  return isEmpty(address) || !hexAddress[0] || !hexAddress[1]
-    ? undefined
-    : {
-        bech32: address,
-        headerType: hexAddress[0],
-        netType: hexAddress[1],
-        payment: hexAddress.slice(2, POLICY_LENGTH),
-        kind: Number(hexAddress[0]) % 2 === 0 ? "key" : "script",
-      };
-};
-
-const generateGraphicalUTXO = ({
-  txHash,
-  index,
-  bytes,
-  address,
-  lovelace,
-  datum,
-  assets,
-  scriptRef,
-  transactionBox,
-  position = defaultPosition,
-  distance = defaultPosition,
-  isReferenceInput = false,
-}: IGenerateUTXO): IGraphicalUtxo => {
-  const exist = getUtxo(transactionBox)(txHash + "#" + index);
-  if (exist) {
-    return exist;
-  }
-
-  return {
-    txHash: txHash + "#" + index,
-    index,
-    bytes,
-    address: formatAddress(address),
-    lovelace,
-    datum,
-    assets,
-    scriptRef,
-    lines: [],
-    pos: position,
-    distance,
-    isReferenceInput,
+export const getTransaction =
+  (transactionBox: TransactionsBox) => (txHash: string) => {
+    return transactionBox.transactions.find((tx) => tx.txHash === txHash);
   };
-};
 
-export const parseTxToGraphical = (
-  txFromCbors: ITransaction[],
-  transactionBox: TransactionsBox,
-): IGraphicalTransaction[] =>
-  txFromCbors.map((cbor) => {
-    const inputs: IGraphicalUtxo[] = cbor.referenceInputs
-      .concat(cbor.inputs)
-      .map((input) =>
-        generateGraphicalUTXO({
-          ...input,
-          transactionBox,
-          isReferenceInput: cbor.referenceInputs.some(
-            (referenceInput) => referenceInput === input,
-          ),
-        }),
-      );
+export const getUtxo =
+  (transactionBox: TransactionsBox) => (utxoHash: string) => {
+    return transactionBox.utxos[utxoHash];
+  };
 
-    const outputs = cbor.outputs.map((output) =>
-      generateGraphicalUTXO({
-        ...output,
-        transactionBox,
-      }),
+export const getUtxoIndex =
+  (transactions: IGraphicalTransaction[]) => (utxoHash: string) => {
+    const inputs = transactions.flatMap(({ inputs }) =>
+      inputs
+        .filter(({ isReferenceInput }) => !isReferenceInput)
+        .map(({ txHash }) => txHash),
     );
-    const existsTx = getTransaction(transactionBox)(cbor.txHash);
-    const alias = existsTx ? existsTx.alias : "";
 
-    return {
-      ...cbor,
-      pos: defaultPosition,
-      outputs,
-      inputs,
-      producedLines: [],
-      consumedLines: [],
-      alias,
-    };
-  });
+    return inputs.indexOf(utxoHash);
+  };
+
+export const isInputUtxo =
+  (transactionBox: TransactionsBox) => (utxoHash: string) => {
+    return transactionBox.transactions.some((tx) =>
+      tx.inputs.some((utxo) => utxo.txHash === utxoHash),
+    );
+  };
+
+export const isOutputUtxo =
+  (transactionBox: TransactionsBox) => (utxoHash: string) => {
+    return transactionBox.transactions.some((tx) =>
+      tx.outputs.some((utxo) => utxo.txHash === utxoHash),
+    );
+  };
+
+export const existsMint =
+  (transactionBox: TransactionsBox) => (txHash: string) => {
+    const selectedTx = getTransaction(transactionBox)(txHash);
+    if (!selectedTx) return false;
+    return selectedTx.mints.some(({ assetsPolicy }) =>
+      assetsPolicy.some((asset) => (asset.amount ?? 0) > 0),
+    );
+  };
+
+export const existsBurn =
+  (transactionBox: TransactionsBox) => (txHash: string) => {
+    const selectedTx = getTransaction(transactionBox)(txHash);
+    if (!selectedTx) return false;
+    return selectedTx.mints.some(({ assetsPolicy }) =>
+      assetsPolicy.some((asset) => (asset.amount ?? 0) < 0),
+    );
+  };

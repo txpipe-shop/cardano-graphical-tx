@@ -1,32 +1,13 @@
 import type { Vector2d } from "konva/lib/types";
 import type { Dispatch, SetStateAction } from "react";
-import type {
-  IGraphicalTransaction,
-  IGraphicalUtxo,
-  TransactionsBox,
-} from "~/app/_interfaces";
-import { KONVA_COLORS, TX_HEIGHT, TX_WIDTH, UTXO_LINE_GAP } from ".";
-
-export const getTransaction =
-  (transactionBox: TransactionsBox) => (txHash: string) => {
-    return transactionBox.transactions.find((tx) => tx.txHash === txHash);
-  };
-
-export const getUtxo =
-  (transactionBox: TransactionsBox) => (utxoHash: string) => {
-    return transactionBox.utxos[utxoHash];
-  };
-
-export const getUtxoIndex =
-  (transactions: IGraphicalTransaction[]) => (utxoHash: string) => {
-    const inputs = transactions.flatMap(({ inputs }) =>
-      inputs
-        .filter(({ isReferenceInput }) => !isReferenceInput)
-        .map(({ txHash }) => txHash),
-    );
-
-    return inputs.indexOf(utxoHash);
-  };
+import type { TransactionsBox } from "~/app/_interfaces";
+import { KONVA_COLORS } from ".";
+import {
+  getTransaction,
+  getUtxo,
+  isInputUtxo,
+  isOutputUtxo,
+} from "./txHelpers";
 
 /**
  * Updates the positions of produced and consumed lines (the outputs and inputs) in a transaction box,
@@ -94,7 +75,7 @@ export const updateUtxoLines =
     const selectedUtxo = getUtxo(transactionBox)(utxoHash);
     if (!selectedUtxo) return;
     selectedUtxo.lines.forEach((line) => {
-      if (!line) return;
+      if (!line || (!isOutput && line.attrs.metadata === "output")) return;
       const [centerX] = line.points().slice(0, 1);
       if (!centerX) return;
       line.points([
@@ -114,101 +95,15 @@ export const updateUtxoLines =
     });
   };
 
-export const isInputUtxo =
-  (transactionBox: TransactionsBox) => (utxoHash: string) => {
-    return transactionBox.transactions.some((tx) =>
-      tx.inputs.some((utxo) => utxo.txHash === utxoHash),
-    );
-  };
-
-export const isOutputUtxo =
-  (transactionBox: TransactionsBox) => (utxoHash: string) => {
-    return transactionBox.transactions.some((tx) =>
-      tx.outputs.some((utxo) => utxo.txHash === utxoHash),
-    );
-  };
-
 /** Obtains the color of a utxo based on if it is an input and/or output of a transaction. */
 export const getUtxoColor =
   (transactions: TransactionsBox) => (utxoHash: string) => {
+    if (
+      isOutputUtxo(transactions)(utxoHash) &&
+      isInputUtxo(transactions)(utxoHash)
+    )
+      return { fill: KONVA_COLORS.BLUE, stroke: KONVA_COLORS.RED };
     if (isOutputUtxo(transactions)(utxoHash))
       return { fill: KONVA_COLORS.RED, stroke: KONVA_COLORS.TRANSAPARENT };
     return { fill: KONVA_COLORS.BLUE, stroke: KONVA_COLORS.TRANSAPARENT };
-  };
-
-/**
- * Calculates the positions of the UTXOs in a transaction.
- * @returns An array of UTXO items with their positions updated.
- */
-const setUtxoPosition = (
-  utxoList: IGraphicalUtxo[],
-  txPos: Vector2d,
-  isOutput: boolean,
-): IGraphicalUtxo[] => {
-  const length = utxoList.length;
-  // hasSpace checks if there is enough space to fit all utxos in the tx_height
-  const hasSpace = (length - 1) * UTXO_LINE_GAP > TX_HEIGHT;
-  // margin is the space between the first (top) utxo and the top of the tx when utxos dont fit in the tx_height
-  const margin = hasSpace ? ((length - 1) * UTXO_LINE_GAP - TX_HEIGHT) / 2 : 0;
-
-  return utxoList.map((utxo, index) => {
-    const distanceBetweenPoints = TX_HEIGHT / (length + 1);
-
-    const y = hasSpace
-      ? txPos.y - margin + index * UTXO_LINE_GAP
-      : txPos.y + distanceBetweenPoints * (index + 1);
-
-    const x = isOutput ? txPos.x + 2 * TX_WIDTH : txPos.x - TX_WIDTH;
-
-    return {
-      ...utxo,
-      pos: { x, y },
-      distance: {
-        x: isOutput ? 2 * TX_WIDTH : -TX_WIDTH,
-        y: y - txPos.y,
-      },
-      isReferenceInput: utxo.isReferenceInput,
-    };
-  });
-};
-
-/** Calculates the position of the transaction on the canvas. */
-export const setPosition = (
-  transactions: IGraphicalTransaction[],
-): IGraphicalTransaction[] => {
-  const initial = window.innerWidth / 2 - TX_WIDTH / 2;
-
-  return transactions.map((tx) => {
-    const txPos = { x: initial, y: TX_HEIGHT };
-
-    const inputs = setUtxoPosition(tx.inputs, txPos, false);
-
-    const sortedOutputs = tx.outputs.sort((a, b) => a.index - b.index);
-    const outputs = setUtxoPosition(sortedOutputs, txPos, true);
-
-    return {
-      ...tx,
-      inputs,
-      outputs,
-      pos: txPos,
-    };
-  });
-};
-
-export const existsMint =
-  (transactionBox: TransactionsBox) => (txHash: string) => {
-    const selectedTx = getTransaction(transactionBox)(txHash);
-    if (!selectedTx) return false;
-    return selectedTx.mints.some(({ assetsPolicy }) =>
-      assetsPolicy.some((asset) => (asset.amount ?? 0) > 0),
-    );
-  };
-
-export const existsBurn =
-  (transactionBox: TransactionsBox) => (txHash: string) => {
-    const selectedTx = getTransaction(transactionBox)(txHash);
-    if (!selectedTx) return false;
-    return selectedTx.mints.some(({ assetsPolicy }) =>
-      assetsPolicy.some((asset) => (asset.amount ?? 0) < 0),
-    );
   };

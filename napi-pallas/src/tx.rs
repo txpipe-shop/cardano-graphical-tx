@@ -309,8 +309,8 @@ fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
 
 pub fn cbor_to_tx(raw: String) -> SafeCborResponse {
   SafeCborResponse::new().try_build(|| {
-    let cbor = hex::decode(raw).map_err(|e| format!("Failed to decode hex: {}", e))?;
-    let tx = MultiEraTx::decode(&cbor).map_err(|e| format!("Failed to decode tx: {}", e))?;
+    let cbor = hex::decode(raw).map_err(|e| format!("Failed to decode hex. {}", e))?;
+    let tx = MultiEraTx::decode(&cbor).map_err(|e| format!("Failed to decode tx. {}", e))?;
 
     let inputs: Vec<Input> = get_inputs(&tx.inputs());
     let reference_inputs: Vec<Input> = get_inputs(&tx.reference_inputs());

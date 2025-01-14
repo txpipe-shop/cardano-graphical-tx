@@ -18,8 +18,8 @@ export const Error = ({
     error === "Internal server error" ? Error500Icon : NotFoundIcon;
 
   return (
-    <div className="absolute inset-0 -z-30 overflow-hidden">
-      <div className="flex h-screen w-full flex-col items-center justify-center text-center text-2xl font-black text-red-400">
+    <div className="absolute inset-0 -z-30 flex justify-center overflow-hidden">
+      <div className="flex h-screen w-2/3 flex-col items-center justify-center text-center text-2xl font-black text-red-400">
         <Image src={getError()} alt="ERROR" />
         There was an error {action} the {goal}: <br />
         {error} <br /> <br />
