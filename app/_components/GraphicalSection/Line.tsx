@@ -47,7 +47,7 @@ export const UtxoLine = ({
         startY + distanceBetweenOutputs * (index + 1),
         endX - Math.abs(centerXOutput - endX) * 0.7,
         endY,
-        endX,
+        utxo.consumedBy ? endX - 10 : endX,
         endY,
       ]
     : [
