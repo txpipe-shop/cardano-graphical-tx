@@ -121,43 +121,53 @@ export default function UtxoTracers({
         />
       )}
       {inputTracer && (
-        <Group>
-          <Arc
-            x={utxo.pos.x}
-            y={utxo.pos.y}
-            innerRadius={40}
-            outerRadius={55}
-            scale={{ x: 0.2, y: 0.2 }}
-            angle={300}
-            rotation={30}
-            fill={KONVA_COLORS.RED}
-          />
-          <Line
-            points={[utxo.pos.x - 10, utxo.pos.y, utxo.pos.x - 40, utxo.pos.y]}
-            stroke={outputGradient}
-            strokeWidth={2}
-          />
-        </Group>
+        <Arc
+          x={utxo.pos.x}
+          y={utxo.pos.y}
+          innerRadius={40}
+          outerRadius={55}
+          scale={{ x: 0.2, y: 0.2 }}
+          angle={300}
+          rotation={30}
+          fill={KONVA_COLORS.RED}
+          shadowColor={
+            arrowHovered
+              ? KONVA_COLORS.RED_BURN_FILL
+              : KONVA_COLORS.TRANSAPARENT
+          }
+          shadowBlur={arrowHovered ? 20 : 0}
+          opacity={arrowHovered ? 1 : 0.2}
+        />
       )}
       {outputTracer && (
-        <Group>
-          <Circle
-            x={utxo.pos.x}
-            y={utxo.pos.y}
-            radius={POINT_SIZE}
-            width={POINT_SIZE}
-            height={POINT_SIZE}
-            fill={KONVA_COLORS.BLUE}
-            stroke={color.stroke}
-            strokeWidth={3}
-          />
-          <Line
-            points={[utxo.pos.x + 5, utxo.pos.y, utxo.pos.x + 35, utxo.pos.y]}
-            stroke={inputGradient}
-            strokeWidth={2}
-          />
-        </Group>
+        <Circle
+          x={utxo.pos.x}
+          y={utxo.pos.y}
+          radius={POINT_SIZE}
+          width={POINT_SIZE}
+          height={POINT_SIZE}
+          fill={KONVA_COLORS.BLUE}
+          stroke={color.stroke}
+          strokeWidth={3}
+          shadowColor={
+            arrowHovered ? KONVA_COLORS.BLUE : KONVA_COLORS.TRANSAPARENT
+          }
+          shadowBlur={arrowHovered ? 15 : 0}
+          opacity={arrowHovered ? 1 : 0.2}
+        />
       )}
+      <Line
+        points={
+          inputTracer
+            ? [utxo.pos.x - 10, utxo.pos.y, utxo.pos.x - 40, utxo.pos.y]
+            : outputTracer
+              ? [utxo.pos.x + 5, utxo.pos.y, utxo.pos.x + 35, utxo.pos.y]
+              : []
+        }
+        stroke={inputTracer ? outputGradient : inputGradient}
+        strokeWidth={2}
+        opacity={arrowHovered ? 1 : 0.2}
+      />
     </Group>
   );
 }
