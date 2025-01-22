@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   AddressExamples,
+  DSLExamples,
   NETWORK,
   OPTIONS,
   ROUTES,
@@ -15,11 +16,11 @@ import addCBORsToContext from "./Input/TxInput/txInput.helper";
 
 export function Examples({
   showTxExamples,
-  showDSLExample = false,
+  showDSLExamples = false,
   showAddressesExamples = false,
 }: {
   showTxExamples?: boolean;
-  showDSLExample?: boolean;
+  showDSLExamples?: boolean;
   showAddressesExamples?: boolean;
 }) {
   const router = useRouter();
@@ -82,19 +83,22 @@ export function Examples({
               </code>
             </button>
           ))}
-        {showDSLExample && (
-          <button
-            type="submit"
-            className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
-            onClick={() => router.push(ROUTES.DSL + "?example=true")}
-          >
-            <h3 className="text-xl">DSL Usage Example</h3>
-
-            <code className="mt-4 block w-full break-words text-gray-400">
-              {`{ "transaction": { "name": "example", "fee": 1,...`}
-            </code>
-          </button>
-        )}
+        {showDSLExamples &&
+          DSLExamples.map((example, index) => (
+            <button
+              key={index}
+              type="submit"
+              className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
+              onClick={() =>
+                router.push(ROUTES.DSL + "?example=" + example.title)
+              }
+            >
+              <h3 className="text-xl">{example.title} DSL Usage Example</h3>
+              <code className="mt-4 block w-full break-words text-gray-400">
+                {example.code.substring(0, 30)}
+              </code>
+            </button>
+          ))}
         {showAddressesExamples &&
           AddressExamples.map((example, index) => (
             <button
