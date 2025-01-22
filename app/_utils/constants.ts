@@ -150,9 +150,38 @@ export const TxExamples = [
   { title: "Draw Multiple Tx Hashes", code: multipleHashes },
 ];
 
-export const dslExample = `{
+export const simpleDSL = `{
   "transaction": {
-    "name": "example",
+    "name": "simple example",
+    "fee": 2,
+    "inputs": [
+      {
+        "txHash": "328a2c5a860062fdfc968e476982561a8255ae31ae940d3022d3759fef8083d5",
+        "index": 1
+      }
+    ],
+    "outputs": [
+      {
+        "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk",
+        "values": [
+          {
+            "amount": 9000000,
+            "name": "lovelace"
+          },
+          {
+            "amount": 123,
+            "name": "New Token"
+          }
+        ]
+      }
+    ]
+  }
+}
+`;
+
+const complexDSL = `{
+  "transaction": {
+    "name": "complex example",
     "fee": 1,
     "start": 123,
     "ttl": 321,
@@ -186,7 +215,7 @@ export const dslExample = `{
         "values": [
           {
             "amount": 10000000,
-            "name": "lovelace"
+            "name": "Token1"
           },
           {
             "amount": 10,
@@ -197,7 +226,7 @@ export const dslExample = `{
     ],
     "outputs": [
       {
-        "name": "wallet-de-sofi",
+        "name": "wallet-B",
         "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk",
         "values": [
           {
@@ -261,3 +290,8 @@ export const dslExample = `{
   }
 }
 `;
+
+export const DSLExamples = [
+  { title: "Simple", code: simpleDSL },
+  { title: "Complex", code: complexDSL },
+];

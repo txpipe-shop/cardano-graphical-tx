@@ -10,13 +10,13 @@ import jsonpointer from "jsonpointer";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useUI } from "~/app/_contexts";
-import { dslExample, getDSLFromJSON, isEmpty } from "~/app/_utils";
+import { DSLExamples, getDSLFromJSON, isEmpty, simpleDSL } from "~/app/_utils";
 import { customJsonLinter } from "./CustomLinter";
 import { DslInputHeader, DslResHeader } from "./DslHeader";
 
 export const DslSection = () => {
   const { setError } = useUI();
-  const [dsl, setDsl] = useState<string>("");
+  const [dsl, setDsl] = useState<string>(simpleDSL);
   const [cborHex, setCborHex] = useState<string>("");
   const [cborDiagnostic, setCborDiagnostic] = useState<string>("");
   const [customDiagnostics, setCustomDiagnostics] = useState<Diagnostic[]>([]);
@@ -24,7 +24,8 @@ export const DslSection = () => {
   const useExample = searchParams.get("example");
 
   useEffect(() => {
-    if (useExample) setDsl(dslExample);
+    if (useExample)
+      setDsl(DSLExamples.find((ex) => ex.title === useExample)!.code);
   }, [useExample]);
 
   const TabContent = [
