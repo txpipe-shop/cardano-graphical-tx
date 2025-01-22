@@ -29,6 +29,7 @@ const OutputSchema = z.object({
   inline_datum: z.string().nullable(),
   collateral: z.boolean(),
   reference_script_hash: z.string().nullable(),
+  consumed_by_tx: z.string().nullable(),
 });
 
 export const BlockfrostUTxOSchema = z.object({

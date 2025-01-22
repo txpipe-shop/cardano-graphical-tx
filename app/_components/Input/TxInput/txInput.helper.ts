@@ -8,7 +8,6 @@ import type {
 import {
   KONVA_COLORS,
   OPTIONS,
-  POINT_SIZE,
   POLICY_LENGTH,
   TX_HEIGHT,
   TX_WIDTH,
@@ -29,7 +28,8 @@ import toast from "react-hot-toast";
 import type { Address, IGraphicalUtxo } from "~/app/_interfaces";
 import type { Utxo } from "~/napi-pallas";
 
-interface IGenerateUTXO extends Utxo {
+interface IGenerateUTXO {
+  utxo: Utxo & { consumedBy?: string };
   existingTxs: TransactionsBox;
   pos?: Vector2d;
   isReferenceInput?: boolean;
@@ -64,31 +64,21 @@ const formatAddress = (address: string): Address | undefined => {
 };
 
 const generateGraphicalUTXO = ({
-  txHash,
-  index,
-  bytes,
-  address,
-  lovelace,
-  datum,
-  assets,
-  scriptRef,
+  utxo,
   existingTxs,
   pos = defaultPosition,
   distance = defaultPosition,
   isReferenceInput = false,
 }: IGenerateUTXO): IGraphicalUtxo => {
+  const { txHash, index, address, datum } = utxo;
   const exist = getUtxo(existingTxs)(txHash + "#" + index);
   if (exist) return exist;
 
   return {
-    txHash: txHash + "#" + index,
-    index,
-    bytes,
-    address: formatAddress(address),
-    lovelace,
+    ...utxo,
     datum,
-    assets,
-    scriptRef,
+    txHash: txHash + "#" + index,
+    address: formatAddress(address),
     lines: [],
     pos,
     distance,
@@ -105,7 +95,7 @@ const parseTxToGraphical = (
       .concat(cbor.inputs)
       .map((input) =>
         generateGraphicalUTXO({
-          ...input,
+          utxo: input,
           existingTxs,
           isReferenceInput: cbor.referenceInputs.some(
             (referenceInput) => referenceInput === input,
@@ -115,7 +105,7 @@ const parseTxToGraphical = (
 
     const outputs = cbor.outputs.map((output) =>
       generateGraphicalUTXO({
-        ...output,
+        utxo: output,
         existingTxs,
       }),
     );
@@ -171,6 +161,7 @@ const setPositions = (
   transactions: IGraphicalTransaction[],
 ): IGraphicalTransaction[] => {
   const blockWidth = 3 * TX_WIDTH;
+  const spaceBetweenBlocks = 100;
   const blocks = new Set(transactions.map((tx) => tx.blockHeight).sort()); // Blocks containing the txs
   const normalizedBlockIndex = transactions.reduce(
     // Txs grouped by block
@@ -205,7 +196,7 @@ const setPositions = (
       (txHash) => txHash === tx.txHash,
     );
     // Gap between blocks. Its zero if the tx is the first in the block
-    const blockGap = blockIndex % blocks.size ? POINT_SIZE * 5 : 0;
+    const blockGap = blockIndex % blocks.size ? spaceBetweenBlocks : 0;
     const pos = {
       x: initialX + (blockWidth + blockGap) * blockIndex,
       y: initialY + TX_HEIGHT * 1.5 * indexInBlock,
@@ -298,12 +289,12 @@ export default async function addCBORsToContext(
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
   setLoading: Dispatch<SetStateAction<boolean>>,
 ) {
+  const cborsToSet: string[] = [];
   if (option === OPTIONS.HASH) {
     const hashesPromises = uniqueInputs.map((hash) =>
       getCborFromHash(hash, net, setError),
     );
     const cbors = await Promise.all(hashesPromises);
-    const cborsToSet: string[] = [];
     cbors.map(({ warning, cbor }) => {
       if (warning) {
         toast.error(warning, {
@@ -315,24 +306,16 @@ export default async function addCBORsToContext(
       }
       cborsToSet.push(cbor);
     });
-    await setCBORs(
-      net,
-      cborsToSet,
-      transactions,
-      setTransactionBox,
-      setError,
-      setLoading,
-      true,
-    );
   } else {
-    await setCBORs(
-      net,
-      uniqueInputs,
-      transactions,
-      setTransactionBox,
-      setError,
-      setLoading,
-      false,
-    );
+    cborsToSet.push(...uniqueInputs);
   }
+  await setCBORs(
+    net,
+    cborsToSet,
+    transactions,
+    setTransactionBox,
+    setError,
+    setLoading,
+    option === OPTIONS.HASH,
+  );
 }

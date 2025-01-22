@@ -2,7 +2,7 @@ import { Tooltip } from "@nextui-org/react";
 import Image from "next/image";
 import { Button } from "~/app/_components";
 import { useUI } from "~/app/_contexts";
-import { handleCopy, isEmpty } from "~/app/_utils";
+import { firstNChars, handleCopy, isEmpty } from "~/app/_utils";
 import CopyIcon from "/public/copy.svg";
 
 export const DslInputHeader = () => {
@@ -17,9 +17,7 @@ export const DslInputHeader = () => {
         Input DSL JSON
         {!isEmpty(error) && (
           <div className="flex items-center gap-2">
-            <div className="text-lg text-red-500">
-              {error.substring(0, 20) + "..."}
-            </div>
+            <div className="text-lg text-red-500">{firstNChars(error, 20)}</div>
             <Tooltip
               placement="right"
               content={<div className="px-1 py-2">{error}</div>}
