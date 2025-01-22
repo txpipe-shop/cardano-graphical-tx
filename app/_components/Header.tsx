@@ -14,7 +14,7 @@ export const Header = () => {
           </Link>
         </h3>
         <Link
-          href="https://txpipe.shop/"
+          href="https://txpipe.io/"
           target="_blank"
           rel="noopener noreferrer"
           className="z-40"
