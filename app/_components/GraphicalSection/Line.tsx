@@ -9,6 +9,7 @@ import {
   TX_WIDTH,
   getTransaction,
   getUtxo,
+  isInputUtxo,
 } from "~/app/_utils";
 
 interface UtxoLineProps {
@@ -39,6 +40,7 @@ export const UtxoLine = ({
   const { x: endX, y: endY } = utxo.pos;
   const centerXOutput = startX + TX_WIDTH;
   const centerXInput = startX;
+  const isInput = isInputUtxo(transactions)(utxoHash);
   const points = isOutput
     ? [
         centerXOutput + STROKE_WIDTH / 2,
@@ -47,7 +49,7 @@ export const UtxoLine = ({
         startY + distanceBetweenOutputs * (index + 1),
         endX - Math.abs(centerXOutput - endX) * 0.7,
         endY,
-        utxo.consumedBy ? endX - 10 : endX,
+        utxo.consumedBy && !isInput ? endX - 10 : endX,
         endY,
       ]
     : [
