@@ -6,7 +6,6 @@ import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   AddressExamples,
   DSLExamples,
-  firstNChars,
   NETWORK,
   OPTIONS,
   ROUTES,
@@ -96,7 +95,7 @@ export function Examples({
             >
               <h3 className="text-xl">{example.title} DSL Usage Example</h3>
               <code className="mt-4 block w-full break-words text-gray-400">
-                {firstNChars(example.code, 20)}
+                {example.code.substring(0, 30)}
               </code>
             </button>
           ))}
