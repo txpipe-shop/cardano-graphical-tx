@@ -29,33 +29,62 @@ static SCHEMA_JSON: &str = include_str!("../.././docs/schema.json");
 
 fn preprocess_inputs(inputs: &mut Value) {
   if let Some(inputs_array) = inputs.as_array_mut() {
+    // TODO: Resolve predicate inputs here and change necessary parts
     let mut used_indices: HashSet<u64> = inputs_array
       .iter()
-      .filter_map(|input| input["index"].as_u64())
+      .filter_map(|input| {
+        if let Some(normal) = input.get("normal") {
+          normal["index"].as_u64()
+        } else {
+          None
+        }
+      })
       .collect();
 
     let mut next_index = *used_indices.iter().max().unwrap_or(&0) + 1;
 
     for input in inputs_array.iter_mut() {
-      if input["txHash"].is_null() {
-        input["txHash"] = json!(FIXED_HASH);
-      }
+      if let Some(normal) = input.get_mut("normal") {
+        if normal["txHash"].is_null() {
+          normal["txHash"] = json!(FIXED_HASH);
+        }
 
-      if input["index"].is_null() {
+        if normal["index"].is_null() {
+          while used_indices.contains(&next_index) {
+            next_index += 1;
+          }
+          normal["index"] = json!(next_index);
+          used_indices.insert(next_index);
+        }
+      } else {
+        // Change here
+        input["predicate"]["txHash"] = json!(FIXED_HASH);
         while used_indices.contains(&next_index) {
           next_index += 1;
         }
-        input["index"] = json!(next_index);
+        input["predicate"]["index"] = json!(next_index);
         used_indices.insert(next_index);
       }
     }
 
     inputs_array.sort_by(|a, b| {
-      let tx_hash_a = a["txHash"].as_str().unwrap_or_default();
-      let tx_hash_b = b["txHash"].as_str().unwrap_or_default();
+      let (tx_hash_a, index_a) = if let Some(normal) = a.get("normal") {
+        (
+          normal["txHash"].as_str().unwrap_or_default(),
+          normal["index"].as_u64().unwrap_or_default(),
+        )
+      } else {
+        ("", 0)
+      };
 
-      let index_a = a["index"].as_u64().unwrap_or_default();
-      let index_b = b["index"].as_u64().unwrap_or_default();
+      let (tx_hash_b, index_b) = if let Some(normal) = b.get("normal") {
+        (
+          normal["txHash"].as_str().unwrap_or_default(),
+          normal["index"].as_u64().unwrap_or_default(),
+        )
+      } else {
+        ("", 0)
+      };
 
       tx_hash_a.cmp(tx_hash_b).then(index_a.cmp(&index_b))
     });
@@ -113,14 +142,26 @@ fn build_inputs_and_redeemers(inputs: &Value) -> (Set<TransactionInput>, Option<
       .map(|x| {
         build_redeemer(x, &mut redeemers_vec);
         // Unwrap safe because it is ensured by the preprocess_json function
-        TransactionInput {
-          transaction_id: {
-            let tx_hash_value = x["txHash"].as_str().unwrap();
-            let bytes = hex::decode(tx_hash_value).unwrap();
-            let array: [u8; 32] = bytes.try_into().unwrap();
-            Hash::<32>::new(array)
-          },
-          index: x["index"].as_u64().unwrap(),
+        if let Some(normal) = x.get("normal") {
+          TransactionInput {
+            transaction_id: {
+              let tx_hash_value = normal["txHash"].as_str().unwrap();
+              let bytes = hex::decode(tx_hash_value).unwrap();
+              let array: [u8; 32] = bytes.try_into().unwrap();
+              Hash::<32>::new(array)
+            },
+            index: normal["index"].as_u64().unwrap(),
+          }
+        } else {
+          TransactionInput {
+            transaction_id: {
+              let tx_hash_value = x["predicate"]["txHash"].as_str().unwrap();
+              let bytes = hex::decode(tx_hash_value).unwrap();
+              let array: [u8; 32] = bytes.try_into().unwrap();
+              Hash::<32>::new(array)
+            },
+            index: x["predicate"]["index"].as_u64().unwrap(),
+          }
         }
       })
       .collect::<Vec<TransactionInput>>(),
