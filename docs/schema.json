@@ -1,363 +1,211 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Transaction Schema",
-    "description": "The specification of a transaction.",
-    "type": "object",
-    "additionalProperties": false,
-    "definitions": {
-        "Values": {
-            "type": "array",
-            "items": {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Transaction Schema",
+  "description": "The specification of a transaction.",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "Values": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "amount": { "type": "number" },
+          "name": { "type": "string" },
+          "assetClass": { "$ref": "#/definitions/AssetClass" }
+        },
+        "oneOf": [{ "required": ["name"] }, { "required": ["assetClass"] }],
+        "required": ["amount"]
+      },
+      "minItems": 1
+    },
+    "PredicateInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "address": { "$ref": "#/definitions/Address" },
+        "assetClass": { "$ref": "#/definitions/AssetClass" },
+        "policyId": { "type": "string", "pattern": "^[0-9a-fA-F]{56}$" }
+      },
+      "oneOf": [{ "required": ["assetClass"] }, { "required": ["policyId"] }],
+      "required": ["address"]
+    },
+    "NormalInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "address": { "$ref": "#/definitions/Address" },
+        "script_ref": { "$ref": "#/definitions/Hash" },
+        "datum": { "$ref": "#/definitions/Datum" },
+        "txHash": { "$ref": "#/definitions/Hash" },
+        "index": { "type": "integer" },
+        "redeemer": { "type": "object" },
+        "values": { "$ref": "#/definitions/Values" }
+      },
+      "allOf": [
+        { "if": { "required": ["txHash"] }, "then": { "required": ["index"] } },
+        { "if": { "required": ["index"] }, "then": { "required": ["txHash"] } }
+      ]
+    },
+    "RefInputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "address": { "$ref": "#/definitions/Address" },
+        "script_ref": { "$ref": "#/definitions/Hash" },
+        "datum": { "$ref": "#/definitions/Datum" },
+        "txHash": { "$ref": "#/definitions/Hash" },
+        "index": { "type": "integer" },
+        "values": { "$ref": "#/definitions/Values" }
+      },
+      "allOf": [
+        { "if": { "required": ["txHash"] }, "then": { "required": ["index"] } },
+        { "if": { "required": ["index"] }, "then": { "required": ["txHash"] } }
+      ]
+    },
+    "Address": {
+      "type": "string",
+      "pattern": "^[a-zA-Z_]+1[0-9a-zA-Z]{32,128}$"
+    },
+    "AssetClass": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{56}\\.[0-9a-fA-F]{0,64}$"
+    },
+    "Hash": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "Datum": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "hash": { "$ref": "#/definitions/Hash" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bytes": {
+              "type": "string",
+              "pattern": "^([a-fA-F0-9][a-fA-F0-9])+$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": { "json": { "type": "object" } }
+        }
+      ]
+    }
+  },
+  "properties": {
+    "transaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "fee": { "type": "number" },
+        "start": { "type": "number" },
+        "ttl": { "type": "number" },
+        "ref_inputs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/RefInputs" }
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
-                    "amount": {
-                        "type": "number"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "assetClass": {
-                        "type": "string",
-                        "pattern": "^[0-9a-fA-F]{56}\\.[0-9a-fA-F]{0,64}$"
-                    }
+                  "predicate": { "$ref": "#/definitions/PredicateInput" }
+                },
+                "required": ["predicate"]
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "normal": { "$ref": "#/definitions/NormalInput" }
+                },
+                "required": ["normal"]
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "outputs": {
+          "type": "array",
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "address": { "$ref": "#/definitions/Address" },
+            "script_ref": { "$ref": "#/definitions/Hash" },
+            "datum": { "$ref": "#/definitions/Datum" },
+            "txHash": { "$ref": "#/definitions/Hash" },
+            "index": { "type": "integer" },
+            "redeemer": { "type": "object" },
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "amount": { "type": "number" },
+                  "name": { "type": "string" },
+                  "assetClass": { "$ref": "#/definitions/AssetClass" },
+                  "minted": { "type": "boolean" }
                 },
                 "oneOf": [
-                    {
-                        "required": [
-                            "name"
-                        ]
-                    },
-                    {
-                        "required": [
-                            "assetClass"
-                        ]
-                    }
+                  { "required": ["name"] },
+                  { "required": ["assetClass"] }
                 ],
-                "required": [
-                    "amount"
-                ]
+                "required": ["amount"]
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": { "required": ["txHash"] },
+              "then": { "required": ["index"] }
             },
-            "minItems": 1
+            {
+              "if": { "required": ["index"] },
+              "then": { "required": ["txHash"] }
+            }
+          ],
+          "required": ["values"]
         },
-        "Inputs": {
+        "minting": { "$ref": "#/definitions/Values" },
+        "withdrawals": {
+          "type": "array",
+          "items": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "address": {
-                    "$ref": "#/definitions/Address"
-                },
-                "script_ref": {
-                    "type": "string",
-                    "pattern": "^[a-fA-F0-9]{64}$"
-                },
-                "datum": {
-                    "$ref": "#/definitions/Datum"
-                },
-                "txHash": {
-                    "type": "string",
-                    "pattern": "^[a-fA-F0-9]{64}$"
-                },
-                "index": {
-                    "type": "integer"
-                },
-                "redeemer": {
-                    "type": "object"
-                },
-                "values": {
-                    "$ref": "#/definitions/Values"
-                }
-            },
-            "allOf": [
-                {
-                    "if": {
-                        "required": [
-                            "txHash"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "index"
-                        ]
-                    }
-                },
-                {
-                    "if": {
-                        "required": [
-                            "index"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "txHash"
-                        ]
-                    }
-                }
-            ]
+              "raw_address": { "$ref": "#/definitions/Address" },
+              "amount": { "type": "number", "pattern": "[1-9][0-9]*" }
+            }
+          }
         },
-        "RefInputs": {
+        "metadata": {
+          "type": "array",
+          "items": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "address": {
-                    "$ref": "#/definitions/Address"
-                },
-                "script_ref": {
-                    "type": "string",
-                    "pattern": "^[a-fA-F0-9]{64}$"
-                },
-                "datum": {
-                    "$ref": "#/definitions/Datum"
-                },
-                "txHash": {
-                    "type": "string",
-                    "pattern": "^[a-fA-F0-9]{64}$"
-                },
-                "index": {
-                    "type": "integer"
-                },
-                "values": {
-                    "$ref": "#/definitions/Values"
-                }
-            },
-            "allOf": [
-                {
-                    "if": {
-                        "required": [
-                            "txHash"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "index"
-                        ]
-                    }
-                },
-                {
-                    "if": {
-                        "required": [
-                            "index"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "txHash"
-                        ]
-                    }
-                }
-            ]
-        },
-        "Address": {
-            "type": "string",
-            "pattern": "^[a-zA-Z_]+1[0-9a-zA-Z]{32,128}$"
-        },
-        "Datum": {
-            "oneOf": [
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "hash": {
-                            "type": "string",
-                            "pattern": "^[a-fA-F0-9]{64}$"
-                        }
-                    }
-                },
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "bytes": {
-                            "type": "string",
-                            "pattern": "^([a-fA-F0-9][a-fA-F0-9])+$"
-                        }
-                    }
-                },
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "json": {
-                            "type": "object"
-                        }
-                    }
-                }
-            ]
+              "label": { "type": "number" },
+              "json_metadata": { "type": "object" }
+            }
+          }
         }
-    },
-    "properties": {
-        "transaction": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "fee": {
-                    "type": "number"
-                },
-                "start": {
-                    "type": "number"
-                },
-                "ttl": {
-                    "type": "number"
-                },
-                "ref_inputs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/RefInputs"
-                    }
-                },
-                "inputs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Inputs"
-                    }
-                },
-                "outputs": {
-                    "type": "array",
-                    "additionalProperties": false,
-                    "properties": {
-                        "name": {
-                            "type": "string"
-                        },
-                        "address": {
-                            "$ref": "#/definitions/Address"
-                        },
-                        "script_ref": {
-                            "type": "string",
-                            "pattern": "^[a-fA-F0-9]{64}$"
-                        },
-                        "datum": {
-                            "$ref": "#/definitions/Datum"
-                        },
-                        "txHash": {
-                            "type": "string",
-                            "pattern": "^[a-fA-F0-9]{64}$"
-                        },
-                        "index": {
-                            "type": "integer"
-                        },
-                        "redeemer": {
-                            "type": "object"
-                        },
-                        "values": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "amount": {
-                                        "type": "number"
-                                    },
-                                    "name": {
-                                        "type": "string"
-                                    },
-                                    "assetClass": {
-                                        "type": "string",
-                                        "pattern": "^[0-9a-fA-F]{56}\\.[0-9a-fA-F]{0,64}$"
-                                    },
-                                    "minted": {
-                                        "type": "boolean"
-                                    }
-                                },
-                                "oneOf": [
-                                    {
-                                        "required": [
-                                            "name"
-                                        ]
-                                    },
-                                    {
-                                        "required": [
-                                            "assetClass"
-                                        ]
-                                    }
-                                ],
-                                "required": [
-                                    "amount"
-                                ]
-                            },
-                            "minItems": 1
-                        }
-                    },
-                    "allOf": [
-                        {
-                            "if": {
-                                "required": [
-                                    "txHash"
-                                ]
-                            },
-                            "then": {
-                                "required": [
-                                    "index"
-                                ]
-                            }
-                        },
-                        {
-                            "if": {
-                                "required": [
-                                    "index"
-                                ]
-                            },
-                            "then": {
-                                "required": [
-                                    "txHash"
-                                ]
-                            }
-                        }
-                    ],
-                    "required": [
-                        "values"
-                    ]
-                },
-                "minting": {
-                    "$ref": "#/definitions/Values"
-                },
-                "withdrawals": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "raw_address": {
-                                "$ref": "#/definitions/Address"
-                            },
-                            "amount": {
-                                "type": "number",
-                                "pattern": "[1-9][0-9]*"
-                            }
-                        }
-                    }
-                },
-                "metadata": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "label": {
-                                "type": "number"
-                            },
-                            "json_metadata": {
-                                "type": "object"
-                            }
-                        }
-                    }
-                }
-            },
-            "required": [
-                "inputs",
-                "outputs"
-            ]
-        }
-    },
-    "required": [
-        "transaction"
-    ]
+      },
+      "required": ["inputs", "outputs"]
+    }
+  },
+  "required": ["transaction"]
 }

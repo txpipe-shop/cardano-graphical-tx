@@ -15,11 +15,13 @@ As an example, we can show how to build a simple transaction with this DSL. The 
     "fee": 1000000,
     "inputs": [
       {
-        "name": "wallet-A",
-        "address": "addr_test1xq0pg5k3gc47qe8ntj25548dprlnmdyd44h7u653ply9pkw8yq3wjqnaym5vvm2sewd4m2xpwdhv69gqj62c5dxw5xwqm3j3fa",
-        "txHash": "32252D31C9C9D49DC3326FC29343E63F180FDB3872C72BF36658C915E8B81BA3",
-        "index": 0,
-        "values": [{ "amount": 10000000, "name": "lovelace" }]
+        "normal": {
+          "name": "wallet-A",
+          "address": "addr_test1xq0pg5k3gc47qe8ntj25548dprlnmdyd44h7u653ply9pkw8yq3wjqnaym5vvm2sewd4m2xpwdhv69gqj62c5dxw5xwqm3j3fa",
+          "txHash": "32252D31C9C9D49DC3326FC29343E63F180FDB3872C72BF36658C915E8B81BA3",
+          "index": 0,
+          "values": [{ "amount": 10000000, "name": "lovelace" }]
+        }
       }
     ],
     "outputs": [
@@ -53,7 +55,7 @@ For our example, the CBOR generated from this structure written in the DSL would
 
 Notice that in this CBOR, the information about the address, or the values are not reflected on the CBOR.
 
-We can also take in count the following examples:
+We can also take in count the following example:
 
 ```json
 {
@@ -61,7 +63,9 @@ We can also take in count the following examples:
     "name": "example",
     "inputs": [
       {
-        "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk"
+        "normal": {
+          "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk"
+        }
       }
     ],
     "outputs": [
@@ -109,12 +113,43 @@ The minimal structure must specify the keywords `transaction`, `inputs`, and `ou
 It is possible to verify that the JSON that represents a transaction is valid by checking some verifier, such as the following: [https://jsonschema.dev/s/CsTl1](https://jsonschema.dev/s/CsTl1).
 This can help ensure that the desired transaction can be translated into CBOR later on.
 
-## Inputs/Outputs
+## Inputs
 
 Given a transaction, its inputs are references to existing UTxOs (Unspent Transaction Outputs) that are being spent in the current transaction. Those references provide proof that the spender has ownership of the values specified in the input.
+Within the inputs lists, one or more singleton objects can be specified. Each object in the inputs list must be encapsulated under either the `predicate` or `normal` key.
+
+### Predicate Inputs
+
+Predicate inputs are used to search for a UTxO at a fixed address containing at least a certain token. To specify the address and the token, the value of the predicate input must be an object with the following structure:
+
+```js
+{
+  "predicate": {
+    "address" : "string",
+    "assetClass": "391589af6db9d9008e3e0952563f8d1d5c18cdb8ea0c300bfc1e60b6.414e4f4e3066396466613433" // [PolicyID].[HexaName] format
+  }
+}
+```
+
+Alternatively, it is possible to use `policyId` and specify only the policyID:
+
+```js
+{
+  "predicate": {
+    "address" : "string",
+    "policyId": "391589af6db9d9008e3e0952563f8d1d5c18cdb8ea0c300bfc1e60b6"
+  }
+}
+```
+
+### Normal Inputs
+
+Normal inputs can be specified with the same structure as the objects defined in the `outputs` list.
+
+## Outputs
 
 On the other hand, outputs are created in the transaction to specify where the values of the inputs are going. They represent new UTXOs that can be spent in future transactions.
-Within the inputs and outputs lists, one or more objects can be specified with the following optional fields:
+Within `outputs`, one or more objects can be specified with the following optional fields:
 
 ```js
 {
@@ -126,7 +161,7 @@ Within the inputs and outputs lists, one or more objects can be specified with t
 }
 ```
 
-Particularly, for the inputs there are some extra (also optional) fields that can be added:
+Particularly, for the `normal` inputs there are some extra (also optional) fields that can be added:
 
 ```js
 {
@@ -141,7 +176,7 @@ The following explains the mentioned fields that can be added:
 
 #### Name
 
-The name is a string that can be used to have a better understanding of the input. It is not reflected on the CBOR.
+The name is a string that can be used to have a better understanding of the normal input/output. This value is not reflected on the CBOR.
 
 #### Address
 
@@ -163,7 +198,7 @@ This field details the tokens and their amount contained in the UTxO. It is a li
 }
 ```
 
-The token name can be expressed either as an ASCII or in the format [PolicyID].[HexaName], for example:
+The token name can be expressed either as an ASCII or in the format [PolicyID].[HexaName] using the `assetClass` field, for example:
 
 ```js
 {
@@ -201,7 +236,7 @@ The script reference is a string _(cbor hex)_ that represents a reference to a s
 
 The datum is a piece of data attached to a UTXO which provides context or information for how that UTXO can be used in future transactions.
 
-In the DSL the datum in the inputs/outputs can have any of these 3 fields:
+In the DSL the datum in the `normal` inputs/outputs can have any of these 3 fields:
 
 ```js
 {
@@ -219,14 +254,14 @@ In the DSL the datum in the inputs/outputs can have any of these 3 fields:
 
 This field will be explained in more detail later.
 
-### TxHash and Index (only for inputs)
+### TxHash and Index (only for `normal` inputs)
 
 They represent the UTxO-Ref: the original transaction that created the UTXO and the position of the UTxO in the original transaction.
 It is important to notice that, the UTxO-Ref information (`txHash` and `index` fields) will be the only information relfected on the inputs of the generated CBOR.
 
-### Redeemer (only for inputs)
+### Redeemer (only for `normal` inputs)
 
-The spent redeemer information that corresponds with the actual input. Is used for data validation. It is important to note that the specified redeemer will be placed in the corresponding field of the witnesses at the time of generating the CBOR.
+The spent redeemer information that corresponds with the actual `normal` input. Is used for data validation. It is important to note that the specified redeemer will be placed in the corresponding field of the witnesses at the time of generating the CBOR.
 
 ---
 
@@ -311,12 +346,14 @@ This section consists of a list of token names that were minted in the transacti
   "transaction": {
     "inputs": [
       {
-        "name": "from x",
-        "values": [
-          { "amount": "N", "name": "lovelace" },
-          { "amount": "K", "name": "TokenA" }
-        ],
-        "script_ref": "string_hexa"
+        "normal": {
+          "name": "from x",
+          "values": [
+            { "amount": "N", "name": "lovelace" },
+            { "amount": "K", "name": "TokenA" }
+          ],
+          "script_ref": "string_hexa"
+        }
       }
     ],
     "outputs": [],

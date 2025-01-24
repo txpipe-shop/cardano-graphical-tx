@@ -4,8 +4,7 @@ use std::{collections::HashMap, str::FromStr};
 
 use pallas::ledger::traverse::MultiEraTx;
 
-#[macro_use]
-extern crate napi_derive;
+use napi_derive::napi;
 
 mod address;
 pub mod cbor;
