@@ -53,7 +53,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
   if (loading) return <Loading />;
 
   return (
-    <div className="flex flex-grow flex-col gap-0 p-5">
+    <div className="flex flex-grow flex-col gap-0 py-5 pr-5">
       <Accordion
         selectionMode="multiple"
         showDivider={false}

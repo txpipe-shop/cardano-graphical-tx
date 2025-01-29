@@ -8,8 +8,14 @@ const hexaToText = (hexa: string) => {
   return text;
 };
 
+export const firstNChars = (string: string, length = 8) => {
+  if (isEmpty(string)) return "";
+  if (string.length <= length) return string;
+  return string.slice(0, length) + "...";
+};
+
 export const trimString = (string: string, length = 8) => {
-  if (string.length === 0) return "";
+  if (isEmpty(string)) return "";
   return string.slice(0, length) + "..." + string.slice(-length);
 };
 

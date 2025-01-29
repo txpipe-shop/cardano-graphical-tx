@@ -30,6 +30,7 @@ export const TxInput = () => {
   };
 
   useEffect(() => {
+    if (isEmpty(configs.query)) router.replace(ROUTES.TX);
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
