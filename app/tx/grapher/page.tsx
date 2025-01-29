@@ -9,8 +9,8 @@ import {
   TxInput,
   UtxoInfo,
 } from "~/app/_components";
-import { useUI } from "~/app/_contexts";
-import { ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
+import { useConfigs, useUI } from "~/app/_contexts";
+import { isEmpty, ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
 import Loading from "~/app/loading";
 
 interface GrapherProps {
@@ -23,12 +23,18 @@ interface GrapherProps {
 export default function Index({ searchParams }: GrapherProps) {
   const { replace } = useRouter();
   const { loading } = useUI();
+  const { configs } = useConfigs();
   const { [TX_URL_PARAM]: selectedTx, [UTXO_URL_PARAM]: selectedUtxo } =
     searchParams || {};
 
   useEffect(() => {
+    if (isEmpty(configs.query)) {
+      replace(ROUTES.TX);
+      return;
+    }
     // Remove URL params when reloading the page
     replace(ROUTES.GRAPHER);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [replace]);
 
   if (loading) return <Loading />;

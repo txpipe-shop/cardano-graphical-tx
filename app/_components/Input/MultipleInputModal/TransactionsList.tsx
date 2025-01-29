@@ -1,6 +1,5 @@
 import { Button, Input } from "@nextui-org/react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { type Dispatch, type SetStateAction } from "react";
 import toast from "react-hot-toast";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
@@ -10,7 +9,6 @@ import {
   isInputUtxo,
   isOutputUtxo,
   OPTIONS,
-  ROUTES,
 } from "~/app/_utils";
 import TrashRedIcon from "~/public/delete-red.svg";
 import NoContractsIcon from "~/public/no-contract.svg";
@@ -31,7 +29,6 @@ export const TransactionsList = ({
   const { transactions, setTransactionBox } = useGraphical();
   const { setError, setLoading } = useUI();
   const { configs } = useConfigs();
-  const router = useRouter();
 
   const handleRemove = (txHash: string) => () => {
     const values = [...newTxs];
@@ -90,7 +87,6 @@ export const TransactionsList = ({
         setLoading,
       );
       setError("");
-      router.push(ROUTES.GRAPHER);
     } catch (error) {
       console.log(error);
       if (error instanceof Error) {
