@@ -15,7 +15,7 @@ export interface ITransaction {
   scriptsSuccessful: boolean;
   inputs: Utxo[];
   referenceInputs: Utxo[];
-  outputs: Utxo[];
+  outputs: (Utxo & { consumedBy?: string })[];
   mints: Assets[];
   blockHash?: string;
   blockTxIndex?: number;

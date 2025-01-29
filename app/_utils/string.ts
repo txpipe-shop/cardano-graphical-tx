@@ -10,7 +10,13 @@ const hexaToText = (hexa: string) => {
 
 export const trimString = (string: string, length = 8) => {
   if (string.length === 0) return "";
+  if (string.length <= length * 2) return string;
   return string.slice(0, length) + "..." + string.slice(-length);
+};
+
+export const firstNChars = (string: string, n: number) => {
+  if (string.length <= n) return string;
+  return string.slice(0, n) + "...";
 };
 
 const validHexaChars = "0123456789abcdefABCDEF";
