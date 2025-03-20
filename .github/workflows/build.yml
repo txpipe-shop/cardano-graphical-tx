@@ -35,3 +35,4 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/cardano-graphical-tx:${{ env.SHA_SHORT }}
           build-args: |
             NEXT_PUBLIC_CBOR_ENDPOINT=${{ vars.CBOR_ENDPOINT }}
+            NEXT_PUBLIC_GA_TRACKING_ID=${{ vars.GA_TRACKING_ID }}
