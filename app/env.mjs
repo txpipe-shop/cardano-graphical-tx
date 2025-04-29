@@ -25,6 +25,7 @@ export const env = createEnv({
    */
   client: {
     NEXT_PUBLIC_CBOR_ENDPOINT: z.string().url(),
+    NEXT_PUBLIC_GA_TRACKING_ID: z.string().optional(),
   },
   /*
    * Due to how Next.js bundles environment variables on Edge and Client,
@@ -37,6 +38,7 @@ export const env = createEnv({
     MAINNET_BLOCKFROST_KEY: process.env.MAINNET_BLOCKFROST_KEY,
     PREVIEW_BLOCKFROST_KEY: process.env.PREVIEW_BLOCKFROST_KEY,
     NEXT_PUBLIC_CBOR_ENDPOINT: process.env.NEXT_PUBLIC_CBOR_ENDPOINT,
+    NEXT_PUBLIC_GA_TRACKING_ID: process.env.NEXT_PUBLIC_GA_TRACKING_ID,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
