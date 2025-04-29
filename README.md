@@ -50,6 +50,9 @@ It is recommended to use yarn to run this project.
    5. **Set the Blockfrost keys**
       Locate the following lines `MAINNET_BLOCKFROST_KEY="<Your-Mainnet-Blockfrost-Key>"` & `PREPROD_BLOCKFROST_KEY="<Your-Preprod-Blockfrost-Key>"` & `PREVIEW_BLOCKFROST_KEY="<Your-Preview-Blockfrost-Key>"`. Replace `<Your-X-Blockfrost-Key>` with your actual Blockfrost Keys.
 
+   6. **Set GA Tracking Id**
+      Locate the line `NEXT_PUBLIC_GA_TRACKING_ID="<Your-GA-Tracking-ID>"`. Replace `<Your-GA-Tracking-ID>` with your actual Google Analytics Tracking ID. (You must create a [Google Analytics](https://analytics.google.com/) account to get this value). This is optional and can be left empty.
+
 4. **Rename the .env.example file**
 
    Since the `.env` file is gitignored, you need to rename the name of the file to `.env`.
