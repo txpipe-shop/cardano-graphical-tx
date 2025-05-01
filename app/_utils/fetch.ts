@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
 import type { IBlockfrostResponse, ITransaction } from "~/app/_interfaces";
 import { env } from "~/app/env.mjs";
-import type { SafeAddressResponse } from "~/napi-pallas";
+import type { SafeAddressResponse, SafeDslResponse } from "~/napi-pallas";
 import { API_ROUTES, ERRORS, NETWORK } from "./constants";
 
 export const getApiKey = (network: NETWORK): string => {
@@ -98,7 +98,7 @@ export const getCborFromHash = async (
 export const getDSLFromJSON = async (
   dsl: string,
   setError: Dispatch<SetStateAction<string>>,
-): Promise<string> => {
+): Promise<SafeDslResponse> => {
   try {
     const formData = new FormData();
     formData.append("dsl", dsl);
@@ -111,9 +111,9 @@ export const getDSLFromJSON = async (
 
     const responseJson = await res.json();
     return responseJson || "Unknown error";
-  } catch (error) {
-    console.error("Error processing JSON:", error);
-    setError("Error processing JSON: " + error);
+  } catch (error: Response | any) {
+    console.error("Error processing JSON:", error.statusText);
+    setError("Error processing JSON: " + error.statusText);
     throw error;
   }
 };

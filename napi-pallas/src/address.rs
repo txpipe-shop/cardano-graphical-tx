@@ -1,5 +1,6 @@
 #![deny(clippy::all)]
 
+use napi_derive::napi;
 pub use pallas::ledger::addresses::{Address, Network};
 
 fn network_to_string(network: Network) -> String {

@@ -78,6 +78,7 @@ export const DslSection = () => {
 
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError("");
     if (!dsl.trim()) {
       setCborHex("Please enter DSL JSON to parse.");
       setCborDiagnostic("Please enter DSL JSON to parse.");
