@@ -60,6 +60,7 @@ export interface IGraphicalUtxo {
   pos: Vector2d;
   lines: (Konva.Line | null)[];
   distance: Vector2d;
+  consumedBy?: string;
 }
 
 export interface Address {
