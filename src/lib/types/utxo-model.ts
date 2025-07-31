@@ -88,3 +88,30 @@ export type Metadatum = bigint | MetadatumMap | string | Uint8Array | Metadatum[
 export type Metadata = Map<bigint, Metadatum>;
 
 export type Mint = Value;
+
+export type Tx = {
+  hash: Hash;
+  fee: bigint;
+  mint: Mint;
+  outputs: UTxO[];
+  inputs: UTxO[];
+  referenceInputs: UTxO[];
+  metadata: Metadata;
+};
+
+export type ChainPoint = {
+  hash: Hash;
+  slot: bigint;
+};
+
+export type BlockHeader = {
+  chainPoint: ChainPoint;
+  blockNumber: bigint;
+  // TODO: figure out how to get this from UTxORPC
+  // previousHash?: Hash;
+};
+
+export type Block = {
+  header: BlockHeader;
+  txs: Tx[];
+};
