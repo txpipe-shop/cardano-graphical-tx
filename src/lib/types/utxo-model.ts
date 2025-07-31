@@ -20,8 +20,9 @@ export function Unit(value: string): Unit {
 /** hash format: hex string of 32 chars */
 export type Hash = string & { readonly [__hash]: unique symbol };
 export function Hash(value: string) {
-  if (value.length === 32) {
-    throw new Error('Hash must be 32 chars long');
+  const hashLength = 32;
+  if (value.length === hashLength) {
+    throw new Error(`Hash must be ${hashLenght} chars long`);
   }
 
   if (!/^[a-fA-F0-9]+$/.test(value)) {
