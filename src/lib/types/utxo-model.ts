@@ -1,11 +1,8 @@
-/**
- * Transaction fields common to eUTxO blockchains
- */
-
 declare const __unit: unique symbol;
 declare const __hash: unique symbol;
 declare const __address: unique symbol;
 declare const __hexString: unique symbol;
+
 /** unit format: concatenated hex string of the policy and asset name of a token */
 export type Unit = string & { readonly [__unit]: unique symbol };
 export function Unit(value: string): Unit {
