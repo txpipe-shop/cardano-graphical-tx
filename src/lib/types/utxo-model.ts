@@ -55,3 +55,36 @@ export function HexString(value: string) {
 
   return value as HexString;
 }
+
+export type Value = Record<Unit, bigint>;
+
+export type OutRef = {
+  hash: Hash;
+  index: bigint;
+};
+
+export enum DatumType {
+  HASH = 0,
+  INLINE = 1
+}
+
+export type Datum =
+  | { type: DatumType.HASH; datumHashHex: Hash }
+  | { type: DatumType.INLINE; datumHex: HexString };
+
+export type UTxO = {
+  outRef: OutRef;
+  address: Address;
+  coin: bigint;
+  value: Value;
+  datum: Datum;
+  referenceScript?: HexString;
+  // TODO: should we check what tx has consumed the outptu?
+  // consumedBy?: Hash
+};
+
+export type MetadatumMap = Map<Metadatum, Metadatum>;
+export type Metadatum = bigint | MetadatumMap | string | Uint8Array | Metadatum[];
+export type Metadata = Map<bigint, Metadatum>;
+
+export type Mint = Value;
