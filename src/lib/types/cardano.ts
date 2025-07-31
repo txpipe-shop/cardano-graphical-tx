@@ -8,4 +8,4 @@ export type CardanoSpecificTx = {
   treasuryDonation?: bigint;
 };
 
-export type CardanoTx = BaseTx & CardanoSpecificTx;
+export type Tx = BaseTx & CardanoSpecificTx;
