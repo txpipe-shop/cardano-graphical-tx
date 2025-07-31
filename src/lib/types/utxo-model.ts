@@ -33,8 +33,9 @@ export function Hash(value: string) {
 /** address format: hex string of 58 chars or 114 chars */
 export type Address = string & { readonly [__address]: unique symbol };
 export function Address(value: string) {
-  if ([58, 114].includes(value.length)) {
-    throw new Error('Address must be 32 chars long');
+  const addrLength = [58, 114];
+  if (addrLength.includes(value.length)) {
+    throw new Error(`Address must be ${addrLength.join(' or ')} chars long`);
   }
 
   if (!/^[a-fA-F0-9]+$/.test(value)) {
