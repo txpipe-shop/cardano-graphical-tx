@@ -22,7 +22,7 @@ export type Hash = string & { readonly [__hash]: unique symbol };
 export function Hash(value: string) {
   const hashLength = 32;
   if (value.length === hashLength) {
-    throw new Error(`Hash must be ${hashLenght} chars long`);
+    throw new Error(`Hash must be ${hashLength} chars long`);
   }
 
   if (!/^[a-fA-F0-9]+$/.test(value)) {
