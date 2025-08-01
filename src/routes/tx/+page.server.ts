@@ -1,39 +1,23 @@
-import { cardano } from '@utxorpc/spec';
-import { CardanoSyncClient } from '@utxorpc/sdk';
-// TODO: move it somewhere where all types live happy together
-export type Tx = {
-  hash: string;
-  fee: bigint;
-  inputs: { txHash: string; index: number }[];
-  outputs: { index: number; addr: string; coin: bigint }[];
-};
+import { privateEnv } from '$lib/private-env';
+import { DolosProvider } from '@/providers/cardano/dolos';
+import { Hash } from '@/types/utxo-model';
 
-function sourceToExplorerTx(tx: cardano.Tx): Tx {
-  return {
-    hash: Buffer.from(tx.hash).toString('hex'),
-    inputs: tx.inputs.map((txIn) => ({
-      index: txIn.outputIndex,
-      txHash: Buffer.from(txIn.txHash).toString('hex')
-    })),
-    fee: tx.fee,
-    outputs: tx.outputs.map((output, index) => ({
-      index,
-      addr: Buffer.from(output.address).toString('hex'),
-      coin: output.coin
-    }))
-  };
-}
 export async function load() {
-  const utxorpc = new CardanoSyncClient({
-    uri: 'https://preprod.utxorpc-v0.demeter.run',
-    headers: { 'dmtr-api-key': '' }
+  const dolosProvider = new DolosProvider({
+    utxoRpc: {
+      uri: privateEnv.UTXORPC_URL,
+      headers: {
+        'dmtr-api-key': privateEnv.UTXORPC_API_KEY || ''
+      }
+    },
+    miniBf: {
+      uri: privateEnv.BLOCKFROST_URL
+    }
   });
-  const block = await utxorpc.fetchBlock({
-    hash: '4fe12e519dffca76937d21f09515758d7a06e9c55ed46305bfa528bf45d3d4e3',
-    slot: 98223531
-  });
-  const utxoRpcTransactions = block.parsedBlock.body?.tx || [];
-  const transactions: Tx[] = utxoRpcTransactions.map(sourceToExplorerTx);
 
-  return { transactions, message: 'LOADED IN THE BACKEND ' };
+  const { txs } = await dolosProvider.getBlock({
+    hash: Hash('549e04a560d569a284d4789a04df3fd46f7388e011e6dab1a18f683805d3bd11')
+  });
+
+  return { transactions: txs, message: 'LOADED IN THE BACKEND ' };
 }
