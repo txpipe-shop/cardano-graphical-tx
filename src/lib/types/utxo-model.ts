@@ -35,7 +35,7 @@ export function Hash(value: string) {
 export type Address = string & { readonly [__address]: unique symbol };
 export function Address(value: string) {
   const addrLength = [58, 114];
-  if (addrLength.includes(value.length)) {
+  if (!addrLength.includes(value.length)) {
     throw new Error(`Address must be ${addrLength.join(' or ')} chars long`);
   }
 
@@ -76,14 +76,14 @@ export type UTxO = {
   address: Address;
   coin: bigint;
   value: Value;
-  datum: Datum;
+  datum?: Datum;
   referenceScript?: HexString;
   // TODO: should we check what tx has consumed the outptu?
   // consumedBy?: Hash
 };
 
 export type MetadatumMap = Map<Metadatum, Metadatum>;
-export type Metadatum = bigint | MetadatumMap | string | Uint8Array | Metadatum[];
+export type Metadatum = bigint | MetadatumMap | string | HexString | Metadatum[];
 export type Metadata = Map<bigint, Metadatum>;
 
 export type Mint = Value;
@@ -95,7 +95,7 @@ export type Tx = {
   outputs: UTxO[];
   inputs: UTxO[];
   referenceInputs: UTxO[];
-  metadata: Metadata;
+  metadata?: Metadata;
 };
 
 export type ChainPoint = {

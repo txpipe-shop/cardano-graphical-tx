@@ -4,7 +4,7 @@ import { type Tx as BaseTx, type Block as BaseBlock } from './utxo-model';
  * Cardano specific transaction properties
  */
 export type CardanoTxFields = {
-  treasury: bigint;
+  treasury?: bigint;
   treasuryDonation?: bigint;
 };
 
