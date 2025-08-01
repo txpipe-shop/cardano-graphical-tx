@@ -17,7 +17,8 @@ export function u5cToCardanoBlock(block: cardano.Block): CardanoBlock {
       chainPoint: {
         hash: uint8ToHash(block.header!.hash),
         slot: block.header!.slot
-      }
+      },
+      previousHash: undefined
     },
     txs: block.body!.tx.map(u5cToCardanoTx)
   };

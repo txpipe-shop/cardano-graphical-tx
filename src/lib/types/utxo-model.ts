@@ -106,8 +106,7 @@ export type ChainPoint = {
 export type BlockHeader = {
   chainPoint: ChainPoint;
   blockNumber: bigint;
-  // TODO: figure out how to get this from UTxORPC
-  // previousHash?: Hash;
+  previousHash?: Hash;
 };
 
 export type Block = {
