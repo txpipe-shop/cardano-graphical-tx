@@ -3,7 +3,7 @@ import { type BlockReq, type ChainProvider } from '@/providers/base';
 import { Hash } from '@/types/utxo-model';
 
 export class DbSyncProvider implements ChainProvider<Cardano> {
-  constructor() { }
+  constructor() {}
 
   async getBlock({ hash }: BlockReq): Promise<CardanoBlock> {
     return { header: { blockNumber: 1n, chainPoint: { hash, slot: 1n } }, txs: [] };
