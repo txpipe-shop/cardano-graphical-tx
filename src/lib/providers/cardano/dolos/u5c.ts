@@ -6,7 +6,7 @@ import {
   uint8ToHash,
   uint8ToHexString
 } from '@/types/utils';
-import { Hash, type Metadata, type Metadatum } from '@/types/utxo-model';
+import { Hash, MetadatumMap, type Metadata, type Metadatum } from '@/types/utxo-model';
 import type { cardano } from '@utxorpc/spec';
 import assert from 'assert';
 
@@ -35,24 +35,31 @@ export function u5cToCardanoUtxo(hash: Hash, output: cardano.TxOutput, index: nu
   };
 }
 
-export function u5cMetadatumToCardanoMetadatum(metadatum: cardano.Metadatum): Metadatum {
-  if (typeof metadatum === 'string') {
-    return metadatum;
-  } else if (typeof metadatum === 'bigint') {
-    return metadatum;
-  } else if (metadatum instanceof Uint8Array) {
-    return uint8ToHexString(metadatum as Uint8Array<ArrayBuffer>);
-  } else if (metadatum instanceof Map) {
-    const map = new Map<Metadatum, Metadatum>();
-    for (const rawKey of metadatum.keys()) {
-      const key = u5cMetadatumToCardanoMetadatum(rawKey);
-      const value = u5cMetadatumToCardanoMetadatum(metadatum.get(rawKey));
-      map.set(key, value);
+export function u5cMetadatumToCardanoMetadatum(m: cardano.Metadatum): Metadatum {
+  const metadatum = m.metadatum;
+  switch (metadatum.case) {
+    case 'int': {
+      return metadatum.value;
     }
-    return map;
-  } else {
-    assert(metadatum instanceof Array);
-    return metadatum.map(u5cMetadatumToCardanoMetadatum);
+    case 'bytes': {
+      return uint8ToHexString(Buffer.from(metadatum.value));
+    }
+    case 'text': {
+      return metadatum.value;
+    }
+    case 'array': {
+      return metadatum.value.items.map(u5cMetadatumToCardanoMetadatum);
+    }
+    case 'map': {
+      return new MetadatumMap(
+        metadatum.value.pairs.map((pair) => [
+          u5cMetadatumToCardanoMetadatum(pair.key!),
+          u5cMetadatumToCardanoMetadatum(pair.value!)
+        ])
+      );
+    }
+    default:
+      throw new Error('Invalid datum');
   }
 }
 

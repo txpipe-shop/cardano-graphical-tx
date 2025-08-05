@@ -16,6 +16,6 @@ export async function load() {
   });
 
   return await dolosProvider.getBlock({
-    hash: Hash('549e04a560d569a284d4789a04df3fd46f7388e011e6dab1a18f683805d3bd11')
+    hash: Hash('7be418ff7622bd75028d80c0f02392307eb5bab56cc4af696b91aef4675f91f0')
   });
 }

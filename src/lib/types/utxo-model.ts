@@ -81,6 +81,7 @@ export type UTxO = {
 };
 
 export type MetadatumMap = Map<Metadatum, Metadatum>;
+export const MetadatumMap = Map<Metadatum, Metadatum>;
 export type Metadatum = bigint | MetadatumMap | string | HexString | Metadatum[];
 export type Metadata = Map<bigint, Metadatum>;
 
