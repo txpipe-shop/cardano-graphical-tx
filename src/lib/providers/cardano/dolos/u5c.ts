@@ -6,7 +6,7 @@ import {
   uint8ToHash,
   uint8ToHexString
 } from '@/types/utils';
-import { Hash, type Metadata, type Metadatum, type UTxO } from '@/types/utxo-model';
+import { Hash, type Metadata, type Metadatum } from '@/types/utxo-model';
 import type { cardano } from '@utxorpc/spec';
 import assert from 'assert';
 
@@ -24,7 +24,7 @@ export function u5cToCardanoBlock(block: cardano.Block): CardanoBlock {
   };
 }
 
-export function u5cToCardanoUtxo(hash: Hash, output: cardano.TxOutput, index: number): UTxO {
+export function u5cToCardanoUtxo(hash: Hash, output: cardano.TxOutput, index: number) {
   return {
     address: uint8ToAddr(output.address),
     coin: output.coin,

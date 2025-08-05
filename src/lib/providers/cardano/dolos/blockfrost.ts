@@ -1,4 +1,4 @@
-import type { CardanoTx } from '@/types';
+import type { CardanoTx, CardanoUTxO } from '@/types';
 import {
   Address,
   DatumType,
@@ -6,7 +6,6 @@ import {
   HexString,
   Unit,
   type Datum,
-  type UTxO,
   type Value
 } from '@/types/utxo-model';
 import type { BlockFrostAPI } from '@blockfrost/blockfrost-js';
@@ -66,7 +65,7 @@ export function bfDatum(utxo: BfInputUtxo | BfOutputUtxo) {
   return datum;
 }
 
-export function bfInputToCardanoUtxo(utxo: BfInputUtxo): UTxO {
+export function bfInputToCardanoUtxo(utxo: BfInputUtxo): CardanoUTxO {
   const referenceScript = utxo.reference_script_hash
     ? HexString(utxo.reference_script_hash)
     : undefined;
@@ -82,7 +81,7 @@ export function bfInputToCardanoUtxo(utxo: BfInputUtxo): UTxO {
   };
 }
 
-export function bfOutputToCardanoUtxo(hash: Hash, utxo: BfOutputUtxo): UTxO {
+export function bfOutputToCardanoUtxo(hash: Hash, utxo: BfOutputUtxo): CardanoUTxO {
   const referenceScript = utxo.reference_script_hash
     ? HexString(utxo.reference_script_hash)
     : undefined;

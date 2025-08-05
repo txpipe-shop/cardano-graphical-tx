@@ -22,8 +22,10 @@ export class DolosProvider implements ChainProvider<Cardano> {
 
   constructor({ utxoRpc, miniBf }: DolosParams) {
     this.syncClient = new CardanoSyncClient(utxoRpc);
-    // TODO: find out how to pass custom headers through the Blockfrost SDK
-    this.miniBf = new BlockFrostAPI({ customBackend: miniBf.uri });
+    this.miniBf = new BlockFrostAPI({
+      customBackend: miniBf.uri,
+      gotOptions: { headers: miniBf.headers }
+    });
   }
 
   async getBlock({ hash }: BlockReq): Promise<CardanoBlock> {

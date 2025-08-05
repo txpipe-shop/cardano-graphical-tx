@@ -77,9 +77,7 @@ export type UTxO = {
   coin: bigint;
   value: Value;
   datum?: Datum;
-  referenceScript?: HexString;
-  // TODO: should we check what tx has consumed the outptu?
-  // consumedBy?: Hash
+  consumedBy?: Hash;
 };
 
 export type MetadatumMap = Map<Metadatum, Metadatum>;
@@ -88,13 +86,13 @@ export type Metadata = Map<bigint, Metadatum>;
 
 export type Mint = Value;
 
-export type Tx = {
+export type Tx<T extends UTxO> = {
   hash: Hash;
   fee: bigint;
   mint: Mint;
-  outputs: UTxO[];
-  inputs: UTxO[];
-  referenceInputs: UTxO[];
+  outputs: T[];
+  inputs: T[];
+  referenceInputs: T[];
   metadata?: Metadata;
 };
 
@@ -109,7 +107,7 @@ export type BlockHeader = {
   previousHash?: Hash;
 };
 
-export type Block = {
+export type Block<U extends UTxO, T extends Tx<U>> = {
   header: BlockHeader;
-  txs: Tx[];
+  txs: T[];
 };
