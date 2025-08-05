@@ -8,7 +8,6 @@ import {
 } from '@/types/utils';
 import { Hash, MetadatumMap, type Metadata, type Metadatum } from '@/types/utxo-model';
 import type { cardano } from '@utxorpc/spec';
-import assert from 'assert';
 
 export function u5cToCardanoBlock(block: cardano.Block): CardanoBlock {
   return {
