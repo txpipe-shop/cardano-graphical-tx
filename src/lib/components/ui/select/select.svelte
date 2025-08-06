@@ -1,6 +1,6 @@
 <script lang="ts">
   import { cn } from '@/utils';
-  
+
   interface SelectItem {
     value: string;
     label: string;
@@ -17,7 +17,7 @@
 
   let {
     value = $bindable(),
-    placeholder = "Select an option...",
+    placeholder = 'Select an option...',
     items,
     onValueChange,
     disabled = false,
@@ -26,7 +26,7 @@
   }: Props = $props();
 
   let isOpen = $state(false);
-  let selectedItem = $derived(items.find(item => item.value === value));
+  let selectedItem = $derived(items.find((item) => item.value === value));
 
   function handleSelect(item: SelectItem) {
     value = item.value;
@@ -43,21 +43,21 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<div class={cn("relative", className)} {...restProps}>
+<div class={cn('relative', className)} {...restProps}>
   <button
     type="button"
     class={cn(
-      "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+      'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
       className
     )}
     {disabled}
     onclick={() => !disabled && (isOpen = !isOpen)}
   >
-    <span class={cn("truncate", !selectedItem && "text-muted-foreground")}>
+    <span class={cn('truncate', !selectedItem && 'text-muted-foreground')}>
       {selectedItem?.label || placeholder}
     </span>
     <svg
-      class={cn("h-4 w-4 opacity-50 transition-transform", isOpen && "rotate-180")}
+      class={cn('h-4 w-4 opacity-50 transition-transform', isOpen && 'rotate-180')}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
       fill="none"
@@ -71,15 +71,18 @@
   </button>
 
   {#if isOpen}
-    <div class="absolute top-full z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
-      {#each items as item}
+    <div
+      class="absolute top-full z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+    >
+      {#each items as item (item.value)}
         <button
           type="button"
           class={cn(
-            "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            value === item.value && "bg-accent text-accent-foreground"
+            'relative flex w-full cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+            value === item.value && 'bg-accent text-accent-foreground'
           )}
           onclick={() => handleSelect(item)}
+          aria-label="show select"
         >
           {item.label}
           {#if value === item.value}
@@ -106,6 +109,7 @@
   <button
     class="fixed inset-0 z-40"
     onclick={() => (isOpen = false)}
+    aria-label="close select"
     tabindex="-1"
   ></button>
 {/if}
