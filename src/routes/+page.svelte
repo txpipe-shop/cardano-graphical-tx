@@ -129,37 +129,4 @@
       </div>
     </CardContent>
   </Card>
-
-  <Card>
-    <CardHeader>
-      <CardTitle>How to Use</CardTitle>
-    </CardHeader>
-    <CardContent class="space-y-4">
-      <div>
-        <h4 class="mb-2 font-medium">Top Bar Provider Selection</h4>
-        <p class="text-sm text-muted-foreground">
-          Use the top bar to select different data providers. The selection applies globally and
-          will be used for subsequent page loads that support provider switching.
-        </p>
-      </div>
-
-      <div>
-        <h4 class="mb-2 font-medium">Custom Providers</h4>
-        <p class="text-sm text-muted-foreground">
-          Click "Add Custom" in the top bar to configure your own provider endpoints. This is useful
-          for connecting to local development networks or custom API endpoints.
-        </p>
-      </div>
-
-      <div>
-        <h4 class="mb-2 font-medium">Built-in Providers</h4>
-        <ul class="space-y-1 text-sm text-muted-foreground">
-          <li>• <strong>Preprod</strong> - Cardano preprod testnet via UTxORPC</li>
-          <li>• <strong>Preview</strong> - Cardano preview testnet via Blockfrost</li>
-          <li>• <strong>Mainnet</strong> - Cardano mainnet via UTxORPC</li>
-          <li>• <strong>Vector/Prime</strong> - Custom testnet environments</li>
-        </ul>
-      </div>
-    </CardContent>
-  </Card>
 </div>

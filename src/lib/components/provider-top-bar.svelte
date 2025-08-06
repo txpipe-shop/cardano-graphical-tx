@@ -35,7 +35,6 @@
 
   function handleAddCustomProvider() {
     let provider: ProviderConfig;
-    console.log(customType);
     if (customType === 'dbsync') {
       if (!customName.trim() || !connectionString.trim()) {
         console.log('Invalid custom provider data');
