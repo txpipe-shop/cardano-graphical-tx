@@ -46,6 +46,7 @@
     <p class="text-lg text-muted-foreground">Multi-provider Cardano blockchain explorer</p>
   </div>
 
+  <Card>
     <CardHeader>
       <CardTitle>Current Provider</CardTitle>
     </CardHeader>
