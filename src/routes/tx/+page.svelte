@@ -1,30 +1,141 @@
 <script lang="ts">
   import TxTable from '$lib/components/tx-table.svelte';
+  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+  import { Badge } from '@/components/ui/badge';
+  import { Button } from '@/components/ui/button';
+  import { currentProvider } from '@/stores/provider-store';
+  import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import { onMount } from 'svelte';
+  import type { CardanoTx } from '@/types';
+  import { Hash } from '@/types/utxo-model';
+  import { BUILTIN_PROVIDERS, type ProviderConfig } from '@/types/provider-config';
+  import { createProviderClient } from '@/client/provider-loader';
 
-  export let data;
-  //const exampleTxs = [
-  //  {
-  //    date: '2025-08-01 16:00',
-  //    hash: 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
-  //    epochBlock: '428 / 123456',
-  //    totalOutput: '10.5 ADA',
-  //    fee: '0.17 ADA',
-  //    size: '512 B',
-  //    scriptSize: '128 B',
-  //    mintsBurns: '+2 NFT'
-  //  },
-  //  {
-  //    date: '2025-08-01 15:59',
-  //    hash: 'ffabbeef00112233445566778899aabbccddeeff00112233445566778899aabb',
-  //    epochBlock: '428 / 123455',
-  //    totalOutput: '250 ADA',
-  //    fee: '0.2 ADA',
-  //    size: '630 B',
-  //    scriptSize: '0 B',
-  //    mintsBurns: '—'
-  //  }
-  //];
+  interface Props {
+    data: {
+      transactions: CardanoTx[];
+      isServerLoaded: boolean;
+      error?: string;
+    };
+  }
+
+  let { data }: Props = $props();
+
+  let clientTransactions = $state<CardanoTx[]>([]);
+  let clientLoading = $state(false);
+  let clientError = $state<string | null>(null);
+
+  let provider = $currentProvider ? $currentProvider : BUILTIN_PROVIDERS[0];
+
+  function reloadWithProvider(providerId: string) {
+    const url = new URL($page.url);
+    url.searchParams.set('provider', providerId);
+    goto(url.toString());
+  }
+
+  function refreshData() {
+    if ($currentProvider) {
+      reloadWithProvider($currentProvider.id);
+    }
+  }
+
+  // client side loading
+  onMount(async () => {
+    if (!data.isServerLoaded && $currentProvider && !$currentProvider.isBuiltIn) {
+      clientLoading = true;
+      clientError = null;
+
+      try {
+        console.log('LOADING CUSTOM PROVIDER DATA');
+        await loadCustomProviderData($currentProvider);
+      } catch (error) {
+        clientError = error instanceof Error ? error.message : 'Unknown error loading data';
+      } finally {
+        clientLoading = false;
+      }
+    }
+  });
+
+  async function loadCustomProviderData(provider: ProviderConfig) {
+    const { txs } = await createProviderClient(provider).getBlock({
+      hash: Hash('92ad00fe7f273e577c0cc5987caed3f662a05a330eeeec255d34b2accb016419')
+    });
+    clientTransactions = txs;
+  }
+
+  let displayTransactions = $derived(data.isServerLoaded ? data.transactions : clientTransactions);
 </script>
 
-<h1 class="text-4xl font-extrabold">Transactions</h1>
-<TxTable txs={data.txs} />
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <h1 class="text-4xl font-extrabold">Transactions</h1>
+    <Button onclick={refreshData} variant="outline">Refresh with Current Provider</Button>
+  </div>
+
+  <!-- Provider Info Card -->
+  <Card>
+    <CardHeader>
+      <CardTitle class="flex items-center gap-2">
+        Data Source Information
+        <Badge variant="secondary">{provider.type.toUpperCase()}</Badge>
+        <Badge variant="outline">{provider.network}</Badge>
+        {#if data.isServerLoaded}
+          <Badge variant="default">Server-side</Badge>
+        {:else}
+          <Badge variant="outline">Client-side</Badge>
+        {/if}
+      </CardTitle>
+    </CardHeader>
+    <CardContent class="space-y-2">
+      <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+        <div>
+          <span class="font-medium">Provider:</span>
+          {provider.name}
+        </div>
+        <div>
+          <span class="font-medium">Loading:</span>
+          {#if data.isServerLoaded}
+            <span class="text-green-600">Server-side (SSR)</span>
+          {:else if clientLoading}
+            <span class="text-blue-600">Client-side (loading...)</span>
+          {:else}
+            <span class="text-blue-600">Client-side</span>
+          {/if}
+        </div>
+      </div>
+      <div class="pt-2">
+        <span class="text-sm text-muted-foreground">
+          {data.error}
+          {#if clientError}
+            <br /><span class="text-red-600">Client error: {clientError}</span>
+          {/if}
+        </span>
+      </div>
+    </CardContent>
+  </Card>
+
+  <!-- Transaction Data -->
+  {#if clientLoading}
+    <Card>
+      <CardContent class="py-8 text-center">
+        <div class="flex items-center justify-center gap-2">
+          <div class="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
+          <span class="text-muted-foreground">Loading data from custom provider...</span>
+        </div>
+      </CardContent>
+    </Card>
+  {:else if displayTransactions && displayTransactions.length > 0}
+    <TxTable txs={displayTransactions} />
+  {:else}
+    <Card>
+      <CardContent class="py-8 text-center text-muted-foreground">
+        {#if clientError}
+          Failed to load transaction data from custom provider.
+        {:else}
+          No transaction data available from the current provider.
+        {/if}
+      </CardContent>
+    </Card>
+  {/if}
+</div>

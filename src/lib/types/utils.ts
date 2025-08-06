@@ -1,4 +1,5 @@
 import { Address, Hash, HexString } from './utxo-model';
+import { Buffer } from 'buffer';
 
 export function uint8ToHexString(arr: Uint8Array<ArrayBuffer>): HexString {
   return HexString(Buffer.from(arr).toString('hex'));

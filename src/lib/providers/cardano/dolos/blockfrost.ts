@@ -1,19 +1,10 @@
 import type { CardanoTx, CardanoUTxO } from '@/types';
-import {
-  Address,
-  DatumType,
-  Hash,
-  HexString,
-  Unit,
-  type Datum,
-  type Value
-} from '@/types/utxo-model';
-import type { BlockFrostAPI } from '@blockfrost/blockfrost-js';
-import { Address as BlazeAddr } from '@blaze-cardano/core';
-import { addManyValues, diffValues } from '@/types/utils';
+import { DatumType, Hash, HexString, Unit, type Datum, type Value } from '@/types/utxo-model';
+import { type TxContent as BfTx, type TxContentUtxo as BfTxUtxos } from '$lib/sdk/blockfrost';
 
-type BfTx = Awaited<ReturnType<BlockFrostAPI['txs']>>;
-type BfTxUtxos = Awaited<ReturnType<BlockFrostAPI['txsUtxos']>>;
+import { addManyValues, diffValues } from '@/types/utils';
+import { bech32ToHex } from '@/types/cardano/utils';
+
 type BfValue = { unit: string; quantity: string }[];
 type BfInputUtxo = BfTxUtxos['inputs'][0];
 type BfOutputUtxo = BfTxUtxos['outputs'][0];
@@ -71,7 +62,7 @@ export function bfInputToCardanoUtxo(utxo: BfInputUtxo): CardanoUTxO {
     : undefined;
 
   return {
-    address: Address(BlazeAddr.fromBech32(utxo.address).toBytes()),
+    address: bech32ToHex(utxo.address),
     coin: bfCoin(utxo.amount),
     outRef: { hash: Hash(utxo.tx_hash), index: BigInt(utxo.output_index) },
     value: bfValue(utxo.amount),
@@ -87,7 +78,7 @@ export function bfOutputToCardanoUtxo(hash: Hash, utxo: BfOutputUtxo): CardanoUT
     : undefined;
 
   return {
-    address: Address(BlazeAddr.fromBech32(utxo.address).toBytes()),
+    address: bech32ToHex(utxo.address),
     coin: bfCoin(utxo.amount),
     outRef: { hash: hash, index: BigInt(utxo.output_index) },
     value: bfValue(utxo.amount),

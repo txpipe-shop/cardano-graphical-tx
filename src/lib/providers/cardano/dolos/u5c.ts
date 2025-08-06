@@ -1,4 +1,5 @@
 import type { CardanoBlock, CardanoTx } from '@/types';
+import { Buffer } from 'buffer';
 import {
   addManyValues,
   diffValues,

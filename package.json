@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
+    "gen-blockfrost": "docker run --rm  -v ${PWD}/src/lib/sdk/blockfrost:/local openapitools/openapi-generator-cli generate -i /local/openapi.yml -g typescript-axios -o /local ",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
@@ -50,10 +51,12 @@
     ]
   },
   "dependencies": {
-    "@blaze-cardano/core": "^0.6.4",
-    "@blockfrost/blockfrost-js": "^6.0.0",
     "@utxorpc/sdk": "^0.7.0",
     "@utxorpc/spec": "^0.17.0",
+    "assert": "^2.1.0",
+    "axios": "^1.11.0",
+    "bech32": "^2.0.0",
+    "buffer": "^6.0.3",
     "zod": "^4.0.14"
   }
 }
