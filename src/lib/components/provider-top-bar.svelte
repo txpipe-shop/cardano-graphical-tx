@@ -138,7 +138,6 @@
 >
   <div class="container mx-auto px-4 py-3">
     <div class="flex items-center justify-between gap-4">
-      <!-- Current Provider Info -->
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2">
           <span class="text-sm font-medium text-muted-foreground">Source:</span>
@@ -169,7 +168,6 @@
         {/if}
       </div>
 
-      <!-- Provider Selection -->
       <div class="flex items-center gap-2">
         <Select
           bind:value={selectedProviderId}
@@ -185,7 +183,6 @@
       </div>
     </div>
 
-    <!-- Custom Provider Form -->
     {#if showCustomForm}
       <Card class="mt-4">
         <CardHeader>

@@ -47,7 +47,6 @@
       clientError = null;
 
       try {
-        console.log('LOADING CUSTOM PROVIDER DATA');
         await loadCustomProviderData($currentProvider);
       } catch (error) {
         clientError = error instanceof Error ? error.message : 'Unknown error loading data';
@@ -67,13 +66,12 @@
   let displayTransactions = $derived(data.isServerLoaded ? data.transactions : clientTransactions);
 </script>
 
-<div class="space-y-6">
+<div class="container mx-auto space-y-6 px-4 py-3">
   <div class="flex items-center justify-between">
     <h1 class="text-4xl font-extrabold">Transactions</h1>
     <Button onclick={refreshData} variant="outline">Refresh with Current Provider</Button>
   </div>
 
-  <!-- Provider Info Card -->
   <Card>
     <CardHeader>
       <CardTitle class="flex items-center gap-2">
@@ -115,7 +113,6 @@
     </CardContent>
   </Card>
 
-  <!-- Transaction Data -->
   {#if clientLoading}
     <Card>
       <CardContent class="py-8 text-center">
