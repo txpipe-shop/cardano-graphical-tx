@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ url }) => {
       const client = createProviderClient(providerConfig);
 
       const { txs } = await client.getBlock({
-        hash: Hash('8815bd746347f6cd344eda4a8c138ff93a9e1a520d08519eed83a107ec5b3cd5')
+        hash: Hash('79d637d5ac7e970ef7c95cc3019456cec5d1853a51ec270b225d0f81e6945dcd')
       });
 
       const data = {
