@@ -119,8 +119,7 @@ function createProviderStore() {
           ...state,
           customProviders: newCustomProviders,
           allProviders: state.allProviders.filter((p) => p.id !== providerId),
-          currentProvider:
-            state.currentProvider?.id === providerId ? null : state.currentProvider
+          currentProvider: state.currentProvider?.id === providerId ? null : state.currentProvider
         };
       });
     },
@@ -149,8 +148,8 @@ function createProviderStore() {
       update((state) => ({
         ...state,
         customProviders: [],
-        allProviders: state.allProviders.filter(p => p.isBuiltIn),
-        currentProvider: state.allProviders.find(p => p.isBuiltIn) || null
+        allProviders: state.allProviders.filter((p) => p.isBuiltIn),
+        currentProvider: state.allProviders.find((p) => p.isBuiltIn) || null
       }));
     },
     reset: () => set(initialState)
@@ -165,6 +164,6 @@ export const allProviders = derived(providerStore, ($store) => $store.allProvide
 
 export const customProviders = derived(providerStore, ($store) => $store.customProviders);
 
-export const builtInProviders = derived(providerStore, ($store) => 
-  $store.allProviders.filter(p => p.isBuiltIn)
+export const builtInProviders = derived(providerStore, ($store) =>
+  $store.allProviders.filter((p) => p.isBuiltIn)
 );

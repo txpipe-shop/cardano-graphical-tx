@@ -6,7 +6,8 @@ export function getServerProviderConfigs(): ProviderConfig[] {
     {
       id: 'preprod-dolos',
       name: 'Preprod (Dolos)',
-      description: 'UTxORPC + MiniBlockfrost services for Cardano Preprod testnet. Not realiable for older queries',
+      description:
+        'UTxORPC + MiniBlockfrost services for Cardano Preprod testnet. Not realiable for older queries',
       miniBfUrl: privateEnv.PREPROD_BLOCKFROST_URL,
       miniBfApiKey: privateEnv.PREPROD_BLOCKFROST_API_KEY,
       utxoRpcUrl: privateEnv.PREPROD_UTXORPC_URL,
@@ -18,7 +19,8 @@ export function getServerProviderConfigs(): ProviderConfig[] {
     {
       id: 'preview-dolos',
       name: 'Preview (Dolos)',
-      description: 'UTxORPC + MiniBlockfrost services for Cardano Preview testnet. Not realiable for older queries',
+      description:
+        'UTxORPC + MiniBlockfrost services for Cardano Preview testnet. Not realiable for older queries',
       miniBfUrl: privateEnv.PREVIEW_BLOCKFROST_URL,
       miniBfApiKey: privateEnv.PREVIEW_BLOCKFROST_API_KEY,
       utxoRpcUrl: privateEnv.PREVIEW_UTXORPC_URL,
@@ -30,7 +32,8 @@ export function getServerProviderConfigs(): ProviderConfig[] {
     {
       id: 'mainnet-dolos',
       name: 'Mainnet (Dolos)',
-      description: 'UTxORPC + MiniBlockfrost services for Cardano Mainnet. Not realiable for older queries',
+      description:
+        'UTxORPC + MiniBlockfrost services for Cardano Mainnet. Not realiable for older queries',
       miniBfUrl: privateEnv.MAINNET_BLOCKFROST_URL,
       miniBfApiKey: privateEnv.MAINNET_BLOCKFROST_API_KEY,
       utxoRpcUrl: privateEnv.MAINNET_UTXORPC_URL,
@@ -42,7 +45,8 @@ export function getServerProviderConfigs(): ProviderConfig[] {
     {
       id: 'vector-testnet',
       name: 'Vector Testnet (Dolos)',
-      description: "UTxORPC + MiniBlockfrost services for Apex Fusion's Vector Testnet. Not realiable for older queries",
+      description:
+        "UTxORPC + MiniBlockfrost services for Apex Fusion's Vector Testnet. Not realiable for older queries",
       utxoRpcUrl: privateEnv.AF_VECTOR_TESTNET_UTXORPC_URL,
       utxoRpcApiKey: privateEnv.AF_VECTOR_TESTNET_UTXORPC_API_KEY,
       miniBfUrl: privateEnv.AF_VECTOR_TESTNET_BLOCKFROST_URL,
@@ -54,7 +58,8 @@ export function getServerProviderConfigs(): ProviderConfig[] {
     {
       id: 'vector-mainnet',
       name: 'Vector Mainnet (Dolos)',
-      description: "UTxORPC + MiniBlockfrost services for Apex Fusion's Vector Mainnet. Not realiable for older queries",
+      description:
+        "UTxORPC + MiniBlockfrost services for Apex Fusion's Vector Mainnet. Not realiable for older queries",
       miniBfUrl: privateEnv.AF_VECTOR_MAINNET_BLOCKFROST_URL,
       miniBfApiKey: privateEnv.AF_VECTOR_MAINNET_BLOCKFROST_API_KEY,
       utxoRpcUrl: privateEnv.AF_VECTOR_MAINNET_UTXORPC_URL,
@@ -66,7 +71,8 @@ export function getServerProviderConfigs(): ProviderConfig[] {
     {
       id: 'prime-testnet',
       name: 'Prime Testnet (Dolos)',
-      description: "UTxORPC + MiniBlockfrost services for Apex Fusion's Prime Testnet. Not realiable for older queries",
+      description:
+        "UTxORPC + MiniBlockfrost services for Apex Fusion's Prime Testnet. Not realiable for older queries",
       utxoRpcUrl: privateEnv.AF_PRIME_TESTNET_UTXORPC_URL,
       utxoRpcApiKey: privateEnv.AF_PRIME_TESTNET_UTXORPC_API_KEY,
       miniBfUrl: privateEnv.AF_PRIME_TESTNET_BLOCKFROST_URL,
@@ -78,7 +84,8 @@ export function getServerProviderConfigs(): ProviderConfig[] {
     {
       id: 'prime-mainnet',
       name: 'Prime Mainnet (Dolos)',
-      description: "UTxORPC + MiniBlockfrost services for Apex Fusion's Prime Mainnet. Not realiable for older queries",
+      description:
+        "UTxORPC + MiniBlockfrost services for Apex Fusion's Prime Mainnet. Not realiable for older queries",
       utxoRpcUrl: privateEnv.AF_PRIME_MAINNET_UTXORPC_URL,
       utxoRpcApiKey: privateEnv.AF_PRIME_MAINNET_UTXORPC_API_KEY,
       miniBfUrl: privateEnv.AF_PRIME_MAINNET_BLOCKFROST_URL,
