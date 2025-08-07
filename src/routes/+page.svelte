@@ -2,8 +2,9 @@
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
   import { Badge } from '@/components/ui/badge';
   import { Button } from '@/components/ui/button';
-  import { currentProvider, allProviders } from '@/stores/provider-store';
+  import { currentProvider, allProviders, providerStore } from '@/stores/provider-store';
   import { goto } from '$app/navigation';
+  import type { ProviderConfig } from '@/types/provider-config';
 
   function viewTransactionsWithProvider(providerId: string) {
     goto(`/tx?provider=${providerId}`);
@@ -11,6 +12,16 @@
 
   function viewBlocksWithProvider(providerId: string) {
     goto(`/block?provider=${providerId}`);
+  }
+
+  function removeCustomProvider(providerId: string) {
+    if (confirm('Remove this custom provider?')) {
+      providerStore.removeCustomProvider(providerId);
+    }
+  }
+
+  function setCurrentProvider(provider: ProviderConfig) {
+    providerStore.setCurrentProvider(provider);
   }
 
   function getProviderTypeColor(type: string) {
@@ -108,6 +119,24 @@
               </p>
 
               <div class="flex gap-1">
+                <Button
+                  size="sm"
+                  variant={$currentProvider?.id === provider.id ? 'default' : 'outline'}
+                  onclick={() => setCurrentProvider(provider)}
+                >
+                  {$currentProvider?.id === provider.id ? 'Current' : 'Select'}
+                </Button>
+
+                {#if !provider.isBuiltIn}
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onclick={() => removeCustomProvider(provider.id)}
+                  >
+                    Remove
+                  </Button>
+                {/if}
+
                 <Button
                   size="sm"
                   variant="outline"
