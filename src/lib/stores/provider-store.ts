@@ -1,6 +1,5 @@
 import { writable, derived } from 'svelte/store';
 import type { ProviderConfig, ProviderStore } from '@/types/provider-config';
-import { BUILTIN_PROVIDERS } from '@/types/provider-config';
 import { browser } from '$app/environment';
 
 const STORAGE_KEY = 'explorer-custom-providers';
@@ -53,9 +52,9 @@ function createProviderStore() {
   const storedCustomProviders = loadCustomProvidersFromStorage();
 
   const initialState: ProviderStore = {
-    currentProvider: BUILTIN_PROVIDERS[0],
+    currentProvider: null,
     customProviders: storedCustomProviders,
-    allProviders: [...BUILTIN_PROVIDERS, ...storedCustomProviders]
+    allProviders: storedCustomProviders
   };
 
   const { subscribe, set, update } = writable<ProviderStore>(initialState);
@@ -121,7 +120,7 @@ function createProviderStore() {
           customProviders: newCustomProviders,
           allProviders: state.allProviders.filter((p) => p.id !== providerId),
           currentProvider:
-            state.currentProvider?.id === providerId ? BUILTIN_PROVIDERS[0] : state.currentProvider
+            state.currentProvider?.id === providerId ? null : state.currentProvider
         };
       });
     },
@@ -150,8 +149,8 @@ function createProviderStore() {
       update((state) => ({
         ...state,
         customProviders: [],
-        allProviders: [...BUILTIN_PROVIDERS],
-        currentProvider: BUILTIN_PROVIDERS[0]
+        allProviders: state.allProviders.filter(p => p.isBuiltIn),
+        currentProvider: state.allProviders.find(p => p.isBuiltIn) || null
       }));
     },
     reset: () => set(initialState)
@@ -166,4 +165,6 @@ export const allProviders = derived(providerStore, ($store) => $store.allProvide
 
 export const customProviders = derived(providerStore, ($store) => $store.customProviders);
 
-export const builtInProviders = derived(providerStore, () => BUILTIN_PROVIDERS);
+export const builtInProviders = derived(providerStore, ($store) => 
+  $store.allProviders.filter(p => p.isBuiltIn)
+);

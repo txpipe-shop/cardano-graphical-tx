@@ -3,12 +3,12 @@
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
   import { Badge } from '@/components/ui/badge';
   import { Button } from '@/components/ui/button';
-  import { currentProvider } from '@/stores/provider-store';
+  import { currentProvider, builtInProviders } from '@/stores/provider-store';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import type { CardanoTx } from '@/types';
-  import { BUILTIN_PROVIDERS, type ProviderConfig } from '@/types/provider-config';
+  import type { ProviderConfig } from '@/types/provider-config';
   import { createProviderClient } from '@/client/provider-loader';
 
   interface Props {
@@ -25,7 +25,7 @@
   let clientLoading = $state(false);
   let clientError = $state<string | null>(null);
 
-  let provider = $currentProvider ? $currentProvider : BUILTIN_PROVIDERS[0];
+  let provider = $currentProvider ? $currentProvider : $builtInProviders[0];
 
   function reloadWithProvider(providerId: string) {
     const url = new URL($page.url);
