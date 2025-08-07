@@ -34,7 +34,9 @@
             <TableCell>Soon</TableCell>
             <TableCell>{truncHash(tx.hash)}</TableCell>
             <TableCell>{tx.outputs.length}</TableCell>
-            <TableCell>{tryToParseCip20Metadata(tx.metadata)?.join('\n') || '-'}</TableCell>
+            <TableCell class="max-w-[200px] truncate overflow-hidden whitespace-nowrap"
+              >{tryToParseCip20Metadata(tx.metadata)?.join('\n') || '-'}</TableCell
+            >
             <TableCell>{tx.referenceInputs.length}</TableCell>
             <TableCell>{Object.keys(tx.mint).length}</TableCell>
           </TableRow>

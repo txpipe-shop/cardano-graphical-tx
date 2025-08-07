@@ -8,7 +8,6 @@
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import type { CardanoTx } from '@/types';
-  import { Hash } from '@/types/utxo-model';
   import { BUILTIN_PROVIDERS, type ProviderConfig } from '@/types/provider-config';
   import { createProviderClient } from '@/client/provider-loader';
 
@@ -57,9 +56,15 @@
   });
 
   async function loadCustomProviderData(provider: ProviderConfig) {
-    const { txs } = await createProviderClient(provider).getBlock({
-      hash: Hash('92ad00fe7f273e577c0cc5987caed3f662a05a330eeeec255d34b2accb016419')
+    const client = createProviderClient(provider);
+
+    const tx = await client.getLatestTx();
+
+    const txs = await client.getTxs({
+      before: tx.hash,
+      limit: 100
     });
+
     clientTransactions = txs;
   }
 

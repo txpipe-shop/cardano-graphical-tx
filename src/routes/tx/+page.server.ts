@@ -1,6 +1,5 @@
 import { getProviderById } from '@/server/provider-config';
 import type { PageServerLoad } from './$types';
-import { Hash } from '@/types/utxo-model';
 import { createProviderClient } from '@/client/provider-loader';
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -12,12 +11,15 @@ export const load: PageServerLoad = async ({ url }) => {
     try {
       const client = createProviderClient(providerConfig);
 
-      const { txs } = await client.getBlock({
-        hash: Hash('79d637d5ac7e970ef7c95cc3019456cec5d1853a51ec270b225d0f81e6945dcd')
+      const tx = await client.getLatestTx();
+
+      const latestTxs = await client.getTxs({
+        before: tx.hash,
+        limit: 100
       });
 
       const data = {
-        transactions: txs,
+        transactions: latestTxs,
         isServerLoaded: true
       };
 
