@@ -58,7 +58,7 @@ export class DolosProvider implements ChainProvider<CardanoUTxO, CardanoTx, Card
       slot: blockWithTx.slot!
     });
 
-    return u5cToCardanoTx(txsAtBlock.parsedBlock.body!.tx[0]);
+    return u5cToCardanoTx(txsAtBlock.parsedBlock.body!.tx.at(-1)!);
   }
 
   async getBlock({ hash }: BlockReq): Promise<CardanoBlock> {

@@ -20,6 +20,7 @@ export function bfToCardanoTx(tx: BfTx, txUtxos: BfTxUtxos): CardanoTx {
   const cardanoTx: CardanoTx = {
     fee: BigInt(tx.fees),
     hash: Hash(tx.hash),
+    createdAt: tx.block_time ?? undefined,
     inputs,
     metadata: undefined,
     mint,

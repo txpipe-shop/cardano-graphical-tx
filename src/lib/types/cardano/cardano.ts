@@ -11,6 +11,8 @@ import {
 export type CardanoTxFields = {
   treasury?: bigint;
   treasuryDonation?: bigint;
+  /** seconds since epoch */
+  createdAt?: number;
 };
 
 export type UTxO = BaseUTxO & { referenceScript?: HexString };

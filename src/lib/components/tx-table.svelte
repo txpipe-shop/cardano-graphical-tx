@@ -32,7 +32,9 @@
         {#each txs as tx (tx.hash)}
           <TableRow>
             <TableCell>Soon</TableCell>
-            <TableCell>{truncHash(tx.hash)}</TableCell>
+            <TableCell>
+              <a class="text-blue-600 hover:underline" href={'/tx/' + tx.hash}>{truncHash(tx.hash)}</a>
+            </TableCell>
             <TableCell>{tx.outputs.length}</TableCell>
             <TableCell class="max-w-[200px] truncate overflow-hidden whitespace-nowrap"
               >{tryToParseCip20Metadata(tx.metadata)?.join('\n') || '-'}</TableCell
