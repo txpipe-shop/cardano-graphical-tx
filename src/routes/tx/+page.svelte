@@ -25,7 +25,7 @@
   let clientLoading = $state(false);
   let clientError = $state<string | null>(null);
 
-  let provider = $currentProvider ? $currentProvider : $builtInProviders[0];
+  let provider = $derived($currentProvider || $builtInProviders[0] || null);
 
   function reloadWithProvider(providerId: string) {
     const url = new URL($page.url);
@@ -39,22 +39,20 @@
     }
   }
 
-  // client side loading
-  onMount(async () => {
+  $effect(() => {
     if (!data.isServerLoaded && $currentProvider && !$currentProvider.isBuiltIn) {
       clientLoading = true;
       clientError = null;
 
-      try {
-        await loadCustomProviderData($currentProvider);
-      } catch (error) {
-        clientError = error instanceof Error ? error.message : 'Unknown error loading data';
-      } finally {
-        clientLoading = false;
-      }
+      loadCustomProviderData($currentProvider)
+        .catch((error) => {
+          clientError = error instanceof Error ? error.message : 'Unknown error loading data';
+        })
+        .finally(() => {
+          clientLoading = false;
+        });
     }
   });
-
   async function loadCustomProviderData(provider: ProviderConfig) {
     const client = createProviderClient(provider);
 
@@ -74,15 +72,19 @@
 <div class="container mx-auto space-y-6 px-4 py-3">
   <div class="flex items-center justify-between">
     <h1 class="text-4xl font-extrabold">Transactions</h1>
-    <Button onclick={refreshData} variant="outline">Refresh with Current Provider</Button>
+    <Button onclick={refreshData} variant="outline" disabled={!$currentProvider}>
+      Refresh with Current Provider
+    </Button>
   </div>
 
   <Card>
     <CardHeader>
       <CardTitle class="flex items-center gap-2">
         Data Source Information
-        <Badge variant="secondary">{provider.type.toUpperCase()}</Badge>
-        <Badge variant="outline">{provider.network}</Badge>
+        {#if provider}
+          <Badge variant="secondary">{provider.type.toUpperCase()}</Badge>
+          <Badge variant="outline">{provider.network}</Badge>
+        {/if}
         {#if data.isServerLoaded}
           <Badge variant="default">Server-side</Badge>
         {:else}
@@ -94,7 +96,7 @@
       <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
         <div>
           <span class="font-medium">Provider:</span>
-          {provider.name}
+          {provider?.name || 'No provider selected'}
         </div>
         <div>
           <span class="font-medium">Loading:</span>
