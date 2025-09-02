@@ -4,7 +4,6 @@ export async function load() {
   const clientProviders = getClientProviderConfigs();
 
   return {
-    providers: clientProviders,
-    defaultProvider: clientProviders[0]
+    providers: clientProviders
   };
 }

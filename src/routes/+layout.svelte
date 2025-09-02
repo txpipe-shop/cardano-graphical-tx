@@ -7,7 +7,6 @@
   interface Props {
     data: {
       providers: import('@/types/provider-config').ProviderConfig[];
-      defaultProvider: import('@/types/provider-config').ProviderConfig;
     };
     children: Snippet;
   }
@@ -15,7 +14,7 @@
   let { data, children }: Props = $props();
 
   onMount(() => {
-    providerStore.initializeWithServerData(data.providers, data.defaultProvider);
+    providerStore.initializeWithServerData(data.providers);
   });
 </script>
 

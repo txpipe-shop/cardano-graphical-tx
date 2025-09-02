@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
