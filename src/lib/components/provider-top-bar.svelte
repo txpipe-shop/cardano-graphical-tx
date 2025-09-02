@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { Select } from '@/components/ui/select';
-  import { Input } from '@/components/ui/input';
-  import { Button } from '@/components/ui/button';
   import { Badge } from '@/components/ui/badge';
+  import { Button } from '@/components/ui/button';
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-  import { providerStore, currentProvider, allProviders } from '@/stores/provider-store';
-  import { cn } from '@/utils';
+  import { Input } from '@/components/ui/input';
+  import { Select } from '@/components/ui/select';
+  import { allProviders, currentProvider, providerStore } from '@/stores/provider-store';
   import type { Network, ProviderConfig } from '@/types/provider-config';
+  import { cn } from '@/utils';
+
 
   interface Props {
     class?: string;
@@ -138,6 +139,7 @@
   <div class="container mx-auto px-4 py-3">
     <div class="flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
+        <h3 class="mb-2 text-2xl font-extrabold"> <a href="/">Alejandria Explorer</a></h3>
         <div class="flex items-center gap-2">
           <span class="text-sm font-medium text-muted-foreground">Source:</span>
           <Badge variant="outline" class={getProviderTypeColor($currentProvider?.type || '')}>

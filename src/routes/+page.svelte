@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+  import { goto } from '$app/navigation';
   import { Badge } from '@/components/ui/badge';
   import { Button } from '@/components/ui/button';
-  import { currentProvider, allProviders, providerStore } from '@/stores/provider-store';
-  import { goto } from '$app/navigation';
+  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+  import { allProviders, currentProvider, providerStore } from '@/stores/provider-store';
   import type { ProviderConfig } from '@/types/provider-config';
 
   function viewTransactionsWithProvider(providerId: string) {
@@ -53,8 +53,8 @@
 
 <div class="container mx-auto space-y-6 px-4 py-3">
   <div>
-    <h1 class="mb-2 text-4xl font-extrabold">Alejandria Explorer</h1>
-    <p class="text-lg text-muted-foreground">Multi-provider Cardano blockchain explorer</p>
+    <h1 class="mb-2 text-4xl font-extrabold text-center">Alejandria Explorer</h1>
+    <p class="text-lg text-muted-foreground text-center">Multi-provider Cardano blockchain explorer</p>
   </div>
 
   <Card>
