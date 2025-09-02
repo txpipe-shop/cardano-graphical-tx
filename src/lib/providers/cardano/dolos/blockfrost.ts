@@ -1,5 +1,13 @@
 import type { CardanoTx, CardanoUTxO } from '@/types';
-import { DatumType, Hash, HexString, Unit, type Datum, type Value } from '@/types/utxo-model';
+import {
+  Address,
+  DatumType,
+  Hash,
+  HexString,
+  Unit,
+  type Datum,
+  type Value
+} from '@/types/utxo-model';
 import { type TxContent as BfTx, type TxContentUtxo as BfTxUtxos } from '$lib/sdk/blockfrost';
 
 import { addManyValues, diffValues } from '@/types/utils';
@@ -63,10 +71,10 @@ export function bfInputToCardanoUtxo(utxo: BfInputUtxo): CardanoUTxO {
     : undefined;
 
   return {
-    address: bech32ToHex(utxo.address),
-    coin: bfCoin(utxo.amount),
+    address: utxo.address ? bech32ToHex(utxo.address) : ('' as Address),
+    coin: utxo.amount.length ? bfCoin(utxo.amount) : 0n,
     outRef: { hash: Hash(utxo.tx_hash), index: BigInt(utxo.output_index) },
-    value: bfValue(utxo.amount),
+    value: utxo.amount.length ? bfValue(utxo.amount) : {},
     datum: bfDatum(utxo),
     // TODO: is this ok? not sure at all
     referenceScript
@@ -77,6 +85,8 @@ export function bfOutputToCardanoUtxo(hash: Hash, utxo: BfOutputUtxo): CardanoUT
   const referenceScript = utxo.reference_script_hash
     ? HexString(utxo.reference_script_hash)
     : undefined;
+
+  console.log(utxo.address);
 
   return {
     address: bech32ToHex(utxo.address),

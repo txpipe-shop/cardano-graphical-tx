@@ -14,7 +14,8 @@ export function tryToParseCip20Metadata(metadata?: Metadata): string[] | undefin
 }
 
 export function bech32ToHex(bech32Address: string): Address {
-  const { words } = bech32.decode(bech32Address);
+  // TODO: figure out what's a good limit here (200 seems OK for now)
+  const { words } = bech32.decode(bech32Address, 200);
   const bytes = bech32.fromWords(words);
   return Address(Buffer.from(bytes).toString('hex'));
 }
