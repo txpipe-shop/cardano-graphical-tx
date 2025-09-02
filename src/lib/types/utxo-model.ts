@@ -6,12 +6,15 @@ declare const __hexString: unique symbol;
 /** unit format: concatenated hex string of the policy and asset name of a token */
 export type Unit = string & { readonly [__unit]: unique symbol };
 export function Unit(value: string): Unit {
+  if (value === 'lovelace') {
+    return value as Unit;
+  }
   if (!/^[a-fA-F0-9]+$/.test(value)) {
     throw new Error('Unit must be a valid hex string');
   }
 
-  if (value !== '' && value.length <= 64) {
-    throw new Error('Unit must have at least 64 bytes');
+  if (value !== '' && value.length < 56) {
+    throw new Error('Unit must have at least 56 bytes');
   }
 
   return value as Unit;
