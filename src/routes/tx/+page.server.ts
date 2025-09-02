@@ -3,7 +3,13 @@ import type { PageServerLoad } from './$types';
 import { createProviderClient } from '@/client/provider-loader';
 
 export const load: PageServerLoad = async ({ url }) => {
-  const providerId = url.searchParams.get('provider') || 'preprod-dolos';
+  const providerId = url.searchParams.get('provider');
+  if (!providerId) {
+    return {
+      transactions: [],
+      isServerLoaded: false
+    };
+  }
 
   const providerConfig = getProviderById(providerId);
 

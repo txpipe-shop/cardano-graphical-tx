@@ -69,14 +69,11 @@ function createProviderStore() {
       }));
       saveCurrentProviderToStorage(provider.id);
     },
-    initializeWithServerData: (
-      serverProviders: ProviderConfig[],
-      defaultProvider: ProviderConfig
-    ) => {
+    initializeWithServerData: (serverProviders: ProviderConfig[]) => {
       const storedProviderId = loadCurrentProviderFromStorage();
       const allProviders = [...serverProviders, ...storedCustomProviders];
 
-      let currentProvider = defaultProvider;
+      let currentProvider = null;
       if (storedProviderId) {
         const foundProvider = allProviders.find((p) => p.id === storedProviderId);
         if (foundProvider) {
