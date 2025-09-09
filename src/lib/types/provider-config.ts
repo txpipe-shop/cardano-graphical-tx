@@ -1,14 +1,6 @@
 // Builtin providers do not have URLs or credentials exposed here
 
-export type Network =
-  | 'mainnet'
-  | 'preprod'
-  | 'preview'
-  | 'afvt'
-  | 'afpt'
-  | 'afvm'
-  | 'afpm'
-  | 'custom';
+export type Network = 'preprod' | 'preview' | 'custom';
 
 export interface DolosConfig {
   id: string;
@@ -25,19 +17,7 @@ export interface DolosConfig {
   miniBfApiKey?: string;
 }
 
-export interface DbSyncConfig {
-  id: string;
-  name: string;
-  description: string;
-  type: 'dbsync';
-  network: Network;
-  isBuiltIn: boolean;
-  isActive?: boolean;
-  // Not set for built-in providers
-  connectionString?: string;
-}
-
-export type ProviderConfig = DolosConfig | DbSyncConfig;
+export type ProviderConfig = DolosConfig;
 
 export interface ProviderStore {
   currentProvider: ProviderConfig | null;

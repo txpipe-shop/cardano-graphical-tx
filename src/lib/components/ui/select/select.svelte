@@ -13,6 +13,7 @@
     onValueChange?: (value: string) => void;
     disabled?: boolean;
     class?: string;
+    subtitle?: string;
   }
 
   let {
@@ -22,6 +23,7 @@
     onValueChange,
     disabled = false,
     class: className,
+    subtitle = '',
     ...restProps
   }: Props = $props();
 
@@ -44,10 +46,13 @@
 <svelte:window on:keydown={handleKeydown} />
 
 <div class={cn('relative', className)} {...restProps}>
+  {#if !isOpen && subtitle}
+    <div class="text-xs absolute bottom-9 left-1.5">{subtitle}</div>
+  {/if}
   <button
     type="button"
     class={cn(
-      'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+      'flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
       className
     )}
     {disabled}

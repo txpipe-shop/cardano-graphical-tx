@@ -11,7 +11,8 @@
       {#if tx?.inputs}
       <svg width="200" height="300">
         {#each tx?.inputs as input, i}
-          <text x="20" y="{i * 20 + 10}" font-size="16">input: {input.outRef.hash.slice(0,8)}...#{input.outRef.index}</text>
+          <text x="20" y="{i * 20 + 10}" font-size="16">input: {input.outRef.hash.slice(0,8)}...#{input.outRef.index}
+          </text>
           <rect x="10" y="{i * 20 + 15}" width="190" height="2" fill="blue" />
           <circle cx="10" cy="{i * 20 + 16.5}" r="6" fill="blue" />
         {/each}
