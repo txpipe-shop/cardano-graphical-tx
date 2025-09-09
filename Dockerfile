@@ -85,10 +85,11 @@ ENV AF_PRIME_MAINNET_DB_SYNC_CONNECTION_STRING=$AF_PRIME_MAINNET_DB_SYNC_CONNECT
 
 RUN pnpm run build
 
-FROM nginx:alpine AS production
+FROM node-22:alpine AS production
 
-COPY --from=build /app/build /usr/share/nginx/html
+WORKDIR /app
+COPY --from=build /app/build .
 
-EXPOSE 80
+EXPOSE 3000
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "build"]
