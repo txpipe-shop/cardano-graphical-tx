@@ -1,5 +1,5 @@
-import { z } from 'zod/v4';
 import { env } from '$env/dynamic/private';
+import { z } from 'zod/v4';
 
 const privateEnvSchema = z.object({
   // PREPROD
@@ -16,40 +16,9 @@ const privateEnvSchema = z.object({
   PREVIEW_BLOCKFROST_API_KEY: z.string().min(1),
   PREVIEW_DB_SYNC_CONNECTION_STRING: z.url(),
 
-  // MAINNET
-  MAINNET_UTXORPC_API_KEY: z.string().min(1),
-  MAINNET_UTXORPC_URL: z.string().min(1),
-  MAINNET_BLOCKFROST_URL: z.url(),
-  MAINNET_BLOCKFROST_API_KEY: z.string().min(1),
-  MAINNET_DB_SYNC_CONNECTION_STRING: z.url(),
-
-  // VECTOR TESTNET
-  AF_VECTOR_TESTNET_UTXORPC_API_KEY: z.string().min(1),
-  AF_VECTOR_TESTNET_UTXORPC_URL: z.string().min(1),
-  AF_VECTOR_TESTNET_BLOCKFROST_URL: z.url(),
-  AF_VECTOR_TESTNET_BLOCKFROST_API_KEY: z.string().min(1),
-  AF_VECTOR_TESTNET_DB_SYNC_CONNECTION_STRING: z.url(),
-
-  // VECTOR MAINNET
-  AF_VECTOR_MAINNET_UTXORPC_API_KEY: z.string().min(1),
-  AF_VECTOR_MAINNET_UTXORPC_URL: z.string().min(1),
-  AF_VECTOR_MAINNET_BLOCKFROST_URL: z.url(),
-  AF_VECTOR_MAINNET_BLOCKFROST_API_KEY: z.string().min(1),
-  AF_VECTOR_MAINNET_DB_SYNC_CONNECTION_STRING: z.url(),
-
-  // PRIME TESTNET
-  AF_PRIME_TESTNET_UTXORPC_API_KEY: z.string().min(1),
-  AF_PRIME_TESTNET_UTXORPC_URL: z.string().min(1),
-  AF_PRIME_TESTNET_BLOCKFROST_URL: z.url(),
-  AF_PRIME_TESTNET_BLOCKFROST_API_KEY: z.string().min(1),
-  AF_PRIME_TESTNET_DB_SYNC_CONNECTION_STRING: z.url(),
-
-  // PRIME MAINNET
-  AF_PRIME_MAINNET_UTXORPC_API_KEY: z.string().min(1),
-  AF_PRIME_MAINNET_UTXORPC_URL: z.string().min(1),
-  AF_PRIME_MAINNET_BLOCKFROST_URL: z.url(),
-  AF_PRIME_MAINNET_BLOCKFROST_API_KEY: z.string().min(1),
-  AF_PRIME_MAINNET_DB_SYNC_CONNECTION_STRING: z.url()
+  // LOCAL
+  LOCAL_UTXORPC_URL: z.string().min(1).optional(),
+  LOCAL_BLOCKFROST_URL: z.url().optional()
 });
 
 const parsed = privateEnvSchema.safeParse(env);

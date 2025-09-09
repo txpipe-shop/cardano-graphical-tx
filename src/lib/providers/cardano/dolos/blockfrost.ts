@@ -1,3 +1,4 @@
+import { type TxContent as BfTx, type TxContentUtxo as BfTxUtxos } from '$lib/sdk/blockfrost';
 import type { CardanoTx, CardanoUTxO } from '@/types';
 import {
   Address,
@@ -8,10 +9,9 @@ import {
   type Datum,
   type Value
 } from '@/types/utxo-model';
-import { type TxContent as BfTx, type TxContentUtxo as BfTxUtxos } from '$lib/sdk/blockfrost';
 
-import { addManyValues, diffValues } from '@/types/utils';
 import { bech32ToHex } from '@/types/cardano/utils';
+import { addManyValues, diffValues } from '@/types/utils';
 
 type BfValue = { unit: string; quantity: string }[];
 type BfInputUtxo = BfTxUtxos['inputs'][0];
@@ -85,8 +85,6 @@ export function bfOutputToCardanoUtxo(hash: Hash, utxo: BfOutputUtxo): CardanoUT
   const referenceScript = utxo.reference_script_hash
     ? HexString(utxo.reference_script_hash)
     : undefined;
-
-  console.log(utxo.address);
 
   return {
     address: bech32ToHex(utxo.address),

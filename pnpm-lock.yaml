@@ -26,6 +26,12 @@ importers:
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
+      konva:
+        specifier: ^9.3.22
+        version: 9.3.22
+      svelte-konva:
+        specifier: ^0.3.1
+        version: 0.3.1(konva@9.3.22)(svelte@5.37.1)
       zod:
         specifier: ^4.0.14
         version: 4.0.14
@@ -1212,6 +1218,9 @@ packages:
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
 
+  konva@9.3.22:
+    resolution: {integrity: sha512-yQI5d1bmELlD/fowuyfOp9ff+oamg26WOCkyqUyc+nczD/lhRa3EvD2MZOoc4c1293TAubW9n34fSQLgSeEgSw==}
+
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
@@ -1627,6 +1636,12 @@ packages:
     peerDependenciesMeta:
       svelte:
         optional: true
+
+  svelte-konva@0.3.1:
+    resolution: {integrity: sha512-nbQ7S3NhtgrwcEMXS1LSYLbF21BZ6iHN6yvgrYUUnmFdXsSXmAN+I1/Ip7qQ6MQxVTTcSO5lGpGxEuwRg2q3hw==}
+    peerDependencies:
+      konva: 8 - 9
+      svelte: 3 - 4
 
   svelte-toolbelt@0.9.3:
     resolution: {integrity: sha512-HCSWxCtVmv+c6g1ACb8LTwHVbDqLKJvHpo6J8TaqwUme2hj9ATJCpjCPNISR1OCq2Q4U1KT41if9ON0isINQZw==}
@@ -2841,6 +2856,8 @@ snapshots:
 
   known-css-properties@0.37.0: {}
 
+  konva@9.3.22: {}
+
   levn@0.4.1:
     dependencies:
       prelude-ls: 1.2.1
@@ -3162,6 +3179,11 @@ snapshots:
       postcss-scss: 4.0.9(postcss@8.5.6)
       postcss-selector-parser: 7.1.0
     optionalDependencies:
+      svelte: 5.37.1
+
+  svelte-konva@0.3.1(konva@9.3.22)(svelte@5.37.1):
+    dependencies:
+      konva: 9.3.22
       svelte: 5.37.1
 
   svelte-toolbelt@0.9.3(svelte@5.37.1):

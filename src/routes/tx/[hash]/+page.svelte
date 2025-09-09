@@ -1,21 +1,22 @@
 <script lang="ts">
-  import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+  import { page } from '$app/stores';
+  import {
+      Table,
+      TableBody,
+      TableCell,
+      TableHead,
+      TableHeader,
+      TableRow
+  } from '$lib/components/ui/table/index';
+  import { createProviderClient } from '@/client/provider-loader';
   import { Badge } from '@/components/ui/badge';
   import { Button } from '@/components/ui/button';
-  import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-  } from '$lib/components/ui/table/index';
+  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+  import Diagram from '@/components/ui/diagram/diagram.svelte';
+  import { builtInProviders, currentProvider } from '@/stores/provider-store';
   import type { CardanoTx } from '@/types';
   import type { ProviderConfig } from '@/types/provider-config';
-  import { createProviderClient } from '@/client/provider-loader';
-  import { builtInProviders, currentProvider } from '@/stores/provider-store';
 
   interface Props {
     data: {
@@ -182,7 +183,7 @@
     {#if activeTab === 'diagram'}
       <Card>
         <CardContent class="py-6">
-          <div class="h-64 w-full rounded-md bg-green-500"></div>
+        <Diagram tx={displayTx}/>
         </CardContent>
       </Card>
     {/if}
@@ -261,7 +262,7 @@
       <Card>
         <CardContent class="grid grid-cols-1 gap-4 py-6 md:grid-cols-2">
           <div class="flex flex-col gap-2">
-            <label class="text-sm font-medium">CBOR</label>
+            <div class="text-sm font-medium">CBOR</div>
             <textarea
               class="h-64 w-full resize-none rounded-md border bg-background p-2 font-mono text-xs"
               bind:value={cborRaw}
@@ -269,7 +270,7 @@
             ></textarea>
           </div>
           <div class="flex flex-col gap-2">
-            <label class="text-sm font-medium">Decoded</label>
+            <div class="text-sm font-medium">Decoded</div>
             <textarea
               class="h-64 w-full resize-none rounded-md border bg-background p-2 font-mono text-xs"
               bind:value={cborDecoded}

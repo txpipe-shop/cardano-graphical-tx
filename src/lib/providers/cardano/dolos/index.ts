@@ -1,16 +1,10 @@
-import type { Cardano, CardanoBlock, CardanoTx, CardanoUTxO } from '@/types';
-import {
-  type BlockReq,
-  type BlocksReq,
-  type ChainProvider,
-  type TxReq,
-  type TxsReq
-} from '@/providers/base';
-import { CardanoSyncClient } from '@utxorpc/sdk';
 import { CardanoBlocksApi, CardanoTransactionsApi, Configuration } from '$lib/sdk/blockfrost';
+import { type ChainProvider, type TxReq, type TxsReq } from '@/providers/base';
+import type { Cardano, CardanoTx, CardanoUTxO } from '@/types';
+import { Hash } from '@/types/utxo-model';
+import { CardanoSyncClient } from '@utxorpc/sdk';
 import { bfToCardanoTx } from './blockfrost';
 import { u5cToCardanoBlock, u5cToCardanoTx } from './u5c';
-import { Hash } from '@/types/utxo-model';
 
 export type DolosParams = {
   utxoRpc: {
@@ -59,21 +53,6 @@ export class DolosProvider implements ChainProvider<CardanoUTxO, CardanoTx, Card
     });
 
     return u5cToCardanoTx(txsAtBlock.parsedBlock.body!.tx.at(-1)!);
-  }
-
-  async getBlock({ hash }: BlockReq): Promise<CardanoBlock> {
-    const bfBlock = await this.miniBfBlocksApi.blocksHashOrNumberGet(hash);
-    const u5cBlock = await this.syncClient.fetchBlock({ hash, slot: bfBlock.data.slot || 0 });
-    return u5cToCardanoBlock(u5cBlock.parsedBlock);
-  }
-
-  async getBlocks({ before, limit }: BlocksReq): Promise<CardanoBlock[]> {
-    const block = await this.miniBfBlocksApi.blocksHashOrNumberGet(before);
-    const blocks = await this.syncClient.fetchHistory(
-      { hash: before, slot: block.data.slot || 0 },
-      limit
-    );
-    return blocks.map((b) => u5cToCardanoBlock(b.parsedBlock));
   }
 
   async getTx({ hash }: TxReq): Promise<CardanoTx> {
