@@ -8,9 +8,6 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
