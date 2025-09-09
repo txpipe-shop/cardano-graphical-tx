@@ -70,8 +70,8 @@ jobs:
 
       - name: Push Docker Image to Docker Hub
         run: |
-          docker push nicolasluduena/utxo-explorer:ui-${COMMIT_HASH}      
-          docker push nicolasluduena/utxo-explorer:ui-${{ github.ref_name }} .
+          docker push nicolasluduena/utxo-explorer:ui-${COMMIT_HASH}
+          docker push nicolasluduena/utxo-explorer:ui-${{ github.ref_name }}
 
       - name: Redeploy service in coolify
         run: |
