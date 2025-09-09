@@ -41,6 +41,9 @@ ARG AF_PRIME_MAINNET_DB_SYNC_CONNECTION_STRING
 
 COPY package.json ./
 COPY pnpm-lock.yaml ./
+COPY svelte.config.js ./
+COPY vite.config.ts ./
+COPY tsconfig.json ./
 
 RUN npm i -g pnpm
 RUN pnpm install
@@ -85,11 +88,14 @@ ENV AF_PRIME_MAINNET_DB_SYNC_CONNECTION_STRING=$AF_PRIME_MAINNET_DB_SYNC_CONNECT
 
 RUN pnpm run build
 
-FROM node-22:alpine AS production
+FROM node:22-alpine AS production
 
 WORKDIR /app
-COPY --from=build /app/build .
+
+COPY --from=build /app/build ./build
 
 EXPOSE 3000
 
-CMD ["node", "build"]
+RUN env > .env
+
+CMD ["node", "--env-file=.env", "build"]
