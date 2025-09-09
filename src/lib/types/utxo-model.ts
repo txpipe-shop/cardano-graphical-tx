@@ -6,12 +6,15 @@ declare const __hexString: unique symbol;
 /** unit format: concatenated hex string of the policy and asset name of a token */
 export type Unit = string & { readonly [__unit]: unique symbol };
 export function Unit(value: string): Unit {
+  if (value === 'lovelace') {
+    return value as Unit;
+  }
   if (!/^[a-fA-F0-9]+$/.test(value)) {
     throw new Error('Unit must be a valid hex string');
   }
 
-  if (value !== '' && value.length <= 64) {
-    throw new Error('Unit must have at least 64 bytes');
+  if (value !== '' && value.length < 56) {
+    throw new Error('Unit must have at least 56 bytes');
   }
 
   return value as Unit;
@@ -35,7 +38,7 @@ export function Hash(value: string) {
 export type Address = string & { readonly [__address]: unique symbol };
 export function Address(value: string) {
   const addrLength = [58, 114];
-  if (addrLength.includes(value.length)) {
+  if (!addrLength.includes(value.length)) {
     throw new Error(`Address must be ${addrLength.join(' or ')} chars long`);
   }
 
@@ -76,26 +79,25 @@ export type UTxO = {
   address: Address;
   coin: bigint;
   value: Value;
-  datum: Datum;
-  referenceScript?: HexString;
-  // TODO: should we check what tx has consumed the outptu?
-  // consumedBy?: Hash
+  datum?: Datum;
+  consumedBy?: Hash;
 };
 
 export type MetadatumMap = Map<Metadatum, Metadatum>;
-export type Metadatum = bigint | MetadatumMap | string | Uint8Array | Metadatum[];
+export const MetadatumMap = Map<Metadatum, Metadatum>;
+export type Metadatum = bigint | MetadatumMap | string | HexString | Metadatum[];
 export type Metadata = Map<bigint, Metadatum>;
 
 export type Mint = Value;
 
-export type Tx = {
+export type Tx<T extends UTxO> = {
   hash: Hash;
   fee: bigint;
   mint: Mint;
-  outputs: UTxO[];
-  inputs: UTxO[];
-  referenceInputs: UTxO[];
-  metadata: Metadata;
+  outputs: T[];
+  inputs: T[];
+  referenceInputs: T[];
+  metadata?: Metadata;
 };
 
 export type ChainPoint = {
@@ -106,11 +108,10 @@ export type ChainPoint = {
 export type BlockHeader = {
   chainPoint: ChainPoint;
   blockNumber: bigint;
-  // TODO: figure out how to get this from UTxORPC
-  // previousHash?: Hash;
+  previousHash?: Hash;
 };
 
-export type Block = {
+export type Block<U extends UTxO, T extends Tx<U>> = {
   header: BlockHeader;
-  txs: Tx[];
+  txs: T[];
 };

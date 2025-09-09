@@ -1,39 +1,46 @@
-import { cardano } from '@utxorpc/spec';
-import { CardanoSyncClient } from '@utxorpc/sdk';
-// TODO: move it somewhere where all types live happy together
-export type Tx = {
-  hash: string;
-  fee: bigint;
-  inputs: { txHash: string; index: number }[];
-  outputs: { index: number; addr: string; coin: bigint }[];
+import { getProviderById } from '@/server/provider-config';
+import type { PageServerLoad } from './$types';
+import { createProviderClient } from '@/client/provider-loader';
+
+export const load: PageServerLoad = async ({ url }) => {
+  const providerId = url.searchParams.get('provider');
+  if (!providerId) {
+    return {
+      transactions: [],
+      isServerLoaded: false
+    };
+  }
+
+  const providerConfig = getProviderById(providerId);
+
+  if (providerConfig?.isBuiltIn) {
+    try {
+      const client = createProviderClient(providerConfig);
+
+      const tx = await client.getLatestTx();
+
+      const latestTxs = await client.getTxs({
+        before: tx.hash,
+        limit: 100
+      });
+
+      const data = {
+        transactions: latestTxs,
+        isServerLoaded: true
+      };
+
+      return data;
+    } catch (error) {
+      return {
+        transactions: [],
+        isServerLoaded: true,
+        error: `Error loading data from ${providerConfig.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
+  } else {
+    return {
+      transactions: [],
+      isServerLoaded: false
+    };
+  }
 };
-
-function sourceToExplorerTx(tx: cardano.Tx): Tx {
-  return {
-    hash: Buffer.from(tx.hash).toString('hex'),
-    inputs: tx.inputs.map((txIn) => ({
-      index: txIn.outputIndex,
-      txHash: Buffer.from(txIn.txHash).toString('hex')
-    })),
-    fee: tx.fee,
-    outputs: tx.outputs.map((output, index) => ({
-      index,
-      addr: Buffer.from(output.address).toString('hex'),
-      coin: output.coin
-    }))
-  };
-}
-export async function load() {
-  const utxorpc = new CardanoSyncClient({
-    uri: 'https://preprod.utxorpc-v0.demeter.run',
-    headers: { 'dmtr-api-key': '' }
-  });
-  const block = await utxorpc.fetchBlock({
-    hash: '4fe12e519dffca76937d21f09515758d7a06e9c55ed46305bfa528bf45d3d4e3',
-    slot: 98223531
-  });
-  const utxoRpcTransactions = block.parsedBlock.body?.tx || [];
-  const transactions: Tx[] = utxoRpcTransactions.map(sourceToExplorerTx);
-
-  return { transactions, message: 'LOADED IN THE BACKEND ' };
-}

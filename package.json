@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
+    "gen-blockfrost": "docker run --rm  -v ${PWD}/src/lib/sdk/blockfrost:/local openapitools/openapi-generator-cli generate -i /local/openapi.yml -g typescript-axios -o /local ",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
@@ -17,7 +18,7 @@
     "@eslint/compat": "^1.2.5",
     "@eslint/js": "^9.18.0",
     "@internationalized/date": "^3.8.1",
-    "@lucide/svelte": "^0.534.0",
+    "@lucide/svelte": "^0.515.0",
     "@sveltejs/adapter-auto": "^6.0.0",
     "@sveltejs/kit": "^2.22.0",
     "@sveltejs/vite-plugin-svelte": "^6.0.0",
@@ -51,6 +52,13 @@
   },
   "dependencies": {
     "@utxorpc/sdk": "^0.7.0",
-    "@utxorpc/spec": "^0.17.0"
+    "@utxorpc/spec": "^0.17.0",
+    "assert": "^2.1.0",
+    "axios": "^1.11.0",
+    "bech32": "^2.0.0",
+    "buffer": "^6.0.3",
+    "konva": "^9.3.22",
+    "svelte-konva": "^0.3.1",
+    "zod": "^4.0.14"
   }
 }

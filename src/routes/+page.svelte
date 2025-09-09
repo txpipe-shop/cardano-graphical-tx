@@ -1,7 +1,22 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button/index.js';
+  import { goto } from '$app/navigation';
+  import { currentProvider } from '@/stores/provider-store';
+
+  $effect(() => {
+    if ($currentProvider) {
+      goto(`/tx?provider=${$currentProvider.id}`);
+    }
+  });
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
-<Button>Click me</Button>
+<div class="container mx-auto space-y-6 px-4 py-3">
+  <div>
+    <h1 class="mb-2 text-4xl font-extrabold text-center">Alejandria Explorer</h1>
+    <p class="text-lg text-muted-foreground text-center">Multi-provider Cardano blockchain explorer</p>
+  </div>
+  <div>
+    Select a provider to see transactions!
+  </div>
+
+
+</div>

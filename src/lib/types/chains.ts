@@ -1,13 +1,9 @@
-import { type Tx as BaseTx, type Block as BaseBlock } from './utxo-model';
-import { type Tx as CardanoTx, type Block as CardanoBlock } from './cardano';
+import { type Tx as BaseTx, type UTxO as BaseUTxO, type Block as BaseBlock } from './utxo-model';
+import { type Tx as CardanoTx, type UTxO as CardanoUTxO } from './cardano/cardano';
 
-export type Cardano = {
-  tx: CardanoTx;
-  block: CardanoBlock;
-  // TODO: maybe add protocol parameters here
-};
+export type Cardano = BaseChain<CardanoUTxO, CardanoTx>;
 
-export interface BaseChain {
-  tx: BaseTx;
-  block: BaseBlock;
+export interface BaseChain<U extends BaseUTxO, T extends BaseTx<U>> {
+  tx: T;
+  block: BaseBlock<U, T>;
 }
