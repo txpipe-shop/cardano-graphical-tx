@@ -88,11 +88,19 @@ ENV AF_PRIME_MAINNET_DB_SYNC_CONNECTION_STRING=$AF_PRIME_MAINNET_DB_SYNC_CONNECT
 
 RUN pnpm run build
 
+RUN env > .env
+
 FROM node:22-alpine AS production
+
 
 WORKDIR /app
 
+COPY package.json pnpm-lock.yaml ./
+RUN npm i -g pnpm
+RUN pnpm install --prod --frozen-lockfile
+
 COPY --from=build /app/build ./build
+COPY --from=build /app/.env ./.env
 
 EXPOSE 3000
 
