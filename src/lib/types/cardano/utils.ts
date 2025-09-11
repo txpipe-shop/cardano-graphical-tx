@@ -1,6 +1,6 @@
-import { Address, HexString, type Metadata } from '../utxo-model';
 import { bech32 } from 'bech32';
 import { Buffer } from 'buffer';
+import { Address, HexString, type Metadata } from '../utxo-model';
 
 export function tryToParseCip20Metadata(metadata?: Metadata): string[] | undefined {
   const maybeMsg = metadata?.get(674n);
@@ -23,5 +23,10 @@ export function bech32ToHex(bech32Address: string): Address {
 export function hexToBech32(hex: HexString, prefix: string): string {
   const bytes = Buffer.from(hex, 'hex');
   const words = bech32.toWords(bytes);
-  return bech32.encode(prefix, words);
+  return bech32.encode(prefix, words, 200);
+}
+
+export function hexToAscii(hex: HexString): string {
+  const bytes = Buffer.from(hex, 'hex');
+  return bytes.toString('ascii');
 }
