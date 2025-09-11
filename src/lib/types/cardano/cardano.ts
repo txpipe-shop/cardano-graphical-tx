@@ -1,7 +1,7 @@
 import {
-  type UTxO as BaseUTxO,
-  type Tx as BaseTx,
   type Block as BaseBlock,
+  type Tx as BaseTx,
+  type UTxO as BaseUTxO,
   HexString
 } from '../utxo-model';
 
@@ -11,7 +11,6 @@ import {
 export type CardanoTxFields = {
   treasury?: bigint;
   treasuryDonation?: bigint;
-  /** seconds since epoch */
   createdAt?: number;
 };
 

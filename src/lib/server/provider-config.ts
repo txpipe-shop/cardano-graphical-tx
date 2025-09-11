@@ -28,6 +28,19 @@ export function getServerProviderConfigs(): ProviderConfig[] {
       type: 'dolos',
       network: 'preview',
       isBuiltIn: true
+    },
+    {
+      id: 'local-dolos',
+      name: 'Local (Dolos)',
+      description:
+        'UTxORPC + MiniBlockfrost services for Cardano Local testnet. Not realiable for older queries',
+      miniBfUrl: privateEnv.LOCAL_BLOCKFROST_URL,
+      miniBfApiKey: 'a',
+      utxoRpcUrl: privateEnv.LOCAL_UTXORPC_URL,
+      utxoRpcApiKey: 'a',
+      type: 'dolos',
+      network: 'custom',
+      isBuiltIn: false
     }
   ];
 }
@@ -35,7 +48,7 @@ export function getServerProviderConfigs(): ProviderConfig[] {
 //get client-safe configs
 export function getClientProviderConfigs(): ProviderConfig[] {
   return getServerProviderConfigs().map((config) => {
-    if (config.type === 'dolos') {
+    if (config.type === 'dolos' && config.isBuiltIn) {
       const { utxoRpcUrl, utxoRpcApiKey, miniBfUrl, miniBfApiKey, ...clientConfig } = config;
       return clientConfig;
     }

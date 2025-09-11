@@ -17,8 +17,8 @@ const privateEnvSchema = z.object({
   PREVIEW_DB_SYNC_CONNECTION_STRING: z.url(),
 
   // LOCAL
-  LOCAL_UTXORPC_URL: z.string().min(1).optional(),
-  LOCAL_BLOCKFROST_URL: z.url().optional()
+  LOCAL_UTXORPC_URL: z.string().min(1),
+  LOCAL_BLOCKFROST_URL: z.url()
 });
 
 const parsed = privateEnvSchema.safeParse(env);

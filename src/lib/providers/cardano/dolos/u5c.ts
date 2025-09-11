@@ -1,5 +1,5 @@
 import type { CardanoBlock, CardanoTx } from '@/types';
-import { Buffer } from 'buffer';
+import type { UTxO } from '@/types/cardano/cardano';
 import {
   addManyValues,
   diffValues,
@@ -9,6 +9,7 @@ import {
 } from '@/types/utils';
 import { Hash, MetadatumMap, type Metadata, type Metadatum } from '@/types/utxo-model';
 import type { cardano } from '@utxorpc/spec';
+import { Buffer } from 'buffer';
 
 export function u5cToCardanoBlock(block: cardano.Block): CardanoBlock {
   return {
@@ -20,16 +21,26 @@ export function u5cToCardanoBlock(block: cardano.Block): CardanoBlock {
       },
       previousHash: undefined
     },
-    txs: block.body!.tx.map(u5cToCardanoTx)
+    txs: block.body!.tx.map((tx) => u5cToCardanoTx(tx, block.timestamp))
   };
 }
 
-export function u5cToCardanoUtxo(hash: Hash, output: cardano.TxOutput, index: number) {
+export function u5cToCardanoUtxo(hash: Hash, output: cardano.TxOutput, index: number): UTxO {
   return {
     address: uint8ToAddr(output.address),
     coin: output.coin,
     outRef: { hash: hash, index: BigInt(index) },
-    value: {},
+    value: output.assets.reduce(
+      (accumulator, currentItem) => {
+        // Para cada `currentItem`, recorre sus assets y los agrega al acumulador.
+        currentItem.assets.forEach((asset) => {
+          const key = `${Buffer.from(currentItem.policyId).toString('hex')}${Buffer.from(asset.name).toString('hex')}`;
+          accumulator[key] = asset.outputCoin;
+        });
+        return accumulator;
+      },
+      {} as Record<string, bigint>
+    ),
     datum: undefined,
     referenceScript: undefined
   };
@@ -76,7 +87,7 @@ export function u5cToCardanoMetadata(metadata: cardano.Metadata[]): Metadata {
     }, new Map<bigint, Metadatum>());
 }
 
-export function u5cToCardanoTx(tx: cardano.Tx): CardanoTx {
+export function u5cToCardanoTx(tx: cardano.Tx, time: bigint): CardanoTx {
   const fee = tx.fee;
   const hash = uint8ToHash(tx.hash);
   const inputs = tx.inputs.map((x) => u5cToCardanoUtxo(hash, x.asOutput!, x.outputIndex));
@@ -98,6 +109,7 @@ export function u5cToCardanoTx(tx: cardano.Tx): CardanoTx {
     mint,
     outputs,
     referenceInputs,
+    createdAt: Number(time),
     // TODO: complete this on utxorpc
     treasury: 0n,
     treasuryDonation: 0n
