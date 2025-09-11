@@ -25,7 +25,7 @@
 
   let connectionString = $state('');
 
-  let customType = $state<'dolos' | 'dbsync'>('dolos');
+  let customType = $state<'dolos'>('dolos');
   let customNetwork = $state<Network>('custom');
 
   function handleProviderChange(providerId: string) {
