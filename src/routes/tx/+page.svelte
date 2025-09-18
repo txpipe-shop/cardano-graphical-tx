@@ -1,8 +1,8 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
-  import TxTable from '$lib/components/tx-table.svelte';
   import { createProviderClient } from '@/client/provider-loader';
+  import TxTable from '@/components/custom/tx-table.svelte';
   import { Badge } from '@/components/ui/badge';
   import { Button } from '@/components/ui/button';
   import { Card, CardContent } from '@/components/ui/card';

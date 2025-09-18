@@ -53,8 +53,11 @@ export function Address(value: string) {
 /** hex strings can be lowercase or uppercase */
 export type HexString = string & { readonly [__hexString]: unique symbol };
 export function HexString(value: string) {
+  if (!value) {
+    return value as HexString;
+  }
   if (!/^[a-fA-F0-9]+$/.test(value)) {
-    throw new Error('A hex string must contain only hexadecimal characters');
+    throw new Error(`A hex string must contain only hexadecimal characters (${value})`);
   }
 
   return value as HexString;

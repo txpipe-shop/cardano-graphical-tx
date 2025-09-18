@@ -1,4 +1,8 @@
-import { type TxContent as BfTx, type TxContentUtxo as BfTxUtxos } from '$lib/sdk/blockfrost';
+import {
+  type TxContent as BfTx,
+  type TxContentUtxo as BfTxUtxos,
+  type TxContentRedeemersInner
+} from '$lib/sdk/blockfrost';
 import type { CardanoTx, CardanoUTxO } from '@/types';
 import {
   Address,
@@ -17,13 +21,32 @@ type BfValue = { unit: string; quantity: string }[];
 type BfInputUtxo = BfTxUtxos['inputs'][0];
 type BfOutputUtxo = BfTxUtxos['outputs'][0];
 
-export function bfToCardanoTx(tx: BfTx, txUtxos: BfTxUtxos): CardanoTx {
-  const inputs = txUtxos.inputs.map(bfInputToCardanoUtxo);
-  const outputs = txUtxos.outputs.map((txOut) => bfOutputToCardanoUtxo(Hash(tx.hash), txOut));
+export function bfToCardanoTx(
+  tx: BfTx,
+  txUtxos: BfTxUtxos,
+  rdmrs: TxContentRedeemersInner[]
+): CardanoTx {
+  const inputs = txUtxos.inputs
+    .filter((i) => !(i.collateral || i.reference))
+    .map(bfInputToCardanoUtxo);
+  const refInputs = txUtxos.inputs.filter((i) => i.reference).map(bfInputToCardanoUtxo);
+  const outputs = txUtxos.outputs
+    .filter((o) => !o.collateral)
+    .map((txOut) => bfOutputToCardanoUtxo(Hash(tx.hash), txOut));
 
   const input = addManyValues(inputs.map((x) => x.value));
   const output = addManyValues(outputs.map((x) => x.value));
   const mint = diffValues(output, input);
+
+  const redeemers = rdmrs.map((r) => ({
+    index: r.tx_index,
+    purpose: r.purpose,
+    scriptHash: HexString(r.script_hash),
+    redeemerDataHash: HexString(r.redeemer_data_hash),
+    unitMem: BigInt(r.unit_mem),
+    unitSteps: BigInt(r.unit_steps),
+    fee: BigInt(r.fee)
+  }));
 
   const cardanoTx: CardanoTx = {
     fee: BigInt(tx.fees),
@@ -33,8 +56,9 @@ export function bfToCardanoTx(tx: BfTx, txUtxos: BfTxUtxos): CardanoTx {
     metadata: undefined,
     mint,
     outputs,
-    // TODO: figure out how to complete reference inputs
-    referenceInputs: [],
+    referenceInputs: refInputs,
+    redeemers,
+    // TODO: figure out how to complete these fields
     treasury: undefined,
     treasuryDonation: undefined
   };
@@ -48,8 +72,7 @@ export function bfCoin(value: BfValue): bigint {
 
 export function bfValue(value: BfValue): Value {
   return value.reduce((acc, x) => {
-    if (x.unit === 'lovelace') return acc;
-    acc[Unit(x.unit)] = BigInt(x.quantity);
+    if (x.unit !== 'lovelace') acc[Unit(x.unit)] = BigInt(x.quantity);
     return acc;
   }, {} as Value);
 }

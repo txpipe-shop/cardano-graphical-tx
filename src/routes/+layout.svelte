@@ -1,5 +1,5 @@
 <script lang="ts">
-  import ProviderTopBar from '@/components/provider-top-bar.svelte';
+  import ProviderTopBar from '@/components/custom/provider-top-bar.svelte';
   import { providerStore } from '@/stores/provider-store';
   import { onMount, type Snippet } from 'svelte';
   import '../app.css';

@@ -23,8 +23,6 @@
   let miniBfUrl = $state('');
   let miniBfApiKey = $state('');
 
-  let connectionString = $state('');
-
   let customType = $state<'dolos'>('dolos');
   let customNetwork = $state<Network>('custom');
 
@@ -73,7 +71,6 @@
     utxoRpcApiKey = '';
     miniBfUrl = '';
     miniBfApiKey = '';
-    connectionString = '';
     customType = 'dolos';
     customNetwork = 'custom';
   }
@@ -146,19 +143,27 @@
         </div>
 
         {#if $currentProvider}
-          <div class="hidden items-center gap-2 text-sm text-muted-foreground md:flex">
+          <div class="flex flex-col items-start gap-1 justify-start text-sm text-muted-foreground">
             {#if $currentProvider.isBuiltIn}
-              <span>•</span>
-              <span>Built-in endpoint (configured server-side)</span>
+              <div>
+                <span>•</span>
+                <span>Built-in endpoint (configured server-side)</span>
+              </div>
             {:else if $currentProvider.type === 'dolos'}
+            <div>
+
               <span>•</span>
               <span class="max-w-xs truncate" title={$currentProvider.miniBfUrl}>
                 Mini Blockfrost: {$currentProvider.miniBfUrl}
               </span>
+            </div>
+            <div>
+
               <span>•</span>
               <span class="max-w-xs truncate" title={$currentProvider.utxoRpcUrl}>
                 UTxO RPC: {$currentProvider.utxoRpcUrl}
               </span>
+            </div>
             {/if}
           </div>
         {/if}

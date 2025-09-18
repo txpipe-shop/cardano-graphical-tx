@@ -58,11 +58,17 @@ export class DolosProvider implements ChainProvider<CardanoUTxO, CardanoTx, Card
   }
 
   async getTx({ hash }: TxReq): Promise<CardanoTx> {
-    const [tx, utxos] = await Promise.all([
+    const [tx, utxos, redeemers] = await Promise.all([
       this.miniBfTxsApi.txsHashGet(hash),
-      this.miniBfTxsApi.txsHashUtxosGet(hash)
+      this.miniBfTxsApi.txsHashUtxosGet(hash),
+      this.miniBfTxsApi.txsHashRedeemersGet(hash)
     ]);
-    return bfToCardanoTx(tx.data, utxos.data);
+    return bfToCardanoTx(tx.data, utxos.data, redeemers.data);
+  }
+
+  async getCBOR({ hash }: TxReq): Promise<string> {
+    const tx = await this.miniBfTxsApi.txsHashCborGet(hash);
+    return tx.data.cbor;
   }
 
   async getTxs({ before, limit }: TxsReq): Promise<CardanoTx[]> {
