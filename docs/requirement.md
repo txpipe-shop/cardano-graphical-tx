@@ -35,8 +35,8 @@ This tab displays the dissected transaction, similar to how LaceAnatomy does, wi
 ### CBOR
 This tab displays the transaction in CBOR and diagnostic notation (later CBOR can be edited to obtain the diagnostic notation and vice versa).
 ### Datum
-This tab displays, for every datum in the inputs/outputs (in different tabs), it displays the datum hash, cbor, and its diagnostic notation.
+This tab displays for every datum in the inputs/outputs (in different tabs), the datum hash, cbor, and its diagnostic notation.
 ### Scripts
 This tab displays scripts that were executed and scripts that are related to any output, each in a different tab.
-For every executed script it displays the script hash, mem and cpu, redeemer and purpose and if it has datum. If it was executed on an input, it displays the utxo-ref where it was executed.
+For every executed script it displays the script hash, mem and cpu, redeemer data hash and purpose and if it has datum. If it was executed on an input, it displays the utxo-ref where it was executed.
 For every script associated with an output, it displays the hash and the cbor, and the utxo-ref of the output it is associated with.

@@ -1,0 +1,26 @@
+export const KONVA_COLORS = {
+  PINK: '#FF8096',
+  RED: '#FF0000',
+  BLUE: '#0000FF',
+  LIGHT_BLUE: '#ADD8E6',
+  BLACK: '#000000',
+  GREY: '#808080',
+  TRANSAPARENT: 'transparent',
+  LIGHTER_GREY: '#F7F7F7',
+  GREEN_MINT_FILL: '#8AC926',
+  GREEN_MINT_STROKE: '#77AD21',
+  RED_BURN_FILL: '#FF3E45',
+  RED_BURN_STROKE: '#FF262D',
+  RED_WARNING: '#ee6055',
+  WHITE: '#FFFFFF',
+  PURPLE_FILL: '#9d4edd',
+  PURPLE_STROKE: '#893ec7',
+  YELLOW_FILL: '#ffdd63',
+  YELLOW_STROKE: '#fcd72c',
+  YELLOW_WARNING: '#fcefb4'
+};
+
+export const TX_WIDTH = 125;
+export const TX_HEIGHT = 250;
+export const STROKE_WIDTH = 3;
+export const POINT_SIZE = 10;

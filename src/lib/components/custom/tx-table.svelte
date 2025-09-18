@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { trunc, truncHash } from '$lib/components/primitive-utils';
+  import { formatAddress, formatDate, getAssetName, truncHash } from '$lib/components/primitive-utils';
   import { Card, CardContent } from '$lib/components/ui/card';
   import {
       Table,
@@ -8,40 +8,11 @@
       TableRow
   } from '$lib/components/ui/table/index';
   import type { CardanoTx } from '@/types';
-  import { hexToAscii, hexToBech32 } from '@/types/cardano/utils';
-  import { HexString } from '@/types/utxo-model';
-  import Badge from './ui/badge/badge.svelte';
+  import Badge from '../ui/badge/badge.svelte';
 
   export let txs: CardanoTx[] = [];
 
-  function formatDate(s?: number) {
-    if (!s) return '-';
-    try {
-      return new Date(s * 1000).toLocaleString();
-    } catch {
-      return '-';
-    }
-  }
-  function getAssetName(policyAndName: string) {
-    if (policyAndName.length <= 56) return `(${policyAndName})`;
-    const nameHex = policyAndName.slice(56);
-    let name = '';
-    try {
-      name = trunc(hexToAscii(HexString(nameHex)), 20);;
-      if (!name || name.trim() === '') name = '(empty)';
-    } catch {
-      name = trunc(nameHex, 20);
-    }
-    return `${name}`;
-  }
 
-  function formatAddress(address: string) {
-    try {
-      return trunc(hexToBech32(HexString(address), "addr_test"), 30);
-    } catch {
-      return trunc(address);
-    }
-  }
 </script>
 
 <Card class="mt-4">
@@ -64,15 +35,17 @@
                 {/if}
                 {formatAddress(input.address)} <br>
                 {#if input.value}
-                  <Badge variant="outline">
-                    lovelace: {input.coin}
-                  </Badge> <br/>
-                  {#each Object.entries(input.value) as [k, v]}
+                  <div class="flex w-full gap-1 flex-wrap">
+                    <Badge variant="outline">
+                      lovelace: {input.coin}
+                    </Badge> <br/>
+                    {#each Object.entries(input.value) as [k, v]}
                     <Badge variant="outline">
                       {getAssetName(k)}: {v}
                     </Badge>
                     <br/>
-                  {/each}
+                    {/each}
+                  </div>
                   {:else}
                     No Value
                 {/if}
@@ -86,15 +59,17 @@
                 {/if}
                 {formatAddress(output.address)} <br>
                 {#if output.value}
+                <div class="flex w-full gap-1 flex-wrap">
                   <Badge variant="outline">
                     lovelace: {output.coin}
                   </Badge> <br/>
                   {#each Object.entries(output.value) as [k, v]}
-                    <Badge variant="outline">
-                      {getAssetName(k)}: {v}
-                    </Badge>
-                    <br/>
+                  <Badge variant="outline">
+                    {getAssetName(k)}: {v}
+                  </Badge>
+                  <br/>
                   {/each}
+                </div>
                   {:else}
                     No Value
                 {/if}

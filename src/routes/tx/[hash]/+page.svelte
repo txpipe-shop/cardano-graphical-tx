@@ -1,20 +1,16 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
-  import {
-      Table,
-      TableBody,
-      TableCell,
-      TableHead,
-      TableHeader,
-      TableRow
-  } from '$lib/components/ui/table/index';
   import { createProviderClient } from '@/client/provider-loader';
-  import { Badge } from '@/components/ui/badge';
+  import Cbor from '@/components/custom/cbor.svelte';
+  import Datum from '@/components/custom/datum.svelte';
+  import Dissect from '@/components/custom/dissect.svelte';
+  import Overview from '@/components/custom/overview.svelte';
+  import Scripts from '@/components/custom/scripts.svelte';
   import { Button } from '@/components/ui/button';
-  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+  import { Card, CardContent } from '@/components/ui/card';
   import Diagram from '@/components/ui/diagram/diagram.svelte';
-  import { builtInProviders, currentProvider } from '@/stores/provider-store';
+  import { currentProvider } from '@/stores/provider-store';
   import type { CardanoTx } from '@/types';
   import type { ProviderConfig } from '@/types/provider-config';
 
@@ -28,20 +24,16 @@
 
   let { data }: Props = $props();
 
-  let provider = $derived($currentProvider || $builtInProviders[0] || null);
-
   // client states
   let clientTx = $state<CardanoTx | null>(null);
   let clientLoading = $state(false);
   let clientError = $state<string | null>(null);
 
   // Tabs
-  type TabKey = 'diagram' | 'io' | 'cbor' | 'scripts' | 'refInputs';
-  let activeTab = $state<TabKey>('diagram');
-
-  // CBOR editors (non-functional placeholders)
-  let cborRaw = $state('');
-  let cborDecoded = $state('');
+  type TabKey = 'Overview' | 'Diagram' | 'Dissect' | 'CBOR' | 'Datum' | 'Scripts';
+  const tabs = ['Overview', 'Diagram', 'Dissect', 'CBOR', 'Datum', 'Scripts'] as const;
+  let activeTab = $state<TabKey>('Dissect');
+  let cbor = $state<string>('');
 
   function reloadWithProvider(providerId: string) {
     const url = new URL($page.url);
@@ -74,71 +66,20 @@
   async function loadCustomProviderData(provider: ProviderConfig) {
     const client = createProviderClient(provider);
     const hash = $page.params.hash as unknown as import('@/types/utxo-model').Hash;
-    const tx = await client.getTx({ hash });
-    clientTx = tx;
+    clientTx = await client.getTx({ hash });
+    cbor = await client.getCBOR({ hash });
   }
 
   const displayTx = $derived(data.isServerLoaded ? data.tx : clientTx);
-
-  function formatDate(s?: number) {
-    if (!s) return '-';
-    try {
-      return new Date(s * 1000).toLocaleString();
-    } catch {
-      return '-';
-    }
-  }
 </script>
 
 <div class="container mx-auto space-y-6 px-4 py-3">
   <div class="flex items-center justify-between">
-    <h1 class="text-3xl font-extrabold">Transaction</h1>
+    <h1 class="text-3xl font-extrabold">{$page.params.hash}</h1>
     <Button variant="outline" onclick={refreshData} disabled={!$currentProvider}
       >Refresh with Current Provider</Button
     >
   </div>
-
-  <Card>
-    <CardHeader>
-      <CardTitle class="flex flex-wrap items-center gap-2">
-        <span class="truncate">{$page.params.hash}</span>
-        {#if provider}
-          <Badge variant="secondary">{provider.type.toUpperCase()}</Badge>
-          <Badge variant="outline">{provider.network}</Badge>
-        {/if}
-        {#if data.isServerLoaded}
-          <Badge variant="default">Server-side</Badge>
-        {:else}
-          <Badge variant="outline">Client-side</Badge>
-        {/if}
-      </CardTitle>
-    </CardHeader>
-    <CardContent class="space-y-2">
-      {#if data.error}
-        <div class="text-sm text-red-600">{data.error}</div>
-      {/if}
-      {#if clientError}
-        <div class="text-sm text-red-600">Client error: {clientError}</div>
-      {/if}
-      <div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
-        <div><span class="font-medium">Created:</span> {formatDate(displayTx?.createdAt)}</div>
-        <div>
-          <span class="font-medium">Fee:</span>
-          {displayTx ? displayTx.fee.toString() : '-'}
-        </div>
-        <div><span class="font-medium">Inputs:</span> {displayTx?.inputs.length ?? '-'}</div>
-        <div><span class="font-medium">Outputs:</span> {displayTx?.outputs.length ?? '-'}</div>
-        <div>
-          <span class="font-medium">Reference Inputs:</span>
-          {displayTx?.referenceInputs.length ?? '-'}
-        </div>
-        <div>
-          <span class="font-medium">Minted/Burned Assets:</span>
-          {displayTx ? Object.keys(displayTx.mint).length : '-'}
-        </div>
-      </div>
-    </CardContent>
-  </Card>
 
   {#if clientLoading}
     <Card>
@@ -152,184 +93,49 @@
   {:else if displayTx}
     <!-- Tabs header -->
     <div class="flex gap-2 border-b pb-2">
-      <Button
-        size="sm"
-        variant={activeTab === 'diagram' ? 'default' : 'outline'}
-        onclick={() => (activeTab = 'diagram')}>Diagram</Button
-      >
-      <Button
-        size="sm"
-        variant={activeTab === 'io' ? 'default' : 'outline'}
-        onclick={() => (activeTab = 'io')}>Inputs / Outputs</Button
-      >
-      <Button
-        size="sm"
-        variant={activeTab === 'cbor' ? 'default' : 'outline'}
-        onclick={() => (activeTab = 'cbor')}>CBOR</Button
-      >
-      <Button
-        size="sm"
-        variant={activeTab === 'scripts' ? 'default' : 'outline'}
-        onclick={() => (activeTab = 'scripts')}>Scripts</Button
-      >
-      <Button
-        size="sm"
-        variant={activeTab === 'refInputs' ? 'default' : 'outline'}
-        onclick={() => (activeTab = 'refInputs')}>Referenced Inputs</Button
-      >
+      {#each tabs as tab}
+        <Button
+          size="sm"
+          variant={activeTab === tab ? 'default' : 'outline'}
+          onclick={() => (activeTab = tab)}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Button
+        >
+
+      {/each}
     </div>
 
-    <!-- Diagram Tab -->
-    {#if activeTab === 'diagram'}
-      <Card>
-        <CardContent class="py-6">
+    {#if data.error}
+      <div class="text-sm text-red-600">{data.error}</div>
+    {/if}
+    {#if clientError}
+      <div class="text-sm text-red-600">Client error: {clientError}</div>
+    {/if}
+
+    {#if activeTab === 'Overview'}
+    <Overview {displayTx}/>
+    {/if}
+
+    {#if activeTab === 'Diagram'}
+      <Card class="-z-20">
+        <CardContent class="py-1">
         <Diagram tx={displayTx}/>
         </CardContent>
       </Card>
     {/if}
 
-    <!-- Inputs / Outputs Tab -->
-    {#if activeTab === 'io'}
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader
-            ><CardTitle class="text-lg">Inputs ({displayTx.inputs.length})</CardTitle></CardHeader
-          >
-          <CardContent class="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>TxOut Ref</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead>Coin</TableHead>
-                  <TableHead>Datum</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {#each displayTx.inputs as i}
-                  <TableRow>
-                    <TableCell class="font-mono text-xs"
-                      >{i.outRef.hash}:{i.outRef.index.toString()}</TableCell
-                    >
-                    <TableCell class="max-w-[260px] truncate font-mono text-xs"
-                      >{i.address}</TableCell
-                    >
-                    <TableCell>{i.coin.toString()}</TableCell>
-                    <TableCell>{i.datum ? 'Yes' : '-'}</TableCell>
-                  </TableRow>
-                {/each}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader
-            ><CardTitle class="text-lg">Outputs ({displayTx.outputs.length})</CardTitle></CardHeader
-          >
-          <CardContent class="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>TxOut Ref</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead>Coin</TableHead>
-                  <TableHead>Datum</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {#each displayTx.outputs as o}
-                  <TableRow>
-                    <TableCell class="font-mono text-xs"
-                      >{o.outRef.hash}:{o.outRef.index.toString()}</TableCell
-                    >
-                    <TableCell class="max-w-[260px] truncate font-mono text-xs"
-                      >{o.address}</TableCell
-                    >
-                    <TableCell>{o.coin.toString()}</TableCell>
-                    <TableCell>{o.datum ? 'Yes' : '-'}</TableCell>
-                  </TableRow>
-                {/each}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
+    {#if activeTab === 'Dissect'}
+      <Dissect tx={displayTx}/>
     {/if}
 
-    <!-- CBOR Tab -->
-    {#if activeTab === 'cbor'}
-      <Card>
-        <CardContent class="grid grid-cols-1 gap-4 py-6 md:grid-cols-2">
-          <div class="flex flex-col gap-2">
-            <div class="text-sm font-medium">CBOR</div>
-            <textarea
-              class="h-64 w-full resize-none rounded-md border bg-background p-2 font-mono text-xs"
-              bind:value={cborRaw}
-              placeholder="Paste raw CBOR here"
-            ></textarea>
-          </div>
-          <div class="flex flex-col gap-2">
-            <div class="text-sm font-medium">Decoded</div>
-            <textarea
-              class="h-64 w-full resize-none rounded-md border bg-background p-2 font-mono text-xs"
-              bind:value={cborDecoded}
-              placeholder="Decoded CBOR JSON"
-            ></textarea>
-          </div>
-        </CardContent>
-      </Card>
+    {#if activeTab === 'Datum'}
+      <Datum tx={displayTx}/>
     {/if}
 
-    <!-- Scripts Tab -->
-    {#if activeTab === 'scripts'}
-      <Card>
-        <CardHeader><CardTitle class="text-lg">Scripts</CardTitle></CardHeader>
-        <CardContent class="py-4 text-sm text-muted-foreground"
-          >No scripts to display yet.</CardContent
-        >
-      </Card>
+    {#if activeTab === 'CBOR'}
+      <Cbor {cbor}/>
     {/if}
 
-    <!-- Referenced Inputs Tab -->
-    {#if activeTab === 'refInputs'}
-      <Card>
-        <CardHeader
-          ><CardTitle class="text-lg"
-            >Referenced Inputs ({displayTx.referenceInputs.length})</CardTitle
-          ></CardHeader
-        >
-        <CardContent class="overflow-x-auto">
-          {#if displayTx.referenceInputs.length === 0}
-            <div class="py-4 text-sm text-muted-foreground">No referenced inputs.</div>
-          {:else}
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>TxOut Ref</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead>Coin</TableHead>
-                  <TableHead>Datum</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {#each displayTx.referenceInputs as r}
-                  <TableRow>
-                    <TableCell class="font-mono text-xs"
-                      >{r.outRef.hash}:{r.outRef.index.toString()}</TableCell
-                    >
-                    <TableCell class="max-w-[260px] truncate font-mono text-xs"
-                      >{r.address}</TableCell
-                    >
-                    <TableCell>{r.coin.toString()}</TableCell>
-                    <TableCell>{r.datum ? 'Yes' : '-'}</TableCell>
-                  </TableRow>
-                {/each}
-              </TableBody>
-            </Table>
-          {/if}
-        </CardContent>
-      </Card>
+    {#if activeTab === 'Scripts'}
+      <Scripts tx={displayTx}/>
     {/if}
   {:else}
     <Card>

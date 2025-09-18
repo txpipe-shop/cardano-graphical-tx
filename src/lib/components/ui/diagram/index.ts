@@ -1,3 +1,3 @@
 import Root from './diagram.svelte';
 
-export { Root as Button };
+export { Root as Diagram };
