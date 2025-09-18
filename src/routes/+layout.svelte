@@ -1,20 +1,19 @@
 <script lang="ts">
-  import ProviderTopBar from '@/components/custom/provider-top-bar.svelte';
+  import ProviderTopBar from '@/components/custom/providers/provider-top-bar.svelte';
   import { providerStore } from '@/stores/provider-store';
   import { onMount, type Snippet } from 'svelte';
   import '../app.css';
 
   interface Props {
-    data: {
-      providers: import('@/types/provider-config').ProviderConfig[];
-    };
+    providers: import('@/types/provider-config').ProviderConfig[];
     children: Snippet;
   }
 
-  let { data, children }: Props = $props();
-
+  let { providers, children }: Props = $props();
+  console.log("LAYOUT, ", providers);
   onMount(() => {
-    providerStore.initializeWithServerData(data.providers);
+    console.log("MOUNT, ", providers);
+    providerStore.initializeWithServerData(providers);
   });
 </script>
 

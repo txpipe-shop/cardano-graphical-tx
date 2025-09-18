@@ -32,7 +32,7 @@
   // Tabs
   type TabKey = 'Overview' | 'Diagram' | 'Dissect' | 'CBOR' | 'Datum' | 'Scripts';
   const tabs = ['Overview', 'Diagram', 'Dissect', 'CBOR', 'Datum', 'Scripts'] as const;
-  let activeTab = $state<TabKey>('Dissect');
+  let activeTab = $state<TabKey>('Overview');
   let cbor = $state<string>('');
 
   function reloadWithProvider(providerId: string) {
@@ -48,7 +48,7 @@
   }
 
   $effect(() => {
-    if (!data.isServerLoaded && $currentProvider && !$currentProvider.isBuiltIn) {
+    if (!data.isServerLoaded && $currentProvider && $currentProvider.isLocal) {
       clientLoading = true;
       clientError = null;
 

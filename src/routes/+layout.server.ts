@@ -1,7 +1,7 @@
-import { getClientProviderConfigs } from '@/server/provider-config';
+import { getClientProviders } from '@/server/provider-config';
 
 export async function load() {
-  const clientProviders = getClientProviderConfigs();
+  const clientProviders = getClientProviders();
 
   return {
     providers: clientProviders

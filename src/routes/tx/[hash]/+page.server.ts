@@ -1,7 +1,7 @@
-import { getProviderById } from '@/server/provider-config';
-import type { PageServerLoad } from './$types';
 import { createProviderClient } from '@/client/provider-loader';
+import { getProviderById } from '@/server/provider-config';
 import { Hash } from '@/types/utxo-model';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, params }) => {
   const providerId = url.searchParams.get('provider');
@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ url, params }) => {
   }
   const providerConfig = getProviderById(providerId);
 
-  if (providerConfig?.isBuiltIn) {
+  if (providerConfig && !providerConfig?.isLocal) {
     try {
       const client = createProviderClient(providerConfig);
       const tx = await client.getTx({ hash: Hash(params.hash) });

@@ -11,7 +11,7 @@
     <div class="text-xs font-bold mb-2">
       {title}
     </div>
-    <div class="text-lg">
+    <div class="text-lg whitespace-pre-wrap break-all">
       {content}
     </div>
   </CardContent>

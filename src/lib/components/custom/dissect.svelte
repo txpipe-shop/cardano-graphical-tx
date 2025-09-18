@@ -31,7 +31,7 @@
   {#each tx.inputs as input, i}
   <Ccollapsible title={`Input ${i + 1}`}>
     <Box title="UtxoRef Hash" content={`${input.outRef.hash}#${input.outRef.index}`}/>
-    <Box title="Address" content={`${formatAddress(input.address)}`}/>
+    <Box title="Address" content={`${formatAddress(input.address, false)}`}/>
     <Box title="Lovelace" content={input.coin ? `${input.coin}` : '-'}/>
     {#if Object.keys(input.value).length > 0}
       <Ccollapsible title={`Values`}>
@@ -53,8 +53,17 @@
   {#each tx.outputs as output, i}
   <Ccollapsible title={`Output ${i + 1}`}>
     <Box title="UtxoRef Hash" content={`${output.outRef.hash}#${output.outRef.index}`}/>
-    <Box title="Address" content={`${formatAddress(output.address)}`}/>
+    <Box title="Address" content={`${formatAddress(output.address, false)}`}/>
     <Box title="Lovelace" content={`${output.coin}`}/>
+    {#if output.datum && output.datum.type === DatumType.HASH}
+      <Box title="Datum Hash" content={`${output.datum.datumHashHex}`}/>
+    {/if}
+    {#if output.datum && output.datum.type === DatumType.INLINE}
+      <Box title="Inline Datum" content={`${output.datum.datumHex}`}/>
+    {/if}
+    {#if output.consumedBy}
+      <Box title="Consumed By" content={`${output.consumedBy}`}/>
+    {/if}
     {#if parseValues(output.value).length > 0}
       <Ccollapsible title={`Values`}>
         {#each parseValues(output.value) as value}
@@ -65,15 +74,6 @@
           </Ccollapsible>
         {/each}
       </Ccollapsible>
-    {/if}
-    {#if output.datum && output.datum.type === DatumType.HASH}
-      <Box title="Datum Hash" content={`${output.datum.datumHashHex}`}/>
-    {/if}
-    {#if output.datum && output.datum.type === DatumType.INLINE}
-      <Box title="Inline Datum" content={`${output.datum.datumHex}`}/>
-    {/if}
-    {#if output.consumedBy}
-      <Box title="Consumed By" content={`${output.consumedBy}`}/>
     {/if}
 
   </Ccollapsible>
@@ -87,8 +87,14 @@
   {#each tx.referenceInputs as refInput, i}
     <Ccollapsible title={`Reference Input ${i + 1}`}>
       <Box title="UtxoRef Hash" content={`${refInput.outRef.hash}#${refInput.outRef.index}`}/>
-      <Box title="Address" content={`${formatAddress(refInput.address)}`}/>
+      <Box title="Address" content={`${formatAddress(refInput.address, false)}`}/>
       <Box title="Lovelace" content={`${refInput.coin}`}/>
+      {#if refInput.datum && refInput.datum.type === DatumType.HASH}
+        <Box title="Datum Hash" content={`${refInput.datum.datumHashHex}`}/>
+      {/if}
+      {#if refInput.datum && refInput.datum.type === DatumType.INLINE}
+        <Box title="Inline Datum" content={`${refInput.datum.datumHex}`}/>
+      {/if}
       {#if Object.keys(refInput.value).length > 0}
         <Ccollapsible title={`Values`}>
         {#each parseValues(refInput.value) as value}
@@ -100,19 +106,13 @@
         {/each}
       </Ccollapsible>
       {/if}
-      {#if refInput.datum && refInput.datum.type === DatumType.HASH}
-        <Box title="Datum Hash" content={`${refInput.datum.datumHashHex}`}/>
-      {/if}
-      {#if refInput.datum && refInput.datum.type === DatumType.INLINE}
-        <Box title="Inline Datum" content={`${refInput.datum.datumHex}`}/>
-      {/if}
     </Ccollapsible>
   {/each}
 </Ccollapsible>
 
 <Ccollapsible title="MINTS AND BURNS">
   {#if Object.keys(tx.mint).length === 0}
-    <Box title="No Mints or Burns" content="This transaction has no minting or burning activities."/>
+    <Box title="No Mints or Burns" content="This transaction has no mintings or burnings."/>
   {/if}
   {#each parseValues(tx.mint) as value}
     <Ccollapsible title={`Policy: ${value.policy}`}>

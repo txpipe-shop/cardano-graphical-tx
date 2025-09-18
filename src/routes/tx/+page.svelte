@@ -37,7 +37,7 @@
   }
 
   $effect(() => {
-    if (!data.isServerLoaded && $currentProvider && !$currentProvider.isBuiltIn) {
+    if (!data.isServerLoaded && $currentProvider && $currentProvider.isLocal) {
       clientLoading = true;
       clientError = null;
 
