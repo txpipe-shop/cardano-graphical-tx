@@ -8,7 +8,7 @@
 </script>
 
 
-<Card class="flex flex-row justify-between gap-2">
+<Card class="flex flex-row justify-between gap-2 px-5">
   {#if !redeemers || redeemers.length === 0}
     <CardContent class="text-sm text-center text-muted-foreground">
       No scripts on this transaction.

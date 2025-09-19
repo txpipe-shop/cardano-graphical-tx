@@ -1,6 +1,6 @@
+import { createProviderClient } from '@/client/provider-loader';
 import { getProviderById } from '@/server/provider-config';
 import type { PageServerLoad } from './$types';
-import { createProviderClient } from '@/client/provider-loader';
 
 export const load: PageServerLoad = async ({ url }) => {
   const providerId = url.searchParams.get('provider');
@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
   const providerConfig = getProviderById(providerId);
 
-  if (providerConfig?.isBuiltIn) {
+  if (!providerConfig?.isLocal && providerConfig) {
     try {
       const client = createProviderClient(providerConfig);
 

@@ -1,7 +1,7 @@
 import { privateEnv } from '@/private-env';
-import type { ProviderConfig } from '@/types/provider-config';
+import { LOCAL_PROVIDER_ID, type ProviderConfig } from '@/types/provider-config';
 
-export function getServerProviderConfigs(): ProviderConfig[] {
+export function getServerProviders(): ProviderConfig[] {
   return [
     {
       id: 'preprod-dolos',
@@ -14,7 +14,7 @@ export function getServerProviderConfigs(): ProviderConfig[] {
       utxoRpcApiKey: privateEnv.PREPROD_UTXORPC_API_KEY,
       type: 'dolos',
       network: 'preprod',
-      isBuiltIn: true
+      isLocal: false
     },
     {
       id: 'preview-dolos',
@@ -27,28 +27,26 @@ export function getServerProviderConfigs(): ProviderConfig[] {
       utxoRpcApiKey: privateEnv.PREVIEW_UTXORPC_API_KEY,
       type: 'dolos',
       network: 'preview',
-      isBuiltIn: true
+      isLocal: false
     },
     {
-      id: 'local-dolos',
+      id: LOCAL_PROVIDER_ID,
       name: 'Local (Dolos)',
       description:
         'UTxORPC + MiniBlockfrost services for Cardano Local testnet. Not realiable for older queries',
       miniBfUrl: privateEnv.LOCAL_BLOCKFROST_URL,
-      miniBfApiKey: 'a',
       utxoRpcUrl: privateEnv.LOCAL_UTXORPC_URL,
-      utxoRpcApiKey: 'a',
       type: 'dolos',
       network: 'custom',
-      isBuiltIn: false
+      isLocal: true
     }
   ];
 }
 
 //get client-safe configs
-export function getClientProviderConfigs(): ProviderConfig[] {
-  return getServerProviderConfigs().map((config) => {
-    if (config.type === 'dolos' && config.isBuiltIn) {
+export function getClientProviders(): ProviderConfig[] {
+  return getServerProviders().map((config) => {
+    if (config.type === 'dolos' && !config.isLocal) {
       const { utxoRpcUrl, utxoRpcApiKey, miniBfUrl, miniBfApiKey, ...clientConfig } = config;
       return clientConfig;
     }
@@ -57,13 +55,13 @@ export function getClientProviderConfigs(): ProviderConfig[] {
 }
 
 export function getProviderById(id: string): ProviderConfig | undefined {
-  return getServerProviderConfigs().find((p) => p.id === id);
+  return getServerProviders().find((p) => p.id === id);
 }
 
 export function getProvidersByType(type: ProviderConfig['type']): ProviderConfig[] {
-  return getServerProviderConfigs().filter((p) => p.type === type);
+  return getServerProviders().filter((p) => p.type === type);
 }
 
 export function getProvidersByNetwork(network: ProviderConfig['network']): ProviderConfig[] {
-  return getServerProviderConfigs().filter((p) => p.network === network);
+  return getServerProviders().filter((p) => p.network === network);
 }

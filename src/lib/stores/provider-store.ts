@@ -1,35 +1,16 @@
-import { writable, derived } from 'svelte/store';
-import type { ProviderConfig, ProviderStore } from '@/types/provider-config';
 import { browser } from '$app/environment';
+import {
+  LOCAL_PROVIDER_ID,
+  type ProviderConfig,
+  type ProviderStore
+} from '@/types/provider-config';
+import { derived, writable } from 'svelte/store';
 
-const STORAGE_KEY = 'explorer-custom-providers';
 const CURRENT_PROVIDER_KEY = 'explorer-current-provider';
-
-function loadCustomProvidersFromStorage(): ProviderConfig[] {
-  if (!browser) return [];
-
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.warn('Failed to load custom providers from localStorage:', error);
-    return [];
-  }
-}
-
-function saveCustomProvidersToStorage(providers: ProviderConfig[]): void {
-  if (!browser) return;
-
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(providers));
-  } catch (error) {
-    console.warn('Failed to save custom providers to localStorage:', error);
-  }
-}
+const LOCAL_PROVIDER_KEY = 'explorer-local-provider';
 
 function loadCurrentProviderFromStorage(): string | null {
   if (!browser) return null;
-
   try {
     return localStorage.getItem(CURRENT_PROVIDER_KEY);
   } catch (error) {
@@ -48,13 +29,31 @@ function saveCurrentProviderToStorage(providerId: string): void {
   }
 }
 
-function createProviderStore() {
-  const storedCustomProviders = loadCustomProvidersFromStorage();
+function loadLocalProviderFromStorage(): ProviderConfig | null {
+  if (!browser) return null;
+  try {
+    const localConfig = localStorage.getItem(LOCAL_PROVIDER_KEY);
+    // TODO: validate the config structure
+    return localConfig ? (JSON.parse(localConfig) as ProviderConfig) : null;
+  } catch (error) {
+    console.warn('Failed to load local provider from localStorage:', error);
+    return null;
+  }
+}
 
+function saveLocalProviderToStorage(config: ProviderConfig) {
+  if (!browser) return;
+  try {
+    localStorage.setItem(LOCAL_PROVIDER_KEY, JSON.stringify(config));
+  } catch (error) {
+    console.warn('Failed to save local provider to localStorage:', error);
+  }
+}
+
+function createProviderStore() {
   const initialState: ProviderStore = {
     currentProvider: null,
-    customProviders: storedCustomProviders,
-    allProviders: storedCustomProviders
+    allProviders: []
   };
 
   const { subscribe, set, update } = writable<ProviderStore>(initialState);
@@ -71,15 +70,21 @@ function createProviderStore() {
     },
     initializeWithServerData: (serverProviders: ProviderConfig[]) => {
       const storedProviderId = loadCurrentProviderFromStorage();
-      const allProviders = [...serverProviders, ...storedCustomProviders];
+      const localProviderFromStorage = loadLocalProviderFromStorage();
+
+      let allProviders = serverProviders;
+      if (localProviderFromStorage) {
+        allProviders = [
+          localProviderFromStorage,
+          ...allProviders.filter((p) => p.id !== LOCAL_PROVIDER_ID)
+        ];
+      }
 
       let currentProvider = null;
-      if (storedProviderId) {
-        const foundProvider = allProviders.find((p) => p.id === storedProviderId);
-        if (foundProvider) {
-          currentProvider = foundProvider;
-        }
-      }
+
+      if (storedProviderId)
+        currentProvider = allProviders.find((p) => p.id === storedProviderId) ?? null;
+      else currentProvider = allProviders.find((p) => p.id === LOCAL_PROVIDER_ID) ?? null;
 
       update((state) => ({
         ...state,
@@ -87,66 +92,33 @@ function createProviderStore() {
         currentProvider
       }));
     },
-    addCustomProvider: (provider: Omit<ProviderConfig, 'id' | 'isBuiltIn'>) => {
-      const newProvider: ProviderConfig = {
-        ...provider,
-        id: `custom-${Date.now()}`,
-        isBuiltIn: false
-      };
-
+    updateLocalProvider: (updates: Partial<ProviderConfig>) => {
       update((state) => {
-        const newCustomProviders = [...state.customProviders, newProvider];
-        saveCustomProvidersToStorage(newCustomProviders);
+        const localProvider = state.allProviders
+          .filter((p) => p.id === LOCAL_PROVIDER_ID)
+          .map((p) => ({ ...p, ...updates }))[0];
+        saveLocalProviderToStorage(localProvider);
+        if (state.currentProvider?.id === LOCAL_PROVIDER_ID) {
+          state.currentProvider = localProvider;
+        }
 
         return {
           ...state,
-          customProviders: newCustomProviders,
-          allProviders: [...state.allProviders, newProvider]
-        };
-      });
-
-      return newProvider;
-    },
-    removeCustomProvider: (providerId: string) => {
-      update((state) => {
-        const newCustomProviders = state.customProviders.filter((p) => p.id !== providerId);
-        saveCustomProvidersToStorage(newCustomProviders);
-
-        return {
-          ...state,
-          customProviders: newCustomProviders,
-          allProviders: state.allProviders.filter((p) => p.id !== providerId),
-          currentProvider: state.currentProvider?.id === providerId ? null : state.currentProvider
-        };
-      });
-    },
-    updateCustomProvider: (providerId: string, updates: Partial<ProviderConfig>) => {
-      update((state) => {
-        const newCustomProviders = state.customProviders.map((p) =>
-          p.id === providerId ? { ...p, ...updates } : p
-        );
-        saveCustomProvidersToStorage(newCustomProviders);
-
-        return {
-          ...state,
-          customProviders: newCustomProviders,
           allProviders: state.allProviders.map((p) =>
-            p.id === providerId ? { ...p, ...updates } : p
+            p.id === LOCAL_PROVIDER_ID ? localProvider : p
           )
         };
       });
     },
     clearStorage: () => {
-      if (browser) {
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(CURRENT_PROVIDER_KEY);
-      }
+      if (browser) localStorage.removeItem(CURRENT_PROVIDER_KEY);
+      if (browser) localStorage.removeItem(LOCAL_PROVIDER_KEY);
 
       update((state) => ({
         ...state,
         customProviders: [],
-        allProviders: state.allProviders.filter((p) => p.isBuiltIn),
-        currentProvider: state.allProviders.find((p) => p.isBuiltIn) || null
+        allProviders: state.allProviders.filter((p) => !p.isLocal),
+        currentProvider: state.allProviders.find((p) => !p.isLocal) || null
       }));
     },
     reset: () => set(initialState)
@@ -158,9 +130,3 @@ export const providerStore = createProviderStore();
 export const currentProvider = derived(providerStore, ($store) => $store.currentProvider);
 
 export const allProviders = derived(providerStore, ($store) => $store.allProviders);
-
-export const customProviders = derived(providerStore, ($store) => $store.customProviders);
-
-export const builtInProviders = derived(providerStore, ($store) =>
-  $store.allProviders.filter((p) => p.isBuiltIn)
-);

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { createProviderClient } from '@/client/provider-loader';
   import Cbor from '@/components/custom/cbor.svelte';
@@ -32,23 +31,11 @@
   // Tabs
   type TabKey = 'Overview' | 'Diagram' | 'Dissect' | 'CBOR' | 'Datum' | 'Scripts';
   const tabs = ['Overview', 'Diagram', 'Dissect', 'CBOR', 'Datum', 'Scripts'] as const;
-  let activeTab = $state<TabKey>('Dissect');
+  let activeTab = $state<TabKey>('Overview');
   let cbor = $state<string>('');
 
-  function reloadWithProvider(providerId: string) {
-    const url = new URL($page.url);
-    url.searchParams.set('provider', providerId);
-    goto(url.toString());
-  }
-
-  function refreshData() {
-    if ($currentProvider) {
-      reloadWithProvider($currentProvider.id);
-    }
-  }
-
   $effect(() => {
-    if (!data.isServerLoaded && $currentProvider && !$currentProvider.isBuiltIn) {
+    if (!data.isServerLoaded && $currentProvider && $currentProvider.isLocal) {
       clientLoading = true;
       clientError = null;
 
@@ -76,9 +63,6 @@
 <div class="container mx-auto space-y-6 px-4 py-3">
   <div class="flex items-center justify-between">
     <h1 class="text-3xl font-extrabold">{$page.params.hash}</h1>
-    <Button variant="outline" onclick={refreshData} disabled={!$currentProvider}
-      >Refresh with Current Provider</Button
-    >
   </div>
 
   {#if clientLoading}

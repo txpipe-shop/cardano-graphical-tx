@@ -11,7 +11,7 @@
   let TextComp: any = $state(null);
   let UtxoLineComp: any = $state(null);
 
-  let {tx}: {tx: CardanoTx} = $props();
+  let { tx }: { tx: CardanoTx } = $props();
 
   let width = $state(0);
   let height = $state(0);
@@ -32,37 +32,36 @@
     UtxoLineComp = utxoLine.default;
 
     width = window.innerWidth;
-    height = window.innerHeight * 0.55;
-    xpos = window.innerWidth * 0.4;
-    ypos = window.innerHeight * 0.15;
+    height = window.innerHeight * 0.85;
+    xpos = width * 0.4;
+    ypos = height / 2 - TX_HEIGHT / 2;
 
     loaded = true;
   });
-
 </script>
 
-<div class="h-full w-full rounded-md bg-white -z-10">
+<div class="-z-10 h-full w-full rounded-md bg-white">
   {#if loaded}
-    <StageComp config={{ width, height }} >
+    <StageComp config={{ width, height }}>
       <LayerComp>
-        {#each tx.inputs as _, i}
+        {#each tx.inputs as input, i}
           <UtxoLineComp
             isOutput={false}
             inCount={tx.inputs.length}
             outCount={tx.outputs.length}
-            xpos={xpos}
-            ypos={ypos}
+            {xpos}
+            {ypos}
             index={i}
             isReferenceInput={false}
+            utxo={input}
           />
         {/each}
 
         <GroupComp
           config={{ x: xpos, y: ypos, draggable: true }}
           on:dragmove={(e: CustomEvent) => {
-              xpos = e.detail.currentTarget.attrs.x;
-              ypos = e.detail.currentTarget.attrs.y;
-              console.log("DRAGGED TO ", xpos, ypos);
+            xpos = e.detail.currentTarget.attrs.x;
+            ypos = e.detail.currentTarget.attrs.y;
           }}
         >
           <GroupComp config={{ x: -TX_WIDTH / 2 + 15, y: -(TX_HEIGHT / 6) }}>
@@ -71,7 +70,7 @@
                 fill: KONVA_COLORS.LIGHTER_GREY,
                 width: TX_WIDTH + 2 * (TX_WIDTH / 3) + 10,
                 height: TX_HEIGHT / 7,
-                cornerRadius: 10,
+                cornerRadius: 10
               }}
             />
             <TextComp
@@ -100,15 +99,16 @@
             }}
           />
         </GroupComp>
-        {#each tx.outputs as _, i}
+        {#each tx.outputs as output, i}
           <UtxoLineComp
             isOutput={true}
             inCount={tx.inputs.length}
             outCount={tx.outputs.length}
-            xpos={xpos}
-            ypos={ypos}
+            {xpos}
+            {ypos}
             index={i}
             isReferenceInput={false}
+            utxo={output}
           />
         {/each}
       </LayerComp>

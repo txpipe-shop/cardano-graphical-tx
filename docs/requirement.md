@@ -29,7 +29,7 @@ This is the default tab, which provides details (if available) about:
 - Inputs: UTxO-ref, address, value, if it has datum, and if it has a script associated with it.
 - Outputs: index, address, value, if it has datum; and if it has a script address, a reference to the script tab where the script info is displayed.
 ### Diagram
-This tab displays the transaction as a diagram, similar to how LaceAnatomy does. Both the transaction and its inputs and outputs are draggable. Icons indicate whether the transaction involves minting or burning. By clicking on any input or output, information about their address and value (if available) becomes visible.
+This tab displays the transaction as a diagram, similar to how LaceAnatomy does. Both the transaction and its inputs and outputs are draggable. Icons indicate whether the transaction involves minting or burning. By double clicking on any input or output, information about their address and value (if available) becomes visible.
 ### Dissect
 This tab displays the dissected transaction, similar to how LaceAnatomy does, with collapsible sections.
 ### CBOR
