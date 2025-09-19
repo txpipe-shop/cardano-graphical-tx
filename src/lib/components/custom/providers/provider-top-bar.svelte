@@ -13,7 +13,6 @@
 
   let showCustomForm = $state(false);
 
-  console.log($allProviders);
   function handleProviderChange(providerId: string) {
     const provider = $allProviders.find((p) => p.id === providerId);
     if (provider) providerStore.setCurrentProvider(provider);

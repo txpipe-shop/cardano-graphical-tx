@@ -32,12 +32,12 @@ export function getAssetName(policyAndName: string) {
   return `${name}`;
 }
 
-export function formatAddress(address: string, truncate: boolean = true) {
+export function formatAddress(address: string, truncate: boolean = true, length: number = 30) {
   if (!address) return 'No address found';
   try {
     // The prefix will change depending on the network
     return truncate
-      ? trunc(hexToBech32(HexString(address), 'addr_test'), 30)
+      ? trunc(hexToBech32(HexString(address), 'addr_test'), length)
       : hexToBech32(HexString(address), 'addr_test');
   } catch {
     return trunc(address);

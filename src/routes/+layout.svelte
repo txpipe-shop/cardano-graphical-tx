@@ -5,15 +5,13 @@
   import '../app.css';
 
   interface Props {
-    providers: import('@/types/provider-config').ProviderConfig[];
+    data: { providers: import('@/types/provider-config').ProviderConfig[] };
     children: Snippet;
   }
 
-  let { providers, children }: Props = $props();
-  console.log("LAYOUT, ", providers);
+  let { data, children }: Props = $props();
   onMount(() => {
-    console.log("MOUNT, ", providers);
-    providerStore.initializeWithServerData(providers);
+    providerStore.initializeWithServerData(data.providers);
   });
 </script>
 

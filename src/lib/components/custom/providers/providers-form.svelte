@@ -12,16 +12,13 @@
 
   let { showCustomForm = $bindable() } = $props()
 
-  let utxoRpcUrl = $state('http://localhost:50051');
-  let miniBfUrl = $state('http://localhost:3000');
+  let utxoRpcUrl = $derived($currentProvider?.isLocal ? $currentProvider.utxoRpcUrl ?? "NO URL" : "NOT LOCAL");
+  let miniBfUrl = $derived($currentProvider?.isLocal ? $currentProvider.miniBfUrl ?? "NO URL" : "NOT LOCAL");
 
   let customNetwork = $state<Network>('custom');
 
   function resetCustomForm() {
     showCustomForm = false;
-    utxoRpcUrl = '';
-    miniBfUrl = '';
-    customNetwork = 'custom';
   }
 
 
@@ -34,7 +31,7 @@
   }
 
 
-  function handleEditCustomProvider() {
+  function handleEditLocalProvider() {
     let provider: ProviderConfig;
     if (
       !customNetwork ||
@@ -55,11 +52,11 @@
       utxoRpcUrl: utxoRpcUrl.trim(),
       miniBfUrl: miniBfUrl.trim(),
     };
-    console.log("CURRENT: ", $currentProvider);
-    if ($currentProvider) {
-      providerStore.updateLocalProvider(provider);
-    }
 
+    providerStore.updateLocalProvider(provider);
+    if ($currentProvider && $currentProvider?.id === LOCAL_PROVIDER_ID) {
+      window.location.reload();
+    }
     resetCustomForm();
   }
 
@@ -74,7 +71,7 @@
   <CardContent class="h-30 flex flex-col justify-between gap-4">
     <div class="flex w-full gap-4">
       <div class="space-y-2 w-full">
-        <label for="blockfrost-url" class="text-sm font-medium">Blockfrost</label>
+        <label for="blockfrost-url" class="text-sm font-medium">Mini Blockfrost URL</label>
         <Input
           id="blockfrost-url"
           bind:value={miniBfUrl}
@@ -105,10 +102,10 @@
     <div class="flex justify-end gap-2">
       <Button variant="outline" onclick={resetCustomForm}>Cancel</Button>
       <Button
-        onclick={handleEditCustomProvider}
+        onclick={handleEditLocalProvider}
         disabled={!miniBfUrl.trim() || !utxoRpcUrl.trim() || !customNetwork}
       >
-        Edit Local Provider
+        Save
       </Button>
     </div>
 

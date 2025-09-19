@@ -1,10 +1,7 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
-  import { page } from '$app/stores';
   import { createProviderClient } from '@/client/provider-loader';
   import TxTable from '@/components/custom/tx-table.svelte';
   import { Badge } from '@/components/ui/badge';
-  import { Button } from '@/components/ui/button';
   import { Card, CardContent } from '@/components/ui/card';
   import { currentProvider } from '@/stores/provider-store';
   import type { CardanoTx } from '@/types';
@@ -23,18 +20,6 @@
   let clientTransactions = $state<CardanoTx[]>([]);
   let clientLoading = $state(false);
   let clientError = $state<string | null>(null);
-
-  function reloadWithProvider(providerId: string) {
-    const url = new URL($page.url);
-    url.searchParams.set('provider', providerId);
-    goto(url.toString());
-  }
-
-  function refreshData() {
-    if ($currentProvider) {
-      reloadWithProvider($currentProvider.id);
-    }
-  }
 
   $effect(() => {
     if (!data.isServerLoaded && $currentProvider && $currentProvider.isLocal) {
@@ -81,9 +66,6 @@
         {/if}
       </Badge>
     </div>
-      <Button onclick={refreshData} variant="outline" disabled={!$currentProvider}>
-      Refresh with Current Provider
-    </Button>
   </div>
 
   {#if clientLoading}
