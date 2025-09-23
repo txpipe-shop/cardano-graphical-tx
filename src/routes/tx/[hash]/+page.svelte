@@ -3,12 +3,12 @@
   import { createProviderClient } from '@/client/provider-loader';
   import Cbor from '@/components/custom/cbor.svelte';
   import Datum from '@/components/custom/datum.svelte';
+  import Diagram from '@/components/custom/diagram/diagram.svelte';
   import Dissect from '@/components/custom/dissect.svelte';
   import Overview from '@/components/custom/overview.svelte';
   import Scripts from '@/components/custom/scripts.svelte';
   import { Button } from '@/components/ui/button';
   import { Card, CardContent } from '@/components/ui/card';
-  import Diagram from '@/components/ui/diagram/diagram.svelte';
   import { currentProvider } from '@/stores/provider-store';
   import type { CardanoTx } from '@/types';
   import type { ProviderConfig } from '@/types/provider-config';
@@ -99,7 +99,7 @@
     {/if}
 
     {#if activeTab === 'Diagram'}
-      <Card class="-z-20">
+      <Card class="z-0">
         <CardContent class="py-1">
         <Diagram tx={displayTx}/>
         </CardContent>

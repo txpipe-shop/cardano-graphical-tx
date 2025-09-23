@@ -80,40 +80,37 @@
   {/each}
 </Ccollapsible>
 
-<Ccollapsible title="REFERENCE INPUTS">
-  {#if tx.referenceInputs.length === 0}
-    <Box title="No Reference Inputs" content="This transaction has no reference inputs."/>
-  {/if}
-  {#each tx.referenceInputs as refInput, i}
-    <Ccollapsible title={`Reference Input ${i + 1}`}>
-      <Box title="UtxoRef Hash" content={`${refInput.outRef.hash}#${refInput.outRef.index}`}/>
-      <Box title="Address" content={`${formatAddress(refInput.address, false)}`}/>
-      <Box title="Lovelace" content={`${refInput.coin}`}/>
-      {#if refInput.datum && refInput.datum.type === DatumType.HASH}
-        <Box title="Datum Hash" content={`${refInput.datum.datumHashHex}`}/>
-      {/if}
-      {#if refInput.datum && refInput.datum.type === DatumType.INLINE}
-        <Box title="Inline Datum" content={`${refInput.datum.datumHex}`}/>
-      {/if}
-      {#if Object.keys(refInput.value).length > 0}
-        <Ccollapsible title={`Values`}>
-        {#each parseValues(refInput.value) as value}
-          <Ccollapsible title={`Policy: ${value.policy}`}>
-            {#each Object.entries(value.values) as [assetName, amount]}
-              <Box title={`Asset Name: Amount`} content={`${assetName}: ${amount}`}/>
+{#if tx.referenceInputs.length > 0}
+  <Ccollapsible title="REFERENCE INPUTS">
+    {#each tx.referenceInputs as refInput, i}
+      <Ccollapsible title={`Reference Input ${i + 1}`}>
+        <Box title="UtxoRef Hash" content={`${refInput.outRef.hash}#${refInput.outRef.index}`}/>
+        <Box title="Address" content={`${formatAddress(refInput.address, false)}`}/>
+        <Box title="Lovelace" content={`${refInput.coin}`}/>
+        {#if refInput.datum && refInput.datum.type === DatumType.HASH}
+          <Box title="Datum Hash" content={`${refInput.datum.datumHashHex}`}/>
+        {/if}
+        {#if refInput.datum && refInput.datum.type === DatumType.INLINE}
+          <Box title="Inline Datum" content={`${refInput.datum.datumHex}`}/>
+        {/if}
+        {#if Object.keys(refInput.value).length > 0}
+          <Ccollapsible title={`Values`}>
+            {#each parseValues(refInput.value) as value}
+              <Ccollapsible title={`Policy: ${value.policy}`}>
+                {#each Object.entries(value.values) as [assetName, amount]}
+                  <Box title={`Asset Name: Amount`} content={`${assetName}: ${amount}`}/>
+                {/each}
+              </Ccollapsible>
             {/each}
           </Ccollapsible>
-        {/each}
+        {/if}
       </Ccollapsible>
-      {/if}
-    </Ccollapsible>
-  {/each}
-</Ccollapsible>
+    {/each}
+  </Ccollapsible>
+{/if}
 
-<Ccollapsible title="MINTS AND BURNS">
-  {#if Object.keys(tx.mint).length === 0}
-    <Box title="No Mints or Burns" content="This transaction has no mintings or burnings."/>
-  {/if}
+{#if Object.keys(tx.mint).length > 0}
+  <Ccollapsible title="MINTS AND BURNS">
   {#each parseValues(tx.mint) as value}
     <Ccollapsible title={`Policy: ${value.policy}`}>
       {#each Object.entries(value.values) as [assetName, amount]}
@@ -121,10 +118,11 @@
       {/each}
     </Ccollapsible>
   {/each}
-</Ccollapsible>
+  </Ccollapsible>
+{/if}
 
-<Ccollapsible title="METADATA">
-  {#if tx.metadata}
+{#if tx.metadata}
+  <Ccollapsible title="METADATA">
     {#each (tx.metadata as Metadata) as metadata}
       {#if typeof metadata === 'bigint' || typeof metadata === 'string'}
         <Box title={`Metadata`} content={`${metadata}`} />
@@ -135,7 +133,5 @@
         {/each}
       {/if}
     {/each}
-  {:else}
-    <Box title="No Metadata" content="This transaction has no metadata."/>
-  {/if}
-</Ccollapsible>
+  </Ccollapsible>
+{/if}

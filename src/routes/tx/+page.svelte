@@ -1,11 +1,14 @@
 <script lang="ts">
+  import { navigating } from '$app/stores';
   import { createProviderClient } from '@/client/provider-loader';
-  import TxTable from '@/components/custom/tx-table.svelte';
+  import TxTable from '@/components/custom/tx-table/tx-table.svelte';
   import { Badge } from '@/components/ui/badge';
   import { Card, CardContent } from '@/components/ui/card';
   import { currentProvider } from '@/stores/provider-store';
   import type { CardanoTx } from '@/types';
   import type { ProviderConfig } from '@/types/provider-config';
+
+  let isLoading = $derived($navigating !== null);
 
   interface Props {
     data: {
@@ -51,6 +54,20 @@
   let displayTransactions = $derived(data.isServerLoaded ? data.transactions : clientTransactions);
 </script>
 
+
+{#if isLoading}
+<div class="container mx-auto space-y-6 py-3">
+
+  <Card>
+    <CardContent class="py-8 text-center">
+      <div class="flex items-center justify-center gap-2">
+        <div class="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
+        <span class="text-muted-foreground">Loading data from provider...</span>
+      </div>
+    </CardContent>
+  </Card>
+</div>
+{:else}
 <div class="container mx-auto space-y-6 py-3">
   <div class="flex items-center justify-between">
     <div class="flex gap-2 items-end">
@@ -93,3 +110,4 @@
     </Card>
   {/if}
 </div>
+{/if}

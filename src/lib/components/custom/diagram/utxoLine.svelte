@@ -85,9 +85,10 @@
 
 
   $effect(() => {
-    if (showInfo && utxo && utxo.address) {
+    if (showInfo && utxo) {
       const lines = text.split('\n').length;
       const maxLineLength = Math.max(...text.split('\n').map(line => line.length));
+      // TODO: Change this using refs
       const width = maxLineLength * 8 + 20; // Approximate width based on character count
       const height = lines * 20; // Approximate height based on line count
       dimensions = {

@@ -12,8 +12,8 @@
 
   let { showCustomForm = $bindable() } = $props()
 
-  let utxoRpcUrl = $derived($currentProvider?.isLocal ? $currentProvider.utxoRpcUrl ?? "NO URL" : "NOT LOCAL");
-  let miniBfUrl = $derived($currentProvider?.isLocal ? $currentProvider.miniBfUrl ?? "NO URL" : "NOT LOCAL");
+  let utxoRpcUrl = $derived($allProviders.find(p => p.id === LOCAL_PROVIDER_ID)?.utxoRpcUrl || "");
+  let miniBfUrl = $derived($allProviders.find(p => p.id === LOCAL_PROVIDER_ID)?.miniBfUrl || "");
 
   let customNetwork = $state<Network>('custom');
 

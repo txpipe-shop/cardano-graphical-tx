@@ -38,15 +38,17 @@ export function bfToCardanoTx(
   const output = addManyValues(outputs.map((x) => x.value));
   const mint = diffValues(output, input);
 
-  const redeemers = rdmrs.map((r) => ({
-    index: r.tx_index,
-    purpose: r.purpose,
-    scriptHash: HexString(r.script_hash),
-    redeemerDataHash: HexString(r.redeemer_data_hash),
-    unitMem: BigInt(r.unit_mem),
-    unitSteps: BigInt(r.unit_steps),
-    fee: BigInt(r.fee)
-  }));
+  const redeemers = rdmrs.map((r) => {
+    return {
+      index: r.tx_index,
+      purpose: r.purpose,
+      scriptHash: HexString(r.script_hash),
+      redeemerDataHash: HexString(r.redeemer_data_hash),
+      unitMem: BigInt(r.unit_mem),
+      unitSteps: BigInt(r.unit_steps),
+      fee: BigInt(r.fee)
+    };
+  });
 
   const cardanoTx: CardanoTx = {
     fee: BigInt(tx.fees),
@@ -57,7 +59,7 @@ export function bfToCardanoTx(
     mint,
     outputs,
     referenceInputs: refInputs,
-    redeemers,
+    witnesses: { redeemers },
     // TODO: figure out how to complete these fields
     treasury: undefined,
     treasuryDonation: undefined
