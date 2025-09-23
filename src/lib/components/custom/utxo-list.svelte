@@ -21,6 +21,10 @@ type ValueProps = {
 type Props = UTxOProps | ValueProps;
 
   let {title, list, type = ListType.UTXO}: Props = $props();
+  function getBadgeColor(amount: bigint): string {
+    if (amount > 0n) return 'bg-green-800';
+    else return 'bg-red-800';
+  }
 </script>
 
 <Card>
@@ -46,7 +50,7 @@ type Props = UTxOProps | ValueProps;
         {#if type === ListType.VALUE}
         <div class="flex w-full gap-2 flex-wrap">
           {#each Object.entries(list) as [k, v]}
-          <Badge variant="outline">
+          <Badge variant="outline" class={getBadgeColor(v)}>
             {getAssetName(k)}: {v}
           </Badge>
           {/each}
@@ -58,21 +62,18 @@ type Props = UTxOProps | ValueProps;
                 >{utxo.outRef.hash}#{utxo.outRef.index.toString()}</TableCell
               >
               <TableCell class="font-mono break-all whitespace-pre-wrap text-xs w-1/4"
-                >{formatAddress(utxo.address)}</TableCell
+                >{formatAddress(utxo.address, false)}</TableCell
               >
               <TableCell class="font-mono break-all whitespace-pre-wrap text-xs w-1/12"
-                >{utxo.coin.toString()}</TableCell
+                >{utxo.coin ? utxo.coin.toString() : '-'}</TableCell
               >
               <TableCell class="font-mono break-all whitespace-pre-wrap text-xs w-1/12"
                 >{utxo.datum ? 'Yes' : '-'}</TableCell
               >
               <TableCell class="flex w-full gap-1 flex-wrap">
 
-                {#if utxo.value}
+                {#if Object.entries(utxo.value).length > 0}
                   <div class="flex w-full gap-1 flex-wrap">
-                    <Badge variant="outline">
-                      lovelace: {utxo.coin}
-                    </Badge> <br/>
                     {#each Object.entries(utxo.value) as [k, v]}
                     <Badge variant="outline">
                       {getAssetName(k)}: {v}
@@ -81,7 +82,7 @@ type Props = UTxOProps | ValueProps;
                     {/each}
                   </div>
                 {:else}
-                  No Value
+                  -
                 {/if}
               </TableCell>
             </TableRow>

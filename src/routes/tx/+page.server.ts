@@ -5,10 +5,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ url }) => {
   const providerId = url.searchParams.get('provider');
   if (!providerId) {
-    return {
-      transactions: [],
-      isServerLoaded: false
-    };
+    return { transactions: [], isServerLoaded: false };
   }
 
   const providerConfig = getProviderById(providerId);

@@ -1,5 +1,5 @@
 import type { CardanoBlock, CardanoTx } from '@/types';
-import type { UTxO } from '@/types/cardano/cardano';
+import type { Script, UTxO } from '@/types/cardano/cardano';
 import {
   addManyValues,
   diffValues,
@@ -7,7 +7,7 @@ import {
   uint8ToHash,
   uint8ToHexString
 } from '@/types/utils';
-import { Hash, MetadatumMap, type Metadata, type Metadatum } from '@/types/utxo-model';
+import { Hash, HexString, MetadatumMap, type Metadata, type Metadatum } from '@/types/utxo-model';
 import type { cardano } from '@utxorpc/spec';
 import { Buffer } from 'buffer';
 
@@ -100,6 +100,15 @@ export function u5cToCardanoTx(tx: cardano.Tx, time: bigint): CardanoTx {
   const mint = diffValues(output, input);
 
   const referenceInputs = tx.referenceInputs.map((x, i) => u5cToCardanoUtxo(hash, x.asOutput!, i));
+  const scripts = tx.witnesses?.script.map(({ script }) => {
+    return {
+      type: script.case as Script,
+      bytes:
+        script.value && script.case !== 'native'
+          ? HexString(Buffer.from(script.value).toString('hex'))
+          : HexString('')
+    };
+  });
 
   return {
     fee,
@@ -110,6 +119,7 @@ export function u5cToCardanoTx(tx: cardano.Tx, time: bigint): CardanoTx {
     outputs,
     referenceInputs,
     createdAt: Number(time),
+    witnesses: { scripts },
     // TODO: complete this on utxorpc
     treasury: 0n,
     treasuryDonation: 0n
