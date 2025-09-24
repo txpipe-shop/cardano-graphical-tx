@@ -2,7 +2,6 @@
   import { navigating } from '$app/stores';
   import { createProviderClient } from '@/client/provider-loader';
   import TxTable from '@/components/custom/tx-table/tx-table.svelte';
-  import { Badge } from '@/components/ui/badge';
   import { Card, CardContent } from '@/components/ui/card';
   import { currentProvider } from '@/stores/provider-store';
   import type { CardanoTx } from '@/types';
@@ -69,20 +68,8 @@
 </div>
 {:else}
 <div class="container mx-auto space-y-6 py-3">
-  <div class="flex items-center justify-between">
-    <div class="flex gap-2 items-end">
-
-      <h1 class="text-4xl font-extrabold">Transactions</h1>
-      <Badge variant="outline" class="h-8">
-        {#if data.isServerLoaded}
-          <span class="text-green-600">Server-side (SSR)</span>
-        {:else if clientLoading}
-          <span class="text-blue-600">Client-side (loading...)</span>
-        {:else}
-          <span class="text-blue-600">Client-side</span>
-        {/if}
-      </Badge>
-    </div>
+  <div class="flex gap-2 items-end">
+    <h1 class="text-4xl font-extrabold">Transactions</h1>
   </div>
 
   {#if clientLoading}

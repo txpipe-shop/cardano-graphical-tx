@@ -1,5 +1,5 @@
 import type { CardanoBlock, CardanoTx } from '@/types';
-import type { Script, UTxO } from '@/types/cardano/cardano';
+import type { Script, ScriptType, UTxO } from '@/types/cardano/cardano';
 import {
   addManyValues,
   diffValues,
@@ -25,6 +25,20 @@ export function u5cToCardanoBlock(block: cardano.Block): CardanoBlock {
   };
 }
 
+function getRefScript(script: cardano.Script): Script | undefined {
+  const { script: s } = script;
+  if (s.case && s.case !== 'native') {
+    return {
+      type: s.case as ScriptType,
+      bytes: s.value ? HexString(Buffer.from(s.value).toString('hex')) : HexString('')
+    };
+  } else if (s.case === 'native' && s.value) {
+    // TODO: figure out how to handle native scripts
+    return { type: s.case as ScriptType, bytes: HexString('') };
+  }
+  return undefined;
+}
+
 export function u5cToCardanoUtxo(hash: Hash, output: cardano.TxOutput, index: number): UTxO {
   return {
     address: uint8ToAddr(output.address),
@@ -42,7 +56,7 @@ export function u5cToCardanoUtxo(hash: Hash, output: cardano.TxOutput, index: nu
       {} as Record<string, bigint>
     ),
     datum: undefined,
-    referenceScript: undefined
+    referenceScript: output.script ? getRefScript(output.script) : undefined
   };
 }
 
@@ -102,7 +116,7 @@ export function u5cToCardanoTx(tx: cardano.Tx, time: bigint): CardanoTx {
   const referenceInputs = tx.referenceInputs.map((x, i) => u5cToCardanoUtxo(hash, x.asOutput!, i));
   const scripts = tx.witnesses?.script.map(({ script }) => {
     return {
-      type: script.case as Script,
+      type: script.case as ScriptType,
       bytes:
         script.value && script.case !== 'native'
           ? HexString(Buffer.from(script.value).toString('hex'))

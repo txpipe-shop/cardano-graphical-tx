@@ -81,7 +81,12 @@
     const assetName = getAssetName(v);
     return acc + `- ${assetName} ${k}\n  `;
   }, "")}`
-    : `txHash: ${trunc(utxo.outRef.hash, 10)}\nIndex: ${utxo.outRef.index}\n`);
+    : `txHash: ${trunc(utxo.outRef.hash, 10)}\nIndex: ${utxo.outRef.index}\nAssets:
+  - lovelace ${utxo.coin}
+  ${Object.entries(utxo.value).reduce((acc, [v, k]) => {
+    const assetName = getAssetName(v);
+    return acc + `- ${assetName} ${k}\n  `;
+  }, "")}`);
 
 
   $effect(() => {

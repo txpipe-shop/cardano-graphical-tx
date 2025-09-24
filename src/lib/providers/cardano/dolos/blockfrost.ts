@@ -92,7 +92,7 @@ export function bfDatum(utxo: BfInputUtxo | BfOutputUtxo) {
 
 export function bfInputToCardanoUtxo(utxo: BfInputUtxo): CardanoUTxO {
   const referenceScript = utxo.reference_script_hash
-    ? HexString(utxo.reference_script_hash)
+    ? { bytes: HexString(utxo.reference_script_hash) }
     : undefined;
 
   return {
@@ -108,7 +108,7 @@ export function bfInputToCardanoUtxo(utxo: BfInputUtxo): CardanoUTxO {
 
 export function bfOutputToCardanoUtxo(hash: Hash, utxo: BfOutputUtxo): CardanoUTxO {
   const referenceScript = utxo.reference_script_hash
-    ? HexString(utxo.reference_script_hash)
+    ? { bytes: HexString(utxo.reference_script_hash) }
     : undefined;
 
   return {

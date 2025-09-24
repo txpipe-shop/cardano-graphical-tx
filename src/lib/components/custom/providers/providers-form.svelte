@@ -1,5 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
+    import { page } from '$app/stores';
     import { allProviders, currentProvider, providerStore } from "@/stores/provider-store";
     import { LOCAL_PROVIDER_ID, type Network, type ProviderConfig } from '@/types/provider-config';
     import { Badge } from "../../ui/badge";
@@ -55,7 +56,9 @@
 
     providerStore.updateLocalProvider(provider);
     if ($currentProvider && $currentProvider?.id === LOCAL_PROVIDER_ID) {
-      window.location.reload();
+      const url = new URL($page.url);
+      url.searchParams.set('provider', $currentProvider.id);
+      goto(url.toString());
     }
     resetCustomForm();
   }

@@ -2,9 +2,16 @@
     import { formatDate } from "@/components/primitive-utils";
     import { Badge } from "@/components/ui/badge";
     import { TableCell, TableRow } from "@/components/ui/table";
+    import { currentProvider } from "@/stores/provider-store";
     import type { CardanoTx } from "@/types";
+    import type { Script } from "@/types/cardano/cardano";
 
     let { tx } : {tx: CardanoTx} = $props();
+
+    let scriptsList = tx.witnesses && tx.witnesses.scripts ? tx.witnesses.scripts : [];
+    let refScriptsList = tx.referenceInputs ? tx.referenceInputs.map(ri => ri.referenceScript).filter(a => !!a) : [];
+    let badgeList: Script[] = [...scriptsList, ...refScriptsList];
+    let providerId = $currentProvider?.id || '';
 
 </script>
 
@@ -17,7 +24,7 @@
         <line x1="10" y1="3" x2="8" y2="21">
         </line><line x1="16" y1="3" x2="14" y2="21"></line>
       </svg>
-      <a class="text-blue-600 hover:underline" href={'/tx/' + tx.hash}>{tx.hash}</a>
+      <a class="text-blue-600 hover:underline" href={'/tx/' + tx.hash + "?provider=" + providerId}>{tx.hash}</a>
     </div>
   </TableCell>
   <TableCell>
@@ -31,21 +38,21 @@
   <TableCell> Fee: {Number(tx.fee) / 1000000} ₳</TableCell>
   <TableCell>
     <div class="flex items-center justify-center gap-1">
-      {#if tx.witnesses && tx.witnesses.scripts && tx.witnesses.scripts?.length > 0}
-        {#if tx.witnesses.scripts.some(s => s.type === 'native')}
+      {#if badgeList && badgeList?.length > 0}
+        {#if badgeList.some(s => s.type === 'native')}
         <Badge variant="outline" class="text-bold bg-yellow-400 text-black">
           Native Script
         </Badge>
-        {:else if tx.witnesses.scripts.some(s => s.type === 'plutusV1')}
-        <Badge variant="outline" class="text-bold bg-purple-600">
+        {:else if badgeList.some(s => s.type === 'plutusV1')}
+        <Badge variant="outline" class="text-bold bg-orange-600">
           Plutus V1
         </Badge>
-        {:else if tx.witnesses.scripts.some(s => s.type === 'plutusV2')}
+        {:else if badgeList.some(s => s.type === 'plutusV2')}
         <Badge variant="outline" class="text-bold bg-purple-800">
           Plutus V2
         </Badge>
-        {:else if tx.witnesses.scripts.some(s => s.type === 'plutusV3')}
-        <Badge variant="outline" class="text-bold bg-gray-600">
+        {:else if badgeList.some(s => s.type === 'plutusV3')}
+        <Badge variant="outline" class="text-bold bg-pink-600">
           Plutus V3
         </Badge>
         {/if}

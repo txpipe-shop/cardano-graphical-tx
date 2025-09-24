@@ -44,8 +44,8 @@
         <h3 class="text-3xl font-extrabold"> <a href="/">Alejandria Explorer</a></h3>
       </div>
       <div class="flex gap-3">
-        <div class="flex items-end justify-end flex-col">
-          <div class="flex items-end justify-end gap-3">
+        <div class="flex items-end justify-end flex-col gap-1">
+          <div class="flex items-end justify-end gap-1">
             <span class="text-sm font-medium text-muted-foreground">Current Provider:</span>
             <Badge variant="outline" class={getProviderTypeColor($currentProvider?.type || '')}>
               {$currentProvider?.type?.toUpperCase() || 'N/A'}
@@ -58,7 +58,7 @@
           {#if $currentProvider}
             <div class="flex items-start gap-2 justify-start text-sm text-muted-foreground">
               {#if !$currentProvider.isLocal}
-                <span>Built-in endpoint (configured server-side)</span>
+                <span>Built-in endpoint</span>
               {:else if $currentProvider.type === 'dolos'}
                 <span class="max-w-xs truncate" title={$currentProvider.miniBfUrl}>
                   Mini Blockfrost: {$currentProvider.miniBfUrl}
@@ -82,7 +82,7 @@
           />
 
           <Button variant="outline" size="sm" onclick={() => (showCustomForm = !showCustomForm)}>
-            {showCustomForm ? 'Cancel' : 'Edit Providers List'}
+            {showCustomForm ? 'Cancel' : 'Edit Local Provider'}
           </Button>
         </div>
       </div>
