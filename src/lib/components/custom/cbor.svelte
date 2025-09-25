@@ -3,14 +3,17 @@
     import { onMount } from "svelte";
     import { Card, CardContent } from "../ui/card";
 
-  let cborRaw = $state('');
+  let { cbor, error }: { cbor: string, error: string | undefined} = $props();
+  let cborRaw = $derived(cbor);
   let cborDecoded = $state('');
-  let { cbor }: { cbor: string} = $props();
 
   onMount(async () => {
-    cborRaw = cbor;
+    if (!cborRaw) {
+      cborDecoded = '';
+      return;
+    }
     try {
-      cborDecoded = cbor2.diagnose(cbor)
+      cborDecoded = cbor2.diagnose(cborRaw)
     } catch (error) {
       cborDecoded = `Diagnostic error: ${error instanceof Error ? error.message : "Unknown error"}`
     }
@@ -26,7 +29,7 @@
         class="h-96 w-full resize-none rounded-md border bg-background p-2 font-mono text-sm whitespace-pre-wrap break-all"
         bind:value={cborDecoded}
         disabled={true}
-        placeholder="Decoded CBOR JSON"
+        placeholder="No decoded CBOR JSON"
       ></textarea>
     </div>
     <div class="flex flex-col gap-2">
@@ -34,7 +37,7 @@
       <textarea
         class="h-96 w-full resize-none rounded-md border bg-background p-2 font-mono text-sm"
         bind:value={cborRaw}
-        placeholder="Paste raw CBOR here"
+        placeholder={error ?? "CBOR not available" }
       ></textarea>
     </div>
   </CardContent>

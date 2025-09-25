@@ -21,7 +21,14 @@ export function u5cToCardanoBlock(block: cardano.Block): CardanoBlock {
       },
       previousHash: undefined
     },
-    txs: block.body!.tx.map((tx) => u5cToCardanoTx(tx, block.timestamp))
+    txs: block.body!.tx.map((tx) =>
+      u5cToCardanoTx(
+        tx,
+        block.timestamp,
+        block.header?.hash ? uint8ToHash(block.header?.hash) : undefined,
+        block.header?.height
+      )
+    )
   };
 }
 
@@ -101,7 +108,12 @@ export function u5cToCardanoMetadata(metadata: cardano.Metadata[]): Metadata {
     }, new Map<bigint, Metadatum>());
 }
 
-export function u5cToCardanoTx(tx: cardano.Tx, time: bigint): CardanoTx {
+export function u5cToCardanoTx(
+  tx: cardano.Tx,
+  time: bigint,
+  blockHash: Hash | undefined,
+  blockHeight: bigint | undefined
+): CardanoTx {
   const fee = tx.fee;
   const hash = uint8ToHash(tx.hash);
   const inputs = tx.inputs.map((x) => u5cToCardanoUtxo(hash, x.asOutput!, x.outputIndex));
@@ -134,6 +146,7 @@ export function u5cToCardanoTx(tx: cardano.Tx, time: bigint): CardanoTx {
     referenceInputs,
     createdAt: Number(time),
     witnesses: { scripts },
+    block: blockHash && blockHeight ? { hash: blockHash, height: blockHeight } : undefined,
     // TODO: complete this on utxorpc
     treasury: 0n,
     treasuryDonation: 0n

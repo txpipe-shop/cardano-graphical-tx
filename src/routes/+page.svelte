@@ -13,7 +13,7 @@
 <div class="container mx-auto space-y-6 px-4 py-3">
   <div>
     <h1 class="mb-2 text-4xl font-extrabold text-center">Alejandria Explorer</h1>
-    <p class="text-lg text-muted-foreground text-center">Multi-provider Cardano blockchain explorer</p>
+    <p class="text-lg text-muted-foreground text-center">Multi-provider Utxo blockchain explorer</p>
   </div>
   {#if $currentProvider}
     <Card>

@@ -16,6 +16,7 @@
   interface Props {
     data: {
       tx: CardanoTx | null;
+      cbor: string | null;
       isServerLoaded: boolean;
       error?: string;
     };
@@ -32,7 +33,7 @@
   type TabKey = 'Overview' | 'Diagram' | 'Dissect' | 'CBOR' | 'Datum' | 'Scripts';
   const tabs = ['Overview', 'Diagram', 'Dissect', 'CBOR', 'Datum', 'Scripts'] as const;
   let activeTab = $state<TabKey>('Overview');
-  let cbor = $state<string>('');
+  let cbor = $derived<string>(data.cbor ?? '');
 
   $effect(() => {
     if (!data.isServerLoaded && $currentProvider && $currentProvider.isLocal) {
@@ -54,7 +55,11 @@
     const client = createProviderClient(provider);
     const hash = $page.params.hash as unknown as import('@/types/utxo-model').Hash;
     clientTx = await client.getTx({ hash });
-    cbor = await client.getCBOR({ hash });
+    try {
+      cbor = await client.getCBOR({ hash });
+    } catch {
+      console.error("CBOR not available");
+    }
   }
 
   const displayTx = $derived(data.isServerLoaded ? data.tx : clientTx);
@@ -87,9 +92,6 @@
       {/each}
     </div>
 
-    {#if data.error}
-      <div class="text-sm text-red-600">{data.error}</div>
-    {/if}
     {#if clientError}
       <div class="text-sm text-red-600">Client error: {clientError}</div>
     {/if}
@@ -115,7 +117,7 @@
     {/if}
 
     {#if activeTab === 'CBOR'}
-      <Cbor {cbor}/>
+      <Cbor {cbor} error={data.error}/>
     {/if}
 
     {#if activeTab === 'Scripts'}
@@ -123,9 +125,9 @@
     {/if}
   {:else}
     <Card>
-      <CardContent class="py-8 text-center text-muted-foreground"
-        >Transaction not found or not loaded.</CardContent
-      >
+      <CardContent class="py-8 text-center text-muted-foreground">
+        Transaction not found or not loaded.<br/>
+      </CardContent>
     </Card>
   {/if}
 </div>

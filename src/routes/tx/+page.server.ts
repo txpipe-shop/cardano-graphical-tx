@@ -35,9 +35,6 @@ export const load: PageServerLoad = async ({ url }) => {
       };
     }
   } else {
-    return {
-      transactions: [],
-      isServerLoaded: false
-    };
+    return { transactions: [], isServerLoaded: false };
   }
 };

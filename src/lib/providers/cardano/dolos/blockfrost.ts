@@ -60,6 +60,11 @@ export function bfToCardanoTx(
     outputs,
     referenceInputs: refInputs,
     witnesses: { redeemers },
+    block: { hash: Hash(tx.block), height: BigInt(tx.block_height) },
+    validityInterval: {
+      invalidBefore: tx.invalid_before ? BigInt(tx.invalid_before) : undefined,
+      invalidHereafter: tx.invalid_hereafter ? BigInt(tx.invalid_hereafter) : undefined
+    },
     // TODO: figure out how to complete these fields
     treasury: undefined,
     treasuryDonation: undefined
@@ -92,7 +97,7 @@ export function bfDatum(utxo: BfInputUtxo | BfOutputUtxo) {
 
 export function bfInputToCardanoUtxo(utxo: BfInputUtxo): CardanoUTxO {
   const referenceScript = utxo.reference_script_hash
-    ? { bytes: HexString(utxo.reference_script_hash) }
+    ? { hash: HexString(utxo.reference_script_hash) }
     : undefined;
 
   return {
@@ -108,7 +113,7 @@ export function bfInputToCardanoUtxo(utxo: BfInputUtxo): CardanoUTxO {
 
 export function bfOutputToCardanoUtxo(hash: Hash, utxo: BfOutputUtxo): CardanoUTxO {
   const referenceScript = utxo.reference_script_hash
-    ? { bytes: HexString(utxo.reference_script_hash) }
+    ? { hash: HexString(utxo.reference_script_hash) }
     : undefined;
 
   return {

@@ -6,10 +6,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ url, params }) => {
   const providerId = url.searchParams.get('provider');
   if (!providerId || !params.hash) {
-    return {
-      tx: null,
-      isServerLoaded: false
-    };
+    return { tx: null, isServerLoaded: false };
   }
   const providerConfig = getProviderById(providerId);
 
@@ -17,10 +14,17 @@ export const load: PageServerLoad = async ({ url, params }) => {
     try {
       const client = createProviderClient(providerConfig);
       const tx = await client.getTx({ hash: Hash(params.hash) });
-      return { tx, isServerLoaded: true };
+      let cbor = null;
+      try {
+        cbor = await client.getCBOR({ hash: Hash(params.hash) });
+      } catch {
+        return { tx, cbor, isServerLoaded: true, error: 'CBOR not available from this provider' };
+      }
+      return { tx, cbor, isServerLoaded: true };
     } catch (error) {
       return {
         tx: null,
+        cbor: null,
         isServerLoaded: true,
         error: `Error loading tx from ${providerConfig.name}: ${error instanceof Error ? error.message : 'Unknown error'}`
       };

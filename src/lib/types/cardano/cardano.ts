@@ -36,7 +36,8 @@ export enum ScriptType {
 
 export type Script = {
   type?: ScriptType;
-  bytes: HexString;
+  bytes?: HexString;
+  hash?: HexString;
 };
 
 /**
@@ -47,6 +48,7 @@ export type CardanoTxFields = {
   treasuryDonation?: bigint;
   createdAt?: number;
   witnesses?: { redeemers?: Redeemer[]; scripts?: Script[] };
+  validityInterval?: { invalidBefore?: bigint; invalidHereafter?: bigint };
 };
 
 export type UTxO = BaseUTxO & { referenceScript?: Script };
