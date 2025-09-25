@@ -43,8 +43,3 @@ export function formatAddress(address: string, truncate: boolean = true, length:
     return trunc(address);
   }
 }
-
-export enum ListType {
-  UTXO = 'UTXO',
-  VALUE = 'VALUE'
-}

@@ -11,7 +11,6 @@
     let scriptsList = tx.witnesses && tx.witnesses.scripts ? tx.witnesses.scripts : [];
     let refScriptsList = tx.referenceInputs ? tx.referenceInputs.map(ri => ri.referenceScript).filter(a => !!a) : [];
     let badgeList: Script[] = [...scriptsList, ...refScriptsList];
-    let providerId = $currentProvider?.id || '';
 
 </script>
 
@@ -24,7 +23,7 @@
         <line x1="10" y1="3" x2="8" y2="21">
         </line><line x1="16" y1="3" x2="14" y2="21"></line>
       </svg>
-      <a class="text-blue-600 hover:underline" href={'/tx/' + tx.hash + "?provider=" + providerId}>{tx.hash}</a>
+      <a class="text-blue-600 hover:underline" href={'/tx/' + tx.hash + "?provider=" + $currentProvider?.id || ''}>{tx.hash}</a>
     </div>
   </TableCell>
   <TableCell>

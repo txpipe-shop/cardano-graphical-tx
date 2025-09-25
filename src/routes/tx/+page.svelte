@@ -2,7 +2,9 @@
   import { navigating } from '$app/stores';
   import { createProviderClient } from '@/client/provider-loader';
   import TxTable from '@/components/custom/tx-table/tx-table.svelte';
+  import { Button } from '@/components/ui/button';
   import { Card, CardContent } from '@/components/ui/card';
+  import { Input } from '@/components/ui/input';
   import { currentProvider } from '@/stores/provider-store';
   import type { CardanoTx } from '@/types';
   import type { ProviderConfig } from '@/types/provider-config';
@@ -51,6 +53,17 @@
   }
 
   let displayTransactions = $derived(data.isServerLoaded ? data.transactions : clientTransactions);
+
+  let txHash = $state('');
+
+  function handleSearch() {
+    if (txHash.trim().length === 0) {
+      return;
+    }
+    const providerId = $currentProvider ? $currentProvider.id : '';
+    const url = `/tx/${txHash.trim()}?provider=${providerId}`;
+    window.location.href = url;
+  }
 </script>
 
 
@@ -68,8 +81,13 @@
 </div>
 {:else}
 <div class="container mx-auto space-y-6 py-3">
-  <div class="flex gap-2 items-end">
+  <div class="flex gap-2 items-center justify-between">
     <h1 class="text-4xl font-extrabold">Transactions</h1>
+    <div class="flex gap-2 w-1/2">
+
+      <Input placeholder="Search transactions..." bind:value={txHash}/>
+      <Button variant="default" onclick={handleSearch}>Search</Button>
+    </div>
   </div>
 
   {#if clientLoading}
