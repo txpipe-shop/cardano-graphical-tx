@@ -40,7 +40,7 @@
   });
 </script>
 
-<div class="-z-10 h-full w-full rounded-md bg-[#0f111a]">
+<div class="-z-10 h-full w-full rounded-md dark:bg-[#0f111a]">
   {#if loaded}
     <StageComp config={{ width, height }}>
       <LayerComp>

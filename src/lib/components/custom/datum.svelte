@@ -2,11 +2,12 @@
     import type { CardanoTx } from "@/types";
     import { DatumType } from "@/types/utxo-model";
     import * as cbor2 from "cbor2";
+    import { onMount } from "svelte";
     import { trunc } from "../primitive-utils";
     import { Button } from "../ui/button";
     import { Card, CardContent } from "../ui/card";
 
-  let {tx} : {tx : CardanoTx} = $props();
+  let { tx, tab } : { tx : CardanoTx, tab?: string } = $props();
   let inputsWithDatum = tx.inputs.filter(i => i.datum)
   .map(utxo => ({ref: utxo.outRef, datum: utxo.datum}));
   let outputsWithDatum = tx.outputs.filter(o => o.datum).map(utxo => ({ref: utxo.outRef, datum: utxo.datum}));
@@ -15,6 +16,14 @@
   let diagnostic = $state('No diagnostic');
 
   let activeTab = $state(inputsWithDatum.length > 0 ? inputsWithDatum[0] : (outputsWithDatum.length > 0 ? outputsWithDatum[0] : null));
+
+  onMount(() => {
+    if(tab){
+      let foundTab = inputsWithDatum.find(t => `${t.ref.hash}n${t.ref.index}` === tab) || outputsWithDatum.find(t => `${t.ref.hash}n${t.ref.index}` === tab);
+      if(foundTab) activeTab = foundTab;
+    }
+  });
+
   $effect(() => {
     if(activeTab && activeTab.datum?.type === DatumType.HASH){
       datumHash = activeTab.datum?.datumHashHex ?? 'No hash';
@@ -63,14 +72,16 @@
     {/if}
   </div>
   <div class="p-2 w-3/4">
+    {#if activeTab.datum?.type === DatumType.HASH}
       <div class="my-4">
         Datum Hash:
           <Card class="p-2 mt-2 break-all whitespace-pre-wrap">
             {datumHash}
           </Card>
       </div>
+    {:else if activeTab.datum?.type === DatumType.INLINE}
       <div class="my-4">
-        CBOR:
+        INLINE DATUM:
           <Card class="p-2 mt-2 break-all whitespace-pre-wrap">
             {datumHex}
           </Card>
@@ -81,8 +92,7 @@
             {diagnostic}
           </Card>
       </div>
-
-
+    {/if}
     </div>
   {:else}
     <CardContent class="text-sm text-center text-muted-foreground">

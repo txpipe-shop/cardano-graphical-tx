@@ -14,7 +14,7 @@
 
 </script>
 
-<TableRow class="w-full bg-[#29294f]">
+<TableRow class="w-full dark:bg-[#29294f] bg-violet-200">
   <TableCell>
     <div class="flex items-center gap-1">
       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-hash fsmall">
@@ -47,7 +47,7 @@
           Plutus V1
         </Badge>
         {:else if badgeList.some(s => s.type === 'plutusV2')}
-        <Badge variant="outline" class="text-bold bg-purple-800">
+        <Badge variant="outline" class="text-bold bg-purple-800 text-white">
           Plutus V2
         </Badge>
         {:else if badgeList.some(s => s.type === 'plutusV3')}
