@@ -12,8 +12,8 @@ type ValueProps = {
 
   let {title, list }: ValueProps = $props();
   function getBadgeColor(amount: bigint): string {
-    if (amount > 0n) return 'bg-green-800';
-    else return 'bg-red-800';
+    if (amount > 0n) return 'dark:bg-green-800 dark:text-white bg-green-500 text-black';
+    else return 'dark:bg-red-800 dark:text-white bg-red-500 text-black';
   }
 </script>
 
@@ -24,11 +24,11 @@ type ValueProps = {
   <CardContent class="overflow-x-auto">
     <Table>
       <TableBody>
-        <TableRow class="flex w-full gap-2 flex-wrap">
+        <TableRow class="flex w-full gap-2 flex-wrap ">
           <TableCell colspan={5} class="flex w-full gap-2 flex-wrap">
             {#each Object.entries(list) as [k, v]}
-              <Badge variant="outline" class={getBadgeColor(v)}>
-                {getAssetName(k)}: {v}
+              <Badge variant="outline" class={"text-sm " + getBadgeColor(v)}>
+                <div class="font-extrabold">{getAssetName(k)}</div>: {v}
               </Badge>
               {/each}
           </TableCell>
