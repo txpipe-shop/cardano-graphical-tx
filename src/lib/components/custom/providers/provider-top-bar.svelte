@@ -7,8 +7,37 @@
   import TxPipeShop from "@/images/txpipe_shop.png";
   import { allProviders, currentProvider, providerStore } from '@/stores/provider-store';
   import { cn } from '@/utils';
+  import { onMount } from "svelte";
   import { getNetworkColor, getProviderTypeColor } from './color-utils';
   import ProvidersForm from './providers-form.svelte';
+
+  let theme = $state<"light" | "dark">("light");
+
+  onMount(() => {
+    const stored = localStorage.getItem("theme");
+    if (stored === "light" || stored === "dark") {
+      theme = stored;
+    } else {
+      theme = window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+    applyTheme();
+  });
+
+  $effect(() => {
+    applyTheme();
+    localStorage.setItem("theme", theme);
+  });
+
+  function applyTheme() {
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(theme);
+  }
+
+  function toggleTheme() {
+    theme = theme === "light" ? "dark" : "light";
+  }
 
   interface Props { class?: string; }
 
@@ -83,6 +112,13 @@
 
           <Button variant="outline" size="sm" onclick={() => (showCustomForm = !showCustomForm)}>
             {showCustomForm ? 'Cancel' : 'Edit Local Provider'}
+          </Button>
+
+          <Button
+            class="px-4 py-2 bg-gray-800 dark:text-gray-200 "
+            onclick={toggleTheme}
+          >
+            {theme === "light" ? "🌙 Dark" : "☀️ Light"}
           </Button>
         </div>
       </div>

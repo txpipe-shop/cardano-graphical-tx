@@ -36,8 +36,8 @@
     {#if Object.entries(utxo.value).length > 0}
       <div class="flex w-full gap-1 flex-wrap my-2">
         {#each Object.entries(utxo.value) as [k, v]}
-        <Badge variant="outline" class={getBadgeColor(k, mints)}>
-          <div class="font-extrabold">{getAssetName(k)}</div>: {v}
+        <Badge variant="outline" class={getBadgeColor(k, mints) + "text-black dark:text-white"}>
+          <div class="dark:text-white font-extrabold text-yellow-950">{getAssetName(k)}</div>: {v}
         </Badge>
         <br/>
         {/each}

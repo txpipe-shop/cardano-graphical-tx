@@ -7,10 +7,10 @@
       variant: {
         default: 'bg-primary text-primary-popover hover:bg-primary/90 border-transparent',
         secondary:
-          'bg-secondary text-[#1A1A2E] hover:bg-secondary/90 border-transparent',
+          'bg-secondary dark:text-[#1A1A2E] hover:bg-secondary/90 border-transparent',
         destructive:
-          'bg-destructive hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/70 border-transparent text-white',
-        outline: 'text-popover hover:bg-accent hover:text-accent-foreground text-white'
+          'bg-destructive hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/70 border-transparent dark:text-white',
+        outline: 'text-popover hover:bg-accent hover:text-accent-foreground text-muted-foreground'
       }
     },
     defaultVariants: {

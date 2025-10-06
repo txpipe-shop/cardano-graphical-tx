@@ -19,6 +19,7 @@
       cbor: string | null;
       isServerLoaded: boolean;
       error?: string;
+      datumTab?: string;
     };
   }
 
@@ -32,7 +33,8 @@
   // Tabs
   type TabKey = 'Overview' | 'Diagram' | 'Dissect' | 'CBOR' | 'Datum' | 'Scripts';
   const tabs = ['Overview', 'Diagram', 'Dissect', 'CBOR', 'Datum', 'Scripts'] as const;
-  let activeTab = $state<TabKey>('Overview');
+
+  let activeTab = $derived<TabKey>(data.datumTab ? 'Datum' :'Overview');
   let cbor = $derived<string>(data.cbor ?? '');
 
   $effect(() => {
@@ -113,7 +115,7 @@
     {/if}
 
     {#if activeTab === 'Datum'}
-      <Datum tx={displayTx}/>
+      <Datum tx={displayTx} tab={data.datumTab}/>
     {/if}
 
     {#if activeTab === 'CBOR'}
