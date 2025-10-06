@@ -2,14 +2,15 @@
     import { formatAddress, getAssetName } from "@/components/primitive-utils";
     import { Badge } from "@/components/ui/badge";
     import { Unit, type Value } from "@/types/utxo-model";
+    import Copy from "../copy.svelte";
 
     let { list, mints } = $props();
 
   function getBadgeColor(assetId: string, mintedAssets: Value | undefined): string {
     if (mintedAssets && assetId in mintedAssets && mintedAssets[Unit(assetId)] > 0n) {
-      return 'bg-green-800';
+      return 'dark:bg-green-800 dark:text-white bg-green-500 text-black';
     } else if (mintedAssets && assetId in mintedAssets && mintedAssets[Unit(assetId)] < 0n) {
-      return 'bg-red-800';
+      return 'dark:bg-red-800 dark:text-white bg-red-500 text-black';
     }
     return '';
   }
@@ -32,12 +33,13 @@
           {formatAddress(utxo.address, false).slice(-5)}
         </div>
       </div>
+      <Copy content={formatAddress(utxo.address, false)} text="address"/>
     </div>
     {#if Object.entries(utxo.value).length > 0}
       <div class="flex w-full gap-1 flex-wrap my-2">
         {#each Object.entries(utxo.value) as [k, v]}
-        <Badge variant="outline" class={getBadgeColor(k, mints) + "text-black dark:text-white"}>
-          <div class="dark:text-white font-extrabold text-yellow-950">{getAssetName(k)}</div>: {v}
+        <Badge variant="outline" class={getBadgeColor(k, mints)}>
+          <div class="font-extrabold">{getAssetName(k)}</div>: {v}
         </Badge>
         <br/>
         {/each}

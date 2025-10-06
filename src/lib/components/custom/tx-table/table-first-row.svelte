@@ -5,6 +5,7 @@
     import { currentProvider } from "@/stores/provider-store";
     import type { CardanoTx } from "@/types";
     import type { Script } from "@/types/cardano/cardano";
+    import Copy from "../copy.svelte";
 
     let { tx } : {tx: CardanoTx} = $props();
 
@@ -24,6 +25,7 @@
         </line><line x1="16" y1="3" x2="14" y2="21"></line>
       </svg>
       <a class="text-blue-600 hover:underline" href={'/tx/' + tx.hash + "?provider=" + $currentProvider?.id || ''}>{tx.hash}</a>
+      <Copy content={tx.hash} text="tx hash"/>
     </div>
   </TableCell>
   <TableCell>
@@ -51,7 +53,7 @@
           Plutus V2
         </Badge>
         {:else if badgeList.some(s => s.type === 'plutusV3')}
-        <Badge variant="outline" class="text-bold bg-pink-600">
+        <Badge variant="outline" class="text-bold bg-pink-600 text-white">
           Plutus V3
         </Badge>
         {/if}
