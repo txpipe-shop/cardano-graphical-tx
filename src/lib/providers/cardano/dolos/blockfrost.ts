@@ -1,7 +1,7 @@
 import {
   type TxContent as BfTx,
   type TxContentUtxo as BfTxUtxos,
-  type TxContentRedeemersInner
+  type TxContentRedeemersInner as BfTxRedeemer
 } from '$lib/sdk/blockfrost';
 import type { CardanoTx, CardanoUTxO } from '@/types';
 import {
@@ -21,11 +21,7 @@ type BfValue = { unit: string; quantity: string }[];
 type BfInputUtxo = BfTxUtxos['inputs'][0];
 type BfOutputUtxo = BfTxUtxos['outputs'][0];
 
-export function bfToCardanoTx(
-  tx: BfTx,
-  txUtxos: BfTxUtxos,
-  rdmrs: TxContentRedeemersInner[]
-): CardanoTx {
+export function bfToCardanoTx(tx: BfTx, txUtxos: BfTxUtxos, rdmrs: BfTxRedeemer[]): CardanoTx {
   const inputs = txUtxos.inputs
     .filter((i) => !(i.collateral || i.reference))
     .map(bfInputToCardanoUtxo);
