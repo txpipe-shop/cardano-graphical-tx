@@ -1,10 +1,18 @@
-import { CardanoBlocksApi, CardanoTransactionsApi, Configuration } from '$lib/sdk/blockfrost';
+import {
+  type TxContent as BfTx,
+  type TxContentUtxo as BfTxUtxos,
+  type TxContentRedeemersInner as BfTxRedeemer,
+  CardanoBlocksApi,
+  CardanoTransactionsApi,
+  Configuration
+} from '$lib/sdk/blockfrost';
 import { type ChainProvider, type TxReq, type TxsReq } from '@/providers/base';
 import type { Cardano, CardanoTx, CardanoUTxO } from '@/types';
 import { Hash } from '@/types/utxo-model';
 import { CardanoSyncClient } from '@utxorpc/sdk';
 import { bfToCardanoTx } from './blockfrost';
 import { u5cToCardanoBlock } from './u5c';
+import assert from 'assert';
 
 export type DolosParams = {
   utxoRpc: {
@@ -58,12 +66,28 @@ export class DolosProvider implements ChainProvider<CardanoUTxO, CardanoTx, Card
   }
 
   async getTx({ hash }: TxReq): Promise<CardanoTx> {
-    const [tx, utxos, redeemers] = await Promise.all([
+    const [tx, utxos, redeemers] = await Promise.allSettled([
       this.miniBfTxsApi.txsHashGet(hash),
       this.miniBfTxsApi.txsHashUtxosGet(hash),
       this.miniBfTxsApi.txsHashRedeemersGet(hash)
-    ]);
-    return bfToCardanoTx(tx.data, utxos.data, redeemers.data);
+    ]).then(([tx, utxos, redeemers]) => {
+      assert(tx.status === 'fulfilled');
+      assert(utxos.status === 'fulfilled');
+      // ugly workaround needed to handle minibf failures on redeemers when getting transactions that consume a genesis UTxO
+      // behavior is if there is an error fetching redeemers, let's just return empty
+      let originSafeRedeemers: BfTxRedeemer[] = [];
+      if (redeemers.status === 'fulfilled') {
+        originSafeRedeemers = redeemers.value.data;
+      } else {
+        console.warn(`Redeemers are missing for hash ${hash}`);
+      }
+      return [tx.value.data, utxos.value.data, originSafeRedeemers || []] as [
+        BfTx,
+        BfTxUtxos,
+        BfTxRedeemer[]
+      ];
+    });
+    return bfToCardanoTx(tx, utxos, redeemers);
   }
 
   async getCBOR({ hash }: TxReq): Promise<string> {
