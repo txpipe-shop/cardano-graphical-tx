@@ -1,32 +1,66 @@
 import type { CardanoBlock, CardanoTx } from '@/types';
 import type { Script, ScriptType, UTxO } from '@/types/cardano/cardano';
+import { uint8ToAddr, uint8ToHash, uint8ToHexString } from '@/types/utils';
 import {
-  addManyValues,
-  diffValues,
-  uint8ToAddr,
-  uint8ToHash,
-  uint8ToHexString
-} from '@/types/utils';
-import { Hash, HexString, MetadatumMap, type Metadata, type Metadatum } from '@/types/utxo-model';
+  Address,
+  Hash,
+  HexString,
+  MetadatumMap,
+  type Metadata,
+  type Metadatum
+} from '@/types/utxo-model';
 import type { cardano } from '@utxorpc/spec';
+import assert from 'assert';
 import { Buffer } from 'buffer';
+
+export function toBigInt(value: Uint8Array | bigint | undefined): bigint {
+  if (value === undefined) return 0n;
+
+  if (value instanceof Uint8Array) {
+    if (value.length === 0) return 0n;
+    return BigInt('0x' + Buffer.from(value).toString('hex'));
+  }
+
+  return BigInt(value);
+}
+
+export async function getBlockPreviousHash(nativeBytes: Uint8Array): Promise<Hash> {
+  const cbor = await import('cbor2');
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const cborParsed = cbor.decode<any>(nativeBytes);
+
+  // let's ignore the era of the block
+  const blockCborDecoded = cborParsed[1];
+  const encoded = cbor.encode(blockCborDecoded);
+  if (window) {
+    const { Block } = await import('@emurgo/cardano-serialization-lib-browser');
+    const hash = Block.from_bytes(encoded).header().header_body().prev_hash()?.to_hex();
+    assert(hash);
+    return Hash(hash);
+  } else {
+    const { Block } = await import('@emurgo/cardano-serialization-lib-nodejs');
+    const hash = Block.from_bytes(encoded).header().header_body().prev_hash()?.to_hex();
+    assert(hash);
+    return Hash(hash);
+  }
+}
 
 export function u5cToCardanoBlock(block: cardano.Block): CardanoBlock {
   return {
     header: {
-      blockNumber: block.header!.height,
+      blockNumber: toBigInt(block.header!.height),
       chainPoint: {
         hash: uint8ToHash(block.header!.hash),
-        slot: block.header!.slot
+        slot: toBigInt(block.header!.slot)
       },
       previousHash: undefined
     },
     txs: block.body!.tx.map((tx) =>
       u5cToCardanoTx(
         tx,
-        block.timestamp,
+        toBigInt(block.timestamp),
         block.header?.hash ? uint8ToHash(block.header?.hash) : undefined,
-        block.header?.height
+        block.header?.height ? toBigInt(block.header?.height) : undefined
       )
     )
   };
@@ -46,24 +80,34 @@ function getRefScript(script: cardano.Script): Script | undefined {
   return undefined;
 }
 
-export function u5cToCardanoUtxo(hash: Hash, output: cardano.TxOutput, index: number): UTxO {
+export function u5cToCardanoUtxo(
+  hash: Hash,
+  output: cardano.TxOutput | undefined,
+  index: number
+): UTxO {
+  const value: Record<string, bigint> = {};
+
+  if (output?.assets) {
+    for (const multiAsset of output.assets) {
+      const policyId = Buffer.from(multiAsset.policyId).toString('hex');
+
+      for (const asset of multiAsset.assets) {
+        const assetName = Buffer.from(asset.name).toString('hex');
+        const key = `${policyId}${assetName}`;
+
+        const quantityVal = asset.quantity.value?.bigInt?.value;
+        value[key] = toBigInt(quantityVal);
+      }
+    }
+  }
+
   return {
-    address: uint8ToAddr(output.address),
-    coin: output.coin,
+    address: output ? uint8ToAddr(output.address) : ('' as Address),
+    coin: toBigInt(output?.coin?.bigInt.value),
     outRef: { hash: hash, index: BigInt(index) },
-    value: output.assets.reduce(
-      (accumulator, currentItem) => {
-        // Para cada `currentItem`, recorre sus assets y los agrega al acumulador.
-        currentItem.assets.forEach((asset) => {
-          const key = `${Buffer.from(currentItem.policyId).toString('hex')}${Buffer.from(asset.name).toString('hex')}`;
-          accumulator[key] = asset.outputCoin;
-        });
-        return accumulator;
-      },
-      {} as Record<string, bigint>
-    ),
+    value,
     datum: undefined,
-    referenceScript: output.script ? getRefScript(output.script) : undefined
+    referenceScript: output?.script ? getRefScript(output.script) : undefined
   };
 }
 
@@ -71,7 +115,7 @@ export function u5cMetadatumToCardanoMetadatum(m: cardano.Metadatum): Metadatum 
   const metadatum = m.metadatum;
   switch (metadatum.case) {
     case 'int': {
-      return metadatum.value;
+      return toBigInt(metadatum.value);
     }
     case 'bytes': {
       return uint8ToHexString(Buffer.from(metadatum.value));
@@ -98,7 +142,7 @@ export function u5cMetadatumToCardanoMetadatum(m: cardano.Metadatum): Metadatum 
 export function u5cToCardanoMetadata(metadata: cardano.Metadata[]): Metadata {
   return metadata
     .map((x): [bigint, Metadatum] => {
-      const label = x.label;
+      const label = toBigInt(x.label);
       const metadatum = x.value!;
       return [label, u5cMetadatumToCardanoMetadatum(metadatum)];
     })
@@ -114,16 +158,21 @@ export function u5cToCardanoTx(
   blockHash: Hash | undefined,
   blockHeight: bigint | undefined
 ): CardanoTx {
-  const fee = tx.fee;
+  const fee = toBigInt(tx.fee?.bigInt.value);
   const hash = uint8ToHash(tx.hash);
-  const inputs = tx.inputs.map((x) => u5cToCardanoUtxo(hash, x.asOutput!, x.outputIndex));
+  const inputs = tx.inputs.map((x) => u5cToCardanoUtxo(hash, x.asOutput, x.outputIndex));
   const outputs = tx.outputs.map((txOut, i) => u5cToCardanoUtxo(hash, txOut, i));
 
   const metadata = tx.auxiliary?.metadata ? u5cToCardanoMetadata(tx.auxiliary.metadata) : undefined;
 
-  const input = addManyValues(inputs.map((x) => x.value));
-  const output = addManyValues(outputs.map((x) => x.value));
-  const mint = diffValues(output, input);
+  const mint: Record<string, bigint> = {};
+  for (const ma of tx.mint) {
+    const policy = Buffer.from(ma.policyId).toString('hex');
+    for (const asset of ma.assets) {
+      const hexName = Buffer.from(asset.name).toString('hex');
+      mint[`${policy}${hexName}`] = toBigInt(asset.quantity.value?.bigInt.value);
+    }
+  }
 
   const referenceInputs = tx.referenceInputs.map((x, i) => u5cToCardanoUtxo(hash, x.asOutput!, i));
   const scripts = tx.witnesses?.script.map(({ script }) => {

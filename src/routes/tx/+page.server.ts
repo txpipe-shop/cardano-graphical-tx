@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ url }) => {
     try {
       const client = createProviderClient(providerConfig);
 
-      const tx = await client.getLatestTx();
+      const tx = await client.getLatestTx({ maxFetch: 100 });
 
       const latestTxs = await client.getTxs({
         before: tx.hash,
