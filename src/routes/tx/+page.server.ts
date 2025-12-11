@@ -28,6 +28,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
       return data;
     } catch (error) {
+      console.error(error);
       return {
         transactions: [],
         isServerLoaded: true,

@@ -27,17 +27,24 @@ export function toBigInt(value: Uint8Array | bigint | undefined): bigint {
 export async function getBlockPreviousHash(nativeBytes: Uint8Array): Promise<Hash> {
   const cbor = await import('cbor2');
   /* eslint-disable @typescript-eslint/no-explicit-any */
+  console.log('About to decode');
   const cborParsed = cbor.decode<any>(nativeBytes);
+  console.log('Finished decoding');
+  console.log(Buffer.from(nativeBytes).toString('hex'));
 
   // let's ignore the era of the block
   const blockCborDecoded = cborParsed[1];
+  console.log('About to encode');
   const encoded = cbor.encode(blockCborDecoded);
-  if (window) {
+  console.log('Decoded successfully');
+  if (typeof window !== 'undefined') {
+    console.log('Running in browser');
     const { Block } = await import('@emurgo/cardano-serialization-lib-browser');
     const hash = Block.from_bytes(encoded).header().header_body().prev_hash()?.to_hex();
     assert(hash);
     return Hash(hash);
   } else {
+    console.log('Running in nodejs');
     const { Block } = await import('@emurgo/cardano-serialization-lib-nodejs');
     const hash = Block.from_bytes(encoded).header().header_body().prev_hash()?.to_hex();
     assert(hash);
