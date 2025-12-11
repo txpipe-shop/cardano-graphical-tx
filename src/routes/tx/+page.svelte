@@ -32,7 +32,7 @@
 
       loadCustomProviderData($currentProvider)
         .catch((error) => {
-          clientError = error instanceof Error ?  error.message : 'Unknown error loading data';
+          clientError = error instanceof Error ? error.message : 'Unknown error loading data';
         })
         .finally(() => {
           clientLoading = false;
@@ -42,7 +42,7 @@
   async function loadCustomProviderData(provider: ProviderConfig) {
     const client = createProviderClient(provider);
 
-    const tx = await client.getLatestTx();
+    const tx = await client.getLatestTx({ maxFetch: -1 });
 
     const txs = await client.getTxs({
       before: tx.hash,
@@ -66,53 +66,50 @@
   }
 </script>
 
-
 {#if isLoading}
-<div class="container mx-auto space-y-6 py-3">
-
-  <Card>
-    <CardContent class="py-8 text-center">
-      <div class="flex items-center justify-center gap-2">
-        <div class="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
-        <span class="text-muted-foreground">Loading data from provider...</span>
-      </div>
-    </CardContent>
-  </Card>
-</div>
-{:else}
-<div class="container mx-auto space-y-6 py-3">
-  <div class="flex gap-2 items-center justify-between">
-    <h1 class="text-4xl font-extrabold">Transactions</h1>
-    <div class="flex gap-2 w-1/2">
-
-      <Input placeholder="Search transactions..." bind:value={txHash}/>
-      <Button variant="default" onclick={handleSearch}>Search</Button>
-    </div>
-  </div>
-
-  {#if clientLoading}
+  <div class="container mx-auto space-y-6 py-3">
     <Card>
       <CardContent class="py-8 text-center">
         <div class="flex items-center justify-center gap-2">
           <div class="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
-          <span class="text-muted-foreground">Loading data from custom provider...</span>
+          <span class="text-muted-foreground">Loading data from provider...</span>
         </div>
       </CardContent>
     </Card>
-  {:else if displayTransactions && displayTransactions.length > 0}
-    <TxTable txs={displayTransactions} />
-  {:else}
-    <Card>
-      <CardContent class="py-8 text-center text-muted-foreground">
-        {#if clientError}
-          Failed to load transaction data from custom provider.
-          <br />
-          <span class="text-red-600">Client error: {clientError}</span>
-        {:else}
-          No transaction data available from the current provider.
-        {/if}
-      </CardContent>
-    </Card>
-  {/if}
-</div>
+  </div>
+{:else}
+  <div class="container mx-auto space-y-6 py-3">
+    <div class="flex items-center justify-between gap-2">
+      <h1 class="text-4xl font-extrabold">Transactions</h1>
+      <div class="flex w-1/2 gap-2">
+        <Input placeholder="Search transactions..." bind:value={txHash} />
+        <Button variant="default" onclick={handleSearch}>Search</Button>
+      </div>
+    </div>
+
+    {#if clientLoading}
+      <Card>
+        <CardContent class="py-8 text-center">
+          <div class="flex items-center justify-center gap-2">
+            <div class="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
+            <span class="text-muted-foreground">Loading data from custom provider...</span>
+          </div>
+        </CardContent>
+      </Card>
+    {:else if displayTransactions && displayTransactions.length > 0}
+      <TxTable txs={displayTransactions} />
+    {:else}
+      <Card>
+        <CardContent class="py-8 text-center text-muted-foreground">
+          {#if clientError}
+            Failed to load transaction data from custom provider.
+            <br />
+            <span class="text-red-600">Client error: {clientError}</span>
+          {:else}
+            No transaction data available from the current provider.
+          {/if}
+        </CardContent>
+      </Card>
+    {/if}
+  </div>
 {/if}

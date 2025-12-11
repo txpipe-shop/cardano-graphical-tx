@@ -8,12 +8,27 @@ importers:
 
   .:
     dependencies:
-      '@utxorpc/sdk':
-        specifier: ^0.7.0
-        version: 0.7.0(@bufbuild/protobuf@1.10.1)
+      '@connectrpc/connect':
+        specifier: '1.4'
+        version: 1.4.0(@bufbuild/protobuf@1.10.1)
+      '@connectrpc/connect-node':
+        specifier: '1.4'
+        version: 1.4.0(@bufbuild/protobuf@1.10.1)(@connectrpc/connect@1.4.0(@bufbuild/protobuf@1.10.1))
+      '@connectrpc/connect-web':
+        specifier: '1.4'
+        version: 1.4.0(@bufbuild/protobuf@1.10.1)(@connectrpc/connect@1.4.0(@bufbuild/protobuf@1.10.1))
+      '@connectrpc/protoc-gen-connect-es':
+        specifier: ^1.4.0
+        version: 1.7.0(@connectrpc/connect@1.4.0(@bufbuild/protobuf@1.10.1))
+      '@emurgo/cardano-serialization-lib-browser':
+        specifier: ^15.0.3
+        version: 15.0.3
+      '@emurgo/cardano-serialization-lib-nodejs':
+        specifier: ^15.0.3
+        version: 15.0.3
       '@utxorpc/spec':
-        specifier: ^0.17.0
-        version: 0.17.0
+        specifier: ^0.18.1
+        version: 0.18.1
       assert:
         specifier: ^2.1.0
         version: 2.1.0
@@ -41,6 +56,9 @@ importers:
       svelte-konva:
         specifier: ^0.3.1
         version: 0.3.1(konva@9.3.22)(svelte@5.37.1)
+      vite-plugin-wasm:
+        specifier: ^3.5.0
+        version: 3.5.0(vite@7.0.6(@types/node@24.1.0)(jiti@2.5.1)(lightningcss@1.30.1)(yaml@2.8.0))
       zod:
         specifier: ^4.0.14
         version: 4.0.14
@@ -145,6 +163,9 @@ packages:
   '@bufbuild/protobuf@1.10.1':
     resolution: {integrity: sha512-wJ8ReQbHxsAfXhrf9ixl0aYbZorRuOWpBNzm8pL8ftmSxQx/wnJD5Eg861NwJU/czy2VXFIebCeZnZrI9rktIQ==}
 
+  '@bufbuild/protoplugin@1.10.1':
+    resolution: {integrity: sha512-LaSbfwabAFIvbVnbn8jWwElRoffCIxhVraO8arliVwWupWezHLXgqPHEYLXZY/SsAR+/YsFBQJa8tAGtNPJyaQ==}
+
   '@connectrpc/connect-node@1.4.0':
     resolution: {integrity: sha512-0ANnrr6SvsjevsWEgdzHy7BaHkluZyS6s4xNoVt7RBHFR5V/kT9lPokoIbYUOU9JHzdRgTaS3x5595mwUsu15g==}
     engines: {node: '>=16.0.0'}
@@ -163,9 +184,28 @@ packages:
     peerDependencies:
       '@bufbuild/protobuf': ^1.4.2
 
+  '@connectrpc/protoc-gen-connect-es@1.7.0':
+    resolution: {integrity: sha512-g2rE799dxGgXtwSTBOJoSlzCy3HN0IX/Es8uKsCgXRmco8o277/bb5nz1X8TmvBooCBGNdtEdUDG50olcvS9jQ==}
+    engines: {node: '>=16.0.0'}
+    hasBin: true
+    peerDependencies:
+      '@bufbuild/protoc-gen-es': ^1.10.0
+      '@connectrpc/connect': 1.7.0
+    peerDependenciesMeta:
+      '@bufbuild/protoc-gen-es':
+        optional: true
+      '@connectrpc/connect':
+        optional: true
+
   '@cto.af/wtf8@0.0.2':
     resolution: {integrity: sha512-ATm4UQiKrdm5GnU6BvIwUDN+LDEtt23zuzKFpnfDT59ULAd0aMYm/nSFzbSO02garLcXumRC13PzNfa7BsfvSg==}
     engines: {node: '>=20'}
+
+  '@emurgo/cardano-serialization-lib-browser@15.0.3':
+    resolution: {integrity: sha512-gbhNh1E3be7/stq7THUxTc8ysW1lZOZaZTvsoV2vixUKp1zJCIp0nuH6SOhQNlWXY/5wxnB2LoYVZe3WWxFA4w==}
+
+  '@emurgo/cardano-serialization-lib-nodejs@15.0.3':
+    resolution: {integrity: sha512-CZkAF7P3Ip3gUCAa6v93DLKp9hGqsfE6F/b3Qrqvym7rEJKi3j+dDk/OPxtmynWWGHhqXL85vzFOOwVduhLAjA==}
 
   '@esbuild/aix-ppc64@0.25.8':
     resolution: {integrity: sha512-urAvrUedIqEiFR3FYSLTWQgLu5tb+m0qZw0NBEasUeo6wuqatkMDaRT+1uABiGXEu5vqgPd7FGE1BhsAIy9QVA==}
@@ -795,11 +835,13 @@ packages:
     resolution: {integrity: sha512-pWrTcoFNWuwHlA9CvlfSsGWs14JxfN1TH25zM5L7o0pRLhsoZkDnTsXfQRJBEWJoV5DL0jf+Z+sxiud+K0mq1g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@utxorpc/sdk@0.7.0':
-    resolution: {integrity: sha512-yWPUZxNbN6Ni+m8vqaldIoPHPS5Vf3IEUdsRCzy/ql0ITYk7QOWKuYawiCPkEi5gfMv227dK4MSxHpsHuwwISg==}
+  '@typescript/vfs@1.6.2':
+    resolution: {integrity: sha512-hoBwJwcbKHmvd2QVebiytN1aELvpk9B74B4L1mFm/XT1Q/VOYAWl2vQ9AWRFtQq8zmz6enTpfTV8WRc4ATjW/g==}
+    peerDependencies:
+      typescript: '*'
 
-  '@utxorpc/spec@0.17.0':
-    resolution: {integrity: sha512-5E+kUTkABl3mFTCOGJZg1uk9SDrilyVHR2b++3RK9+BWbNOSaSnJtp91XxLLkWMTNzbWQw0tB2qY7aoCIkvu7Q==}
+  '@utxorpc/spec@0.18.1':
+    resolution: {integrity: sha512-XNUhgYImEQlmYxWzHhtRSHcKU/VhJ2fbZPzjBgtEyU/3iZgAev9JdjZc5GWEBXO8iWifqaqK1TarANwMbOftVQ==}
     engines: {node: '>=20.0.0'}
 
   acorn-jsx@5.3.2:
@@ -1913,6 +1955,11 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: '>=4.8.4 <5.9.0'
 
+  typescript@4.5.2:
+    resolution: {integrity: sha512-5BlMof9H1yGt0P8/WF+wPNw6GfctgGjXp5hkblpyT+8rkASSmkUKMXrxR0Xg8ThVCi/JnHQiKXeBaEwCeQwMFw==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+
   typescript@5.8.3:
     resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
     engines: {node: '>=14.17'}
@@ -1933,6 +1980,11 @@ packages:
 
   util@0.12.5:
     resolution: {integrity: sha512-kZf/K6hEIrWHI6XqOFUiiMa+79wE/D8Q+NCNAWclkyg3b4d2k7s0QGepNjiABc+aR3N1PAyHL7p6UcLY6LmrnA==}
+
+  vite-plugin-wasm@3.5.0:
+    resolution: {integrity: sha512-X5VWgCnqiQEGb+omhlBVsvTfxikKtoOgAzQ95+BZ8gQ+VfMHIjSHr0wyvXFQCa0eKQ0fKyaL0kWcEnYqBac4lQ==}
+    peerDependencies:
+      vite: ^2 || ^3 || ^4 || ^5 || ^6 || ^7
 
   vite@7.0.6:
     resolution: {integrity: sha512-MHFiOENNBd+Bd9uvc8GEsIzdkn1JxMmEeYX35tI3fv0sJBUTfW5tQsoaOwuY4KhBI09A3dUJ/DXf2yxPVPUceg==}
@@ -2030,6 +2082,14 @@ snapshots:
 
   '@bufbuild/protobuf@1.10.1': {}
 
+  '@bufbuild/protoplugin@1.10.1':
+    dependencies:
+      '@bufbuild/protobuf': 1.10.1
+      '@typescript/vfs': 1.6.2(typescript@4.5.2)
+      typescript: 4.5.2
+    transitivePeerDependencies:
+      - supports-color
+
   '@connectrpc/connect-node@1.4.0(@bufbuild/protobuf@1.10.1)(@connectrpc/connect@1.4.0(@bufbuild/protobuf@1.10.1))':
     dependencies:
       '@bufbuild/protobuf': 1.10.1
@@ -2045,7 +2105,20 @@ snapshots:
     dependencies:
       '@bufbuild/protobuf': 1.10.1
 
+  '@connectrpc/protoc-gen-connect-es@1.7.0(@connectrpc/connect@1.4.0(@bufbuild/protobuf@1.10.1))':
+    dependencies:
+      '@bufbuild/protobuf': 1.10.1
+      '@bufbuild/protoplugin': 1.10.1
+    optionalDependencies:
+      '@connectrpc/connect': 1.4.0(@bufbuild/protobuf@1.10.1)
+    transitivePeerDependencies:
+      - supports-color
+
   '@cto.af/wtf8@0.0.2': {}
+
+  '@emurgo/cardano-serialization-lib-browser@15.0.3': {}
+
+  '@emurgo/cardano-serialization-lib-nodejs@15.0.3': {}
 
   '@esbuild/aix-ppc64@0.25.8':
     optional: true
@@ -2584,17 +2657,14 @@ snapshots:
       '@typescript-eslint/types': 8.38.0
       eslint-visitor-keys: 4.2.1
 
-  '@utxorpc/sdk@0.7.0(@bufbuild/protobuf@1.10.1)':
+  '@typescript/vfs@1.6.2(typescript@4.5.2)':
     dependencies:
-      '@connectrpc/connect': 1.4.0(@bufbuild/protobuf@1.10.1)
-      '@connectrpc/connect-node': 1.4.0(@bufbuild/protobuf@1.10.1)(@connectrpc/connect@1.4.0(@bufbuild/protobuf@1.10.1))
-      '@connectrpc/connect-web': 1.4.0(@bufbuild/protobuf@1.10.1)(@connectrpc/connect@1.4.0(@bufbuild/protobuf@1.10.1))
-      '@utxorpc/spec': 0.17.0
-      buffer: 6.0.3
+      debug: 4.4.1
+      typescript: 4.5.2
     transitivePeerDependencies:
-      - '@bufbuild/protobuf'
+      - supports-color
 
-  '@utxorpc/spec@0.17.0':
+  '@utxorpc/spec@0.18.1':
     dependencies:
       '@bufbuild/protobuf': 1.10.1
 
@@ -3669,6 +3739,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  typescript@4.5.2: {}
+
   typescript@5.8.3: {}
 
   undici-types@7.8.0: {}
@@ -3690,6 +3762,10 @@ snapshots:
       is-generator-function: 1.1.0
       is-typed-array: 1.1.15
       which-typed-array: 1.1.19
+
+  vite-plugin-wasm@3.5.0(vite@7.0.6(@types/node@24.1.0)(jiti@2.5.1)(lightningcss@1.30.1)(yaml@2.8.0)):
+    dependencies:
+      vite: 7.0.6(@types/node@24.1.0)(jiti@2.5.1)(lightningcss@1.30.1)(yaml@2.8.0)
 
   vite@7.0.6(@types/node@24.1.0)(jiti@2.5.1)(lightningcss@1.30.1)(yaml@2.8.0):
     dependencies:

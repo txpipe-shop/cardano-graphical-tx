@@ -10,12 +10,20 @@ export type TxsReq = {
   limit: number;
 };
 
+export type LatestTxReq = {
+  /**
+   * Amount of blocks to look back for the latest transaction
+   * If -1, will search all the way to the genesis block
+   */
+  maxFetch: number;
+};
+
 export interface ChainProvider<
   U extends BaseUTxO,
   T extends BaseTx<U>,
   Chain extends BaseChain<U, T>
 > {
-  getLatestTx(): Promise<Chain['tx']>;
+  getLatestTx(params: LatestTxReq): Promise<Chain['tx']>;
   getTx(params: TxReq): Promise<Chain['tx']>;
   getTxs(params: TxsReq): Promise<Chain['tx'][]>;
   readTip(): Promise<{
