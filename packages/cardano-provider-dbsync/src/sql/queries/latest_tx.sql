@@ -1,0 +1,1 @@
+-- Get the latest transaction from recent blocks
