@@ -18,7 +18,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
       const latestTxs = await client.getTxs({
         before: tx.hash,
-        limit: 100
+        limit: 10
       });
 
       const data = {
