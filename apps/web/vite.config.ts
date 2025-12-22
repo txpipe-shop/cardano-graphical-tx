@@ -8,13 +8,6 @@ export default defineConfig(({ isSsrBuild }) => ({
   ssr: {
     noExternal: ['bits-ui']
   },
-  resolve: {
-    alias: {
-      '@alexandria/utxorpc-sdk/transport': isSsrBuild
-        ? '@alexandria/utxorpc-sdk/transport/node'
-        : '@alexandria/utxorpc-sdk/transport/web'
-    }
-  },
   build: {
     rollupOptions: {
       // Externalize Node.js-only packages from client bundle

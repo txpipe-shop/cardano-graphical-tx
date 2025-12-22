@@ -1,10 +1,11 @@
 import { DolosProvider } from '@/providers/cardano/utxorpc';
-import { createGrpcTransport } from '@alexandria/utxorpc-sdk/transport/web';
+import { createGrpcTransport } from '@alexandria/utxorpc-sdk/transport/node';
 import type { ProviderConfig } from '@/client';
 import assert from 'assert';
 
 function createTransport(baseUrl: string, headers?: Record<string, string>) {
   return createGrpcTransport({
+    httpVersion: '2',
     baseUrl,
     interceptors: headers
       ? [
@@ -19,7 +20,7 @@ function createTransport(baseUrl: string, headers?: Record<string, string>) {
   });
 }
 
-export function createProviderClient(config: ProviderConfig) {
+export function createProviderServer(config: ProviderConfig) {
   assert.ok(config.miniBfUrl && config.utxoRpcUrl);
   if (config.isLocal) {
     return new DolosProvider({

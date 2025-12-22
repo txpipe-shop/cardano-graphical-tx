@@ -54,8 +54,9 @@
   },
   "dependencies": {
     "@alexandria/blockfrost-sdk": "workspace:*",
+    "@alexandria/cardano-provider-u5c": "workspace:*",
+    "@alexandria/provider-core": "workspace:*",
     "@alexandria/types": "workspace:*",
-    "@alexandria/utxorpc-provider": "workspace:*",
     "@alexandria/utxorpc-sdk": "workspace:*",
     "@connectrpc/connect": "1.4",
     "@connectrpc/connect-node": "1.4",

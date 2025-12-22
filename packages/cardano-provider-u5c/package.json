@@ -1,0 +1,59 @@
+{
+  "name": "@alexandria/cardano-provider-u5c",
+  "version": "0.0.1",
+  "private": false,
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./mappers": {
+      "types": "./dist/mappers.d.ts",
+      "import": "./dist/mappers.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@alexandria/provider-core": "workspace:*",
+    "@alexandria/types": "workspace:*",
+    "@alexandria/utxorpc-sdk": "workspace:*",
+    "@connectrpc/connect": "1.4",
+    "@utxorpc/spec": "^0.18.1",
+    "assert": "^2.1.0",
+    "buffer": "^6.0.3",
+    "cbor2": "latest"
+  },
+  "devDependencies": {
+    "@alexandria/typescript-config": "workspace:*",
+    "@emurgo/cardano-serialization-lib-nodejs": "^15.0.3",
+    "@types/node": "^24.1.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@emurgo/cardano-serialization-lib-browser": "^15.0.3",
+    "@emurgo/cardano-serialization-lib-nodejs": "^15.0.3"
+  },
+  "peerDependenciesMeta": {
+    "@emurgo/cardano-serialization-lib-browser": {
+      "optional": true
+    },
+    "@emurgo/cardano-serialization-lib-nodejs": {
+      "optional": true
+    }
+  }
+}

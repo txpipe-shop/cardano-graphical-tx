@@ -1,33 +1,7 @@
-import type { BaseChain, BaseTx, BaseUTxO } from '@alexandria/types';
-import type { Hash } from '@alexandria/types';
-
-export type TxReq = {
-  hash: Hash;
-};
-
-export type TxsReq = {
-  before: Hash;
-  limit: number;
-};
-
-export type LatestTxReq = {
-  /**
-   * Amount of blocks to look back for the latest transaction
-   * If -1, will search all the way to the genesis block
-   */
-  maxFetch: number;
-};
-
-export interface ChainProvider<
-  U extends BaseUTxO,
-  T extends BaseTx<U>,
-  Chain extends BaseChain<U, T>
-> {
-  getLatestTx(params: LatestTxReq): Promise<Chain['tx']>;
-  getTx(params: TxReq): Promise<Chain['tx']>;
-  getTxs(params: TxsReq): Promise<Chain['tx'][]>;
-  readTip(): Promise<{
-    hash: Hash;
-    slot: bigint;
-  }>;
-}
+// Re-export from @alexandria/provider-core for convenience
+export {
+  type ChainProvider,
+  type TxReq,
+  type TxsReq,
+  type LatestTxReq
+} from '@alexandria/provider-core';

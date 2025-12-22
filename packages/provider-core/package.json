@@ -1,5 +1,5 @@
 {
-  "name": "@alexandria/utxorpc-provider",
+  "name": "@alexandria/provider-core",
   "version": "0.0.1",
   "private": false,
   "type": "module",
@@ -25,8 +25,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@alexandria/types": "workspace:*",
-    "@alexandria/utxorpc-sdk": "workspace:*"
+    "@alexandria/types": "workspace:*"
   },
   "devDependencies": {
     "@alexandria/typescript-config": "workspace:*",

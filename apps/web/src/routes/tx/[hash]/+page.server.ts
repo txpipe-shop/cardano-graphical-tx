@@ -1,4 +1,4 @@
-import { createProviderClient } from '@/client/provider-loader';
+import { createProviderServer } from '@/server/provider-loader';
 import { getProviderById } from '@/server/provider-config';
 import { Hash } from '@alexandria/types';
 import type { PageServerLoad } from './$types';
@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ url, params }) => {
 
   if (providerConfig && !providerConfig?.isLocal) {
     try {
-      const client = createProviderClient(providerConfig);
+      const client = createProviderServer(providerConfig);
       const tx = await client.getTx({ hash: Hash(params.hash) });
       let cbor = null;
       try {

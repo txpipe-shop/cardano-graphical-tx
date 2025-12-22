@@ -23,12 +23,15 @@ importers:
       '@alexandria/blockfrost-sdk':
         specifier: workspace:*
         version: link:../../packages/blockfrost-sdk
+      '@alexandria/cardano-provider-u5c':
+        specifier: workspace:*
+        version: link:../../packages/cardano-provider-u5c
+      '@alexandria/provider-core':
+        specifier: workspace:*
+        version: link:../../packages/provider-core
       '@alexandria/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@alexandria/utxorpc-provider':
-        specifier: workspace:*
-        version: link:../../packages/utxorpc-provider
       '@alexandria/utxorpc-sdk':
         specifier: workspace:*
         version: link:../../packages/utxorpc-sdk
@@ -194,6 +197,62 @@ importers:
         specifier: ^5.0.0
         version: 5.8.3
 
+  packages/cardano-provider-u5c:
+    dependencies:
+      '@alexandria/provider-core':
+        specifier: workspace:*
+        version: link:../provider-core
+      '@alexandria/types':
+        specifier: workspace:*
+        version: link:../types
+      '@alexandria/utxorpc-sdk':
+        specifier: workspace:*
+        version: link:../utxorpc-sdk
+      '@connectrpc/connect':
+        specifier: '1.4'
+        version: 1.4.0(@bufbuild/protobuf@1.10.1)
+      '@emurgo/cardano-serialization-lib-browser':
+        specifier: ^15.0.3
+        version: 15.0.3
+      '@utxorpc/spec':
+        specifier: ^0.18.1
+        version: 0.18.1
+      assert:
+        specifier: ^2.1.0
+        version: 2.1.0
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
+      cbor2:
+        specifier: latest
+        version: 2.0.1
+    devDependencies:
+      '@alexandria/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@emurgo/cardano-serialization-lib-nodejs':
+        specifier: ^15.0.3
+        version: 15.0.3
+      '@types/node':
+        specifier: ^24.1.0
+        version: 24.1.0
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+
+  packages/provider-core:
+    dependencies:
+      '@alexandria/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      '@alexandria/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+
   packages/types:
     dependencies:
       bech32:
@@ -211,22 +270,6 @@ importers:
         version: 5.8.3
 
   packages/typescript-config: {}
-
-  packages/utxorpc-provider:
-    dependencies:
-      '@alexandria/types':
-        specifier: workspace:*
-        version: link:../types
-      '@alexandria/utxorpc-sdk':
-        specifier: workspace:*
-        version: link:../utxorpc-sdk
-    devDependencies:
-      '@alexandria/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
 
   packages/utxorpc-sdk:
     dependencies:

@@ -1,12 +1,13 @@
-import { createPromiseClient, type PromiseClient } from '@connectrpc/connect';
-import { createGrpcTransport } from './grpcTransport';
+import { createPromiseClient, type PromiseClient, type Transport } from '@connectrpc/connect';
 import { queryConnect, submitConnect, syncConnect, watchConnect } from '@utxorpc/spec';
 
 export * from '@utxorpc/spec';
 
+// Re-export Transport type for consumers
+export type { Transport } from '@connectrpc/connect';
+
 export interface UtxoRpcClientConfig {
-  baseUrl: string;
-  headers?: Record<string, string>;
+  transport: Transport;
 }
 
 export class UtxoRpcClient {
@@ -15,22 +16,7 @@ export class UtxoRpcClient {
   public sync: PromiseClient<typeof syncConnect.SyncService>;
   public watch: PromiseClient<typeof watchConnect.WatchService>;
 
-  constructor(options: UtxoRpcClientConfig) {
-    const transport = createGrpcTransport({
-      httpVersion: '2',
-      baseUrl: options.baseUrl,
-      interceptors: options.headers
-        ? [
-            (next) => async (req) => {
-              for (const [key, value] of Object.entries(options.headers!)) {
-                req.header.set(key, value);
-              }
-              return next(req);
-            }
-          ]
-        : []
-    });
-
+  constructor({ transport }: UtxoRpcClientConfig) {
     this.query = createPromiseClient(queryConnect.QueryService, transport);
     this.submit = createPromiseClient(submitConnect.SubmitService, transport);
     this.sync = createPromiseClient(syncConnect.SyncService, transport);

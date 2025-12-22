@@ -1,4 +1,4 @@
-import { createProviderClient } from '@/client/provider-loader';
+import { createProviderServer } from '@/server/provider-loader';
 import { getProviderById } from '@/server/provider-config';
 import type { PageServerLoad } from './$types';
 
@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
   if (!providerConfig?.isLocal && providerConfig) {
     try {
-      const client = createProviderClient(providerConfig);
+      const client = createProviderServer(providerConfig);
 
       const tx = await client.getLatestTx({ maxFetch: 100 });
 
