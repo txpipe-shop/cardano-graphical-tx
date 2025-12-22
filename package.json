@@ -6,7 +6,7 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "check": "turbo run check",
-    "format": "prettier --write \"**/*.{ts,tsx,svelte,md,json}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,svelte,md,json,css}\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "turbo run build --filter=./packages/* && changeset publish"

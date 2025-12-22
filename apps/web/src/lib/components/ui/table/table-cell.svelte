@@ -14,7 +14,7 @@
   bind:this={ref}
   data-slot="table-cell"
   class={cn(
-    'bg-clip-padding p-2 align-top whitespace-nowrap [&:has([role=checkbox])]:pr-0',
+    'whitespace-nowrap bg-clip-padding p-2 align-top [&:has([role=checkbox])]:pr-0',
     className
   )}
   {...restProps}

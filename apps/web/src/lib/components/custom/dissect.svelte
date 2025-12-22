@@ -138,4 +138,3 @@
     {/each}
   </Ccollapsible>
 {/if}
-

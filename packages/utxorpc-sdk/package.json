@@ -21,7 +21,9 @@
       "import": "./dist/grpcTransport.web.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

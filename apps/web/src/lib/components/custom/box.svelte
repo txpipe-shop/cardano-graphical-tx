@@ -1,17 +1,16 @@
 <script lang="ts">
-    import { CardContent } from "../ui/card";
-    import Card from "../ui/card/card.svelte";
+  import { CardContent } from '../ui/card';
+  import Card from '../ui/card/card.svelte';
 
-  const { title, content, bg = "green"} = $props();
-
+  const { title, content, bg = 'green' } = $props();
 </script>
 
-<Card class={`rounded-xl border border-black py-3 text-card-foreground shadow-sm mx-3 ${bg}`}>
+<Card class={`text-card-foreground mx-3 rounded-xl border border-black py-3 shadow-sm ${bg}`}>
   <CardContent>
-    <div class="text-xs font-bold mb-2">
+    <div class="mb-2 text-xs font-bold">
       {title}
     </div>
-    <div class="text-lg whitespace-pre-wrap break-all">
+    <div class="whitespace-pre-wrap break-all text-lg">
       {content}
     </div>
   </CardContent>

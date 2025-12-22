@@ -1,0 +1,11 @@
+# Build outputs
+build
+dist
+.svelte-kit
+
+# Dependencies
+node_modules
+
+# Generated files
+*.min.js
+*.min.css

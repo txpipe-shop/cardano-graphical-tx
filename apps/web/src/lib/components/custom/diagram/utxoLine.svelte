@@ -171,4 +171,3 @@
     utxoYDeviation = e.detail.currentTarget.attrs.y - txY;
   }}
 />
-

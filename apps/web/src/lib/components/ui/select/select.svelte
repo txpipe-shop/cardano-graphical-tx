@@ -47,12 +47,12 @@
 
 <div class={cn('relative', className)} {...restProps}>
   {#if !isOpen && subtitle}
-    <div class="text-xs absolute bottom-9 left-1.5">{subtitle}</div>
+    <div class="absolute bottom-9 left-1.5 text-xs">{subtitle}</div>
   {/if}
   <button
     type="button"
     class={cn(
-      'flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+      'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus:ring-ring flex h-9 w-full items-center justify-between rounded-md border px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
       className
     )}
     {disabled}
@@ -77,13 +77,13 @@
 
   {#if isOpen}
     <div
-      class="absolute top-full z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+      class="bg-popover text-popover-foreground absolute top-full z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border p-1 shadow-md"
     >
       {#each items as item (item.value)}
         <button
           type="button"
           class={cn(
-            'relative flex w-full cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+            'hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
             value === item.value && 'bg-accent text-accent-foreground'
           )}
           onclick={() => handleSelect(item)}
