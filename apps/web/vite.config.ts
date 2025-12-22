@@ -15,6 +15,17 @@ export default defineConfig(({ isSsrBuild }) => ({
         : '@alexandria/utxorpc-sdk/transport/web'
     }
   },
+  build: {
+    rollupOptions: {
+      // Externalize Node.js-only packages from client bundle
+      external: isSsrBuild
+        ? []
+        : [
+            '@connectrpc/connect-node',
+            '@emurgo/cardano-serialization-lib-nodejs'
+          ]
+    }
+  },
   define: {
     'process.env': {}
   }

@@ -1,10 +1,10 @@
 import { type ChainProvider, type LatestTxReq, type TxReq, type TxsReq } from '@/providers/base';
 import type { Cardano, CardanoTx, CardanoUTxO } from '@/types';
 import { Hash } from '@/types/utxo-model';
-import { UtxoRpcClient } from '@/sdk/utxorpc';
+import { UtxoRpcClient } from '@alexandria/utxorpc-sdk';
 import { getBlockPreviousHash, u5cToCardanoTx } from './mappers';
 import assert from 'assert';
-import { cardano, sync } from '@utxorpc/spec';
+import { type cardano, sync } from '@utxorpc/spec';
 import { Buffer } from 'buffer';
 
 export type DolosParams = {
