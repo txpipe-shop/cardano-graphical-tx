@@ -1,4 +1,4 @@
-import { DolosProvider } from '@/providers/cardano/utxorpc';
+import { U5CProvider } from '@alexandria/cardano-provider-u5c';
 import { createGrpcTransport } from '@alexandria/utxorpc-sdk/transport/node';
 import type { ProviderConfig } from '@/client';
 import assert from 'assert';
@@ -23,12 +23,12 @@ function createTransport(baseUrl: string, headers?: Record<string, string>) {
 export function createProviderServer(config: ProviderConfig) {
   assert.ok(config.miniBfUrl && config.utxoRpcUrl);
   if (config.isLocal) {
-    return new DolosProvider({
+    return new U5CProvider({
       transport: createTransport(config.utxoRpcUrl)
     });
   }
   assert.ok(config.miniBfApiKey && config.utxoRpcApiKey);
-  return new DolosProvider({
+  return new U5CProvider({
     transport: createTransport(config.utxoRpcUrl, { 'dmtr-api-key': config.utxoRpcApiKey })
   });
 }

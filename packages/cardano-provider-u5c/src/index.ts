@@ -1,4 +1,9 @@
-import { type ChainProvider, type LatestTxReq, type TxReq, type TxsReq } from '@alexandria/provider-core';
+import {
+  type ChainProvider,
+  type LatestTxReq,
+  type TxReq,
+  type TxsReq
+} from '@alexandria/provider-core';
 import type { Cardano, CardanoTx, CardanoUTxO } from '@alexandria/types';
 import { Hash } from '@alexandria/types';
 import { UtxoRpcClient } from '@alexandria/utxorpc-sdk';
@@ -8,7 +13,7 @@ import assert from 'assert';
 import { type cardano, sync } from '@utxorpc/spec';
 import { Buffer } from 'buffer';
 
-export type DolosParams = {
+export type Params = {
   /**
    * Pre-configured transport for the UTxORPC client.
    * Use createGrpcTransport from '@alexandria/utxorpc-sdk/transport/node' for Node.js
@@ -17,10 +22,10 @@ export type DolosParams = {
   transport: Transport;
 };
 
-export class DolosProvider implements ChainProvider<CardanoUTxO, CardanoTx, Cardano> {
+export class U5CProvider implements ChainProvider<CardanoUTxO, CardanoTx, Cardano> {
   utxoRpc: UtxoRpcClient;
 
-  constructor({ transport }: DolosParams) {
+  constructor({ transport }: Params) {
     this.utxoRpc = new UtxoRpcClient({ transport });
   }
 
