@@ -84,7 +84,7 @@
   {:else if displayTx}
     <!-- Tabs header -->
     <div class="flex gap-2 border-b pb-2">
-      {#each tabs as tab}
+      {#each tabs as tab (tab)}
         <Button
           size="sm"
           variant={activeTab === tab ? 'default' : 'outline'}

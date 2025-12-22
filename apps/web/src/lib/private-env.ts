@@ -2,23 +2,6 @@ import { env } from '$env/dynamic/private';
 import { z } from 'zod/v4';
 import { building } from '$app/environment';
 
-const privateEnvSchema = z.object({
-  PREPROD_UTXORPC_API_KEY: z.string().min(1).optional(),
-  PREPROD_UTXORPC_URL: z.string().min(1).optional(),
-  PREPROD_BLOCKFROST_URL: z.string().url().optional(),
-  PREPROD_BLOCKFROST_API_KEY: z.string().min(1).optional(),
-  PREPROD_DB_SYNC_CONNECTION_STRING: z.string().url().optional(),
-
-  PREVIEW_UTXORPC_API_KEY: z.string().min(1).optional(),
-  PREVIEW_UTXORPC_URL: z.string().min(1).optional(),
-  PREVIEW_BLOCKFROST_URL: z.string().url().optional(),
-  PREVIEW_BLOCKFROST_API_KEY: z.string().min(1).optional(),
-  PREVIEW_DB_SYNC_CONNECTION_STRING: z.string().url().optional(),
-
-  LOCAL_UTXORPC_URL: z.string().min(1).optional(),
-  LOCAL_BLOCKFROST_URL: z.string().url().optional()
-});
-
 type PrivateEnv = {
   PREPROD_UTXORPC_API_KEY: string;
   PREPROD_UTXORPC_URL: string;

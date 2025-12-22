@@ -47,6 +47,7 @@ export function getServerProviders(): ProviderConfig[] {
 export function getClientProviders(): ProviderConfig[] {
   return getServerProviders().map((config) => {
     if (config.type === 'dolos' && !config.isLocal) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { utxoRpcUrl, utxoRpcApiKey, miniBfUrl, miniBfApiKey, ...clientConfig } = config;
       return clientConfig;
     }

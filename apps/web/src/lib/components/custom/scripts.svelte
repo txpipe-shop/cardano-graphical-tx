@@ -15,7 +15,7 @@
     </CardContent>
   {:else}
     <div class="flex w-min flex-col gap-2 overflow-y-scroll p-2">
-      {#each redeemers as tab}
+      {#each redeemers as tab (tab.purpose + tab.index)}
         <Button
           size="sm"
           variant={activeTab?.purpose == tab.purpose && activeTab.index == tab.index

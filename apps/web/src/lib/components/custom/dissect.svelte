@@ -23,23 +23,23 @@
   }
 </script>
 
-<Ccollapsible title={'DISSECTED INFORMATION'}>
-  <Box title={'Tx Hash'} content={tx.hash} />
-  <Box title={'Fee'} content={tx.fee} />
+<Ccollapsible title="DISSECTED INFORMATION">
+  <Box title="Tx Hash" content={tx.hash} />
+  <Box title="Fee" content={tx.fee} />
 </Ccollapsible>
 
-<Ccollapsible title={'INPUTS'}>
-  {#each tx.inputs as input, i}
+<Ccollapsible title="INPUTS">
+  {#each tx.inputs as input, i (input.outRef.hash + input.outRef.index)}
     <Ccollapsible title={`Input ${i + 1}`}>
       <Box title="UtxoRef Hash" content={`${input.outRef.hash}#${input.outRef.index}`} />
       <Box title="Address" content={`${formatAddress(input.address, false)}`} />
       <Box title="Lovelace" content={input.coin ? `${input.coin}` : '-'} />
       {#if Object.keys(input.value).length > 0}
-        <Ccollapsible title={`Values`}>
-          {#each parseValues(input.value) as value}
+        <Ccollapsible title="Values">
+          {#each parseValues(input.value) as value (value.policy)}
             <Ccollapsible title={`Policy: ${value.policy}`}>
-              {#each Object.entries(value.values) as [assetName, amount]}
-                <Box title={`Asset Name: Amount`} content={`${assetName}: ${amount}`} />
+              {#each Object.entries(value.values) as [assetName, amount] (assetName)}
+                <Box title="Asset Name: Amount" content={`${assetName}: ${amount}`} />
               {/each}
             </Ccollapsible>
           {/each}
@@ -49,8 +49,8 @@
   {/each}
 </Ccollapsible>
 
-<Ccollapsible title={'OUTPUTS'}>
-  {#each tx.outputs as output, i}
+<Ccollapsible title="OUTPUTS">
+  {#each tx.outputs as output, i (output.outRef.hash + output.outRef.index)}
     <Ccollapsible title={`Output ${i + 1}`}>
       <Box title="UtxoRef Hash" content={`${output.outRef.hash}#${output.outRef.index}`} />
       <Box title="Address" content={`${formatAddress(output.address, false)}`} />
@@ -65,11 +65,11 @@
         <Box title="Consumed By" content={`${output.consumedBy}`} />
       {/if}
       {#if parseValues(output.value).length > 0}
-        <Ccollapsible title={`Values`}>
-          {#each parseValues(output.value) as value}
+        <Ccollapsible title="Values">
+          {#each parseValues(output.value) as value (value.policy)}
             <Ccollapsible title={`Policy: ${value.policy}`}>
-              {#each Object.entries(value.values) as [assetName, amount]}
-                <Box title={`Asset Name: Amount`} content={`${assetName}: ${amount}`} />
+              {#each Object.entries(value.values) as [assetName, amount] (assetName)}
+                <Box title="Asset Name: Amount" content={`${assetName}: ${amount}`} />
               {/each}
             </Ccollapsible>
           {/each}
@@ -81,7 +81,7 @@
 
 {#if tx.referenceInputs.length > 0}
   <Ccollapsible title="REFERENCE INPUTS">
-    {#each tx.referenceInputs as refInput, i}
+    {#each tx.referenceInputs as refInput, i (refInput.outRef.hash + refInput.outRef.index)}
       <Ccollapsible title={`Reference Input ${i + 1}`}>
         <Box title="UtxoRef Hash" content={`${refInput.outRef.hash}#${refInput.outRef.index}`} />
         <Box title="Address" content={`${formatAddress(refInput.address, false)}`} />
@@ -93,11 +93,11 @@
           <Box title="Inline Datum" content={`${refInput.datum.datumHex}`} />
         {/if}
         {#if Object.keys(refInput.value).length > 0}
-          <Ccollapsible title={`Values`}>
-            {#each parseValues(refInput.value) as value}
+          <Ccollapsible title="Values">
+            {#each parseValues(refInput.value) as value (value.policy)}
               <Ccollapsible title={`Policy: ${value.policy}`}>
-                {#each Object.entries(value.values) as [assetName, amount]}
-                  <Box title={`Asset Name: Amount`} content={`${assetName}: ${amount}`} />
+                {#each Object.entries(value.values) as [assetName, amount] (assetName)}
+                  <Box title="Asset Name: Amount" content={`${assetName}: ${amount}`} />
                 {/each}
               </Ccollapsible>
             {/each}
@@ -110,11 +110,11 @@
 
 {#if Object.keys(tx.mint).length > 0}
   <Ccollapsible title="MINTS AND BURNS">
-    {#each parseValues(tx.mint) as value}
+    {#each parseValues(tx.mint) as value (value.policy)}
       <Ccollapsible title={`Policy: ${value.policy}`}>
-        {#each Object.entries(value.values) as [assetName, amount]}
+        {#each Object.entries(value.values) as [assetName, amount] (assetName)}
           <Box
-            title={`Asset Name: Amount`}
+            title="Asset Name: Amount"
             content={`${assetName}: ${amount}`}
             bg={amount > 0 ? 'bg-green-900' : 'bg-red-900'}
           />
@@ -126,13 +126,13 @@
 
 {#if tx.metadata}
   <Ccollapsible title="METADATA">
-    {#each tx.metadata as Metadata as metadata}
+    {#each tx.metadata as Metadata as metadata, i (i)}
       {#if typeof metadata === 'bigint' || typeof metadata === 'string'}
-        <Box title={`Metadata`} content={`${metadata}`} />
+        <Box title="Metadata" content={`${metadata}`} />
       {:else if typeof metadata === 'object' && metadata !== null}
-        {#each Object.entries(metadata) as [key, value]}
-          <Box title={`Metadata Key`} content={`${key}`} />
-          <Box title={`Metadata Value`} content={`${value}`} />
+        {#each Object.entries(metadata) as [key, value] (key)}
+          <Box title="Metadata Key" content={`${key}`} />
+          <Box title="Metadata Value" content={`${value}`} />
         {/each}
       {/if}
     {/each}

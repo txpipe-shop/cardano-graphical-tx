@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { SvelteURLSearchParams } from 'svelte/reactivity';
   import type { cardano, OutRef } from '@alexandria/types';
   import { formatAddress, getAssetName, trunc } from '../../primitive-utils';
   import { Badge } from '../../ui/badge';
@@ -18,7 +19,7 @@
   async function goToDatumTab(utxo: OutRef) {
     const currentPathname = $page.url.pathname;
 
-    const params = new URLSearchParams($page.url.searchParams);
+    const params = new SvelteURLSearchParams($page.url.searchParams);
     params.set('datumTab', `${utxo.hash}n${utxo.index}`);
 
     const newUrl = `${currentPathname}?${params.toString()}`;
@@ -41,7 +42,7 @@
       </TableHeader>
 
       <TableBody>
-        {#each list as cardano.UTxO[] as utxo}
+        {#each list as cardano.UTxO[] as utxo (utxo.outRef.hash + utxo.outRef.index)}
           <TableRow>
             <TableCell class="w-1/4 whitespace-pre-wrap break-all font-mono text-sm">
               <div class="flex items-start">
@@ -132,7 +133,7 @@
             <TableCell class="flex w-full flex-wrap gap-1">
               {#if Object.entries(utxo.value).length > 0}
                 <div class="flex w-full flex-wrap gap-1">
-                  {#each Object.entries(utxo.value) as [k, v]}
+                  {#each Object.entries(utxo.value) as [k, v] (k)}
                     <Badge variant="outline" class="text-black dark:text-white">
                       {getAssetName(k)}: {v}
                     </Badge>

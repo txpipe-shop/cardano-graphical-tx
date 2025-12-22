@@ -3,13 +3,20 @@
   import type { CardanoTx } from '@alexandria/types';
   import { onMount } from 'svelte';
   import { KONVA_COLORS, TX_HEIGHT, TX_WIDTH } from './constants';
+  import type { Component } from 'svelte';
 
-  let StageComp: any = $state(null);
-  let LayerComp: any = $state(null);
-  let GroupComp: any = $state(null);
-  let RectComp: any = $state(null);
-  let TextComp: any = $state(null);
-  let UtxoLineComp: any = $state(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let StageComp: Component<any> | null = $state(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let LayerComp: Component<any> | null = $state(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let GroupComp: Component<any> | null = $state(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let RectComp: Component<any> | null = $state(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let TextComp: Component<any> | null = $state(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let UtxoLineComp: Component<any> | null = $state(null);
 
   let { tx }: { tx: CardanoTx } = $props();
 
@@ -44,7 +51,7 @@
   {#if loaded}
     <StageComp config={{ width, height }}>
       <LayerComp>
-        {#each tx.inputs as input, i}
+        {#each tx.inputs as input, i (input.outRef.hash + input.outRef.index)}
           <UtxoLineComp
             isOutput={false}
             inCount={tx.inputs.length}
@@ -99,7 +106,7 @@
             }}
           />
         </GroupComp>
-        {#each tx.outputs as output, i}
+        {#each tx.outputs as output, i (output.outRef.hash + output.outRef.index)}
           <UtxoLineComp
             isOutput={true}
             inCount={tx.inputs.length}

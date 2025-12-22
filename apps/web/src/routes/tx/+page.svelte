@@ -15,7 +15,6 @@
     data: {
       transactions: CardanoTx[];
       isServerLoaded: boolean;
-      error?: string;
     };
   }
 

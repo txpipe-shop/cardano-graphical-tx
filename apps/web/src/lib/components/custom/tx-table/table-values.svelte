@@ -17,7 +17,7 @@
 </script>
 
 <div>
-  {#each list as utxo, i}
+  {#each list as utxo, i (utxo.outRef.hash + utxo.outRef.index)}
     {#if i !== 0}
       <hr class="w-full border-white" />
     {/if}
@@ -39,7 +39,7 @@
     </div>
     {#if Object.entries(utxo.value).length > 0}
       <div class="my-2 flex w-full flex-wrap gap-1">
-        {#each Object.entries(utxo.value) as [k, v]}
+        {#each Object.entries(utxo.value) as [k, v] (k)}
           <Badge variant="outline" class={getBadgeColor(k, mints)}>
             <div class="font-extrabold">{getAssetName(k)}</div>
             : {v}

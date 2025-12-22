@@ -53,7 +53,7 @@
     <div class="flex w-min flex-col gap-2 p-2">
       {#if inputsWithDatum.length > 0}
         <div class="font-bold">Inputs with Datum:</div>
-        {#each inputsWithDatum as tab}
+        {#each inputsWithDatum as tab (tab.ref.hash + ':' + tab.ref.index)}
           <Button
             size="sm"
             variant={activeTab.ref.hash == tab.ref.hash && activeTab.ref.index == tab.ref.index
@@ -67,7 +67,7 @@
       {/if}
       {#if outputsWithDatum.length > 0}
         <div class="mt-3 font-bold">Outputs with Datum:</div>
-        {#each outputsWithDatum as tab}
+        {#each outputsWithDatum as tab (tab.ref.hash + ':' + tab.ref.index)}
           <Button
             size="sm"
             variant={activeTab.ref.hash == tab.ref.hash && activeTab.ref.index == tab.ref.index

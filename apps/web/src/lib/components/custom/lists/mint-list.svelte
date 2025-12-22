@@ -26,7 +26,7 @@
       <TableBody>
         <TableRow class="flex w-full flex-wrap gap-2 ">
           <TableCell colspan={5} class="flex w-full flex-wrap gap-2">
-            {#each Object.entries(list) as [k, v]}
+            {#each Object.entries(list) as [k, v] (k)}
               <Badge variant="outline" class={'text-sm ' + getBadgeColor(v)}>
                 <div class="font-extrabold">{getAssetName(k)}</div>
                 : {v}
