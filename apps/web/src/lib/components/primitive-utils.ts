@@ -1,5 +1,5 @@
-import { hexToAscii, hexToBech32 } from '@/types/cardano/utils';
-import { HexString, type Hash } from '@/types/utxo-model';
+import { cardano } from '@alexandria/types';
+import { HexString, type Hash } from '@alexandria/types';
 
 export function truncHash(hash: Hash): string {
   return hash;
@@ -24,7 +24,7 @@ export function getAssetName(policyAndName: string) {
   const nameHex = policyAndName.slice(56);
   let name = '';
   try {
-    name = trunc(hexToAscii(HexString(nameHex)), 20);
+    name = trunc(cardano.hexToAscii(HexString(nameHex)), 20);
     if (!name || name.trim() === '') name = '(empty)';
   } catch {
     name = trunc(nameHex, 20);
@@ -37,8 +37,8 @@ export function formatAddress(address: string, truncate: boolean = true, length:
   try {
     // The prefix will change depending on the network
     return truncate
-      ? trunc(hexToBech32(HexString(address), 'addr_test'), length)
-      : hexToBech32(HexString(address), 'addr_test');
+      ? trunc(cardano.hexToBech32(HexString(address), 'addr_test'), length)
+      : cardano.hexToBech32(HexString(address), 'addr_test');
   } catch {
     return trunc(address);
   }

@@ -1,5 +1,5 @@
 import { type Tx as BaseTx, type UTxO as BaseUTxO, type Block as BaseBlock } from './utxo-model';
-import { type Tx as CardanoTx, type UTxO as CardanoUTxO } from './cardano/cardano';
+import { type Tx as CardanoTx, type UTxO as CardanoUTxO } from './cardano';
 
 export type Cardano = BaseChain<CardanoUTxO, CardanoTx>;
 

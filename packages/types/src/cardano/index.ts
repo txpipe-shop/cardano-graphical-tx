@@ -5,6 +5,8 @@ import {
   HexString
 } from '../utxo-model';
 
+export * from './utils';
+
 export const RdmrPurpose = {
   Spend: 'spend',
   Mint: 'mint',

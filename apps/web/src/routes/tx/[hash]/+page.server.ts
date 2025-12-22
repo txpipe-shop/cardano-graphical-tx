@@ -1,6 +1,6 @@
 import { createProviderClient } from '@/client/provider-loader';
 import { getProviderById } from '@/server/provider-config';
-import { Hash } from '@/types/utxo-model';
+import { Hash } from '@alexandria/types';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, params }) => {

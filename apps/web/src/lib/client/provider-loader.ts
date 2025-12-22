@@ -1,5 +1,5 @@
 import { DolosProvider } from '@/providers/cardano/utxorpc';
-import type { ProviderConfig } from '@/types/provider-config';
+import type { ProviderConfig } from './index';
 import assert from 'assert';
 
 export function createProviderClient(config: ProviderConfig) {

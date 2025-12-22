@@ -1,5 +1,5 @@
-import type { BaseChain, BaseTx, BaseUTxO } from '@/types';
-import type { Hash } from '@/types/utxo-model';
+import type { BaseChain, BaseTx, BaseUTxO } from '@alexandria/types';
+import type { Hash } from '@alexandria/types';
 
 export type TxReq = {
   hash: Hash;

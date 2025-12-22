@@ -1,6 +1,5 @@
-import type { CardanoBlock, CardanoTx } from '@/types';
-import type { Script, ScriptType, UTxO } from '@/types/cardano/cardano';
-import { uint8ToAddr, uint8ToHash, uint8ToHexString } from '@/types/utils';
+import type { CardanoBlock, CardanoTx, CardanoUTxO } from '@alexandria/types';
+import { cardano, uint8ToAddr, uint8ToHash, uint8ToHexString } from '@alexandria/types';
 import {
   Address,
   Hash,
@@ -8,8 +7,8 @@ import {
   MetadatumMap,
   type Metadata,
   type Metadatum
-} from '@/types/utxo-model';
-import type { cardano } from '@utxorpc/spec';
+} from '@alexandria/types';
+import type { cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
 import { Buffer } from 'buffer';
 
@@ -52,7 +51,7 @@ export async function getBlockPreviousHash(nativeBytes: Uint8Array): Promise<Has
   }
 }
 
-export function u5cToCardanoBlock(block: cardano.Block): CardanoBlock {
+export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block): CardanoBlock {
   return {
     header: {
       blockNumber: toBigInt(block.header!.height),
@@ -73,25 +72,25 @@ export function u5cToCardanoBlock(block: cardano.Block): CardanoBlock {
   };
 }
 
-function getRefScript(script: cardano.Script): Script | undefined {
+function getRefScript(script: cardanoUtxoRpc.Script): cardano.Script | undefined {
   const { script: s } = script;
   if (s.case && s.case !== 'native') {
     return {
-      type: s.case as ScriptType,
+      type: s.case as cardano.ScriptType,
       bytes: s.value ? HexString(Buffer.from(s.value).toString('hex')) : HexString('')
     };
   } else if (s.case === 'native' && s.value) {
     // TODO: figure out how to handle native scripts
-    return { type: s.case as ScriptType, bytes: HexString('') };
+    return { type: s.case as cardano.ScriptType, bytes: HexString('') };
   }
   return undefined;
 }
 
 export function u5cToCardanoUtxo(
   hash: Hash,
-  output: cardano.TxOutput | undefined,
+  output: cardanoUtxoRpc.TxOutput | undefined,
   index: number
-): UTxO {
+): CardanoUTxO {
   const value: Record<string, bigint> = {};
 
   if (output?.assets) {
@@ -118,7 +117,7 @@ export function u5cToCardanoUtxo(
   };
 }
 
-export function u5cMetadatumToCardanoMetadatum(m: cardano.Metadatum): Metadatum {
+export function u5cMetadatumToCardanoMetadatum(m: cardanoUtxoRpc.Metadatum): Metadatum {
   const metadatum = m.metadatum;
   switch (metadatum.case) {
     case 'int': {
@@ -146,7 +145,7 @@ export function u5cMetadatumToCardanoMetadatum(m: cardano.Metadatum): Metadatum 
   }
 }
 
-export function u5cToCardanoMetadata(metadata: cardano.Metadata[]): Metadata {
+export function u5cToCardanoMetadata(metadata: cardanoUtxoRpc.Metadata[]): Metadata {
   return metadata
     .map((x): [bigint, Metadatum] => {
       const label = toBigInt(x.label);
@@ -160,7 +159,7 @@ export function u5cToCardanoMetadata(metadata: cardano.Metadata[]): Metadata {
 }
 
 export function u5cToCardanoTx(
-  tx: cardano.Tx,
+  tx: cardanoUtxoRpc.Tx,
   time: bigint,
   blockHash: Hash | undefined,
   blockHeight: bigint | undefined
@@ -184,7 +183,7 @@ export function u5cToCardanoTx(
   const referenceInputs = tx.referenceInputs.map((x, i) => u5cToCardanoUtxo(hash, x.asOutput!, i));
   const scripts = tx.witnesses?.script.map(({ script }) => {
     return {
-      type: script.case as ScriptType,
+      type: script.case as cardano.ScriptType,
       bytes:
         script.value && script.case !== 'native'
           ? HexString(Buffer.from(script.value).toString('hex'))

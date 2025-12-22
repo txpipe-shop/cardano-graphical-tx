@@ -1,5 +1,4 @@
 // Non local providers do not have URLs or credentials exposed here
-
 export type Network = 'preprod' | 'preview' | 'custom';
 
 export const LOCAL_PROVIDER_ID = 'local-dolos';

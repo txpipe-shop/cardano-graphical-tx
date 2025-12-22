@@ -1,72 +1,73 @@
 <script lang="ts">
-    import type { CardanoTx } from "@/types";
-    import { Button } from "../ui/button";
-    import { Card, CardContent } from "../ui/card";
-  let {tx} : {tx : CardanoTx} = $props();
-  let {witnesses} = tx;
-  let {redeemers} = witnesses ?? {redeemers: []};
+  import type { CardanoTx } from '@alexandria/types';
+  import { Button } from '../ui/button';
+  import { Card, CardContent } from '../ui/card';
+  let { tx }: { tx: CardanoTx } = $props();
+  let { witnesses } = tx;
+  let { redeemers } = witnesses ?? { redeemers: [] };
   let activeTab = $state(redeemers?.[0] ?? undefined);
 </script>
 
-
-<Card class="flex flex-row justify-between gap-2 px-5 h-80">
+<Card class="flex h-80 flex-row justify-between gap-2 px-5">
   {#if !redeemers || redeemers.length === 0}
-    <CardContent class="text-sm text-center text-muted-foreground">
+    <CardContent class="text-muted-foreground text-center text-sm">
       No scripts on this transaction.
     </CardContent>
   {:else}
-  <div class="flex flex-col gap-2 p-2 w-min  overflow-y-scroll">
-    {#each redeemers as tab}
-      <Button
-        size="sm"
-        variant={activeTab?.purpose == tab.purpose && activeTab.index == tab.index ? 'default' : 'outline'}
-        onclick={() => (activeTab = tab)}
-      >
-        {tab?.purpose} {tab?.index}
-      </Button>
-    {/each}
-  </div>
-  <div class="p-2 w-full grid grid-cols-3 gap-3">
-    {#if activeTab}
-      <div class="mb-4 ">
-
-        Script Hash:
-        <Card class="p-2 mt-2 break-all whitespace-pre-wrap">
-          {activeTab.scriptHash !== "" ? activeTab.scriptHash : "-"}
-        </Card>
-      </div>
-      <div class="mb-4 ">
-
-        Mem:
-        <Card class="p-2 mt-2 break-all whitespace-pre-wrap">
-          {activeTab.unitMem}
-        </Card>
-      </div>
-      <div class="mb-4 ">
+    <div class="flex w-min flex-col gap-2 overflow-y-scroll p-2">
+      {#each redeemers as tab}
+        <Button
+          size="sm"
+          variant={activeTab?.purpose == tab.purpose && activeTab.index == tab.index
+            ? 'default'
+            : 'outline'}
+          onclick={() => (activeTab = tab)}
+        >
+          {tab?.purpose}
+          {tab?.index}
+        </Button>
+      {/each}
+    </div>
+    <div class="grid w-full grid-cols-3 gap-3 p-2">
+      {#if activeTab}
+        <div class="mb-4">
+          Script Hash:
+          <Card class="mt-2 whitespace-pre-wrap break-all p-2">
+            {activeTab.scriptHash !== '' ? activeTab.scriptHash : '-'}
+          </Card>
+        </div>
+        <div class="mb-4">
+          Mem:
+          <Card class="mt-2 whitespace-pre-wrap break-all p-2">
+            {activeTab.unitMem}
+          </Card>
+        </div>
+        <div class="mb-4">
           Cpu:
-        <Card class="p-2 mt-2 break-all whitespace-pre-wrap">
-          {activeTab.unitSteps}
-        </Card>
-      </div>
-      <div class="mb-4 ">
-        Redeemer data hash:
-        <Card class="p-2 mt-2 break-all whitespace-pre-wrap">
-          {activeTab.redeemerDataHash}
-        </Card>
-      </div>
-      <div class="mb-4 ">
-        Purpose:
-        <Card class="p-2 mt-2 break-all whitespace-pre-wrap">
-          {activeTab.purpose}
-        </Card>
-      </div>
-      <div class="mb-4 ">
-        Fee:
-        <Card class="p-2 mt-2 break-all whitespace-pre-wrap">
-          {activeTab.fee}
-        </Card>
-      </div>
+          <Card class="mt-2 whitespace-pre-wrap break-all p-2">
+            {activeTab.unitSteps}
+          </Card>
+        </div>
+        <div class="mb-4">
+          Redeemer data hash:
+          <Card class="mt-2 whitespace-pre-wrap break-all p-2">
+            {activeTab.redeemerDataHash}
+          </Card>
+        </div>
+        <div class="mb-4">
+          Purpose:
+          <Card class="mt-2 whitespace-pre-wrap break-all p-2">
+            {activeTab.purpose}
+          </Card>
+        </div>
+        <div class="mb-4">
+          Fee:
+          <Card class="mt-2 whitespace-pre-wrap break-all p-2">
+            {activeTab.fee}
+          </Card>
+        </div>
       {/if}
     </div>
   {/if}
 </Card>
+

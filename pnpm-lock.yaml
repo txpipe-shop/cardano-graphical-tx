@@ -195,6 +195,13 @@ importers:
         version: 5.8.3
 
   packages/types:
+    dependencies:
+      bech32:
+        specifier: ^2.0.0
+        version: 2.0.0
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
     devDependencies:
       '@alexandria/typescript-config':
         specifier: workspace:*

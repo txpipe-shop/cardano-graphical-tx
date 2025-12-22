@@ -6,8 +6,8 @@
   import { Card, CardContent } from '@/components/ui/card';
   import { Input } from '@/components/ui/input';
   import { currentProvider } from '@/stores/provider-store';
-  import type { CardanoTx } from '@/types';
-  import type { ProviderConfig } from '@/types/provider-config';
+  import type { CardanoTx } from '@alexandria/types';
+  import type { ProviderConfig } from '@/client';
 
   let isLoading = $derived($navigating !== null);
 
@@ -71,7 +71,7 @@
     <Card>
       <CardContent class="py-8 text-center">
         <div class="flex items-center justify-center gap-2">
-          <div class="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
+          <div class="border-primary h-6 w-6 animate-spin rounded-full border-b-2"></div>
           <span class="text-muted-foreground">Loading data from provider...</span>
         </div>
       </CardContent>
@@ -91,7 +91,7 @@
       <Card>
         <CardContent class="py-8 text-center">
           <div class="flex items-center justify-center gap-2">
-            <div class="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
+            <div class="border-primary h-6 w-6 animate-spin rounded-full border-b-2"></div>
             <span class="text-muted-foreground">Loading data from custom provider...</span>
           </div>
         </CardContent>
@@ -100,7 +100,7 @@
       <TxTable txs={displayTransactions} />
     {:else}
       <Card>
-        <CardContent class="py-8 text-center text-muted-foreground">
+        <CardContent class="text-muted-foreground py-8 text-center">
           {#if clientError}
             Failed to load transaction data from custom provider.
             <br />

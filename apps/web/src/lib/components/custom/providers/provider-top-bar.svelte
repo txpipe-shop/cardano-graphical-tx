@@ -4,42 +4,42 @@
   import { Badge } from '@/components/ui/badge';
   import { Button } from '@/components/ui/button';
   import { Select } from '@/components/ui/select';
-  import TxPipeShop from "@/images/txpipe_shop.png";
+  import TxPipeShop from '@/images/txpipe_shop.png';
   import { allProviders, currentProvider, providerStore } from '@/stores/provider-store';
   import { cn } from '@/utils';
-  import { onMount } from "svelte";
+  import { onMount } from 'svelte';
   import { getNetworkColor, getProviderTypeColor } from './color-utils';
   import ProvidersForm from './providers-form.svelte';
 
-  let theme = $state<"light" | "dark">("light");
+  let theme = $state<'light' | 'dark'>('light');
 
   onMount(() => {
-    const stored = localStorage.getItem("theme");
-    if (stored === "light" || stored === "dark") {
+    const stored = localStorage.getItem('theme');
+    if (stored === 'light' || stored === 'dark') {
       theme = stored;
     } else {
-      theme = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     applyTheme();
   });
 
   $effect(() => {
     applyTheme();
-    localStorage.setItem("theme", theme);
+    localStorage.setItem('theme', theme);
   });
 
   function applyTheme() {
-    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(theme);
   }
 
   function toggleTheme() {
-    theme = theme === "light" ? "dark" : "light";
+    theme = theme === 'light' ? 'dark' : 'light';
   }
 
-  interface Props { class?: string; }
+  interface Props {
+    class?: string;
+  }
 
   let { class: className }: Props = $props();
 
@@ -49,33 +49,31 @@
     const provider = $allProviders.find((p) => p.id === providerId);
     if (provider) providerStore.setCurrentProvider(provider);
     let currentPathname = $page.url.pathname;
-    await goto(currentPathname + "?provider=" + providerId);
+    await goto(currentPathname + '?provider=' + providerId);
   }
 
   // Reactive values
-  let selectItems = $derived(
-    $allProviders.map((p) => ({ value: p.id, label: p.name }))
-  );
+  let selectItems = $derived($allProviders.map((p) => ({ value: p.id, label: p.name })));
 
   let selectedProviderId = $derived($currentProvider?.id || '');
 </script>
 
 <div
   class={cn(
-    'border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60',
+    'bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur',
     className
   )}
 >
-  <div class="container mx-auto px-4 pt-5 pb-3 ">
+  <div class="container mx-auto px-4 pb-3 pt-5">
     <div class="flex items-center justify-between gap-3">
       <div class="flex gap-3">
-        <img src={TxPipeShop} alt="TxPipe Shop" class="h-12 w-12 rounded-md"/>
-        <h3 class="text-3xl font-extrabold"> <a href="/">Alejandria Explorer</a></h3>
+        <img src={TxPipeShop} alt="TxPipe Shop" class="h-12 w-12 rounded-md" />
+        <h3 class="text-3xl font-extrabold"><a href="/">Alejandria Explorer</a></h3>
       </div>
       <div class="flex gap-3">
-        <div class="flex items-end justify-end flex-col gap-1">
+        <div class="flex flex-col items-end justify-end gap-1">
           <div class="flex items-end justify-end gap-1">
-            <span class="text-sm font-medium text-muted-foreground">Current Provider:</span>
+            <span class="text-muted-foreground text-sm font-medium">Current Provider:</span>
             <Badge variant="outline" class={getProviderTypeColor($currentProvider?.type || '')}>
               {$currentProvider?.type?.toUpperCase() || 'N/A'}
             </Badge>
@@ -85,7 +83,7 @@
           </div>
 
           {#if $currentProvider}
-            <div class="flex items-start gap-2 justify-start text-sm text-muted-foreground">
+            <div class="text-muted-foreground flex items-start justify-start gap-2 text-sm">
               {#if !$currentProvider.isLocal}
                 <span>Built-in endpoint</span>
               {:else if $currentProvider.type === 'dolos'}
@@ -114,11 +112,8 @@
             {showCustomForm ? 'Cancel' : 'Edit Local Provider'}
           </Button>
 
-          <Button
-            class="px-4 py-2 bg-gray-800 dark:text-gray-200 "
-            onclick={toggleTheme}
-          >
-            {theme === "light" ? "🌙 Dark" : "☀️ Light"}
+          <Button class="bg-gray-800 px-4 py-2 dark:text-gray-200 " onclick={toggleTheme}>
+            {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
           </Button>
         </div>
       </div>

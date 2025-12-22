@@ -1,9 +1,5 @@
 import { browser } from '$app/environment';
-import {
-  LOCAL_PROVIDER_ID,
-  type ProviderConfig,
-  type ProviderStore
-} from '@/types/provider-config';
+import { LOCAL_PROVIDER_ID, type ProviderConfig, type ProviderStore } from '@/client';
 import { derived, writable } from 'svelte/store';
 
 const CURRENT_PROVIDER_KEY = 'explorer-current-provider';

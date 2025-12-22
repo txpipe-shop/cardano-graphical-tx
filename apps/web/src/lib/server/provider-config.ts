@@ -1,5 +1,5 @@
 import { privateEnv } from '@/private-env';
-import { LOCAL_PROVIDER_ID, type ProviderConfig } from '@/types/provider-config';
+import { LOCAL_PROVIDER_ID, type ProviderConfig } from '@/client';
 
 export function getServerProviders(): ProviderConfig[] {
   return [

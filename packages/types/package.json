@@ -24,6 +24,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "dependencies": {
+    "bech32": "^2.0.0",
+    "buffer": "^6.0.3"
+  },
   "devDependencies": {
     "@alexandria/typescript-config": "workspace:*",
     "typescript": "^5.0.0"

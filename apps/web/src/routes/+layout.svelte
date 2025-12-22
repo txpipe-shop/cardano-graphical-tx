@@ -5,7 +5,7 @@
   import '../app.css';
 
   interface Props {
-    data: { providers: import('@/types/provider-config').ProviderConfig[] };
+    data: { providers: import('@/client').ProviderConfig[] };
     children: Snippet;
   }
 
@@ -15,7 +15,7 @@
   });
 </script>
 
-<div class="min-h-screen min-w-screen">
+<div class="min-w-screen min-h-screen">
   <ProviderTopBar />
   <div class="py-5">
     {@render children()}

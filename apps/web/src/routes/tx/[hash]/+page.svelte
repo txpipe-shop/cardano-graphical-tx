@@ -10,8 +10,8 @@
   import { Button } from '@/components/ui/button';
   import { Card, CardContent } from '@/components/ui/card';
   import { currentProvider } from '@/stores/provider-store';
-  import type { CardanoTx } from '@/types';
-  import type { ProviderConfig } from '@/types/provider-config';
+  import type { CardanoTx } from '@alexandria/types';
+  import type { ProviderConfig } from '@/client';
 
   interface Props {
     data: {
@@ -34,7 +34,7 @@
   type TabKey = 'Overview' | 'Diagram' | 'Dissect' | 'CBOR' | 'Datum' | 'Scripts';
   const tabs = ['Overview', 'Diagram', 'Dissect', 'CBOR', 'Datum', 'Scripts'] as const;
 
-  let activeTab = $derived<TabKey>(data.datumTab ? 'Datum' :'Overview');
+  let activeTab = $derived<TabKey>(data.datumTab ? 'Datum' : 'Overview');
   let cbor = $derived<string>(data.cbor ?? '');
 
   $effect(() => {
@@ -55,12 +55,12 @@
 
   async function loadCustomProviderData(provider: ProviderConfig) {
     const client = createProviderClient(provider);
-    const hash = $page.params.hash as unknown as import('@/types/utxo-model').Hash;
+    const hash = $page.params.hash as unknown as import('@alexandria/types').Hash;
     clientTx = await client.getTx({ hash });
     try {
       cbor = await client.getCBOR({ hash });
     } catch {
-      console.error("CBOR not available");
+      console.error('CBOR not available');
     }
   }
 
@@ -76,7 +76,7 @@
     <Card>
       <CardContent class="py-8 text-center">
         <div class="flex items-center justify-center gap-2">
-          <div class="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
+          <div class="border-primary h-6 w-6 animate-spin rounded-full border-b-2"></div>
           <span class="text-muted-foreground">Loading transaction from custom provider...</span>
         </div>
       </CardContent>
@@ -90,7 +90,6 @@
           variant={activeTab === tab ? 'default' : 'outline'}
           onclick={() => (activeTab = tab)}>{tab.charAt(0).toUpperCase() + tab.slice(1)}</Button
         >
-
       {/each}
     </div>
 
@@ -99,36 +98,36 @@
     {/if}
 
     {#if activeTab === 'Overview'}
-    <Overview {displayTx}/>
+      <Overview {displayTx} />
     {/if}
 
     {#if activeTab === 'Diagram'}
       <Card class="z-0">
         <CardContent class="py-1">
-        <Diagram tx={displayTx}/>
+          <Diagram tx={displayTx} />
         </CardContent>
       </Card>
     {/if}
 
     {#if activeTab === 'Dissect'}
-      <Dissect tx={displayTx}/>
+      <Dissect tx={displayTx} />
     {/if}
 
     {#if activeTab === 'Datum'}
-      <Datum tx={displayTx} tab={data.datumTab}/>
+      <Datum tx={displayTx} tab={data.datumTab} />
     {/if}
 
     {#if activeTab === 'CBOR'}
-      <Cbor {cbor} error={data.error}/>
+      <Cbor {cbor} error={data.error} />
     {/if}
 
     {#if activeTab === 'Scripts'}
-      <Scripts tx={displayTx}/>
+      <Scripts tx={displayTx} />
     {/if}
   {:else}
     <Card>
-      <CardContent class="py-8 text-center text-muted-foreground">
-        Transaction not found or not loaded.<br/>
+      <CardContent class="text-muted-foreground py-8 text-center">
+        Transaction not found or not loaded.<br />
       </CardContent>
     </Card>
   {/if}
