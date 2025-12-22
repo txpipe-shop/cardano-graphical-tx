@@ -10,9 +10,9 @@ export default defineConfig(({ isSsrBuild }) => ({
   },
   resolve: {
     alias: {
-      '@sdk/grpcTransport': isSsrBuild
-        ? '/src/lib/sdk/utxorpc/grpcTransport.node.ts'
-        : '/src/lib/sdk/utxorpc/grpcTransport.web.ts'
+      '@alexandria/utxorpc-sdk/transport': isSsrBuild
+        ? '@alexandria/utxorpc-sdk/transport/node'
+        : '@alexandria/utxorpc-sdk/transport/web'
     }
   },
   define: {
