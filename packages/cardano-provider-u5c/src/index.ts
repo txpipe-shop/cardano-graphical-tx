@@ -4,13 +4,13 @@ import {
   type TxReq,
   type TxsReq
 } from '@alexandria/provider-core';
-import type { Cardano, CardanoTx, CardanoUTxO } from '@alexandria/types';
+import type { Cardano, cardano } from '@alexandria/types';
 import { Hash } from '@alexandria/types';
 import { UtxoRpcClient } from '@alexandria/utxorpc-sdk';
 import type { Transport } from '@connectrpc/connect';
 import { getBlockPreviousHash, u5cToCardanoTx } from './mappers';
 import assert from 'assert';
-import { type cardano, sync } from '@utxorpc/spec';
+import { type cardano as cardanoUtxoRpc, sync } from '@utxorpc/spec';
 import { Buffer } from 'buffer';
 
 export type Params = {
@@ -22,7 +22,7 @@ export type Params = {
   transport: Transport;
 };
 
-export class U5CProvider implements ChainProvider<CardanoUTxO, CardanoTx, Cardano> {
+export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano> {
   utxoRpc: UtxoRpcClient;
 
   constructor({ transport }: Params) {
@@ -46,10 +46,10 @@ export class U5CProvider implements ChainProvider<CardanoUTxO, CardanoTx, Cardan
     return { parsedBlock: block.chain.value, nativeBytes: block.nativeBytes };
   }
 
-  async getLatestTx({ maxFetch }: LatestTxReq): Promise<CardanoTx> {
+  async getLatestTx({ maxFetch }: LatestTxReq): Promise<cardano.Tx> {
     const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
     let hash = Buffer.from(tip.tip!.hash);
-    let block: cardano.Block;
+    let block: cardanoUtxoRpc.Block;
     let fetchCount = 0;
     do {
       const rawBlock = await this.fetchBlock(hash);
@@ -71,7 +71,7 @@ export class U5CProvider implements ChainProvider<CardanoUTxO, CardanoTx, Cardan
     return u5cToCardanoTx(latestTx, time, Hash(Buffer.from(blockHash).toString('hex')), height);
   }
 
-  async getTx({ hash }: TxReq): Promise<CardanoTx> {
+  async getTx({ hash }: TxReq): Promise<cardano.Tx> {
     const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') });
     assert(txResponse.ledgerTip, 'Ledger tip of transaction empty');
     assert(txResponse.tx?.chain.case === 'cardano', 'Transaction is not a Cardano transaction');
@@ -88,7 +88,7 @@ export class U5CProvider implements ChainProvider<CardanoUTxO, CardanoTx, Cardan
     return Buffer.from(txResponse.tx?.nativeBytes).toString('hex');
   }
 
-  async getTxs({ before, limit }: TxsReq): Promise<CardanoTx[]> {
+  async getTxs({ before, limit }: TxsReq): Promise<cardano.Tx[]> {
     const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(before, 'hex') });
     assert(
       txResponse.tx?.blockRef?.slot !== undefined,
@@ -101,7 +101,7 @@ export class U5CProvider implements ChainProvider<CardanoUTxO, CardanoTx, Cardan
 
     let blockHash: Uint8Array<ArrayBuffer> = txResponse.tx?.blockRef?.hash;
     assert(txResponse.tx?.chain.case === 'cardano', 'Transaction is not a Cardano transaction');
-    const blocks: Array<cardano.Block> = [];
+    const blocks: Array<cardanoUtxoRpc.Block> = [];
 
     do {
       console.log(`About to fetch ${Buffer.from(blockHash).toString('hex')}`);

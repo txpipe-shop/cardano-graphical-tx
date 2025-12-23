@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { type CardanoTx, DatumType } from '@alexandria/types';
+  import { type cardano, DatumType } from '@alexandria/types';
   import * as cbor2 from 'cbor2';
   import { onMount } from 'svelte';
   import { trunc } from '../primitive-utils';
   import { Button } from '../ui/button';
   import { Card, CardContent } from '../ui/card';
 
-  let { tx, tab }: { tx: CardanoTx; tab?: string } = $props();
+  let { tx, tab }: { tx: cardano.Tx; tab?: string } = $props();
   let inputsWithDatum = tx.inputs
     .filter((i) => i.datum)
     .map((utxo) => ({ ref: utxo.outRef, datum: utxo.datum }));

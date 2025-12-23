@@ -1,8 +1,8 @@
 <script lang="ts">
-  import type { CardanoTx } from '@alexandria/types';
+  import type { cardano } from '@alexandria/types';
   import { Button } from '../ui/button';
   import { Card, CardContent } from '../ui/card';
-  let { tx }: { tx: CardanoTx } = $props();
+  let { tx }: { tx: cardano.Tx } = $props();
   let { witnesses } = tx;
   let { redeemers } = witnesses ?? { redeemers: [] };
   let activeTab = $state(redeemers?.[0] ?? undefined);

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import type { CardanoTx } from '@alexandria/types';
+  import type { cardano } from '@alexandria/types';
   import { formatDate } from '../primitive-utils';
   import { Card, CardContent } from '../ui/card';
   import MintList from './lists/mint-list.svelte';
   import UtxoList from './lists/utxo-list.svelte';
 
-  let { displayTx }: { displayTx: CardanoTx } = $props();
+  let { displayTx }: { displayTx: cardano.Tx } = $props();
 </script>
 
 <Card>

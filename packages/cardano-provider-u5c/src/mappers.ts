@@ -1,5 +1,4 @@
-import type { CardanoBlock, CardanoTx, CardanoUTxO } from '@alexandria/types';
-import { cardano, uint8ToAddr, uint8ToHash, uint8ToHexString } from '@alexandria/types';
+import { type cardano, uint8ToAddr, uint8ToHash, uint8ToHexString } from '@alexandria/types';
 import {
   Address,
   Hash,
@@ -51,7 +50,7 @@ export async function getBlockPreviousHash(nativeBytes: Uint8Array): Promise<Has
   }
 }
 
-export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block): CardanoBlock {
+export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block): cardano.Block {
   return {
     header: {
       blockNumber: toBigInt(block.header!.height),
@@ -90,7 +89,7 @@ export function u5cToCardanoUtxo(
   hash: Hash,
   output: cardanoUtxoRpc.TxOutput | undefined,
   index: number
-): CardanoUTxO {
+): cardano.UTxO {
   const value: Record<string, bigint> = {};
 
   if (output?.assets) {
@@ -163,7 +162,7 @@ export function u5cToCardanoTx(
   time: bigint,
   blockHash: Hash | undefined,
   blockHeight: bigint | undefined
-): CardanoTx {
+): cardano.Tx {
   const fee = toBigInt(tx.fee?.bigInt.value);
   const hash = uint8ToHash(tx.hash);
   const inputs = tx.inputs.map((x) => u5cToCardanoUtxo(hash, x.asOutput, x.outputIndex));

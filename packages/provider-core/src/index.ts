@@ -1,4 +1,4 @@
-import type { BaseChain, BaseTx, BaseUTxO, Hash } from '@alexandria/types';
+import type { BaseChain, Tx, UTxO, Hash } from '@alexandria/types';
 
 export type TxReq = {
   hash: Hash;
@@ -17,11 +17,7 @@ export type LatestTxReq = {
   maxFetch: number;
 };
 
-export interface ChainProvider<
-  U extends BaseUTxO,
-  T extends BaseTx<U>,
-  Chain extends BaseChain<U, T>
-> {
+export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> {
   getLatestTx(params: LatestTxReq): Promise<Chain['tx']>;
   getTx(params: TxReq): Promise<Chain['tx']>;
   getTxs(params: TxsReq): Promise<Chain['tx'][]>;

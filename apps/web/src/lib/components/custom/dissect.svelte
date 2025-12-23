@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { type CardanoTx, type Metadata, DatumType } from '@alexandria/types';
+  import { type cardano, type Metadata, DatumType } from '@alexandria/types';
   import { formatAddress, getAssetName } from '../primitive-utils';
   import Box from './box.svelte';
   import Ccollapsible from './Ccollapsible.svelte';
-  let { tx }: { tx: CardanoTx } = $props();
+  let { tx }: { tx: cardano.Tx } = $props();
 
   function parseValues(
     value: Record<string, bigint>
