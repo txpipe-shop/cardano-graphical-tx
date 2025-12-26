@@ -3,11 +3,10 @@
   import { Badge } from '@/components/ui/badge';
   import { TableCell, TableRow } from '@/components/ui/table';
   import { currentProvider } from '@/stores/provider-store';
-  import type { CardanoTx } from '@alexandria/types';
   import type { cardano } from '@alexandria/types';
   import Copy from '../copy.svelte';
 
-  let { tx }: { tx: CardanoTx } = $props();
+  let { tx }: { tx: cardano.Tx } = $props();
 
   let scriptsList = tx.witnesses && tx.witnesses.scripts ? tx.witnesses.scripts : [];
   let refScriptsList = tx.referenceInputs

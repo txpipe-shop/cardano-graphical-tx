@@ -6,21 +6,21 @@
   import { Card, CardContent } from '@/components/ui/card';
   import { Input } from '@/components/ui/input';
   import { currentProvider } from '@/stores/provider-store';
-  import type { CardanoTx } from '@alexandria/types';
+  import type { cardano } from '@alexandria/types';
   import type { ProviderConfig } from '@/client';
 
   let isLoading = $derived($navigating !== null);
 
   interface Props {
     data: {
-      transactions: CardanoTx[];
+      transactions: cardano.Tx[];
       isServerLoaded: boolean;
     };
   }
 
   let { data }: Props = $props();
 
-  let clientTransactions = $state<CardanoTx[]>([]);
+  let clientTransactions = $state<cardano.Tx[]>([]);
   let clientLoading = $state(false);
   let clientError = $state<string | null>(null);
 

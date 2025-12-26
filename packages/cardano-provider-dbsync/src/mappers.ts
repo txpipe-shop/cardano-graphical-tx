@@ -1,11 +1,11 @@
-import type { CardanoTx, CardanoUTxO } from '@alexandria/types';
+import type { cardano } from '@alexandria/types';
 import { Address, Hash } from '@alexandria/types';
 import type * as QueryTypes from './types/queries';
 
 /**
  * Map a transaction row from db-sync to CardanoTx format.
  */
-export function mapTxRow(row: QueryTypes.Tx): CardanoTx {
+export function mapTxRow(row: QueryTypes.Tx): cardano.Tx {
   return {
     hash: Hash(''),
     inputs: [],
@@ -26,12 +26,12 @@ export function mapTxRow(row: QueryTypes.Tx): CardanoTx {
 /**
  * Map transaction row with UTxOs from db-sync to CardanoTx format.
  */
-export function mapTxUtxosRow(txRow: QueryTypes.Tx, utxoRows: QueryTypes.TxUtxo[]): CardanoTx {
-  const inputs: CardanoUTxO[] = utxoRows
+export function mapTxUtxosRow(txRow: QueryTypes.Tx, utxoRows: QueryTypes.TxUtxo[]): cardano.Tx {
+  const inputs: cardano.UTxO[] = utxoRows
     .filter((u) => u.type === 'input')
     .map((u) => mapUtxoRow(u));
 
-  const outputs: CardanoUTxO[] = utxoRows
+  const outputs: cardano.UTxO[] = utxoRows
     .filter((u) => u.type === 'output')
     .map((u) => mapUtxoRow(u));
 
@@ -45,7 +45,7 @@ export function mapTxUtxosRow(txRow: QueryTypes.Tx, utxoRows: QueryTypes.TxUtxo[
 /**
  * Map a UTxO row from db-sync to CardanoUTxO format.
  */
-export function mapUtxoRow(row: QueryTypes.TxUtxo): CardanoUTxO {
+export function mapUtxoRow(row: QueryTypes.TxUtxo): cardano.UTxO {
   return {
     coin: 123n,
     outRef: {

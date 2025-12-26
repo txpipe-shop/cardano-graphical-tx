@@ -4,7 +4,7 @@ import {
   type TxReq,
   type TxsReq
 } from '@alexandria/provider-core';
-import type { Cardano, CardanoTx, CardanoUTxO } from '@alexandria/types';
+import type { Cardano, cardano } from '@alexandria/types';
 import { Hash } from '@alexandria/types';
 import type { Pool, PoolClient } from 'pg';
 import { SQLQuery } from './sql';
@@ -21,7 +21,7 @@ export type DbSyncParams = {
   pool: Pool;
 };
 
-export class DbSyncProvider implements ChainProvider<CardanoUTxO, CardanoTx, Cardano> {
+export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano> {
   private pool: Pool;
 
   constructor({ pool }: DbSyncParams) {
@@ -56,7 +56,7 @@ export class DbSyncProvider implements ChainProvider<CardanoUTxO, CardanoTx, Car
     }
   }
 
-  async getLatestTx({ maxFetch }: LatestTxReq): Promise<CardanoTx> {
+  async getLatestTx({ maxFetch }: LatestTxReq): Promise<cardano.Tx> {
     const client = await this.getClient();
     try {
       const { rows } = await client.query<QueryTypes.Tx>(SQLQuery.get('latest_tx'), [maxFetch]);
@@ -73,7 +73,7 @@ export class DbSyncProvider implements ChainProvider<CardanoUTxO, CardanoTx, Car
     }
   }
 
-  async getTx({ hash }: TxReq): Promise<CardanoTx> {
+  async getTx({ hash }: TxReq): Promise<cardano.Tx> {
     const client = await this.getClient();
     try {
       const { rows: txRows } = await client.query<QueryTypes.Tx>(SQLQuery.get('tx_by_hash'), [
@@ -115,7 +115,7 @@ export class DbSyncProvider implements ChainProvider<CardanoUTxO, CardanoTx, Car
     }
   }
 
-  async getTxs({ before, limit }: TxsReq): Promise<CardanoTx[]> {
+  async getTxs({ before, limit }: TxsReq): Promise<cardano.Tx[]> {
     const client = await this.getClient();
     try {
       const { rows } = await client.query<QueryTypes.Tx>(SQLQuery.get('txs_before'), [

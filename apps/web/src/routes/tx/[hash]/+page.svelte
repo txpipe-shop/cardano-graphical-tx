@@ -10,12 +10,12 @@
   import { Button } from '@/components/ui/button';
   import { Card, CardContent } from '@/components/ui/card';
   import { currentProvider } from '@/stores/provider-store';
-  import type { CardanoTx } from '@alexandria/types';
+  import type { cardano } from '@alexandria/types';
   import type { ProviderConfig } from '@/client';
 
   interface Props {
     data: {
-      tx: CardanoTx | null;
+      tx: cardano.Tx | null;
       cbor: string | null;
       isServerLoaded: boolean;
       error?: string;
@@ -26,7 +26,7 @@
   let { data }: Props = $props();
 
   // client states
-  let clientTx = $state<CardanoTx | null>(null);
+  let clientTx = $state<cardano.Tx | null>(null);
   let clientLoading = $state(false);
   let clientError = $state<string | null>(null);
 

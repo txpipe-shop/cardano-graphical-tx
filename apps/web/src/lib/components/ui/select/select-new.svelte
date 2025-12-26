@@ -105,5 +105,10 @@
 </div>
 
 {#if isOpen}
-  <button class="fixed inset-0 z-40" onclick={() => (isOpen = false)} tabindex="-1"></button>
+  <button
+    class="fixed inset-0 z-40"
+    onclick={() => (isOpen = false)}
+    tabindex="-1"
+    aria-label="Close dropdown"
+  ></button>
 {/if}

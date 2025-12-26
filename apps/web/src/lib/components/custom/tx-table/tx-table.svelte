@@ -1,11 +1,11 @@
 <script lang="ts">
   import { Card, CardContent } from '$lib/components/ui/card';
   import { Table, TableBody, TableCell, TableRow } from '$lib/components/ui/table/index';
-  import type { CardanoTx } from '@alexandria/types';
+  import type { cardano } from '@alexandria/types';
   import TableFirstRow from './table-first-row.svelte';
   import TableValues from './table-values.svelte';
 
-  export let txs: CardanoTx[] = [];
+  export let txs: cardano.Tx[] = [];
 </script>
 
 <Card class="mt-4">
