@@ -6,13 +6,10 @@
 export interface Tip {
   hash: string;
   slot: string;
-  block_height: number;
-  epoch: number;
-  time: number;
 }
 
 export interface Tx {
-  hash: string;
+  hash: Hash;
   block: string;
   block_height: number;
   block_time: number;
