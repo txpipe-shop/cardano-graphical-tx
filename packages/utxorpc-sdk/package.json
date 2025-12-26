@@ -1,0 +1,47 @@
+{
+  "name": "@alexandria/utxorpc-sdk",
+  "version": "0.0.1",
+  "private": false,
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./transport/node": {
+      "types": "./dist/grpcTransport.node.d.ts",
+      "import": "./dist/grpcTransport.node.js"
+    },
+    "./transport/web": {
+      "types": "./dist/grpcTransport.web.d.ts",
+      "import": "./dist/grpcTransport.web.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@connectrpc/connect": "1.4",
+    "@connectrpc/connect-node": "1.4",
+    "@connectrpc/connect-web": "1.4",
+    "@utxorpc/spec": "^0.18.1"
+  },
+  "devDependencies": {
+    "@alexandria/typescript-config": "workspace:*",
+    "typescript": "^5.0.0"
+  }
+}

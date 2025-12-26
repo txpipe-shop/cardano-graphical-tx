@@ -1,0 +1,1 @@
+-- Get the current tip (latest block)

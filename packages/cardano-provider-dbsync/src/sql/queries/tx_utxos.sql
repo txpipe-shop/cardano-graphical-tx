@@ -1,0 +1,1 @@
+-- Get UTxOs for a transaction (inputs and outputs)
