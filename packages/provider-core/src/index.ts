@@ -74,15 +74,13 @@ export type TxsRes<
 > = PaginatedResult<Chain['tx'], Hash>;
 export type BlocksRes = PaginatedResult<BlockMetadata, Hash>;
 export type EpochsRes = PaginatedResult<Epoch, bigint>;
+export type TipRes = { hash: Hash; slot: bigint };
 
 export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> {
   getLatestTx(params: LatestTxReq): Promise<Chain['tx']>;
-  getTx(params: TxReq): Promise<Chain['tx']>;
+  getTx(params: TxReq): Promise<WrappedTx<U, T>>;
   getTxs(params: TxsReq): Promise<TxsRes<U, T, Chain>>;
   getBlocks(params: BlocksReq): Promise<BlocksRes>;
   getEpochs(params: EpochsReq): Promise<EpochsRes>;
-  readTip(): Promise<{
-    hash: Hash;
-    slot: bigint;
-  }>;
+  readTip(): Promise<TipRes>;
 }
