@@ -3,17 +3,18 @@ import {
   BlocksRes,
   EpochsReq,
   EpochsRes,
+  LatestTxRes,
   TxsReq,
   TxsRes,
   type ChainProvider,
-  type LatestTxReq,
   type TxReq
 } from '@alexandria/provider-core';
-import type { Cardano, cardano } from '@alexandria/types';
-import { Hash } from '@alexandria/types';
+import type { Cardano } from '@alexandria/types';
+import { Address, cardano, DatumType, Unit } from '@alexandria/types';
+import { Hash, HexString } from '@alexandria/types';
 import type { Pool, PoolClient } from 'pg';
+import { mapTx } from './mappers';
 import { SQLQuery } from './sql';
-import { mapTxRow, mapTxUtxosRow } from './mappers';
 import type * as QueryTypes from './types/queries';
 
 export type DbSyncParams = {
@@ -45,7 +46,6 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     const client = await this.getClient();
     try {
       const { rows } = await client.query<QueryTypes.Tip>(SQLQuery.get('tip'));
-      this.gracefulRelease(client);
       if (rows.length === 0) {
         throw new Error('No tip found');
       }
@@ -53,80 +53,135 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         hash: Hash(rows[0]!.hash),
         slot: BigInt(rows[0]!.slot)
       };
-    } catch (error) {
+    } finally {
       this.gracefulRelease(client);
-      throw error;
     }
   }
 
-  async getLatestTx({ maxFetch }: LatestTxReq): Promise<cardano.Tx> {
-    //const client = await this.getClient();
-    //try {
-    //  const { rows } = await client.query<QueryTypes.Tx>(SQLQuery.get('latest_tx'), [maxFetch]);
-    //  this.gracefulRelease(client);
-    //  if (rows.length === 0) {
-    //    throw new Error(`No transactions found`);
-    //  }
-    //  return mapTxRow(rows[0]!);
-    //} catch (error) {
-    //  this.gracefulRelease(client);
-    //  throw error;
-    //}
+  async getLatestTx(): Promise<LatestTxRes<cardano.UTxO, cardano.Tx, Cardano>> {
+    const client = await this.getClient();
+    try {
+      const { rows } = await client.query<QueryTypes.LatestTx>(SQLQuery.get('latest_tx'));
+      if (rows.length === 0) {
+        throw new Error('No latest transaction found');
+      }
+      return mapTx(rows[0]!.result);
+    } finally {
+      this.gracefulRelease(client);
+    }
   }
 
   async getTx({ hash }: TxReq): Promise<cardano.Tx> {
-    //const client = await this.getClient();
-    //try {
-    //  const { rows: txRows } = await client.query<QueryTypes.Tx>(SQLQuery.get('tx_by_hash'), [
-    //    hash
-    //  ]);
-    //  if (txRows.length === 0) {
-    //    this.gracefulRelease(client);
-    //    throw new Error(`Transaction not found: ${hash}`);
-    //  }
-    //  const { rows: utxoRows } = await client.query<QueryTypes.TxUtxo>(SQLQuery.get('tx_utxos'), [
-    //    hash
-    //  ]);
-    //  this.gracefulRelease(client);
-    //  return mapTxUtxosRow(txRows[0]!, utxoRows);
-    //} catch (error) {
-    //  this.gracefulRelease(client);
-    //  throw error;
-    //}
+    return {
+      fee: 123n,
+      hash: Hash(''),
+      mint: {
+        [Unit('sd')]: 123n
+      },
+      referenceInputs: [
+        {
+          address: Address(''),
+          coin: 123n,
+          outRef: {
+            hash: Hash(''),
+            index: 123n
+          },
+          value: { [Unit('')]: 123n },
+          consumedBy: Hash('123'),
+          datum: { type: DatumType.INLINE, datumHex: HexString('123') }
+        }
+      ],
+      block: { hash: Hash(''), epochNo: 123n, height: 123n },
+      createdAt: 123,
+      inputs: [
+        {
+          address: Address(''),
+          coin: 123n,
+          outRef: {
+            hash: Hash(''),
+            index: 123n
+          },
+          value: { [Unit('')]: 123n },
+          consumedBy: Hash('123'),
+          datum: { type: DatumType.INLINE, datumHex: HexString('123') }
+        }
+      ],
+      outputs: [
+        {
+          address: Address(''),
+          coin: 123n,
+          outRef: {
+            hash: Hash(''),
+            index: 123n
+          },
+          value: { [Unit('')]: 123n },
+          consumedBy: Hash('123'),
+          datum: { type: DatumType.INLINE, datumHex: HexString('123') }
+        }
+      ],
+      metadata: new Map(),
+      treasuryDonation: 123n,
+      validityInterval: { invalidBefore: 123n, invalidHereafter: 123n },
+      witnesses: {
+        redeemers: [
+          {
+            fee: 123n,
+            index: 12,
+            purpose: cardano.RdmrPurpose.Mint,
+            redeemerDataHash: HexString(''),
+            scriptHash: HexString(''),
+            unitMem: 123n,
+            unitSteps: 123n
+          }
+        ],
+        scripts: [
+          {
+            bytes: HexString(''),
+            hash: HexString(''),
+            type: cardano.ScriptType.Native
+          }
+        ]
+      }
+    };
   }
 
   async getCBOR({ hash }: TxReq): Promise<string> {
-    //const client = await this.getClient();
-    //try {
-    //  const { rows } = await client.query<QueryTypes.TxCbor>(SQLQuery.get('tx_cbor'), [hash]);
-    //  this.gracefulRelease(client);
-    //  if (rows.length === 0) {
-    //    throw new Error(`Transaction CBOR not found: ${hash}`);
-    //  }
-    //  return rows[0]!.cbor;
-    //} catch (error) {
-    //  this.gracefulRelease(client);
-    //  throw error;
-    //}
+    return '';
   }
 
   async getTxs({ before, limit }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
-    //const client = await this.getClient();
-    //try {
-    //  const { rows } = await client.query<QueryTypes.Tx>(SQLQuery.get('txs_before'), [
-    //    before,
-    //    limit
-    //  ]);
-    //  this.gracefulRelease(client);
-    //  return {
-    //    total: 0n, // Total count not implemented
-    //    data: rows.map(mapTxRow),
-    //    nextCursor: rows.at(-1)?.hash
-    //  };
-    //} catch (error) {
-    //  this.gracefulRelease(client);
-    //  throw error;
-    //}
+    const client = await this.getClient();
+    try {
+      // Get total count
+      const { rows: countRows } = await client.query<QueryTypes.TotalTxs>(
+        SQLQuery.get('txs_count')
+      );
+      const total = BigInt(countRows[0]?.total || 0);
+
+      // Get transactions
+      const { rows } = await client.query<QueryTypes.Txs>(SQLQuery.get('txs'), [
+        before ? before.toString() : null,
+        limit
+      ]);
+
+      const items = rows.map((row) => mapTx(row.result));
+
+      // Calculate next cursor
+      let nextCursor: Hash | undefined;
+      const lastItem = items.at(-1);
+
+      if (lastItem) {
+        nextCursor = lastItem.hash;
+      }
+
+      return {
+        total,
+        data: items,
+        nextCursor
+      };
+    } finally {
+      this.gracefulRelease(client);
+    }
   }
 
   async getBlocks(params: BlocksReq): Promise<BlocksRes> {

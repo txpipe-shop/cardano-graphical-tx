@@ -1,14 +1,30 @@
+-- Get transactions with cursor-based pagination
 WITH
-    latest_tx AS (
+    target_txs AS (
         SELECT *
         FROM tx
+        WHERE (
+                $1::text IS NULL
+                OR id < (
+                    SELECT id
+                    FROM tx
+                    WHERE
+                        hash = decode($1, 'hex')
+                )
+            )
         ORDER BY id DESC
-        LIMIT 1
+        LIMIT $2
     ),
+    -- Block Info
     block_info AS (
-        SELECT b.hash, b.epoch_no, b.block_no, b.time
+        SELECT DISTINCT
+            b.id,
+            b.hash,
+            b.epoch_no,
+            b.block_no,
+            b.time
         FROM block b
-            JOIN latest_tx tx ON tx.block_id = b.id
+            JOIN target_txs tx ON tx.block_id = b.id
     ),
     -- MINT ASSETS
     mint_assets AS (
@@ -19,7 +35,7 @@ WITH
             ) as assets
         FROM
             ma_tx_mint mtm
-            JOIN latest_tx tx ON tx.id = mtm.tx_id
+            JOIN target_txs tx ON tx.id = mtm.tx_id
             JOIN multi_asset ma ON ma.id = mtm.ident
         GROUP BY
             mtm.tx_id
@@ -37,11 +53,11 @@ WITH
             mto.tx_out_id IN (
                 SELECT tx_out_id
                 FROM tx_in
-                    JOIN latest_tx ON latest_tx.id = tx_in.tx_in_id
+                    JOIN target_txs ON target_txs.id = tx_in.tx_in_id
                 UNION
                 SELECT tx_out_id
                 FROM reference_tx_in
-                    JOIN latest_tx ON latest_tx.id = reference_tx_in.tx_in_id
+                    JOIN target_txs ON target_txs.id = reference_tx_in.tx_in_id
             )
         GROUP BY
             mto.tx_out_id
@@ -59,7 +75,7 @@ WITH
                             WHERE
                                 input_assets.tx_out_id = source_out.id
                         ), '{}'::json
-                    ), 'consumedBy', encode(latest_tx.hash, 'hex'), 'datum', (
+                    ), 'consumedBy', encode(target_txs.hash, 'hex'), 'datum', (
                         CASE
                             WHEN source_out.inline_datum_id IS NOT NULL THEN (
                                 SELECT json_build_object(
@@ -81,7 +97,7 @@ WITH
             ) as list
         FROM
             tx_in
-            JOIN latest_tx ON latest_tx.id = tx_in.tx_in_id
+            JOIN target_txs ON target_txs.id = tx_in.tx_in_id
             JOIN tx_out source_out ON source_out.tx_id = tx_in.tx_out_id
             AND source_out.index = tx_in.tx_out_index
             JOIN tx source_tx ON source_tx.id = source_out.tx_id
@@ -123,7 +139,7 @@ WITH
             ) as list
         FROM
             reference_tx_in ref_in
-            JOIN latest_tx ON latest_tx.id = ref_in.tx_in_id
+            JOIN target_txs ON target_txs.id = ref_in.tx_in_id
             JOIN tx_out source_out ON source_out.tx_id = ref_in.tx_out_id
             AND source_out.index = ref_in.tx_out_index
             JOIN tx source_tx ON source_tx.id = source_out.tx_id
@@ -140,7 +156,7 @@ WITH
         FROM
             ma_tx_out mto
             JOIN tx_out ON tx_out.id = mto.tx_out_id
-            JOIN latest_tx ON latest_tx.id = tx_out.tx_id
+            JOIN target_txs ON target_txs.id = tx_out.tx_id
             JOIN multi_asset ma ON ma.id = mto.ident
         GROUP BY
             mto.tx_out_id
@@ -187,7 +203,7 @@ WITH
                 )
             ) as list
         FROM tx_out
-            JOIN latest_tx tx ON tx.id = tx_out.tx_id
+            JOIN target_txs tx ON tx.id = tx_out.tx_id
         GROUP BY
             tx.id
     ),
@@ -199,7 +215,7 @@ WITH
                 )
             ) as list
         FROM script s
-            JOIN latest_tx tx ON tx.id = s.tx_id
+            JOIN target_txs tx ON tx.id = s.tx_id
         GROUP BY
             s.tx_id
     ),
@@ -216,7 +232,7 @@ WITH
                 )
             ) as list
         FROM redeemer r
-            JOIN latest_tx tx ON tx.id = r.tx_id
+            JOIN target_txs tx ON tx.id = r.tx_id
         GROUP BY
             r.tx_id
     ),
@@ -226,7 +242,7 @@ WITH
                 tm.key::text, encode(tm.bytes, 'hex')
             ) as map
         FROM tx_metadata tm
-            JOIN latest_tx tx ON tx.id = tm.tx_id
+            JOIN target_txs tx ON tx.id = tm.tx_id
         GROUP BY
             tm.tx_id
     )
@@ -236,12 +252,16 @@ SELECT json_build_object(
                     'hash', encode(b.hash, 'hex'), 'epochNo', b.epoch_no, 'height', b.block_no
                 )
             FROM block_info b
+            WHERE
+                b.id = tx.block_id
         ), 'createdAt', (
             SELECT extract(
                     epoch
                     from time
                 )::integer
-            FROM block_info
+            FROM block_info b
+            WHERE
+                b.id = tx.block_id
         ), 'inputs', COALESCE(
             (
                 SELECT list
@@ -297,4 +317,5 @@ SELECT json_build_object(
             )
         )
     ) as result
-FROM latest_tx tx;
+FROM target_txs tx
+ORDER BY tx.id DESC;

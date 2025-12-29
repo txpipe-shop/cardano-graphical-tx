@@ -9,53 +9,63 @@ export interface Tip {
 }
 
 export interface Tx {
-  hash: Hash;
-  block: string;
-  block_height: number;
-  block_time: number;
-  slot: string;
-  index: number;
-  fees: string;
-  deposit: string;
-  size: number;
-  invalid_before: string | null;
-  invalid_hereafter: string | null;
-  valid_contract: boolean;
-  // TODO: Add these when queries are complete
-  // output_amount: OutputAmount[];
-  // utxo_count: number;
-  // withdrawal_count: number;
-  // mir_cert_count: number;
-  // delegation_count: number;
-  // stake_cert_count: number;
-  // pool_update_count: number;
-  // pool_retire_count: number;
-  // asset_mint_or_burn_count: number;
-  // redeemer_count: number;
+  hash: string;
+  fee: string;
+  block: {
+    hash: string;
+    epochNo: number;
+    height: number;
+  };
+  createdAt: number;
+  inputs: Array<{
+    address: string;
+    coin: string;
+    outRef: { hash: string; index: number };
+    value: Record<string, string>;
+    consumedBy: string;
+    datum?: { type: 'inline' | 'hash'; datumHex?: string; datumHash?: string };
+  }>;
+  outputs: Array<{
+    address: string;
+    coin: string;
+    outRef: { hash: string; index: number };
+    value: Record<string, string>;
+    consumedBy?: string | null;
+    datum?: { type: 'inline' | 'hash'; datumHex?: string; datumHash?: string };
+  }>;
+  referenceInputs: Array<{
+    address: string;
+    coin: string;
+    outRef: { hash: string; index: number };
+    value: Record<string, string>;
+    datum?: { type: 'inline' | 'hash'; datumHex?: string; datumHash?: string };
+  }>;
+  mint: Record<string, string>;
+  metadata: Record<string, string>;
+  treasuryDonation: string | null;
+  validityInterval: { invalidBefore: string | null; invalidHereafter: string | null };
+  witnesses: {
+    scripts: Array<{ hash: string; type: string; bytes: string }>;
+    redeemers: Array<{
+      purpose: string;
+      index: number;
+      unitMem: number;
+      unitSteps: number;
+      fee: string | null;
+      scriptHash: string;
+      redeemerDataHash: string;
+    }>;
+  };
 }
 
-export interface TxUtxo {
-  type: 'input' | 'output';
-  tx_hash: string;
-  output_index: number;
-  address: string;
-  amount: string;
-  consumed_by_tx_hash: string | null;
-  // TODO: Add multi-asset support
-  // assets: Asset[];
+export interface LatestTx {
+  result: Tx;
 }
 
-export interface TxCbor {
-  cbor: string;
+export interface Txs {
+  result: Tx;
 }
 
-export interface OutputAmount {
-  unit: string;
-  quantity: string;
-}
-
-export interface Asset {
-  policy_id: string;
-  asset_name: string;
-  quantity: string;
+export interface TotalTxs {
+  total: string;
 }

@@ -7,17 +7,15 @@ import {
 
 export * from './utils';
 
-export const RdmrPurpose = {
-  Spend: 'spend',
-  Mint: 'mint',
-  Cert: 'cert',
-  Reward: 'reward',
-  Vote: 'vote',
-  Purpose: 'purpose',
-  Unspecified: 'unspecified'
-} as const;
-
-export type RdmrPurpose = (typeof RdmrPurpose)[keyof typeof RdmrPurpose];
+export enum RdmrPurpose {
+  Spend = 'spend',
+  Mint = 'mint',
+  Cert = 'cert',
+  Reward = 'reward',
+  Vote = 'vote',
+  Purpose = 'purpose',
+  Unspecified = 'unspecified'
+}
 
 export type Redeemer = {
   index: number;
@@ -46,14 +44,14 @@ export type Script = {
  * Cardano specific transaction properties
  */
 export type CardanoTxFields = {
-  treasury?: bigint;
   treasuryDonation?: bigint;
   createdAt?: number;
   witnesses?: { redeemers?: Redeemer[]; scripts?: Script[] };
   validityInterval?: { invalidBefore?: bigint; invalidHereafter?: bigint };
 };
 
+export type CardanoBlockFields = { epochNo: bigint };
+
 export type UTxO = BaseUTxO & { referenceScript?: Script };
 export type Tx = BaseTx<UTxO> & CardanoTxFields;
-
-export type Block = BaseBlock<UTxO, Tx>;
+export type Block = BaseBlock<UTxO, Tx> & CardanoBlockFields;

@@ -17,11 +17,12 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && mkdir -p dist/sql/queries && cp src/sql/queries/*.sql dist/sql/queries/",
     "dev": "tsc --watch",
     "lint": "tsc --noEmit",
     "check": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest run"
   },
   "publishConfig": {
     "access": "public"
@@ -34,6 +35,7 @@
   "devDependencies": {
     "@alexandria/typescript-config": "workspace:*",
     "@types/pg": "^8.11.10",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.16"
   }
 }

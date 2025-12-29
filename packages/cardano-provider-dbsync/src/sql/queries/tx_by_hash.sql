@@ -1,1 +1,0 @@
--- Get transaction by hash

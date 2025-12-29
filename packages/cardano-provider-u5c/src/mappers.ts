@@ -52,6 +52,7 @@ export async function getBlockPreviousHash(nativeBytes: Uint8Array): Promise<Has
 
 export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block): cardano.Block {
   return {
+    epochNo: 0n,
     header: {
       blockNumber: toBigInt(block.header!.height),
       chainPoint: {
@@ -200,9 +201,8 @@ export function u5cToCardanoTx(
     referenceInputs,
     createdAt: Number(time),
     witnesses: { scripts },
-    block: blockHash && blockHeight ? { hash: blockHash, height: blockHeight } : undefined,
-    // TODO: complete this on utxorpc
-    treasury: 0n,
+    block:
+      blockHash && blockHeight ? { hash: blockHash, height: blockHeight, epochNo: 0n } : undefined,
     treasuryDonation: 0n
   };
 }

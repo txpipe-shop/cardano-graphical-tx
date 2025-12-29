@@ -1,6 +1,10 @@
 import {
+  BlocksReq,
+  BlocksRes,
+  EpochsReq,
+  EpochsRes,
+  TxsRes,
   type ChainProvider,
-  type LatestTxReq,
   type TxReq,
   type TxsReq
 } from '@alexandria/provider-core';
@@ -46,7 +50,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     return { parsedBlock: block.chain.value, nativeBytes: block.nativeBytes };
   }
 
-  async getLatestTx({ maxFetch }: LatestTxReq): Promise<cardano.Tx> {
+  async getLatestTx(): Promise<cardano.Tx> {
     const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
     let hash = Buffer.from(tip.tip!.hash);
     let block: cardanoUtxoRpc.Block;
@@ -57,11 +61,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       assert(block.header?.hash, 'Block header empty');
       hash = Buffer.from(await getBlockPreviousHash(rawBlock.nativeBytes), 'hex');
       fetchCount++;
-    } while (fetchCount !== maxFetch && block.body?.tx.length === 0);
-    assert(
-      (block.body?.tx.length || 0) > 0,
-      `No transactions found in the latest blocks ${maxFetch}`
-    );
+    } while (block.body?.tx.length === 0);
     const latestTx = block.body!.tx.at(-1);
     assert(latestTx, 'Latest transaction is undefined');
     const time = block.timestamp;
@@ -88,8 +88,9 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     return Buffer.from(txResponse.tx?.nativeBytes).toString('hex');
   }
 
-  async getTxs({ before, limit }: TxsReq): Promise<cardano.Tx[]> {
-    const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(before, 'hex') });
+  async getTxs({ before, limit }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
+    const lastHash = before ?? (await this.getLatestTx()).hash;
+    const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(lastHash, 'hex') });
     assert(
       txResponse.tx?.blockRef?.slot !== undefined,
       'Slot of the transaction blockRef is undefined'
@@ -117,17 +118,27 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       blocks.push(block.chain.value);
     } while (blocks.flatMap((b) => b.body?.tx?.length || 0).reduce((a, c) => a + c, 0) < limit);
 
-    return blocks.flatMap(
-      (t) =>
-        t.body?.tx.map((x) =>
-          u5cToCardanoTx(
-            x,
-            t.timestamp,
-            Hash(Buffer.from(t.header!.hash).toString('hex')),
-            t.header!.height
-          )
-        ) || []
-    );
+    return {
+      data: blocks.flatMap(
+        (t) =>
+          t.body?.tx.map((x) =>
+            u5cToCardanoTx(
+              x,
+              t.timestamp,
+              Hash(Buffer.from(t.header!.hash).toString('hex')),
+              t.header!.height
+            )
+          ) || []
+      ),
+      total: 0n,
+      nextCursor: undefined
+    };
+  }
+  async getBlocks(_params: BlocksReq): Promise<BlocksRes> {
+    return { data: [], total: 0n, nextCursor: undefined };
+  }
+  async getEpochs(_params: EpochsReq): Promise<EpochsRes> {
+    return { data: [], total: 0n, nextCursor: undefined };
   }
 }
 
