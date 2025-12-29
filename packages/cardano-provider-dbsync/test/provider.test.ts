@@ -73,22 +73,18 @@ describe('DbSyncProvider', () => {
   it('should filter transactions by address', async () => {
     if (!connectionString) return;
 
-    // Get a tx and an address from it
     const latest = await provider.getLatestTx();
-    // Use the first output address for filtering
     const address = latest.outputs[0].address;
+    console.log(address);
 
     const filtered = await provider.getTxs({
       limit: 5,
-      query: { address: address as any } // Cast to avoid type issues if Address type is strict
+      query: { address: address as any }
     });
 
     expect(filtered.data.length).toBeGreaterThan(0);
     expect(filtered.total).toBeGreaterThan(0n);
 
-    // all txs should involve the address
-    // This check is a bit weak since we don't fetch full txs in the list response to check all inputs/outputs easily
-    // but at least we check we got results.
     const found = filtered.data.find((tx) => tx.hash === latest.hash);
     expect(found).toBeDefined();
   });
