@@ -18,12 +18,6 @@ import { SQLQuery } from './sql';
 import type * as QueryTypes from './types/queries';
 
 export type DbSyncParams = {
-  /**
-   * PostgreSQL connection pool or pool configuration.
-   * You can pass either:
-   * - A pre-configured Pool instance
-   * - A PoolConfig object to create a new pool
-   */
   pool: Pool;
 };
 
