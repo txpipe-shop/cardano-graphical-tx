@@ -10,8 +10,8 @@ import {
   type TxReq
 } from '@alexandria/provider-core';
 import type { Cardano } from '@alexandria/types';
-import { Address, cardano, DatumType, Unit } from '@alexandria/types';
-import { Hash, HexString } from '@alexandria/types';
+import { cardano } from '@alexandria/types';
+import { Hash } from '@alexandria/types';
 import type { Pool, PoolClient } from 'pg';
 import { mapTx } from './mappers';
 import { SQLQuery } from './sql';
@@ -92,19 +92,25 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     return '';
   }
 
-  async getTxs({ before, limit }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
+  async getTxs({
+    before,
+    limit,
+    query
+  }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
     const client = await this.getClient();
     try {
       // Get total count
       const { rows: countRows } = await client.query<QueryTypes.TotalTxs>(
-        SQLQuery.get('txs_count')
+        SQLQuery.get('txs_count'),
+        [query?.address || null]
       );
       const total = BigInt(countRows[0]?.total || 0);
 
       // Get transactions
       const { rows } = await client.query<QueryTypes.Txs>(SQLQuery.get('txs'), [
         before ? before.toString() : null,
-        limit
+        limit,
+        query?.address || null
       ]);
 
       const items = rows.map((row) => mapTx(row.result));
