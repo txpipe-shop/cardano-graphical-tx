@@ -56,4 +56,17 @@ describe('DbSyncProvider', () => {
       }
     }
   });
+
+  it('should fetch transaction by hash', async () => {
+    if (!connectionString) return;
+
+    // Get a hash from latest tx
+    const latest = await provider.getLatestTx();
+    const hash = latest.hash;
+
+    const tx = await provider.getTx({ hash });
+    expect(tx).toBeDefined();
+    expect(tx.hash).toEqual(hash);
+    expect(typeof tx.fee).toBe('bigint');
+  });
 });

@@ -72,77 +72,20 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   }
 
   async getTx({ hash }: TxReq): Promise<cardano.Tx> {
-    return {
-      fee: 123n,
-      hash: Hash(''),
-      mint: {
-        [Unit('sd')]: 123n
-      },
-      referenceInputs: [
-        {
-          address: Address(''),
-          coin: 123n,
-          outRef: {
-            hash: Hash(''),
-            index: 123n
-          },
-          value: { [Unit('')]: 123n },
-          consumedBy: Hash('123'),
-          datum: { type: DatumType.INLINE, datumHex: HexString('123') }
-        }
-      ],
-      block: { hash: Hash(''), epochNo: 123n, height: 123n },
-      createdAt: 123,
-      inputs: [
-        {
-          address: Address(''),
-          coin: 123n,
-          outRef: {
-            hash: Hash(''),
-            index: 123n
-          },
-          value: { [Unit('')]: 123n },
-          consumedBy: Hash('123'),
-          datum: { type: DatumType.INLINE, datumHex: HexString('123') }
-        }
-      ],
-      outputs: [
-        {
-          address: Address(''),
-          coin: 123n,
-          outRef: {
-            hash: Hash(''),
-            index: 123n
-          },
-          value: { [Unit('')]: 123n },
-          consumedBy: Hash('123'),
-          datum: { type: DatumType.INLINE, datumHex: HexString('123') }
-        }
-      ],
-      metadata: new Map(),
-      treasuryDonation: 123n,
-      validityInterval: { invalidBefore: 123n, invalidHereafter: 123n },
-      witnesses: {
-        redeemers: [
-          {
-            fee: 123n,
-            index: 12,
-            purpose: cardano.RdmrPurpose.Mint,
-            redeemerDataHash: HexString(''),
-            scriptHash: HexString(''),
-            unitMem: 123n,
-            unitSteps: 123n
-          }
-        ],
-        scripts: [
-          {
-            bytes: HexString(''),
-            hash: HexString(''),
-            type: cardano.ScriptType.Native
-          }
-        ]
+    const client = await this.getClient();
+    try {
+      const { rows } = await client.query<QueryTypes.LatestTx>(SQLQuery.get('tx_by_hash'), [
+        hash.toString()
+      ]);
+
+      if (rows.length === 0) {
+        throw new Error('Transaction not found');
       }
-    };
+
+      return mapTx(rows[0]!.result);
+    } finally {
+      this.gracefulRelease(client);
+    }
   }
 
   async getCBOR({ hash }: TxReq): Promise<string> {
