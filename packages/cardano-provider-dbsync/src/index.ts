@@ -93,7 +93,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
     const client = await this.getClient();
     try {
-      const address = query?.address ? cardano.hexToBech32(HexString(query.address), 'addr') : null;
+      const address = query?.address || null;
       const { rows: countRows } = await client.query<QueryTypes.TotalTxs>(
         SQLQuery.get('txs_count'),
         [address]

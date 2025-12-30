@@ -38,7 +38,7 @@ export function mapTx(tx: QueryTypes.Tx): cardano.Tx {
     }
 
     return {
-      address: Address(cardano.bech32ToHex(input.address)),
+      address: Address(input.address),
       coin: BigInt(input.coin),
       outRef: {
         hash: Hash(input.outRef.hash),

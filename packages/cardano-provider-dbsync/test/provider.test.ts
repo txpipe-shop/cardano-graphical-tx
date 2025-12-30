@@ -1,21 +1,32 @@
+import 'dotenv/config';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Pool } from 'pg';
 import { DbSyncProvider } from '../src/index';
+import { CardanoTransactionsApi, Configuration } from '@alexandria/blockfrost-sdk';
+import z from 'zod';
+import { toEqualBfTx } from './matchers/toEqualBfTx';
+import { Hash } from '@alexandria/types';
 
-// READ FROM ENV
-const connectionString = process.env.DB_CONNECTION_STRING;
+const testEnv = z.object({
+  DB_CONNECTION_STRING: z.url(),
+  BF_URL: z.url()
+});
+
+type TestEnv = z.infer<typeof testEnv>;
+
+expect.extend({ toEqualBfTx });
 
 describe('DbSyncProvider', () => {
   let pool: Pool;
   let provider: DbSyncProvider;
+  let bfTxClient: CardanoTransactionsApi;
+  let config: TestEnv;
 
   beforeAll(() => {
-    if (!connectionString) {
-      console.warn('Skipping tests: DB_CONNECTION_STRING not set');
-      return;
-    }
-    pool = new Pool({ connectionString });
+    config = testEnv.parse(process.env);
+    pool = new Pool({ connectionString: config.DB_CONNECTION_STRING });
     provider = new DbSyncProvider({ pool });
+    bfTxClient = new CardanoTransactionsApi(new Configuration({ basePath: config.BF_URL }));
   });
 
   afterAll(async () => {
@@ -25,21 +36,21 @@ describe('DbSyncProvider', () => {
   });
 
   it('should fetch latest transaction', async () => {
-    if (!connectionString) return;
-
     const tx = await provider.getLatestTx();
+    console.log('Latest tx: ', tx.hash);
     expect(tx).toBeDefined();
     expect(tx.hash).toBeDefined();
     expect(typeof tx.fee).toBe('bigint');
     expect(tx.inputs.length).toBeGreaterThan(0);
     expect(tx.outputs.length).toBeGreaterThan(0);
 
-    console.log('Latest Tx Hash:', tx.hash);
+    const { data: txContent } = await bfTxClient.txsHashGet(tx.hash);
+    const { data: txContentUtxo } = await bfTxClient.txsHashUtxosGet(tx.hash);
+
+    expect(tx).toEqualBfTx({ tx: txContent, utxos: txContentUtxo });
   });
 
   it('should fetch paginated transactions', async () => {
-    if (!connectionString) return;
-
     const page1 = await provider.getTxs({ limit: 5 });
     expect(page1.data.length).toBeLessThanOrEqual(5);
     expect(page1.data.length).toBeGreaterThan(0);
@@ -58,24 +69,23 @@ describe('DbSyncProvider', () => {
   });
 
   it('should fetch transaction by hash', async () => {
-    if (!connectionString) return;
-
-    // Get a hash from latest tx
-    const latest = await provider.getLatestTx();
-    const hash = latest.hash;
+    const hash = Hash('a1e43d0600935ad2243051b81369e3c8e7871998af3c76237da0089a868c607c');
 
     const tx = await provider.getTx({ hash });
     expect(tx).toBeDefined();
     expect(tx.hash).toEqual(hash);
-    expect(typeof tx.fee).toBe('bigint');
+
+    const { data: bfTx } = await bfTxClient.txsHashGet(hash);
+    const { data: bfUtxos } = await bfTxClient.txsHashUtxosGet(hash);
+
+    console.dir({ tx, bfTx, bfUtxos }, { depth: null });
+
+    expect(tx).toEqualBfTx({ tx: bfTx, utxos: bfUtxos });
   });
 
   it('should filter transactions by address', async () => {
-    if (!connectionString) return;
-
     const latest = await provider.getLatestTx();
     const address = latest.outputs[0].address;
-    console.log(address);
 
     const filtered = await provider.getTxs({
       limit: 5,

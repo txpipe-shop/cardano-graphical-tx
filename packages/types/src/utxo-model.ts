@@ -1,3 +1,5 @@
+import { bech32ToHex, isBase58, isHexString } from './utils';
+
 declare const __unit: unique symbol;
 declare const __hash: unique symbol;
 declare const __address: unique symbol;
@@ -36,18 +38,21 @@ export function Hash(value: string) {
 
 /** address format: hex string of 58 chars or 114 chars */
 export type Address = string & { readonly [__address]: unique symbol };
-export function Address(value: string) {
-  const addrLength = [58, 114, 158]; // 58 for Shelley, 114 for Shelley with staking, 158 for Byron
-  if (!addrLength.includes(value.length)) {
-    throw new Error(
-      `Address must be ${addrLength.join(' or ')} chars long but got ${value} (${value.length} chars long)`
-    );
+export function Address(value: string): Address {
+  const trimmed = value.trim();
+
+  if (isHexString(trimmed)) {
+    return trimmed.toLowerCase() as Address;
   }
 
-  if (!/^[a-fA-F0-9]+$/.test(value)) {
-    throw new Error('Address must be a valid hex string');
+  if (isBase58(trimmed)) {
+    return trimmed as Address;
   }
-  return value as Address;
+  try {
+    return bech32ToHex(trimmed) as any as Address;
+  } catch {
+    throw new Error('Invalid bech32 encoding');
+  }
 }
 
 /** hex strings can be lowercase or uppercase */
