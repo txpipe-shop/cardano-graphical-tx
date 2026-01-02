@@ -4,14 +4,6 @@ export type TxReq = {
   hash: Hash;
 };
 
-export type LatestTxReq = {
-  /**
-   * Amount of blocks to look back for the latest transaction
-   * If -1, will search all the way to the genesis block
-   */
-  maxFetch: number;
-};
-
 export type TxQuery = {
   address?: Address;
 };
@@ -45,12 +37,8 @@ export type BlockMetadata = {
   confirmations?: bigint;
 };
 
-export type WrappedTx<U extends UTxO, T extends Tx<U>> = {
-  tx: T;
-  epoch: bigint;
-  blockHeight: bigint;
-};
-
+// TODO: think how to handle epochs in generic chains (currently cardano focused)
+// Same thing with Hydra (no blocks)
 export type Epoch = {
   index: bigint;
   startSlot: bigint;
@@ -74,15 +62,19 @@ export type TxsRes<
 > = PaginatedResult<Chain['tx'], Hash>;
 export type BlocksRes = PaginatedResult<BlockMetadata, Hash>;
 export type EpochsRes = PaginatedResult<Epoch, bigint>;
+export type TipRes = { hash: Hash; slot: bigint };
+export type LatestTxRes<
+  U extends UTxO,
+  T extends Tx<U>,
+  Chain extends BaseChain<U, T>
+> = Chain['tx'];
+export type GetTxRes<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> = Chain['tx'];
 
 export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> {
-  getLatestTx(params: LatestTxReq): Promise<Chain['tx']>;
-  getTx(params: TxReq): Promise<Chain['tx']>;
+  getLatestTx(): Promise<LatestTxRes<U, T, Chain>>;
+  getTx(params: TxReq): Promise<GetTxRes<U, T, Chain>>;
   getTxs(params: TxsReq): Promise<TxsRes<U, T, Chain>>;
   getBlocks(params: BlocksReq): Promise<BlocksRes>;
   getEpochs(params: EpochsReq): Promise<EpochsRes>;
-  readTip(): Promise<{
-    hash: Hash;
-    slot: bigint;
-  }>;
+  readTip(): Promise<TipRes>;
 }

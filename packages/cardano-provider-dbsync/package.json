@@ -17,11 +17,12 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && mkdir -p dist/sql/queries && cp src/sql/queries/*.sql dist/sql/queries/",
     "dev": "tsc --watch",
     "lint": "tsc --noEmit",
     "check": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest run"
   },
   "publishConfig": {
     "access": "public"
@@ -32,8 +33,12 @@
     "pg": "^8.13.1"
   },
   "devDependencies": {
+    "@alexandria/blockfrost-sdk": "workspace:*",
     "@alexandria/typescript-config": "workspace:*",
     "@types/pg": "^8.11.10",
-    "typescript": "^5.0.0"
+    "dotenv": "^17.2.3",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.16",
+    "zod": "^4.0.14"
   }
 }

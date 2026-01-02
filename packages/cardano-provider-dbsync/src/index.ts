@@ -1,23 +1,23 @@
 import {
+  BlocksReq,
+  BlocksRes,
+  EpochsReq,
+  EpochsRes,
+  LatestTxRes,
+  TxsReq,
+  TxsRes,
   type ChainProvider,
-  type LatestTxReq,
-  type TxReq,
-  type TxsReq
+  type TxReq
 } from '@alexandria/provider-core';
-import type { Cardano, cardano } from '@alexandria/types';
+import type { Cardano } from '@alexandria/types';
+import { cardano, HexString } from '@alexandria/types';
 import { Hash } from '@alexandria/types';
 import type { Pool, PoolClient } from 'pg';
+import { mapTx } from './mappers';
 import { SQLQuery } from './sql';
-import { mapTxRow, mapTxUtxosRow } from './mappers';
 import type * as QueryTypes from './types/queries';
 
 export type DbSyncParams = {
-  /**
-   * PostgreSQL connection pool or pool configuration.
-   * You can pass either:
-   * - A pre-configured Pool instance
-   * - A PoolConfig object to create a new pool
-   */
   pool: Pool;
 };
 
@@ -40,95 +40,105 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     const client = await this.getClient();
     try {
       const { rows } = await client.query<QueryTypes.Tip>(SQLQuery.get('tip'));
-      this.gracefulRelease(client);
-
       if (rows.length === 0) {
         throw new Error('No tip found');
       }
-
       return {
         hash: Hash(rows[0]!.hash),
         slot: BigInt(rows[0]!.slot)
       };
-    } catch (error) {
+    } finally {
       this.gracefulRelease(client);
-      throw error;
     }
   }
 
-  async getLatestTx({ maxFetch }: LatestTxReq): Promise<cardano.Tx> {
+  async getLatestTx(): Promise<LatestTxRes<cardano.UTxO, cardano.Tx, Cardano>> {
     const client = await this.getClient();
     try {
-      const { rows } = await client.query<QueryTypes.Tx>(SQLQuery.get('latest_tx'), [maxFetch]);
-      this.gracefulRelease(client);
-
+      const { rows } = await client.query<QueryTypes.LatestTx>(SQLQuery.get('latest_tx'));
       if (rows.length === 0) {
-        throw new Error(`No transactions found`);
+        throw new Error('No latest transaction found');
       }
-
-      return mapTxRow(rows[0]!);
-    } catch (error) {
+      return mapTx(rows[0]!.result);
+    } finally {
       this.gracefulRelease(client);
-      throw error;
     }
   }
 
   async getTx({ hash }: TxReq): Promise<cardano.Tx> {
     const client = await this.getClient();
     try {
-      const { rows: txRows } = await client.query<QueryTypes.Tx>(SQLQuery.get('tx_by_hash'), [
-        hash
+      const { rows } = await client.query<QueryTypes.LatestTx>(SQLQuery.get('tx_by_hash'), [
+        hash.toString()
       ]);
 
-      if (txRows.length === 0) {
-        this.gracefulRelease(client);
-        throw new Error(`Transaction not found: ${hash}`);
+      if (rows.length === 0) {
+        throw new Error('Transaction not found');
       }
 
-      const { rows: utxoRows } = await client.query<QueryTypes.TxUtxo>(SQLQuery.get('tx_utxos'), [
-        hash
-      ]);
-
+      return mapTx(rows[0]!.result);
+    } finally {
       this.gracefulRelease(client);
-
-      return mapTxUtxosRow(txRows[0]!, utxoRows);
-    } catch (error) {
-      this.gracefulRelease(client);
-      throw error;
     }
   }
 
   async getCBOR({ hash }: TxReq): Promise<string> {
+    return '';
+  }
+
+  async getTxs({
+    before,
+    limit,
+    query
+  }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
     const client = await this.getClient();
     try {
-      const { rows } = await client.query<QueryTypes.TxCbor>(SQLQuery.get('tx_cbor'), [hash]);
-      this.gracefulRelease(client);
+      const address = query?.address || null;
+      const { rows: countRows } = await client.query<QueryTypes.TotalTxs>(
+        SQLQuery.get('txs_count'),
+        [address]
+      );
+      const total = BigInt(countRows[0]?.total || 0);
 
-      if (rows.length === 0) {
-        throw new Error(`Transaction CBOR not found: ${hash}`);
+      const { rows } = await client.query<QueryTypes.Txs>(SQLQuery.get('txs'), [
+        before ? before.toString() : null,
+        limit,
+        address
+      ]);
+
+      const items = rows.map((row) => mapTx(row.result));
+
+      let nextCursor: Hash | undefined;
+      const lastItem = items.at(-1);
+
+      if (lastItem) {
+        nextCursor = lastItem.hash;
       }
 
-      return rows[0]!.cbor;
-    } catch (error) {
+      return {
+        total,
+        data: items,
+        nextCursor
+      };
+    } finally {
       this.gracefulRelease(client);
-      throw error;
     }
   }
 
-  async getTxs({ before, limit }: TxsReq): Promise<cardano.Tx[]> {
-    const client = await this.getClient();
-    try {
-      const { rows } = await client.query<QueryTypes.Tx>(SQLQuery.get('txs_before'), [
-        before,
-        limit
-      ]);
-      this.gracefulRelease(client);
+  async getBlocks(params: BlocksReq): Promise<BlocksRes> {
+    return {
+      data: [],
+      total: 0n,
+      nextCursor: Hash('')
+    };
+  }
 
-      return rows.map(mapTxRow);
-    } catch (error) {
-      this.gracefulRelease(client);
-      throw error;
-    }
+  async getEpochs(params: EpochsReq): Promise<EpochsRes> {
+    return {
+      data: [],
+      total: 0n,
+      nextCursor: 0n
+    };
   }
 
   async close(): Promise<void> {

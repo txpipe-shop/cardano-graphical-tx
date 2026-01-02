@@ -1,3 +1,4 @@
+import { bech32 } from 'bech32';
 import { Address, Hash, HexString } from './utxo-model';
 import { Buffer } from 'buffer';
 
@@ -45,4 +46,30 @@ export function addManyValues<K extends string>(values: Record<K, bigint>[]): Re
   }
 
   return result;
+}
+
+export function bech32ToHex(bech32Address: string): HexString {
+  // TODO: figure out what's a good limit here (200 seems OK for now)
+  const { words } = bech32.decode(bech32Address, 200);
+  const bytes = bech32.fromWords(words);
+  return HexString(Buffer.from(bytes).toString('hex'));
+}
+
+export function hexToBech32(hex: HexString, prefix: string): string {
+  const bytes = Buffer.from(hex, 'hex');
+  const words = bech32.toWords(bytes);
+  return bech32.encode(prefix, words, 200);
+}
+
+export function hexToAscii(hex: HexString): string {
+  const bytes = Buffer.from(hex, 'hex');
+  return bytes.toString('ascii');
+}
+
+export function isHexString(s: string): boolean {
+  return /^[0-9a-fA-F]+$/.test(s) && s.length % 2 === 0;
+}
+
+export function isBase58(str: string): boolean {
+  return /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/.test(str);
 }

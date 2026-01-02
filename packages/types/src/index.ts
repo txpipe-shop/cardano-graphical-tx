@@ -9,6 +9,8 @@ export {
   uint8ToHash,
   uint8ToAddr,
   diffValues,
-  addManyValues
+  addManyValues,
+  hexToBech32,
+  isBase58,
+  bech32ToHex
 } from './utils';
-
