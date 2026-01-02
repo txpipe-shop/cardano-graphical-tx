@@ -1,8 +1,10 @@
 import type { BaseChain, Tx, UTxO, Hash, Address } from '@alexandria/types';
 
-export type TxReq = {
+export type BlockReq = {
   hash: Hash;
 };
+
+export type TxReq = BlockReq;
 
 export type TxQuery = {
   address?: Address;
@@ -54,6 +56,7 @@ export type Epoch = {
 export type TxsReq = PaginatedRequest<TxQuery>;
 export type BlocksReq = PaginatedRequest<undefined>;
 export type EpochsReq = PaginatedRequest<undefined>;
+export type BlockRes = BlockMetadata;
 
 export type TxsRes<
   U extends UTxO,
@@ -74,6 +77,7 @@ export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends Ba
   getLatestTx(): Promise<LatestTxRes<U, T, Chain>>;
   getTx(params: TxReq): Promise<GetTxRes<U, T, Chain>>;
   getTxs(params: TxsReq): Promise<TxsRes<U, T, Chain>>;
+  getBlock(params: BlockReq): Promise<BlockRes>;
   getBlocks(params: BlocksReq): Promise<BlocksRes>;
   getEpochs(params: EpochsReq): Promise<EpochsRes>;
   readTip(): Promise<TipRes>;

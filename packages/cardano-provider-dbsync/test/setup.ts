@@ -1,4 +1,6 @@
+import 'dotenv/config';
 import { TxContent, TxContentUtxo } from '@alexandria/blockfrost-sdk';
+import z from 'zod';
 
 export type BfComprehensiveTx = {
   tx: TxContent;
@@ -13,3 +15,10 @@ declare module 'vitest' {
   interface Assertion<T = any> extends CustomMatchers<T> {}
   interface AsymmetricMatchersContaining extends CustomMatchers {}
 }
+
+export const testEnv = z.object({
+  DB_CONNECTION_STRING: z.url(),
+  BF_URL: z.url()
+});
+
+export type TestEnv = z.infer<typeof testEnv>;

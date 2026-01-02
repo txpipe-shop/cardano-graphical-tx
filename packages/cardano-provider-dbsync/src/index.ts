@@ -1,4 +1,6 @@
 import {
+  BlockReq,
+  BlockRes,
   BlocksReq,
   BlocksRes,
   EpochsReq,
@@ -130,6 +132,18 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
       data: [],
       total: 0n,
       nextCursor: Hash('')
+    };
+  }
+
+  async getBlock(params: BlockReq): Promise<BlockRes> {
+    return {
+      fees: 0n,
+      hash: Hash(''),
+      height: 0n,
+      slot: 0n,
+      time: 0,
+      txCount: 0n,
+      confirmations: 0n
     };
   }
 

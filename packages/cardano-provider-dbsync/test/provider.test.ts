@@ -1,18 +1,10 @@
-import 'dotenv/config';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Pool } from 'pg';
 import { DbSyncProvider } from '../src/index';
 import { CardanoTransactionsApi, Configuration } from '@alexandria/blockfrost-sdk';
-import z from 'zod';
 import { toEqualBfTx } from './matchers/toEqualBfTx';
 import { Hash } from '@alexandria/types';
-
-const testEnv = z.object({
-  DB_CONNECTION_STRING: z.url(),
-  BF_URL: z.url()
-});
-
-type TestEnv = z.infer<typeof testEnv>;
+import { testEnv, TestEnv } from './setup';
 
 expect.extend({ toEqualBfTx });
 
