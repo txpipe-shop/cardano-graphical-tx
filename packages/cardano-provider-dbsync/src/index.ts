@@ -95,10 +95,11 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
     const client = await this.getClient();
     try {
-      // if address is providede, convert it to bech32 if it's in hex format otherwise use it as it is (Byron)
+      // if address is provided, convert it to bech32 if it's in hex format otherwise use it as it is (Byron)
       const address = query?.address
         ? isBase58(query.address)
           ? query?.address
+          // TODO: set up address prefix as configurable
           : hexToBech32(HexString(query.address), 'addr')
         : null;
       const { rows: countRows } = await client.query<QueryTypes.TotalTxs>(
