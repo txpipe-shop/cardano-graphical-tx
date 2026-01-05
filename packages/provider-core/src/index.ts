@@ -7,7 +7,9 @@ export type BlockReq = {
 export type TxReq = BlockReq;
 
 export type TxQuery = {
+  /** Filter transactions if it involves this address in any of its inputs or outputs */
   address?: Address;
+  block?: { hash: Hash } | { height: bigint } | { slot: bigint };
 };
 
 /**

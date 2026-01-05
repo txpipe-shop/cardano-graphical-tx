@@ -4,31 +4,63 @@ WITH
         SELECT *
         FROM tx
         WHERE (
-                $1::text IS NULL
-                OR id < (
-                    SELECT id
-                    FROM tx
-                    WHERE
-                        hash = decode($1, 'hex')
+                (
+                    $1::text IS NULL
+                    OR id < (
+                        SELECT id
+                        FROM tx
+                        WHERE
+                            hash = decode($1, 'hex')
+                    )
                 )
-            )
-            AND (
-                $3::text IS NULL
-                OR EXISTS (
-                    SELECT 1
-                    FROM tx_out
-                    WHERE
-                        tx_out.tx_id = tx.id
-                        AND tx_out.address = $3
+                AND (
+                    $3::text IS NULL
+                    OR EXISTS (
+                        SELECT 1
+                        FROM tx_out
+                        WHERE
+                            tx_out.tx_id = tx.id
+                            AND tx_out.address = $3
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM tx_in
+                            JOIN tx_out ON tx_in.tx_out_id = tx_out.id
+                            AND tx_in.tx_out_index = tx_out.index
+                        WHERE
+                            tx_in.tx_in_id = tx.id
+                            AND tx_out.address = $3
+                    )
                 )
-                OR EXISTS (
-                    SELECT 1
-                    FROM tx_in
-                        JOIN tx_out ON tx_in.tx_out_id = tx_out.id
-                        AND tx_in.tx_out_index = tx_out.index
-                    WHERE
-                        tx_in.tx_in_id = tx.id
-                        AND tx_out.address = $3
+                AND (
+                    $4::text IS NULL
+                    OR EXISTS (
+                        SELECT 1
+                        FROM block
+                        WHERE
+                            block.id = tx.block_id
+                            AND block.hash = decode($4, 'hex')
+                    )
+                )
+                AND (
+                    $5::word31type IS NULL
+                    OR EXISTS (
+                        SELECT 1
+                        FROM block
+                        WHERE
+                            block.id = tx.block_id
+                            AND block.block_no = $5
+                    )
+                )
+                AND (
+                    $6::word31type IS NULL
+                    OR EXISTS (
+                        SELECT 1
+                        FROM block
+                        WHERE
+                            block.id = tx.block_id
+                            AND block.slot_no = $6
+                    )
                 )
             )
         ORDER BY id DESC
@@ -75,10 +107,11 @@ WITH
                     JOIN target_txs ON target_txs.id = tx_out.consumed_by_tx_id
                 UNION
                 SELECT tx_out.id
-                FROM reference_tx_in
+                FROM
+                    reference_tx_in
                     JOIN target_txs ON target_txs.id = reference_tx_in.tx_in_id
                     JOIN tx_out ON tx_out.tx_id = reference_tx_in.tx_out_id
-                        AND tx_out.index = reference_tx_in.tx_out_index
+                    AND tx_out.index = reference_tx_in.tx_out_index
             )
         GROUP BY
             mto.tx_out_id

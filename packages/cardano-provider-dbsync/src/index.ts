@@ -88,6 +88,18 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     return '';
   }
 
+  private parseBlockFilter(query: TxsReq['query']): [Hash | null, bigint | null, bigint | null] {
+    const { block } = query || {};
+
+    if (!block) return [null, null, null];
+
+    return [
+      'hash' in block ? block.hash : null,
+      'height' in block ? block.height : null,
+      'slot' in block ? block.slot : null
+    ];
+  }
+
   async getTxs({
     before,
     limit,
@@ -99,19 +111,25 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
       const address = query?.address
         ? isBase58(query.address)
           ? query?.address
-          // TODO: set up address prefix as configurable
-          : hexToBech32(HexString(query.address), 'addr')
+          : // TODO: set up address prefix as configurable
+            hexToBech32(HexString(query.address), 'addr')
         : null;
+
+      const [blockHash, blockHeight, blockSlot] = this.parseBlockFilter(query);
+
       const { rows: countRows } = await client.query<QueryTypes.TotalTxs>(
         SQLQuery.get('txs_count'),
-        [address]
+        [address, blockHash, blockHeight, blockSlot]
       );
       const total = BigInt(countRows[0]?.total || 0);
 
       const { rows } = await client.query<QueryTypes.Txs>(SQLQuery.get('txs'), [
         before ? before.toString() : null,
         limit,
-        address
+        address,
+        blockHash,
+        blockHeight,
+        blockSlot
       ]);
 
       const items = rows.map((row) => mapTx(row.result));
