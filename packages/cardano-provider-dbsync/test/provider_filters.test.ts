@@ -30,7 +30,7 @@ describe('DbSyncProvider Filters', () => {
   describe('getTxs (block filters)', () => {
     it('should filter transactions by block hash', async () => {
       const latest = await provider.getLatestTx();
-      const blockHash = latest.block.hash;
+      const blockHash = latest.block!.hash;
       const filtered = await provider.getTxs({
         limit: 10,
         query: {
@@ -48,7 +48,7 @@ describe('DbSyncProvider Filters', () => {
 
     it('should filter transactions by block height', async () => {
       const latest = await provider.getLatestTx();
-      const blockHeight = BigInt(latest.block.height);
+      const blockHeight = BigInt(latest.block!.height);
 
       const filtered = await provider.getTxs({
         limit: 10,

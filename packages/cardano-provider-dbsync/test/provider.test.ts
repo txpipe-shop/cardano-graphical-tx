@@ -132,8 +132,8 @@ describe('DbSyncProvider', () => {
       if (cursor) {
         const page2 = await provider.getTxs({ limit: 5, before: cursor });
         expect(page2.data.length).toBeLessThanOrEqual(5);
-        if (page2.data.length > 0) {
-          expect(page2.data[0].hash).not.toBe(page1.data[0].hash);
+        if (page2.data.length > 0 && page1.data.length > 0) {
+          expect(page2.data[0]!.hash).not.toBe(page1.data[0]!.hash);
         }
       }
     });
@@ -153,7 +153,8 @@ describe('DbSyncProvider', () => {
 
     it('should filter transactions by address', async () => {
       const latest = await provider.getLatestTx();
-      const address = latest.outputs[0].address;
+      if (latest.outputs.length === 0) throw new Error('Latest transaction has no outputs');
+      const address = latest.outputs[0]!.address;
 
       const filtered = await provider.getTxs({
         limit: 5,
@@ -169,11 +170,12 @@ describe('DbSyncProvider', () => {
 
     it('should filter transactions by address and match Blockfrost', async () => {
       const latest = await provider.getLatestTx();
-      const address = latest.outputs[0].address;
+      if (latest.outputs.length === 0) throw new Error('Latest transaction has no outputs');
+      const address = latest.outputs[0]!.address;
 
       const filtered = await provider.getTxs({
         limit: 3,
-        query: { address: address as any }
+        query: { address: address }
       });
 
       expect(filtered.data.length).toBeGreaterThan(0);
@@ -226,8 +228,8 @@ describe('DbSyncProvider', () => {
         expect(txWithMultipleInputs.inputs.length).toBe(bfInputs.length);
 
         for (let i = 0; i < txWithMultipleInputs.inputs.length; i++) {
-          const input = txWithMultipleInputs.inputs[i];
-          const bfInput = bfInputs[i];
+          const input = txWithMultipleInputs.inputs[i]!;
+          const bfInput = bfInputs[i]!;
           expect(input.outRef.hash).toBe(bfInput.tx_hash);
           expect(Number(input.outRef.index)).toBe(bfInput.output_index);
         }
@@ -248,8 +250,8 @@ describe('DbSyncProvider', () => {
         expect(txWithMultipleOutputs.outputs.length).toBe(bfOutputs.length);
 
         for (let i = 0; i < txWithMultipleOutputs.outputs.length; i++) {
-          const output = txWithMultipleOutputs.outputs[i];
-          const bfOutput = bfOutputs[i];
+          const output = txWithMultipleOutputs.outputs[i]!;
+          const bfOutput = bfOutputs[i]!;
           expect(Number(output.outRef.index)).toBe(bfOutput.output_index);
         }
       }
