@@ -3,16 +3,19 @@ import { Pool } from 'pg';
 import { DbSyncProvider } from '../src/index';
 import { testEnv, TestEnv } from './setup';
 import { Hash } from '@alexandria/types';
+import { CardanoTransactionsApi, Configuration } from '@alexandria/blockfrost-sdk';
 
 describe('DbSyncProvider Blocks & Epochs', () => {
   let pool: Pool;
   let provider: DbSyncProvider;
   let config: TestEnv;
+  let bfTxClient: CardanoTransactionsApi;
 
   beforeAll(() => {
     config = testEnv.parse(process.env);
     pool = new Pool({ connectionString: config.DB_CONNECTION_STRING });
     provider = new DbSyncProvider({ pool });
+    bfTxClient = new CardanoTransactionsApi(new Configuration({ basePath: config.BF_URL }));
   });
 
   afterAll(async () => {

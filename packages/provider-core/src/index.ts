@@ -54,7 +54,6 @@ export type Epoch = {
   fees: bigint;
   blocksProduced: bigint;
   txCount: bigint;
-  blocks: BlockMetadata[];
 };
 
 export type TxsReq = PaginatedRequest<TxQuery>;

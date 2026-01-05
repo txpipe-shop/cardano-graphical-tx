@@ -263,8 +263,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
           endSlot: 0n, // TODO: Fetch separate end slot
           startHeight: 0n, // TODO: Fetch separate start height
           endHeight: 0n,
-          blocksProduced: 0n,
-          blocks: []
+          blocksProduced: 0n
         })),
         total,
         nextCursor
