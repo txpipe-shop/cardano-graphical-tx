@@ -35,13 +35,15 @@ WITH
             JOIN multi_asset ma ON ma.id = mto.ident
         WHERE
             mto.tx_out_id IN (
-                SELECT tx_out_id
-                FROM tx_in
-                    JOIN latest_tx ON latest_tx.id = tx_in.tx_in_id
+                SELECT tx_out.id
+                FROM tx_out
+                    JOIN latest_tx ON latest_tx.id = tx_out.consumed_by_tx_id
                 UNION
-                SELECT tx_out_id
+                SELECT tx_out.id
                 FROM reference_tx_in
                     JOIN latest_tx ON latest_tx.id = reference_tx_in.tx_in_id
+                    JOIN tx_out ON tx_out.tx_id = reference_tx_in.tx_out_id
+                        AND tx_out.index = reference_tx_in.tx_out_index
             )
         GROUP BY
             mto.tx_out_id
@@ -78,6 +80,7 @@ WITH
                         END
                     )
                 )
+                ORDER BY tx_in.id
             ) as list
         FROM
             tx_in
@@ -120,6 +123,7 @@ WITH
                         END
                     )
                 )
+                ORDER BY ref_in.id
             ) as list
         FROM
             reference_tx_in ref_in
@@ -185,6 +189,7 @@ WITH
                         END
                     )
                 )
+                ORDER BY tx_out.index
             ) as list
         FROM tx_out
             JOIN latest_tx tx ON tx.id = tx_out.tx_id

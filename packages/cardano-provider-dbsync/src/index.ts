@@ -12,7 +12,7 @@ import {
   type TxReq
 } from '@alexandria/provider-core';
 import type { Cardano } from '@alexandria/types';
-import { cardano, HexString } from '@alexandria/types';
+import { cardano, HexString, hexToBech32, isBase58 } from '@alexandria/types';
 import { Hash } from '@alexandria/types';
 import type { Pool, PoolClient } from 'pg';
 import { mapTx } from './mappers';
@@ -70,7 +70,6 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   async getTx({ hash }: TxReq): Promise<cardano.Tx> {
     const client = await this.getClient();
     try {
-      // TODO: sort them
       const { rows } = await client.query<QueryTypes.LatestTx>(SQLQuery.get('tx_by_hash'), [
         hash.toString()
       ]);
@@ -96,7 +95,12 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
     const client = await this.getClient();
     try {
-      const address = query?.address || null;
+      // if address is providede, convert it to bech32 if it's in hex format otherwise use it as it is (Byron)
+      const address = query?.address
+        ? isBase58(query.address)
+          ? query?.address
+          : hexToBech32(HexString(query.address), 'addr')
+        : null;
       const { rows: countRows } = await client.query<QueryTypes.TotalTxs>(
         SQLQuery.get('txs_count'),
         [address]

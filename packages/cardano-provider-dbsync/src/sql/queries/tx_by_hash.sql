@@ -46,9 +46,11 @@ WITH
                 FROM tx_out
                     JOIN target_txs ON target_txs.id = tx_out.consumed_by_tx_id
                 UNION
-                SELECT tx_out_id
+                SELECT tx_out.id
                 FROM reference_tx_in
                     JOIN target_txs ON target_txs.id = reference_tx_in.tx_in_id
+                    JOIN tx_out ON tx_out.tx_id = reference_tx_in.tx_out_id
+                        AND tx_out.index = reference_tx_in.tx_out_index
             )
         GROUP BY
             mto.tx_out_id
