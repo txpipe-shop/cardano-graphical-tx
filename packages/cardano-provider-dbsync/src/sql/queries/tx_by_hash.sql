@@ -55,8 +55,8 @@ WITH
     ),
     -- INPUTS
     inputs AS (
-        SELECT tx_in.tx_in_id as tx_id, json_agg(
-                json_build_object(
+        SELECT tx_in.tx_in_id as tx_id, jsonb_agg(
+                DISTINCT jsonb_build_object(
                     'address', source_out.address, 'coin', source_out.value::text, 'outRef', json_build_object(
                         'hash', encode(source_tx.hash, 'hex'), 'index', tx_in.tx_out_index
                     ), 'value', COALESCE(
@@ -97,8 +97,8 @@ WITH
     ),
     -- REFERENCE INPUTS
     reference_inputs AS (
-        SELECT ref_in.tx_in_id as tx_id, json_agg(
-                json_build_object(
+        SELECT ref_in.tx_in_id as tx_id, jsonb_agg(
+                DISTINCT jsonb_build_object(
                     'address', source_out.address, 'coin', source_out.value::text, 'outRef', json_build_object(
                         'hash', encode(source_tx.hash, 'hex'), 'index', ref_in.tx_out_index
                     ), 'value', COALESCE(
@@ -154,8 +154,8 @@ WITH
     ),
     -- OUTPUTS
     outputs AS (
-        SELECT tx.id as tx_id, json_agg(
-                json_build_object(
+        SELECT tx.id as tx_id, jsonb_agg(
+                DISTINCT jsonb_build_object(
                     'address', tx_out.address, 'coin', tx_out.value::text, 'outRef', json_build_object(
                         'hash', encode(tx.hash, 'hex'), 'index', tx_out.index
                     ), 'value', COALESCE(
@@ -259,21 +259,21 @@ SELECT json_build_object(
                 FROM inputs
                 WHERE
                     inputs.tx_id = tx.id
-            ), '[]'::json
+            ), '[]'::jsonb
         ), 'outputs', COALESCE(
             (
                 SELECT list
                 FROM outputs
                 WHERE
                     outputs.tx_id = tx.id
-            ), '[]'::json
+            ), '[]'::jsonb
         ), 'referenceInputs', COALESCE(
             (
                 SELECT list
                 FROM reference_inputs
                 WHERE
                     reference_inputs.tx_id = tx.id
-            ), '[]'::json
+            ), '[]'::jsonb
         ), 'mint', COALESCE(
             (
                 SELECT assets
