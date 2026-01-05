@@ -1,15 +1,17 @@
 import type { BaseChain, Tx, UTxO, Hash, Address } from '@alexandria/types';
 
-export type BlockReq = {
-  hash: Hash;
-};
+export type BlockReq = { hash: Hash } | { height: bigint } | { slot: bigint };
 
-export type TxReq = BlockReq;
+export type TxReq = { hash: Hash };
 
 export type TxQuery = {
   /** Filter transactions if it involves this address in any of its inputs or outputs */
   address?: Address;
   block?: { hash: Hash } | { height: bigint } | { slot: bigint };
+};
+
+export type BlocksQuery = {
+  epoch?: bigint;
 };
 
 /**
@@ -56,7 +58,7 @@ export type Epoch = {
 };
 
 export type TxsReq = PaginatedRequest<TxQuery>;
-export type BlocksReq = PaginatedRequest<undefined>;
+export type BlocksReq = PaginatedRequest<BlocksQuery>;
 export type EpochsReq = PaginatedRequest<undefined>;
 export type BlockRes = BlockMetadata;
 

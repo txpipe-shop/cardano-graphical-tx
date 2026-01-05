@@ -69,3 +69,29 @@ export interface Txs {
 export interface TotalTxs {
   total: string;
 }
+
+export interface TotalBlocks {
+  total: string;
+}
+
+export interface Block {
+  hash: string;
+  height: string;
+  slot: string;
+  time: number;
+  txCount: string;
+  fees: string;
+  confirmations: string;
+  size: number;
+  slotLeader: string;
+}
+
+export interface Epoch {
+  epoch: string;
+  startTime: number;
+  endTime: number;
+  txCount: string;
+  blkCount: string;
+  output: string;
+  fees: string;
+}

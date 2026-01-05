@@ -151,32 +151,127 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     }
   }
 
-  async getBlocks(params: BlocksReq): Promise<BlocksRes> {
-    return {
-      data: [],
-      total: 0n,
-      nextCursor: Hash('')
-    };
+  async getBlocks({ before, query, limit }: BlocksReq): Promise<BlocksRes> {
+    const client = await this.getClient();
+
+    try {
+      const { epoch } = query || {};
+      const { rows } = await client.query<QueryTypes.Block>(SQLQuery.get('blocks'), [
+        before ? before.toString() : null,
+        limit
+      ]);
+      const { rows: countRows } = await client.query<QueryTypes.TotalBlocks>(
+        SQLQuery.get('blocks_count'),
+        [epoch || null]
+      );
+      const total = BigInt(countRows[0]?.total || 0);
+
+      let nextCursor: Hash | undefined;
+      const lastItem = rows.at(-1);
+
+      if (lastItem) {
+        nextCursor = Hash(lastItem.hash);
+      }
+
+      return {
+        data: rows.map((row) => ({
+          fees: BigInt(row.fees || 0),
+          hash: Hash(row.hash),
+          height: BigInt(row.height),
+          slot: BigInt(row.slot),
+          time: row.time,
+          txCount: BigInt(row.txCount || 0),
+          confirmations: BigInt(row.confirmations || 0)
+        })),
+        total,
+        nextCursor
+      };
+    } finally {
+      this.gracefulRelease(client);
+    }
   }
 
   async getBlock(params: BlockReq): Promise<BlockRes> {
-    return {
-      fees: 0n,
-      hash: Hash(''),
-      height: 0n,
-      slot: 0n,
-      time: 0,
-      txCount: 0n,
-      confirmations: 0n
-    };
+    const client = await this.getClient();
+    let hash: string | null = null;
+    let height: number | null = null;
+    let slot: number | null = null;
+
+    if ('hash' in params) {
+      hash = params.hash.toString();
+    } else if ('height' in params) {
+      height = Number(params.height);
+    } else {
+      slot = Number(params.slot);
+    }
+
+    try {
+      const { rows } = await client.query<QueryTypes.Block>(SQLQuery.get('block'), [
+        hash,
+        height,
+        slot
+      ]);
+
+      if (rows.length === 0) {
+        throw new Error('Block not found');
+      }
+
+      const row = rows[0]!;
+
+      return {
+        fees: BigInt(row.fees || 0),
+        hash: Hash(row.hash),
+        height: BigInt(row.height),
+        slot: BigInt(row.slot),
+        time: row.time,
+        txCount: BigInt(row.txCount),
+        confirmations: BigInt(row.confirmations || 0)
+      };
+    } finally {
+      this.gracefulRelease(client);
+    }
   }
 
-  async getEpochs(params: EpochsReq): Promise<EpochsRes> {
-    return {
-      data: [],
-      total: 0n,
-      nextCursor: 0n
-    };
+  async getEpochs({ before, limit }: EpochsReq): Promise<EpochsRes> {
+    const client = await this.getClient();
+
+    try {
+      const { rows: epochsRows } = await client.query<QueryTypes.Epoch>(SQLQuery.get('epochs'), [
+        before ? Number(before) : null,
+        limit
+      ]);
+      const total = 0n; // TODO: Implement getEpochs total count
+
+      let nextCursor: bigint | undefined;
+      const lastItem = epochsRows.at(-1);
+
+      if (lastItem) {
+        nextCursor = BigInt(lastItem.epoch);
+      }
+
+      return {
+        data: epochsRows.map((row) => ({
+          epoch: BigInt(row.epoch),
+          startTime: row.startTime,
+          endTime: row.endTime,
+          txCount: BigInt(row.txCount),
+          blkCount: BigInt(row.blkCount),
+          output: BigInt(row.output),
+          fees: BigInt(row.fees),
+          index: BigInt(row.epoch),
+          startSlot: 0n, // TODO: Fetch separate start slot
+          endSlot: 0n, // TODO: Fetch separate end slot
+          startHeight: 0n, // TODO: Fetch separate start height
+          endHeight: 0n,
+          blocksProduced: 0n,
+          blocks: []
+        })),
+        total,
+        nextCursor
+      };
+    } finally {
+      this.gracefulRelease(client);
+    }
   }
 
   async close(): Promise<void> {

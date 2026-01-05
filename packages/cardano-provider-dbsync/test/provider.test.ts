@@ -154,7 +154,6 @@ describe('DbSyncProvider', () => {
     it('should filter transactions by address', async () => {
       const latest = await provider.getLatestTx();
       const address = latest.outputs[0].address;
-      console.log(address);
 
       const filtered = await provider.getTxs({
         limit: 5,
