@@ -70,7 +70,17 @@ describe('DbSyncProvider', () => {
     const { data: bfTx } = await bfTxClient.txsHashGet(hash);
     const { data: bfUtxos } = await bfTxClient.txsHashUtxosGet(hash);
 
-    console.dir({ tx, bfTx, bfUtxos }, { depth: null });
+    expect(tx).toEqualBfTx({ tx: bfTx, utxos: bfUtxos });
+  });
+
+  it('should fetch transaction with mints', async () => {
+    const hash = Hash('e4ad1bdbeac49e485618c5a2f373b4c5b26669a78cf4e41e6932e4b0680c4c24');
+    const tx = await provider.getTx({ hash });
+    expect(tx).toBeDefined();
+    expect(tx.hash).toEqual(hash);
+
+    const { data: bfTx } = await bfTxClient.txsHashGet(hash);
+    const { data: bfUtxos } = await bfTxClient.txsHashUtxosGet(hash);
 
     expect(tx).toEqualBfTx({ tx: bfTx, utxos: bfUtxos });
   });

@@ -74,7 +74,6 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
       const { rows } = await client.query<QueryTypes.LatestTx>(SQLQuery.get('tx_by_hash'), [
         hash.toString()
       ]);
-      console.dir(rows, { depth: null });
 
       if (rows.length === 0) {
         throw new Error('Transaction not found');
