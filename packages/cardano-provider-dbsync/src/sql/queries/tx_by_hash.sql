@@ -42,9 +42,9 @@ WITH
             JOIN multi_asset ma ON ma.id = mto.ident
         WHERE
             mto.tx_out_id IN (
-                SELECT tx_out_id
-                FROM tx_in
-                    JOIN target_txs ON target_txs.id = tx_in.tx_in_id
+                SELECT tx_out.id
+                FROM tx_out
+                    JOIN target_txs ON target_txs.id = tx_out.consumed_by_tx_id
                 UNION
                 SELECT tx_out_id
                 FROM reference_tx_in
