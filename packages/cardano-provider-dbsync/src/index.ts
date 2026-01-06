@@ -1,4 +1,6 @@
 import {
+  AddressFundsRes,
+  AddressFundsReq,
   BlockReq,
   BlockRes,
   BlocksReq,
@@ -9,19 +11,30 @@ import {
   TxsReq,
   TxsRes,
   type ChainProvider,
-  type TxReq
+  type TxReq,
 } from '@alexandria/provider-core';
 import type { Cardano } from '@alexandria/types';
 import { cardano, HexString, hexToBech32, isBase58 } from '@alexandria/types';
+import {
+  cardano,
+  HexString,
+  hexToBech32,
+  isBase58,
+  Address,
+  Unit,
+  DatumType
+} from '@alexandria/types';
 import { Hash } from '@alexandria/types';
 import type { Pool, PoolClient } from 'pg';
-import { mapTx } from './mappers';
+import { mapTx, mapUtxo } from './mappers';
 import { SQLQuery } from './sql';
 import type * as QueryTypes from './types/queries';
 
 export type DbSyncParams = {
   pool: Pool;
 };
+
+const ADDR_PREFIX = 'addr';
 
 export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano> {
   private pool: Pool;
@@ -36,6 +49,14 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
   private gracefulRelease(client: PoolClient): void {
     client.release();
+  }
+
+  /**
+   * If address is in base58 format, return as it is (Byron format).
+   * Otherwise return in hex format.
+   */
+  private normalizeAddress(address: string, prefix: string): string {
+    return isBase58(address) ? address : hexToBech32(HexString(address), prefix);
   }
 
   async readTip(): Promise<{ hash: Hash; slot: bigint }> {
@@ -54,6 +75,35 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     }
   }
 
+  async getAddressFunds(params: AddressFundsReq): Promise<AddressFundsRes> {
+    const client = await this.getClient();
+    try {
+      const address = this.normalizeAddress(params.address, ADDR_PREFIX);
+
+      const { rows } = await client.query<QueryTypes.AddressFunds>(SQLQuery.get('address_funds'), [
+        address
+      ]);
+
+      if (rows.length === 0) {
+        return { [Unit('lovelace')]: 0n };
+      }
+
+      const row = rows[0]!;
+      const result: AddressFundsRes = {
+        [Unit('lovelace')]: BigInt(row.lovelace || '0')
+      };
+
+      if (row.assets && typeof row.assets === 'object') {
+        for (const [unit, quantity] of Object.entries(row.assets)) {
+          result[Unit(unit)] = BigInt(quantity);
+        }
+      }
+
+      return result;
+    } finally {
+      this.gracefulRelease(client);
+    }
+  }
   async getLatestTx(): Promise<LatestTxRes<cardano.UTxO, cardano.Tx, Cardano>> {
     const client = await this.getClient();
     try {
