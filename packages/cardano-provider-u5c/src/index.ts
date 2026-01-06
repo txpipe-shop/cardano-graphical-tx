@@ -1,4 +1,10 @@
 import {
+  AddressFundsReq,
+  AddressFundsRes,
+  AddressUTxOsReq,
+  AddressUTxOsRes,
+  BlockReq,
+  BlockRes,
   BlocksReq,
   BlocksRes,
   EpochsReq,
@@ -31,6 +37,37 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
   constructor({ transport }: Params) {
     this.utxoRpc = new UtxoRpcClient({ transport });
+  }
+
+  async getBlock(_params: BlockReq): Promise<BlockRes> {
+    return {
+      fees: 0n,
+      hash: Hash(''),
+      height: 0n,
+      slot: 0n,
+      time: 0,
+      txCount: 0n,
+      confirmations: 0n
+    };
+  }
+  async getBlocks(_params: BlocksReq): Promise<BlocksRes> {
+    return {
+      nextCursor: undefined,
+      total: 0n,
+      data: []
+    };
+  }
+
+  async getAddressUTxOs(_params: AddressUTxOsReq): Promise<AddressUTxOsRes<cardano.UTxO>> {
+    return {
+      data: [],
+      nextCursor: undefined,
+      total: 0n
+    };
+  }
+
+  async getAddressFunds(_params: AddressFundsReq): Promise<AddressFundsRes> {
+    return {};
   }
 
   async readTip(): Promise<{ hash: Hash; slot: bigint }> {
@@ -134,9 +171,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       nextCursor: undefined
     };
   }
-  async getBlocks(_params: BlocksReq): Promise<BlocksRes> {
-    return { data: [], total: 0n, nextCursor: undefined };
-  }
+
   async getEpochs(_params: EpochsReq): Promise<EpochsRes> {
     return { data: [], total: 0n, nextCursor: undefined };
   }
