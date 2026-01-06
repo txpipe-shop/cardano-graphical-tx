@@ -175,13 +175,13 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
       return {
         data: rows.map((row) => ({
-          fees: BigInt(row.fees || 0),
+          fees: BigInt(row.fees),
           hash: Hash(row.hash),
           height: BigInt(row.height),
           slot: BigInt(row.slot),
           time: row.time,
-          txCount: BigInt(row.txCount || 0),
-          confirmations: BigInt(row.confirmations || 0)
+          txCount: BigInt(row.txCount),
+          confirmations: BigInt(row.confirmations)
         })),
         total,
         nextCursor
@@ -240,7 +240,9 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         before ? Number(before) : null,
         limit
       ]);
-      const total = 0n; // TODO: Implement getEpochs total count
+      const { rows: epochsCountRows } = await client.query<QueryTypes.TotalEpochs>(
+        SQLQuery.get('epochs_count')
+      );
 
       let nextCursor: bigint | undefined;
       const lastItem = epochsRows.at(-1);
@@ -255,17 +257,16 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
           startTime: row.startTime,
           endTime: row.endTime,
           txCount: BigInt(row.txCount),
-          blkCount: BigInt(row.blkCount),
+          blocksProduced: BigInt(row.blkCount),
           output: BigInt(row.output),
           fees: BigInt(row.fees),
           index: BigInt(row.epoch),
-          startSlot: 0n, // TODO: Fetch separate start slot
-          endSlot: 0n, // TODO: Fetch separate end slot
-          startHeight: 0n, // TODO: Fetch separate start height
-          endHeight: 0n,
-          blocksProduced: 0n
+          startSlot: 0n,
+          endSlot: 0n,
+          startHeight: 0n,
+          endHeight: 0n
         })),
-        total,
+        total: BigInt(epochsCountRows[0]!.total),
         nextCursor
       };
     } finally {

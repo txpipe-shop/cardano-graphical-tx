@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { TxContent, TxContentUtxo } from '@alexandria/blockfrost-sdk';
+import { BlockContent, EpochContent, TxContent, TxContentUtxo } from '@alexandria/blockfrost-sdk';
 import z from 'zod';
 
 export type BfComprehensiveTx = {
@@ -9,6 +9,8 @@ export type BfComprehensiveTx = {
 
 export interface CustomMatchers<R = unknown> {
   toEqualBfTx(expected: BfComprehensiveTx): R;
+  toEqualBfBlock(expected: BlockContent): R;
+  toEqualBfEpoch(expected: EpochContent): R;
 }
 
 declare module 'vitest' {

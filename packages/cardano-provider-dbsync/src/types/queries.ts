@@ -74,6 +74,10 @@ export interface TotalBlocks {
   total: string;
 }
 
+export interface TotalEpochs {
+  total: string;
+}
+
 export interface Block {
   hash: string;
   height: string;
