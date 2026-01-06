@@ -8,64 +8,64 @@ import { registerRoutes } from './routes/index.js';
 const { Pool } = pg;
 
 export async function buildServer() {
-    // Create PostgreSQL connection pool
-    const pool = new Pool({
-        host: config.db.host,
-        port: config.db.port,
-        user: config.db.user,
-        password: config.db.password,
-        database: config.db.database,
-        max: 20,
-        idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 2000,
-    });
+  // Create PostgreSQL connection pool
+  const pool = new Pool({
+    host: config.db.host,
+    port: config.db.port,
+    user: config.db.user,
+    password: config.db.password,
+    database: config.db.database,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000
+  });
 
-    // Test database connection
-    try {
-        const client = await pool.connect();
-        client.release();
-        console.log('✓ Database connection established');
-    } catch (error) {
-        console.error('✗ Failed to connect to database:', error);
-        throw error;
+  // Test database connection
+  try {
+    const client = await pool.connect();
+    client.release();
+    console.log('✓ Database connection established');
+  } catch (error) {
+    console.error('✗ Failed to connect to database:', error);
+    throw error;
+  }
+
+  // Initialize DbSync provider
+  const dbSyncProvider = new DbSyncProvider({ pool });
+
+  // Create Fastify instance
+  const fastify = Fastify({
+    logger: {
+      level: config.server.logLevel
     }
+  });
 
-    // Initialize DbSync provider
-    const dbSyncProvider = new DbSyncProvider({ pool });
+  // Register CORS
+  await fastify.register(cors, {
+    origin: true // Allow all origins in development
+  });
 
-    // Create Fastify instance
-    const fastify = Fastify({
-        logger: {
-            level: config.server.logLevel,
-        },
-    });
+  // Make provider available to routes
+  fastify.decorate('dbSyncProvider', dbSyncProvider);
 
-    // Register CORS
-    await fastify.register(cors, {
-        origin: true, // Allow all origins in development
-    });
+  // Register routes
+  registerRoutes(fastify);
 
-    // Make provider available to routes
-    fastify.decorate('dbSyncProvider', dbSyncProvider);
+  // Health check endpoint
+  fastify.get('/health', async () => {
+    return { status: 'ok', timestamp: new Date().toISOString() };
+  });
 
-    // Register routes
-    registerRoutes(fastify);
+  // Graceful shutdown
+  const closeGracefully = async (signal: string) => {
+    console.log(`\nReceived signal to terminate: ${signal}`);
+    await fastify.close();
+    await dbSyncProvider.close();
+    process.exit(0);
+  };
 
-    // Health check endpoint
-    fastify.get('/health', async () => {
-        return { status: 'ok', timestamp: new Date().toISOString() };
-    });
+  process.on('SIGINT', () => closeGracefully('SIGINT'));
+  process.on('SIGTERM', () => closeGracefully('SIGTERM'));
 
-    // Graceful shutdown
-    const closeGracefully = async (signal: string) => {
-        console.log(`\nReceived signal to terminate: ${signal}`);
-        await fastify.close();
-        await dbSyncProvider.close();
-        process.exit(0);
-    };
-
-    process.on('SIGINT', () => closeGracefully('SIGINT'));
-    process.on('SIGTERM', () => closeGracefully('SIGTERM'));
-
-    return fastify;
+  return fastify;
 }
