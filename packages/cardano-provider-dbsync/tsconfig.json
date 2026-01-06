@@ -2,7 +2,7 @@
   "extends": "@alexandria/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "./src",
     "declaration": true,
     "declarationMap": true
   },

@@ -12,5 +12,6 @@ export {
   addManyValues,
   hexToBech32,
   isBase58,
-  bech32ToHex
+  bech32ToHex,
+  hexToAscii
 } from './utils';

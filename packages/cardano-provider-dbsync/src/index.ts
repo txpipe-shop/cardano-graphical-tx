@@ -33,15 +33,16 @@ import type * as QueryTypes from './types/queries';
 
 export type DbSyncParams = {
   pool: Pool;
+  addrPrefix: string;
 };
-
-const ADDR_PREFIX = 'addr';
 
 export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano> {
   private pool: Pool;
+  private addrPrefix: string;
 
-  constructor({ pool }: DbSyncParams) {
+  constructor({ pool, addrPrefix }: DbSyncParams) {
     this.pool = pool;
+    this.addrPrefix = addrPrefix;
   }
 
   private async getClient(): Promise<PoolClient> {
@@ -79,7 +80,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   async getAddressFunds(params: AddressFundsReq): Promise<AddressFundsRes> {
     const client = await this.getClient();
     try {
-      const address = this.normalizeAddress(params.address, ADDR_PREFIX);
+      const address = this.normalizeAddress(params.address, this.addrPrefix);
 
       const { rows } = await client.query<QueryTypes.AddressFunds>(SQLQuery.get('address_funds'), [
         address
@@ -109,7 +110,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   async getAddressUTxOs(params: AddressUTxOsReq): Promise<AddressUTxOsRes<cardano.UTxO>> {
     const client = await this.getClient();
     try {
-      const address = this.normalizeAddress(params.query.address, ADDR_PREFIX);
+      const address = this.normalizeAddress(params.query.address, this.addrPrefix);
       const offset = params.before ? Number(params.before) : 0;
       const limit = params.limit;
 
