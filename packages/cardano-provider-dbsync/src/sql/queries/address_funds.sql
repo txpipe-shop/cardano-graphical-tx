@@ -14,7 +14,7 @@ asset_balances AS (
         concat(encode(ma.policy, 'hex'), encode(ma.name, 'hex')) as unit,
         SUM(mto.quantity)::text as quantity
     FROM ma_tx_out mto
-    JOIN unspent_utxos u ON u.tx_out_id = mto.tx_out_id
+    JOIN unspent_outputs u ON u.tx_out_id = mto.tx_out_id
     JOIN multi_asset ma ON ma.id = mto.ident
     GROUP BY ma.policy, ma.name
 )
@@ -24,4 +24,4 @@ SELECT
         (SELECT json_object_agg(unit, quantity) FROM asset_balances),
         '{}'::json
     ) as assets
-FROM unspent_utxos u;
+FROM unspent_outputs u;

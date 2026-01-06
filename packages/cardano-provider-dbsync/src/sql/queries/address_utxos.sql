@@ -1,8 +1,8 @@
--- Get unspent UTXOs for an address with pagination
+-- Get unspent outpus for an address with pagination
 -- $1 = address (bech32 or base58)
 -- $2 = offset
 -- $3 = limit
-WITH unspent_utxos AS (
+WITH unspent_outputs AS (
     SELECT
         tx_out.id as tx_out_id,
         tx_out.tx_id,
@@ -21,11 +21,11 @@ WITH unspent_utxos AS (
     ORDER BY tx_out.id DESC
 ),
 total_count AS (
-    SELECT COUNT(*) as total FROM unspent_utxos
+    SELECT COUNT(*) as total FROM unspent_outputs
 ),
 paginated_utxos AS (
-    SELECT * FROM unspent_utxos
-    ORDER BY unspent_utxos.id DESC
+    SELECT * FROM unspent_outputs
+    ORDER BY unspent_outputs.tx_out_id DESC
     OFFSET $2
     LIMIT $3
 ),
@@ -41,7 +41,7 @@ utxo_assets AS (
     JOIN multi_asset ma ON ma.id = mto.ident
     GROUP BY mto.tx_out_id
 )
-SELECT 
+SELECT
     (SELECT total FROM total_count) as total,
     jsonb_agg(
         jsonb_build_object(
