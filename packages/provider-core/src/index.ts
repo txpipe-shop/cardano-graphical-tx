@@ -1,4 +1,4 @@
-import type { BaseChain, Tx, UTxO, Hash, Address } from '@alexandria/types';
+import type { BaseChain, Tx, UTxO, Hash, Address, Value } from '@alexandria/types';
 
 export type BlockReq = { hash: Hash } | { height: bigint } | { slot: bigint };
 
@@ -17,8 +17,8 @@ export type BlocksQuery = {
 /**
  * Cursor based pagination, if `before` is undefined (gets the `${limit}` latest txs)
  */
-export type PaginatedRequest<T> = {
-  before?: Hash;
+export type PaginatedRequest<Cursor, T> = {
+  before?: Cursor;
   limit: number;
   query?: T;
 };
@@ -56,11 +56,14 @@ export type Epoch = {
   txCount: bigint;
 };
 
-export type TxsReq = PaginatedRequest<TxQuery>;
-export type BlocksReq = PaginatedRequest<BlocksQuery>;
-export type EpochsReq = PaginatedRequest<undefined>;
-export type BlockRes = BlockMetadata;
+export type TxsReq = PaginatedRequest<Hash, TxQuery>;
+export type BlocksReq = PaginatedRequest<Hash, BlocksQuery>;
+export type EpochsReq = PaginatedRequest<Hash, undefined>;
+export type AddressFundsReq = { address: Address };
+// offset ordered by newest to oldest
+export type AddressUTxOsReq = PaginatedRequest<bigint, { address: Address }>;
 
+export type BlockRes = BlockMetadata;
 export type TxsRes<
   U extends UTxO,
   T extends Tx<U>,
@@ -75,9 +78,13 @@ export type LatestTxRes<
   Chain extends BaseChain<U, T>
 > = Chain['tx'];
 export type GetTxRes<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> = Chain['tx'];
+export type AddressFundsRes = Value;
+export type AddressUTxOsRes<U extends UTxO> = PaginatedResult<U, bigint>;
 
 export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> {
   getLatestTx(): Promise<LatestTxRes<U, T, Chain>>;
+  getAddressFunds(params: AddressFundsReq): Promise<AddressFundsRes>;
+  getAddressUTxOs(params: AddressUTxOsReq): Promise<AddressUTxOsRes<U>>;
   getTx(params: TxReq): Promise<GetTxRes<U, T, Chain>>;
   getTxs(params: TxsReq): Promise<TxsRes<U, T, Chain>>;
   getBlock(params: BlockReq): Promise<BlockRes>;
