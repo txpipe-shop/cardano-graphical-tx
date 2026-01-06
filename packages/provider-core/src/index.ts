@@ -20,7 +20,7 @@ export type BlocksQuery = {
 export type PaginatedRequest<Cursor, T> = {
   before?: Cursor;
   limit: number;
-  query?: T;
+  query: T;
 };
 
 export type PaginatedResult<T, Cursor> = {
@@ -56,8 +56,8 @@ export type Epoch = {
   txCount: bigint;
 };
 
-export type TxsReq = PaginatedRequest<Hash, TxQuery>;
-export type BlocksReq = PaginatedRequest<Hash, BlocksQuery>;
+export type TxsReq = PaginatedRequest<Hash, TxQuery | undefined>;
+export type BlocksReq = PaginatedRequest<Hash, BlocksQuery | undefined>;
 export type EpochsReq = PaginatedRequest<Hash, undefined>;
 export type AddressFundsReq = { address: Address };
 // offset ordered by newest to oldest

@@ -104,3 +104,15 @@ export interface AddressFunds {
   lovelace: string;
   assets: Record<string, string>;
 }
+
+export interface AddressUTxOs {
+  total: string;
+  utxos: Array<{
+    address: string;
+    coin: string;
+    outRef: { hash: string; index: number };
+    value: Record<string, string>;
+    datum?: { type: 'inline' | 'hash'; datumHex?: string; datumHash?: string } | null;
+    referenceScript?: { hash: string; type: string; bytes: string } | null;
+  }> | null;
+}

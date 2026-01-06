@@ -2,6 +2,68 @@ import type { Tx } from '@alexandria/types';
 import { Address, cardano, DatumType, Hash, HexString, Unit } from '@alexandria/types';
 import * as QueryTypes from './types/queries';
 
+export const mapScriptType = (type: string): cardano.ScriptType => {
+  switch (type) {
+    case 'timelock':
+      return cardano.ScriptType.Native;
+    case 'plutusV1':
+      return cardano.ScriptType.PlutusV1;
+    case 'plutusV2':
+      return cardano.ScriptType.PlutusV2;
+    case 'plutusV3':
+      return cardano.ScriptType.PlutusV3;
+    default:
+      return cardano.ScriptType.Native;
+  }
+};
+
+export const mapUtxo = (
+  utxo: NonNullable<QueryTypes.AddressUTxOs['utxos']>[number]
+): cardano.UTxO => {
+  let datum: cardano.UTxO['datum'] = undefined;
+  if (utxo.datum) {
+    if (utxo.datum.type === 'inline' && utxo.datum.datumHex) {
+      datum = {
+        type: DatumType.INLINE,
+        datumHex: HexString(utxo.datum.datumHex)
+      };
+    } else if (utxo.datum.type === 'hash' && utxo.datum.datumHash) {
+      datum = {
+        type: DatumType.HASH,
+        datumHashHex: Hash(utxo.datum.datumHash)
+      };
+    }
+  }
+
+  const value: Record<Unit, bigint> = {};
+  if (utxo.value && typeof utxo.value === 'object') {
+    for (const [unit, quantity] of Object.entries(utxo.value)) {
+      value[Unit(unit)] = BigInt(quantity);
+    }
+  }
+
+  let referenceScript: cardano.Script | undefined = undefined;
+  if (utxo.referenceScript) {
+    referenceScript = {
+      hash: HexString(utxo.referenceScript.hash),
+      type: mapScriptType(utxo.referenceScript.type),
+      bytes: HexString(utxo.referenceScript.bytes)
+    };
+  }
+
+  return {
+    address: Address(utxo.address),
+    coin: BigInt(utxo.coin),
+    outRef: {
+      hash: Hash(utxo.outRef.hash),
+      index: BigInt(utxo.outRef.index)
+    },
+    value,
+    datum,
+    referenceScript
+  };
+};
+
 /**
  * Map a transaction row from db-sync to CardanoTx format.
  */

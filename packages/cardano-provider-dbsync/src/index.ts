@@ -12,9 +12,10 @@ import {
   TxsRes,
   type ChainProvider,
   type TxReq,
+  AddressUTxOsReq,
+  AddressUTxOsRes
 } from '@alexandria/provider-core';
 import type { Cardano } from '@alexandria/types';
-import { cardano, HexString, hexToBech32, isBase58 } from '@alexandria/types';
 import {
   cardano,
   HexString,
@@ -53,7 +54,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
   /**
    * If address is in base58 format, return as it is (Byron format).
-   * Otherwise return in hex format.
+   * Otherwise return in bech32 format.
    */
   private normalizeAddress(address: string, prefix: string): string {
     return isBase58(address) ? address : hexToBech32(HexString(address), prefix);
@@ -104,6 +105,45 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
       this.gracefulRelease(client);
     }
   }
+
+  async getAddressUTxOs(params: AddressUTxOsReq): Promise<AddressUTxOsRes<cardano.UTxO>> {
+    const client = await this.getClient();
+    try {
+      const address = this.normalizeAddress(params.query.address, ADDR_PREFIX);
+      const offset = params.before ? Number(params.before) : 0;
+      const limit = params.limit;
+
+      const { rows } = await client.query<QueryTypes.AddressUTxOs>(SQLQuery.get('address_utxos'), [
+        address,
+        offset,
+        limit
+      ]);
+
+      if (rows.length === 0 || !rows[0]?.utxos) {
+        return {
+          data: [],
+          total: 0n,
+          nextCursor: undefined
+        };
+      }
+
+      const row = rows[0]!;
+      const total = BigInt(row.total || '0');
+      const utxos: cardano.UTxO[] = (row.utxos || []).map((utxo) => mapUtxo(utxo));
+
+      const nextOffset = offset + utxos.length;
+      const nextCursor = nextOffset < Number(total) ? BigInt(nextOffset) : undefined;
+
+      return {
+        data: utxos,
+        total,
+        nextCursor
+      };
+    } finally {
+      this.gracefulRelease(client);
+    }
+  }
+
   async getLatestTx(): Promise<LatestTxRes<cardano.UTxO, cardano.Tx, Cardano>> {
     const client = await this.getClient();
     try {
