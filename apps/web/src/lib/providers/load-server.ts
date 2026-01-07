@@ -1,4 +1,4 @@
-import type { ProviderConfig } from './types';
+import { networkToAddrPrefix, type ProviderConfig } from './types';
 import { U5CProvider } from '@alexandria/cardano-provider-u5c';
 import { createTransport as createNodeTransport } from './u5c/node-loader';
 import { DbSyncProvider } from '@alexandria/cardano-provider-dbsync';
@@ -16,7 +16,7 @@ export function loadProviderServer(config: ProviderConfig) {
     }
     case 'dbsync': {
       const pool = new Pool({ connectionString: config.connectionString });
-      return new DbSyncProvider({ pool });
+      return new DbSyncProvider({ pool, addrPrefix: networkToAddrPrefix(config.network) });
     }
     default: {
       throw new Error('Unsupported provider type for server');

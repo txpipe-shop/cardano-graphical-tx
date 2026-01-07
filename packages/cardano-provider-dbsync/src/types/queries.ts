@@ -103,6 +103,7 @@ export interface Epoch {
 export interface AddressFunds {
   lovelace: string;
   assets: Record<string, string>;
+  txCount: string;
 }
 
 export interface AddressUTxOs {

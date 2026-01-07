@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { registry } from '../openapi.js';
 
 export const NetworkSchema = z
-  .enum(['prime', 'vector', 'nexus'])
+  .enum(['prime-testnet', 'prime-mainnet', 'vector-testnet', 'vector-mainnet', 'nexus'])
   .describe('Network identifier')
   .openapi({ example: 'prime' });
 

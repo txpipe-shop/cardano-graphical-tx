@@ -1,5 +1,5 @@
 import { bech32 } from 'bech32';
-import { Address, Hash, HexString } from './utxo-model';
+import { Address, Hash, HexString, Unit } from './utxo-model';
 import { Buffer } from 'buffer';
 
 export function uint8ToHexString(arr: Uint8Array<ArrayBuffer>): HexString {
@@ -12,6 +12,14 @@ export function uint8ToHash(arr: Uint8Array<ArrayBuffer>): Hash {
 
 export function uint8ToAddr(arr: Uint8Array<ArrayBuffer>): Address {
   return Address(Buffer.from(arr).toString('hex'));
+}
+
+export function policyFromUnit(unit: Unit): HexString {
+  return unit === 'lovelace' ? HexString('') : HexString(unit.slice(0, 56));
+}
+
+export function assetNameFromUnit(unit: Unit): HexString {
+  return unit === 'lovelace' ? HexString('') : HexString(unit.slice(56));
 }
 
 export function diffValues<K extends string>(

@@ -13,5 +13,7 @@ export {
   hexToBech32,
   isBase58,
   bech32ToHex,
-  hexToAscii
+  hexToAscii,
+  policyFromUnit,
+  assetNameFromUnit
 } from './utils';

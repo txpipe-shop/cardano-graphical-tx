@@ -1,14 +1,18 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import { DbSyncProvider } from '@alexandria/cardano-provider-dbsync';
 import pg from 'pg';
 import { config } from './config.js';
 import { registerRoutes } from './routes/index.js';
 
 const { Pool } = pg;
 
+declare module 'fastify' {
+  interface FastifyInstance {
+    pgPool: import('pg').Pool;
+  }
+}
+
 export async function buildServer() {
-  // Create PostgreSQL connection pool
   const pool = new Pool({
     host: config.db.host,
     port: config.db.port,
@@ -20,7 +24,6 @@ export async function buildServer() {
     connectionTimeoutMillis: 2000
   });
 
-  // Test database connection
   try {
     const client = await pool.connect();
     client.release();
@@ -30,37 +33,25 @@ export async function buildServer() {
     throw error;
   }
 
-  // Initialize DbSync provider
-  const dbSyncProvider = new DbSyncProvider({ pool });
-
-  // Create Fastify instance
   const fastify = Fastify({
     logger: {
       level: config.server.logLevel
-    }
+    },
+    maxParamLength: 512
   });
 
-  // Register CORS
-  await fastify.register(cors, {
-    origin: true // Allow all origins in development
-  });
+  fastify.decorate('pgPool', pool);
+  await fastify.register(cors, { origin: true });
 
-  // Make provider available to routes
-  fastify.decorate('dbSyncProvider', dbSyncProvider);
-
-  // Register routes
   registerRoutes(fastify);
 
-  // Health check endpoint
-  fastify.get('/health', async () => {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+  fastify.ready().then(() => {
+    console.log('Registered routes:\n' + fastify.printRoutes());
   });
 
-  // Graceful shutdown
   const closeGracefully = async (signal: string) => {
     console.log(`\nReceived signal to terminate: ${signal}`);
     await fastify.close();
-    await dbSyncProvider.close();
     process.exit(0);
   };
 

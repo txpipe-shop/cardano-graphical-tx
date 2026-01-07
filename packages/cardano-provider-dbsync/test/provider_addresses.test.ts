@@ -41,8 +41,9 @@ describe('DbSyncProvider - Address Queries', () => {
       const funds = await provider.getAddressFunds({ address: addressWithUtxos });
 
       expect(funds).toBeDefined();
-      expect(funds[Unit('lovelace')]).toBeDefined();
-      expect(typeof funds[Unit('lovelace')]).toBe('bigint');
+      expect(funds.value[Unit('lovelace')]).toBeDefined();
+      expect(typeof funds.value[Unit('lovelace')]).toBe('bigint');
+      expect(typeof funds.txCount).toBe('bigint');
     });
 
     it('should match Blockfrost for address funds', async () => {
@@ -62,7 +63,7 @@ describe('DbSyncProvider - Address Queries', () => {
       const bfLovelace = BigInt(
         bfAddress.amount.find((a) => a.unit === 'lovelace')?.quantity || '0'
       );
-      const receivedLovelace = funds[Unit('lovelace')] || 0n;
+      const receivedLovelace = funds.value[Unit('lovelace')] || 0n;
 
       expect(receivedLovelace).toBe(bfLovelace);
 
@@ -70,12 +71,12 @@ describe('DbSyncProvider - Address Queries', () => {
       for (const asset of bfAssets) {
         const unit = Unit(asset.unit);
         const bfQuantity = BigInt(asset.quantity);
-        const receivedQuantity = funds[unit] || 0n;
+        const receivedQuantity = funds.value[unit] || 0n;
         expect(receivedQuantity).toBe(bfQuantity);
       }
 
       const bfAssetUnits = new Set(bfAssets.map((a) => a.unit));
-      for (const [unit, quantity] of Object.entries(funds)) {
+      for (const [unit, quantity] of Object.entries(funds.value)) {
         if (unit === 'lovelace') continue;
         if (!bfAssetUnits.has(unit)) {
           expect(quantity).toBe(0n);
@@ -302,10 +303,10 @@ describe('DbSyncProvider - Address Queries', () => {
         }
       }
 
-      expect(funds[Unit('lovelace')]).toBe(totalCoin);
+      expect(funds.value[Unit('lovelace')]).toBe(totalCoin);
 
       for (const [unit, quantity] of Object.entries(totalAssets)) {
-        expect(funds[Unit(unit)]).toBe(quantity);
+        expect(funds.value[Unit(unit)]).toBe(quantity);
       }
     });
   });

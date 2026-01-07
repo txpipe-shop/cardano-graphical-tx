@@ -5,10 +5,7 @@ async function start() {
   try {
     const server = await buildServer();
 
-    await server.listen({
-      port: config.server.port,
-      host: config.server.host
-    });
+    await server.listen({ port: config.server.port, host: config.server.host });
 
     console.log(`
 ╔════════════════════════════════════════════════════════╗

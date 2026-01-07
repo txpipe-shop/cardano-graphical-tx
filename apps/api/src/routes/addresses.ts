@@ -3,6 +3,17 @@ import { z } from 'zod';
 import { registry } from '../openapi.js';
 import { NetworkSchema } from '../schemas/common.js';
 import { AddressSchema } from '../schemas/models.js';
+import { Address, assetNameFromUnit, policyFromUnit, Unit } from '@alexandria/types';
+import { DbSyncProvider } from '@alexandria/cardano-provider-dbsync';
+import { networkToAddrPrefix, normalizeAddress } from '../utils.js';
+
+const AddressReqParams = z.object({
+  address: z.string().describe('Address')
+});
+
+const AddressReqQuery = z.object({
+  network: NetworkSchema
+});
 
 export async function addressRoutes(fastify: FastifyInstance) {
   registry.registerPath({
@@ -12,12 +23,8 @@ export async function addressRoutes(fastify: FastifyInstance) {
     summary: 'Get address details',
     description: 'Get detailed information about an address',
     request: {
-      params: z.object({
-        address: z.string().describe('Address')
-      }),
-      query: z.object({
-        network: NetworkSchema
-      })
+      params: AddressReqParams,
+      query: AddressReqQuery
     },
     responses: {
       200: {
@@ -35,17 +42,34 @@ export async function addressRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get('/addresses/:address', async (request, reply) => {
-    return {
-      address: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...',
-      balance: '1000000000',
-      tx_count: 50,
-      tokens: [
-        {
-          policy: 'a1b2...',
-          name: 'TestToken',
-          amount: '1000'
-        }
-      ]
+    const pool = fastify.pgPool;
+
+    const { address: rawAddress } = AddressReqParams.parse(request.params);
+    const { network } = AddressReqQuery.parse(request.query);
+
+    const address = Address(rawAddress);
+    const addrPrefix = networkToAddrPrefix(network);
+
+    const provider = new DbSyncProvider({ pool, addrPrefix });
+
+    const { txCount, value } = await provider.getAddressFunds({ address });
+    const tokens: z.infer<typeof AddressSchema>['tokens'] = [];
+    for (const [unit, amount] of Object.entries(value)) {
+      tokens.push({
+        amount: amount.toString(),
+        name: assetNameFromUnit(unit as Unit),
+        policy: policyFromUnit(unit as Unit)
+      });
+    }
+    const coin = value[Unit('lovelace')].toString();
+    const normalizedAddr = normalizeAddress(address, addrPrefix);
+
+    const response: z.infer<typeof AddressSchema> = {
+      address: normalizedAddr,
+      balance: coin,
+      tokens,
+      tx_count: Number(txCount)
     };
+    return response;
   });
 }

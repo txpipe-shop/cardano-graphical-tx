@@ -78,7 +78,7 @@ export type LatestTxRes<
   Chain extends BaseChain<U, T>
 > = Chain['tx'];
 export type GetTxRes<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> = Chain['tx'];
-export type AddressFundsRes = Value;
+export type AddressFundsRes = { value: Value; txCount: bigint };
 export type AddressUTxOsRes<U extends UTxO> = PaginatedResult<U, bigint>;
 
 export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> {

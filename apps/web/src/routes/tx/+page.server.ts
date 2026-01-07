@@ -15,7 +15,8 @@ export const load: PageServerLoad = async ({ url }) => {
       const client = loadProviderServer(providerConfig);
 
       const latestTxs = await client.getTxs({
-        limit: 20
+        limit: 20,
+        query: undefined
       });
 
       const data = {

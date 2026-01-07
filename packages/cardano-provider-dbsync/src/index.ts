@@ -87,21 +87,24 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
       ]);
 
       if (rows.length === 0) {
-        return { [Unit('lovelace')]: 0n };
+        return { value: { [Unit('lovelace')]: 0n }, txCount: 0n };
       }
 
       const row = rows[0]!;
-      const result: AddressFundsRes = {
+      const valueResult: Record<string, bigint> = {
         [Unit('lovelace')]: BigInt(row.lovelace || '0')
       };
 
       if (row.assets && typeof row.assets === 'object') {
         for (const [unit, quantity] of Object.entries(row.assets)) {
-          result[Unit(unit)] = BigInt(quantity);
+          valueResult[Unit(unit)] = BigInt(quantity);
         }
       }
 
-      return result;
+      return {
+        value: valueResult,
+        txCount: BigInt(row.txCount || '0')
+      };
     } finally {
       this.gracefulRelease(client);
     }

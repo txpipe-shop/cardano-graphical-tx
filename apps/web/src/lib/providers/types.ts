@@ -46,3 +46,20 @@ export interface ProviderStore {
   currentProvider: ProviderConfig | null;
   allProviders: ProviderConfig[];
 }
+
+export function networkToAddrPrefix(network: Network): string {
+  switch (network) {
+    case 'preview':
+    case 'preprod':
+    case 'devnet':
+    case 'afpt': {
+      return 'addr_test';
+    }
+    case 'mainnet':
+    case 'afvt':
+    case 'afvm':
+    case 'afpm': {
+      return 'addr';
+    }
+  }
+}

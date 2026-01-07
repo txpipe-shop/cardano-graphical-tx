@@ -67,7 +67,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
   }
 
   async getAddressFunds(_params: AddressFundsReq): Promise<AddressFundsRes> {
-    return {};
+    return { value: {}, txCount: 0n };
   }
 
   async readTip(): Promise<{ hash: Hash; slot: bigint }> {

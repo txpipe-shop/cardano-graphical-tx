@@ -24,4 +24,15 @@ SELECT
         (SELECT json_object_agg(unit, quantity) FROM asset_balances),
         '{}'::json
     ) as assets
+    , (
+        SELECT COALESCE(COUNT(DISTINCT t.tx_id), 0)::text
+        FROM (
+            SELECT tx_id FROM tx_out WHERE address = $1
+            UNION
+            SELECT tx_in.tx_in_id
+            FROM tx_in
+            JOIN tx_out ON tx_in.tx_out_id = tx_out.id
+            WHERE tx_out.address = $1
+        ) t
+    ) as "txCount"
 FROM unspent_outputs u;
