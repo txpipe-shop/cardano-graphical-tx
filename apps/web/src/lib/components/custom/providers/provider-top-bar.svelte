@@ -84,12 +84,9 @@
 
           {#if $currentProvider}
             <div class="text-muted-foreground flex items-start justify-start gap-2 text-sm">
-              {#if !$currentProvider.isLocal}
+              {#if !$currentProvider.browser}
                 <span>Built-in endpoint</span>
-              {:else if $currentProvider.type === 'dolos'}
-                <span class="max-w-xs truncate" title={$currentProvider.miniBfUrl}>
-                  Mini Blockfrost: {$currentProvider.miniBfUrl}
-                </span>
+              {:else if $currentProvider.type === 'u5c'}
                 <span class="max-w-xs truncate" title={$currentProvider.utxoRpcUrl}>
                   • UTxO RPC: {$currentProvider.utxoRpcUrl}
                 </span>

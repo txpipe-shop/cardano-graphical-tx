@@ -1,19 +1,20 @@
 <script lang="ts">
   import { navigating } from '$app/stores';
-  import { createProviderClient } from '@/client/provider-loader';
   import TxTable from '@/components/custom/tx-table/tx-table.svelte';
   import { Button } from '@/components/ui/button';
   import { Card, CardContent } from '@/components/ui/card';
   import { Input } from '@/components/ui/input';
   import { currentProvider } from '@/stores/provider-store';
-  import type { cardano } from '@alexandria/types';
-  import type { ProviderConfig } from '@/client';
+  import type { Cardano, cardano } from '@alexandria/types';
+  import type { ChainProvider } from '@alexandria/provider-core';
+  import type { ProviderConfig } from '@/providers/types';
+  import { loadProviderClient } from '@/providers/load-client';
 
   let isLoading = $derived($navigating !== null);
 
   interface Props {
     data: {
-      transactions: cardano.Tx[];
+      transactions: Awaited<ReturnType<ChainProvider<cardano.UTxO, cardano.Tx, Cardano>['getTxs']>>;
       isServerLoaded: boolean;
     };
   }
@@ -25,7 +26,7 @@
   let clientError = $state<string | null>(null);
 
   $effect(() => {
-    if (!data.isServerLoaded && $currentProvider && $currentProvider.isLocal) {
+    if (!data.isServerLoaded && $currentProvider && $currentProvider.browser) {
       clientLoading = true;
       clientError = null;
 
@@ -39,19 +40,19 @@
     }
   });
   async function loadCustomProviderData(provider: ProviderConfig) {
-    const client = createProviderClient(provider);
-
-    const tx = await client.getLatestTx({ maxFetch: -1 });
+    const client = loadProviderClient(provider);
 
     const txs = await client.getTxs({
-      before: tx.hash,
-      limit: 100
+      limit: 100,
+      query: undefined
     });
 
-    clientTransactions = txs;
+    clientTransactions = txs.data;
   }
 
-  let displayTransactions = $derived(data.isServerLoaded ? data.transactions : clientTransactions);
+  let displayTransactions = $derived(
+    data.isServerLoaded ? data.transactions.data : clientTransactions
+  );
 
   let txHash = $state('');
 

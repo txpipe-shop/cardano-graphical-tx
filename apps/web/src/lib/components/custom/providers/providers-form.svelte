@@ -2,22 +2,34 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { allProviders, currentProvider, providerStore } from '@/stores/provider-store';
-  import { LOCAL_PROVIDER_ID, type Network, type ProviderConfig } from '@/client';
   import { Badge } from '../../ui/badge';
   import { Button } from '../../ui/button';
   import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
   import { Input } from '../../ui/input';
   import { Select } from '../../ui/select';
   import { getNetworkColor, getProviderTypeColor } from './color-utils';
+  import {
+    isU5CProvider,
+    LOCAL_PROVIDER_ID,
+    type Network,
+    type ProviderConfig,
+    type U5CConfig
+  } from '@/providers/types';
 
   let { showCustomForm = $bindable() } = $props();
 
-  let utxoRpcUrl = $derived(
-    $allProviders.find((p) => p.id === LOCAL_PROVIDER_ID)?.utxoRpcUrl || ''
-  );
-  let miniBfUrl = $derived($allProviders.find((p) => p.id === LOCAL_PROVIDER_ID)?.miniBfUrl || '');
+  const u5cProviders: U5CConfig = $allProviders
+    .filter((p) => p.id === LOCAL_PROVIDER_ID && isU5CProvider(p))
+    .map((p) => {
+      if (isU5CProvider(p)) {
+        return p;
+      }
+      throw new Error('Invalid U5C provider');
+    })[0];
 
-  let customNetwork = $state<Network>('custom');
+  let utxoRpcUrl = $derived(u5cProviders?.utxoRpcUrl || '');
+
+  let customNetwork = $state<Network>('devnet');
 
   function resetCustomForm() {
     showCustomForm = false;
@@ -33,7 +45,7 @@
 
   function handleEditLocalProvider() {
     let provider: ProviderConfig;
-    if (!customNetwork || !utxoRpcUrl.trim() || !miniBfUrl.trim()) {
+    if (!customNetwork || !utxoRpcUrl.trim()) {
       console.log('Invalid custom provider data');
       return;
     }
@@ -42,12 +54,12 @@
       id: LOCAL_PROVIDER_ID,
       description:
         'UTxORPC + MiniBlockfrost services for Cardano Local testnet. Not realiable for older queries',
-      isLocal: true,
+      browser: true,
       name: 'Local (Dolos)',
       network: customNetwork,
-      type: 'dolos',
+      type: 'u5c',
       utxoRpcUrl: utxoRpcUrl.trim(),
-      miniBfUrl: miniBfUrl.trim()
+      isActive: true
     };
 
     providerStore.updateLocalProvider(provider);
@@ -68,10 +80,6 @@
     <CardContent class="h-30 flex flex-col justify-between gap-4">
       <div class="flex w-full gap-4">
         <div class="w-full space-y-2">
-          <label for="blockfrost-url" class="text-sm font-medium">Mini Blockfrost URL</label>
-          <Input id="blockfrost-url" bind:value={miniBfUrl} />
-        </div>
-        <div class="w-full space-y-2">
           <label for="utxorpc-url" class="text-sm font-medium">UTxO RPC URL</label>
           <Input id="utxorpc-url" bind:value={utxoRpcUrl} />
         </div>
@@ -91,10 +99,7 @@
 
       <div class="flex justify-end gap-2">
         <Button variant="outline" onclick={resetCustomForm}>Cancel</Button>
-        <Button
-          onclick={handleEditLocalProvider}
-          disabled={!miniBfUrl.trim() || !utxoRpcUrl.trim() || !customNetwork}
-        >
+        <Button onclick={handleEditLocalProvider} disabled={!utxoRpcUrl.trim() || !customNetwork}>
           Save
         </Button>
       </div>
@@ -109,7 +114,7 @@
             <div class="space-y-3">
               <div class="flex items-center gap-2">
                 <h4 class="font-medium">{provider.name}</h4>
-                {#if provider.isLocal}
+                {#if provider.browser}
                   <Badge variant="secondary" class="text-xs">Local</Badge>
                 {/if}
               </div>

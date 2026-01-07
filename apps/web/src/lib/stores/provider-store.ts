@@ -1,5 +1,10 @@
 import { browser } from '$app/environment';
-import { LOCAL_PROVIDER_ID, type ProviderConfig, type ProviderStore } from '@/client';
+import {
+  LOCAL_PROVIDER_ID,
+  type ProviderConfig,
+  type ProviderStore,
+  type U5CConfig
+} from '@/providers/types';
 import { derived, writable } from 'svelte/store';
 
 const CURRENT_PROVIDER_KEY = 'explorer-current-provider';
@@ -76,7 +81,7 @@ function createProviderStore() {
         ];
       }
 
-      let currentProvider = null;
+      let currentProvider: ProviderConfig | null = null;
 
       if (storedProviderId)
         currentProvider = allProviders.find((p) => p.id === storedProviderId) ?? null;
@@ -88,11 +93,12 @@ function createProviderStore() {
         currentProvider
       }));
     },
-    updateLocalProvider: (updates: Partial<ProviderConfig>) => {
+
+    updateLocalProvider: (updates: Partial<U5CConfig>) => {
       update((state) => {
         const localProvider = state.allProviders
           .filter((p) => p.id === LOCAL_PROVIDER_ID)
-          .map((p) => ({ ...p, ...updates }))[0];
+          .map((p) => ({ ...p, ...updates }))[0] as U5CConfig;
         saveLocalProviderToStorage(localProvider);
         if (state.currentProvider?.id === LOCAL_PROVIDER_ID) {
           state.currentProvider = localProvider;
@@ -113,8 +119,8 @@ function createProviderStore() {
       update((state) => ({
         ...state,
         customProviders: [],
-        allProviders: state.allProviders.filter((p) => !p.isLocal),
-        currentProvider: state.allProviders.find((p) => !p.isLocal) || null
+        allProviders: state.allProviders.filter((p) => !p.browser),
+        currentProvider: state.allProviders.find((p) => !p.browser) || null
       }));
     },
     reset: () => set(initialState)

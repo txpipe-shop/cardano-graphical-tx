@@ -3,9 +3,10 @@
   import { providerStore } from '@/stores/provider-store';
   import { onMount, type Snippet } from 'svelte';
   import '../app.css';
+  import type { ProviderConfig } from '@/providers/types';
 
   interface Props {
-    data: { providers: import('@/client').ProviderConfig[] };
+    data: { providers: ProviderConfig[] };
     children: Snippet;
   }
 

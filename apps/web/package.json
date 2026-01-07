@@ -15,7 +15,6 @@
   },
   "devDependencies": {
     "@alexandria/typescript-config": "workspace:*",
-    "@alexandria/utxorpc-sdk": "workspace:*",
     "@eslint/compat": "^1.2.5",
     "@eslint/js": "^9.18.0",
     "@internationalized/date": "^3.8.1",
@@ -28,6 +27,7 @@
     "@tailwindcss/typography": "^0.5.15",
     "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^24.1.0",
+    "@types/pg": "^8.11.10",
     "bits-ui": "^2.8.6",
     "clsx": "^2.1.1",
     "eslint": "^9.18.0",
@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "@alexandria/blockfrost-sdk": "workspace:*",
+    "@alexandria/cardano-provider-dbsync": "workspace:*",
     "@alexandria/cardano-provider-u5c": "workspace:*",
     "@alexandria/provider-core": "workspace:*",
     "@alexandria/types": "workspace:*",
@@ -73,6 +74,7 @@
     "cbor2": "latest",
     "dotenv": "^17.2.2",
     "konva": "^9.3.22",
+    "pg": "^8.13.1",
     "svelte-konva": "^0.3.1",
     "vite-plugin-wasm": "^3.5.0",
     "zod": "^4.0.14"

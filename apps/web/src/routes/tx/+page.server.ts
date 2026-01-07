@@ -1,6 +1,6 @@
-import { createProviderServer } from '@/server/provider-loader';
-import { getProviderById } from '@/server/provider-config';
+import { getProviderById } from '@/providers/config';
 import type { PageServerLoad } from './$types';
+import { loadProviderServer } from '@/providers/load-server';
 
 export const load: PageServerLoad = async ({ url }) => {
   const providerId = url.searchParams.get('provider');
@@ -10,15 +10,12 @@ export const load: PageServerLoad = async ({ url }) => {
 
   const providerConfig = getProviderById(providerId);
 
-  if (!providerConfig?.isLocal && providerConfig) {
+  if (providerConfig && !providerConfig.browser) {
     try {
-      const client = createProviderServer(providerConfig);
-
-      const tx = await client.getLatestTx({ maxFetch: 100 });
+      const client = loadProviderServer(providerConfig);
 
       const latestTxs = await client.getTxs({
-        before: tx.hash,
-        limit: 10
+        limit: 20
       });
 
       const data = {

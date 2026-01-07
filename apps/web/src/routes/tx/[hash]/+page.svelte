@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { createProviderClient } from '@/client/provider-loader';
   import Cbor from '@/components/custom/cbor.svelte';
   import Datum from '@/components/custom/datum.svelte';
   import Diagram from '@/components/custom/diagram/diagram.svelte';
@@ -9,9 +8,10 @@
   import Scripts from '@/components/custom/scripts.svelte';
   import { Button } from '@/components/ui/button';
   import { Card, CardContent } from '@/components/ui/card';
+  import { loadProviderClient } from '@/providers/load-client';
+  import type { ProviderConfig } from '@/providers/types';
   import { currentProvider } from '@/stores/provider-store';
   import type { cardano } from '@alexandria/types';
-  import type { ProviderConfig } from '@/client';
 
   interface Props {
     data: {
@@ -38,7 +38,7 @@
   let cbor = $derived<string>(data.cbor ?? '');
 
   $effect(() => {
-    if (!data.isServerLoaded && $currentProvider && $currentProvider.isLocal) {
+    if (!data.isServerLoaded && $currentProvider && $currentProvider.browser) {
       clientLoading = true;
       clientError = null;
 
@@ -54,7 +54,7 @@
   });
 
   async function loadCustomProviderData(provider: ProviderConfig) {
-    const client = createProviderClient(provider);
+    const client = loadProviderClient(provider);
     const hash = $page.params.hash as unknown as import('@alexandria/types').Hash;
     clientTx = await client.getTx({ hash });
     try {
