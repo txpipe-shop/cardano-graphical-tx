@@ -23,6 +23,9 @@ importers:
       '@alexandria/cardano-provider-dbsync':
         specifier: workspace:*
         version: link:../../packages/cardano-provider-dbsync
+      '@alexandria/provider-core':
+        specifier: workspace:*
+        version: link:../../packages/provider-core
       '@alexandria/types':
         specifier: workspace:*
         version: link:../../packages/types

@@ -25,6 +25,8 @@ const app = fastify({
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
+// TODO: add multiple network support (multiple pools per each one, each with its own prefix). Monolith. Otherwise to allow individual scaling, each instance can handle a single network -> At this point it's overengineering
+
 const start = async () => {
   try {
     const openApiParams = {
