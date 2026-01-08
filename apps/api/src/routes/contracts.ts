@@ -1,85 +1,63 @@
 import { FastifyInstance } from 'fastify';
+import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { registry } from '../openapi.js';
-import { NetworkSchema, LimitSchema, OffsetSchema } from '../schemas/common.js';
-import { ContractsResponseSchema, ContractSchema } from '../schemas/models.js';
+import * as schemas from '../schemas';
 
-export async function contractsRoutes(fastify: FastifyInstance) {
-  registry.registerPath({
-    method: 'get',
-    path: '/contracts',
-    tags: ['Contracts'],
-    summary: 'List smart contracts',
-    description: 'Get paginated list of verified smart contracts',
-    request: {
-      query: z.object({
-        network: NetworkSchema,
-        limit: LimitSchema,
-        offset: OffsetSchema,
-        search: z.string().optional().describe('Search by contract name or address')
-      })
+export async function contractsRoutes(app: FastifyInstance) {
+  const server = app.withTypeProvider<ZodTypeProvider>();
+
+  server.get(
+    '/contracts',
+    {
+      schema: {
+        tags: ['Contracts'],
+        querystring: z.object({
+          network: schemas.NetworkSchema,
+          limit: z.coerce.number().min(1).max(100).default(20),
+          offset: z.coerce.number().min(0).default(0),
+          search: z.string().optional()
+        }),
+        response: {
+          200: schemas.ContractsResponseSchema
+        }
+      }
     },
-    responses: {
-      200: {
-        description: 'Successful response',
-        content: {
-          'application/json': {
-            schema: ContractsResponseSchema
-          }
+    async (request, reply) => {
+      return {
+        contracts: [],
+        pagination: {
+          total: 0,
+          limit: request.query.limit,
+          offset: request.query.offset,
+          hasMore: false
         }
-      },
-      400: { $ref: '#/components/responses/BadRequest' },
-      500: { $ref: '#/components/responses/InternalServerError' }
+      };
     }
-  });
+  );
 
-  fastify.get('/contracts', async (request, reply) => {
-    return {
-      contracts: [
-        {
-          address: '0xabc...',
-          name: 'MyContract',
-          verified: true
+  server.get(
+    '/contracts/:address',
+    {
+      schema: {
+        tags: ['Contracts'],
+        params: z.object({
+          address: z.string()
+        }),
+        querystring: z.object({
+          network: schemas.NetworkSchema
+        }),
+        response: {
+          200: schemas.ContractSchema
         }
-      ]
-    };
-  });
-
-  registry.registerPath({
-    method: 'get',
-    path: '/contracts/{address}',
-    tags: ['Contracts'],
-    summary: 'Get contract details',
-    description: 'Get detailed information about a smart contract',
-    request: {
-      params: z.object({
-        address: z.string().describe('Contract address')
-      }),
-      query: z.object({
-        network: NetworkSchema
-      })
+      }
     },
-    responses: {
-      200: {
-        description: 'Successful response',
-        content: {
-          'application/json': {
-            schema: ContractSchema
-          }
-        }
-      },
-      404: { $ref: '#/components/responses/NotFound' },
-      400: { $ref: '#/components/responses/BadRequest' },
-      500: { $ref: '#/components/responses/InternalServerError' }
+    async (request, reply) => {
+      return {
+        address: request.params.address,
+        name: 'Mock Contract',
+        verified: false,
+        tx_count: 0
+      };
     }
-  });
-
-  fastify.get('/contracts/:address', async (request, reply) => {
-    return {
-      address: '0xabc...',
-      name: 'MyContract',
-      verified: true,
-      source_code: '// source code'
-    };
-  });
+  );
 }

@@ -1,41 +1,31 @@
 import { FastifyInstance } from 'fastify';
+import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { registry } from '../openapi.js';
-import { NetworkSchema } from '../schemas/common.js';
-import { GasEstimateSchema } from '../schemas/models.js';
+import * as schemas from '../schemas';
 
-export async function gasRoutes(fastify: FastifyInstance) {
-  registry.registerPath({
-    method: 'get',
-    path: '/gas',
-    tags: ['Gas'],
-    summary: 'Get gas price estimates',
-    description: 'Get gas price estimates for different transaction speeds',
-    request: {
-      query: z.object({
-        network: NetworkSchema
-      })
-    },
-    responses: {
-      200: {
-        description: 'Successful response',
-        content: {
-          'application/json': {
-            schema: GasEstimateSchema
-          }
+export async function gasRoutes(app: FastifyInstance) {
+  const server = app.withTypeProvider<ZodTypeProvider>();
+
+  server.get(
+    '/gas',
+    {
+      schema: {
+        tags: ['Gas'],
+        querystring: z.object({
+          network: schemas.NetworkSchema
+        }),
+        response: {
+          200: schemas.GasEstimateSchema
         }
-      },
-      400: { $ref: '#/components/responses/BadRequest' },
-      500: { $ref: '#/components/responses/InternalServerError' }
+      }
+    },
+    async (request, reply) => {
+      return {
+        slow: { gwei: 1.0, dfm: 0.000000001, time: '~5 min' },
+        standard: { gwei: 2.0, dfm: 0.000000002, time: '~2 min' },
+        fast: { gwei: 3.0, dfm: 0.000000003, time: '~30 sec' },
+        instant: { gwei: 5.0, dfm: 0.000000005, time: '~15 sec' }
+      };
     }
-  });
-
-  fastify.get('/gas', async (request, reply) => {
-    return {
-      slow: '10',
-      standard: '15',
-      fast: '20',
-      timestamp: '2024-01-15T10:30:00Z'
-    };
-  });
+  );
 }

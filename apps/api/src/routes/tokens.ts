@@ -1,217 +1,154 @@
 import { FastifyInstance } from 'fastify';
+import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { registry } from '../openapi.js';
-import { NetworkSchema, LimitSchema, OffsetSchema } from '../schemas/common.js';
-import {
-  TokensResponseSchema,
-  TokenSchema,
-  TokenHoldersResponseSchema,
-  TokenTransfersResponseSchema
-} from '../schemas/models.js';
+import * as schemas from '../schemas';
 
-export async function tokensRoutes(fastify: FastifyInstance) {
-  registry.registerPath({
-    method: 'get',
-    path: '/tokens',
-    tags: ['Tokens'],
-    summary: 'List tokens',
-    description: 'Get paginated list of tokens',
-    request: {
-      query: z.object({
-        network: NetworkSchema,
-        limit: LimitSchema,
-        offset: OffsetSchema
-      })
+export async function tokensRoutes(app: FastifyInstance) {
+  const server = app.withTypeProvider<ZodTypeProvider>();
+
+  server.get(
+    '/tokens',
+    {
+      schema: {
+        tags: ['Tokens'],
+        querystring: z.object({
+          network: schemas.NetworkSchema,
+          limit: z.coerce.number().min(1).max(100).default(20),
+          offset: z.coerce.number().min(0).default(0)
+        }),
+        response: {
+          200: schemas.TokensResponseSchema
+        }
+      }
     },
-    responses: {
-      200: {
-        description: 'Successful response',
-        content: {
-          'application/json': {
-            schema: TokensResponseSchema
-          }
+    async (request, reply) => {
+      return {
+        tokens: [],
+        pagination: {
+          total: 0,
+          limit: request.query.limit,
+          offset: request.query.offset,
+          hasMore: false
         }
-      },
-      400: { $ref: '#/components/responses/BadRequest' },
-      500: { $ref: '#/components/responses/InternalServerError' }
+      };
     }
-  });
+  );
 
-  fastify.get('/tokens', async (request, reply) => {
-    return {
-      tokens: [
-        {
-          identifier: 'a1b2...',
-          name: 'TestToken',
-          ticker: 'TST',
-          total_supply: '1000000'
+  server.get(
+    '/tokens/:identifier',
+    {
+      schema: {
+        tags: ['Tokens'],
+        params: z.object({
+          identifier: z.string()
+        }),
+        querystring: z.object({
+          network: schemas.NetworkSchema
+        }),
+        response: {
+          200: schemas.TokenSchema
         }
-      ]
-    };
-  });
-
-  registry.registerPath({
-    method: 'get',
-    path: '/tokens/{identifier}',
-    tags: ['Tokens'],
-    summary: 'Get token details',
-    description: 'Get detailed information about a specific token',
-    request: {
-      params: z.object({
-        identifier: z.string().describe('Token identifier')
-      }),
-      query: z.object({
-        network: NetworkSchema
-      })
+      }
     },
-    responses: {
-      200: {
-        description: 'Successful response',
-        content: {
-          'application/json': {
-            schema: TokenSchema
-          }
-        }
-      },
-      404: { $ref: '#/components/responses/NotFound' },
-      400: { $ref: '#/components/responses/BadRequest' },
-      500: { $ref: '#/components/responses/InternalServerError' }
+    async (request, reply) => {
+      return {
+        name: 'Mock Token',
+        symbol: 'MTK',
+        decimals: 18,
+        total_supply: '0',
+        total_supply_formatted: '0'
+      };
     }
-  });
+  );
 
-  fastify.get('/tokens/:identifier', async (request, reply) => {
-    return {
-      identifier: 'a1b2c3d4e5f6...',
-      name: 'TestToken',
-      ticker: 'TST',
-      total_supply: '1000000'
-    };
-  });
-
-  registry.registerPath({
-    method: 'get',
-    path: '/tokens/{identifier}/holders',
-    tags: ['Tokens'],
-    summary: 'Get token holders',
-    description: 'Get paginated list of token holders',
-    request: {
-      params: z.object({
-        identifier: z.string().describe('Token identifier')
-      }),
-      query: z.object({
-        network: NetworkSchema,
-        limit: LimitSchema,
-        offset: OffsetSchema
-      })
+  server.get(
+    '/tokens/:identifier/holders',
+    {
+      schema: {
+        tags: ['Tokens'],
+        params: z.object({
+          identifier: z.string()
+        }),
+        querystring: z.object({
+          network: schemas.NetworkSchema,
+          limit: z.coerce.number().min(1).max(100).default(20),
+          offset: z.coerce.number().min(0).default(0)
+        }),
+        response: {
+          200: schemas.TokenHoldersResponseSchema
+        }
+      }
     },
-    responses: {
-      200: {
-        description: 'Successful response',
-        content: {
-          'application/json': {
-            schema: TokenHoldersResponseSchema
-          }
+    async (request, reply) => {
+      return {
+        holders: [],
+        pagination: {
+          total: 0,
+          limit: request.query.limit,
+          offset: request.query.offset,
+          hasMore: false
         }
-      },
-      400: { $ref: '#/components/responses/BadRequest' },
-      500: { $ref: '#/components/responses/InternalServerError' }
+      };
     }
-  });
+  );
 
-  fastify.get('/tokens/:identifier/holders', async (request, reply) => {
-    return {
-      holders: [
-        {
-          address: '0x123...',
-          amount: '100'
+  server.get(
+    '/tokens/:identifier/transfers',
+    {
+      schema: {
+        tags: ['Tokens'],
+        params: z.object({
+          identifier: z.string()
+        }),
+        querystring: z.object({
+          network: schemas.NetworkSchema,
+          limit: z.coerce.number().min(1).max(100).default(20),
+          offset: z.coerce.number().min(0).default(0)
+        }),
+        response: {
+          200: schemas.TokenTransfersResponseSchema
         }
-      ]
-    };
-  });
-
-  registry.registerPath({
-    method: 'get',
-    path: '/tokens/{identifier}/transfers',
-    tags: ['Tokens'],
-    summary: 'Get token transfers',
-    description: 'Get paginated list of token transfers for a specific token',
-    request: {
-      params: z.object({
-        identifier: z.string().describe('Token identifier')
-      }),
-      query: z.object({
-        network: NetworkSchema,
-        limit: LimitSchema,
-        offset: OffsetSchema
-      })
+      }
     },
-    responses: {
-      200: {
-        description: 'Successful response',
-        content: {
-          'application/json': {
-            schema: TokenTransfersResponseSchema
-          }
+    async (request, reply) => {
+      return {
+        transfers: [],
+        pagination: {
+          total: 0,
+          limit: request.query.limit,
+          offset: request.query.offset,
+          hasMore: false
         }
-      },
-      400: { $ref: '#/components/responses/BadRequest' },
-      500: { $ref: '#/components/responses/InternalServerError' }
+      };
     }
-  });
+  );
 
-  fastify.get('/tokens/:identifier/transfers', async (request, reply) => {
-    return {
-      transfers: [
-        {
-          tx_hash: '0xabc...',
-          from_address: '0x123...',
-          to_address: '0x456...',
-          amount: '50',
-          timestamp: '2024-01-15T10:30:00Z'
+  server.get(
+    '/token-transfers',
+    {
+      schema: {
+        tags: ['Tokens'],
+        querystring: z.object({
+          network: schemas.NetworkSchema,
+          limit: z.coerce.number().min(1).max(100).default(20),
+          offset: z.coerce.number().min(0).default(0),
+          token: z.string().optional()
+        }),
+        response: {
+          200: schemas.TokenTransfersResponseSchema
         }
-      ]
-    };
-  });
-
-  registry.registerPath({
-    method: 'get',
-    path: '/token-transfers',
-    tags: ['Tokens'],
-    summary: 'List all token transfers',
-    description: 'Get paginated list of all token transfers',
-    request: {
-      query: z.object({
-        network: NetworkSchema,
-        limit: LimitSchema,
-        offset: OffsetSchema,
-        token: z.string().optional().describe('Filter by token contract address')
-      })
+      }
     },
-    responses: {
-      200: {
-        description: 'Successful response',
-        content: {
-          'application/json': {
-            schema: TokenTransfersResponseSchema
-          }
+    async (request, reply) => {
+      return {
+        transfers: [],
+        pagination: {
+          total: 0,
+          limit: request.query.limit,
+          offset: request.query.offset,
+          hasMore: false
         }
-      },
-      400: { $ref: '#/components/responses/BadRequest' },
-      500: { $ref: '#/components/responses/InternalServerError' }
+      };
     }
-  });
-
-  fastify.get('/token-transfers', async (request, reply) => {
-    return {
-      transfers: [
-        {
-          tx_hash: '0xabc...',
-          from_address: '0x123...',
-          to_address: '0x456...',
-          amount: '50',
-          timestamp: '2024-01-15T10:30:00Z'
-        }
-      ]
-    };
-  });
+  );
 }

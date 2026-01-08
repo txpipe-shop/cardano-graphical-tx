@@ -1,24 +1,24 @@
-import type { FastifyInstance } from 'fastify';
-import { blocksRoutes } from './blocks.js';
-import { transactionsRoutes } from './transactions.js';
-import { addressRoutes } from './addresses.js';
-import { statsRoutes } from './stats.js';
-import { tokensRoutes } from './tokens.js';
-import { epochsRoutes } from './epochs.js';
-import { poolsRoutes } from './pools.js';
-import { contractsRoutes } from './contracts.js';
-import { gasRoutes } from './gas.js';
-import { utilityRoutes } from './utility.js';
+import { FastifyInstance } from 'fastify';
+import { blocksRoutes } from './blocks';
+import { transactionsRoutes } from './transactions';
+import { addressesRoutes } from './addresses';
+import { statsRoutes } from './stats';
+import { tokensRoutes } from './tokens';
+import { epochsRoutes } from './epochs';
+import { poolsRoutes } from './pools';
+import { contractsRoutes } from './contracts';
+import { gasRoutes } from './gas';
+import { utilityRoutes } from './utility';
 
-export function registerRoutes(fastify: FastifyInstance) {
-  fastify.register(blocksRoutes);
-  fastify.register(transactionsRoutes);
-  fastify.register(addressRoutes);
-  fastify.register(statsRoutes);
-  fastify.register(tokensRoutes);
-  fastify.register(epochsRoutes);
-  fastify.register(poolsRoutes);
-  fastify.register(contractsRoutes);
-  fastify.register(gasRoutes);
-  fastify.register(utilityRoutes);
+export async function routes(app: FastifyInstance) {
+  app.register(blocksRoutes);
+  app.register(transactionsRoutes);
+  app.register(addressesRoutes);
+  app.register(statsRoutes);
+  app.register(tokensRoutes);
+  app.register(epochsRoutes);
+  app.register(poolsRoutes);
+  app.register(contractsRoutes);
+  app.register(gasRoutes);
+  app.register(utilityRoutes);
 }

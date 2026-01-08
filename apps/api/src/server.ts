@@ -1,62 +1,69 @@
-import Fastify from 'fastify';
+import fastify from 'fastify';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import cors from '@fastify/cors';
-import pg from 'pg';
-import { config } from './config.js';
-import { registerRoutes } from './routes/index.js';
+import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
+import fs from 'fs';
+import path from 'path';
+import { ZodError } from 'zod';
+import { routes } from './routes';
 
-const { Pool } = pg;
-
-declare module 'fastify' {
-  interface FastifyInstance {
-    pgPool: import('pg').Pool;
+const app = fastify({
+  logger: {
+    transport: {
+      target: 'pino-pretty'
+    }
   }
-}
+});
 
-export async function buildServer() {
-  const pool = new Pool({
-    host: config.db.host,
-    port: config.db.port,
-    user: config.db.user,
-    password: config.db.password,
-    database: config.db.database,
-    max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000
-  });
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
 
+const start = async () => {
   try {
-    const client = await pool.connect();
-    client.release();
-    console.log('✓ Database connection established');
-  } catch (error) {
-    console.error('✗ Failed to connect to database:', error);
-    throw error;
+    const openApiParams = {
+      mode: 'static' as const,
+      specification: {
+        path: path.join(__dirname, '../openapi.yaml'),
+        baseDir: path.join(__dirname, '..')
+      }
+    };
+
+    await app.register(cors);
+
+    await app.register(swagger, openApiParams);
+
+    await app.register(swaggerUi, {
+      routePrefix: '/documentation'
+    });
+
+    await app.register(routes);
+
+    app.setErrorHandler((error, request, reply) => {
+      if (error instanceof ZodError) {
+        reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Validation error',
+          details: error.issues
+        });
+        return;
+      }
+      reply.send(error);
+    });
+
+    app.get('/health', async () => {
+      return { status: 'ok', timestamp: new Date().toISOString() };
+    });
+
+    await app.ready();
+    await app.listen({ port: 3000, host: '0.0.0.0' });
+    console.log('Server listening on http://0.0.0.0:3000');
+    console.log('Documentation available at http://0.0.0.0:3000/documentation');
+  } catch (err) {
+    app.log.error(err);
+    process.exit(1);
   }
+};
 
-  const fastify = Fastify({
-    logger: {
-      level: config.server.logLevel
-    },
-    maxParamLength: 512
-  });
-
-  fastify.decorate('pgPool', pool);
-  await fastify.register(cors, { origin: true });
-
-  registerRoutes(fastify);
-
-  fastify.ready().then(() => {
-    console.log('Registered routes:\n' + fastify.printRoutes());
-  });
-
-  const closeGracefully = async (signal: string) => {
-    console.log(`\nReceived signal to terminate: ${signal}`);
-    await fastify.close();
-    process.exit(0);
-  };
-
-  process.on('SIGINT', () => closeGracefully('SIGINT'));
-  process.on('SIGTERM', () => closeGracefully('SIGTERM'));
-
-  return fastify;
-}
+start();
