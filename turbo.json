@@ -4,17 +4,21 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputLogs": "new-only",
       "outputs": [".svelte-kit/**", "dist/**", "build/**"]
     },
     "dev": {
       "cache": false,
+      "outputLogs": "new-only",
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputLogs": "new-only"
     },
     "check": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputLogs": "new-only"
     }
   }
 }
