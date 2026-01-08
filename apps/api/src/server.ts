@@ -8,6 +8,10 @@ import { ZodError } from 'zod';
 import { routes } from './routes';
 import { Pool } from 'pg';
 import { env } from './env';
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
+
+TimeAgo.addDefaultLocale(en);
 
 const app = fastify({
   logger: {
@@ -52,7 +56,10 @@ const start = async () => {
         };
 
     const pool = new Pool(pgConfig);
+
+    const timeAgo = new TimeAgo('en-US');
     app.decorate('pg', pool);
+    app.decorate('timeAgo', timeAgo);
     app.addHook('onClose', async (instance) => {
       try {
         await instance.pg.end();
