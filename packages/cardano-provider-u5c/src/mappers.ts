@@ -203,6 +203,8 @@ export function u5cToCardanoTx(
     witnesses: { scripts },
     block:
       blockHash && blockHeight ? { hash: blockHash, height: blockHeight, epochNo: 0n } : undefined,
-    treasuryDonation: 0n
+    treasuryDonation: 0n,
+    // TODO: fetch this information here
+    indexInBlock: 0n
   };
 }

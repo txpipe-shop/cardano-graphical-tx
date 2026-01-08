@@ -10,15 +10,18 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
     },
     "./transport/node": {
       "types": "./dist/grpcTransport.node.d.ts",
-      "import": "./dist/grpcTransport.node.js"
+      "import": "./dist/grpcTransport.node.js",
+      "require": "./dist/grpcTransport.node.js"
     },
     "./transport/web": {
       "types": "./dist/grpcTransport.web.d.ts",
-      "import": "./dist/grpcTransport.web.js"
+      "import": "./dist/grpcTransport.web.js",
+      "require": "./dist/grpcTransport.web.js"
     }
   },
   "files": [

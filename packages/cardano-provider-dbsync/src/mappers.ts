@@ -152,7 +152,8 @@ export function mapTx(tx: QueryTypes.Tx): cardano.Tx {
         unitSteps: BigInt(r.unitSteps),
         fee: r.fee ? BigInt(r.fee) : 0n
       }))
-    }
+    },
+    indexInBlock: BigInt(tx.block.txIndex)
   };
 }
 

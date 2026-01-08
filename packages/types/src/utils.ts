@@ -1,6 +1,7 @@
 import { bech32 } from 'bech32';
 import { Address, Hash, HexString, Unit } from './utxo-model';
 import { Buffer } from 'buffer';
+import cip14 from '@emurgo/cip14-js';
 
 export function uint8ToHexString(arr: Uint8Array<ArrayBuffer>): HexString {
   return HexString(Buffer.from(arr).toString('hex'));
@@ -20,6 +21,15 @@ export function policyFromUnit(unit: Unit): HexString {
 
 export function assetNameFromUnit(unit: Unit): HexString {
   return unit === 'lovelace' ? HexString('') : HexString(unit.slice(56));
+}
+
+export function fingerprintFromUnit(unit: Unit): string {
+  return cip14
+    .fromParts(
+      Buffer.from(policyFromUnit(unit), 'hex'),
+      Buffer.from(assetNameFromUnit(unit), 'hex')
+    )
+    .fingerprint();
 }
 
 export function diffValues<K extends string>(

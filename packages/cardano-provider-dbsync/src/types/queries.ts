@@ -15,6 +15,7 @@ export interface Tx {
     hash: string;
     epochNo: number;
     height: number;
+    txIndex: string;
   };
   createdAt: number;
   inputs: Array<{

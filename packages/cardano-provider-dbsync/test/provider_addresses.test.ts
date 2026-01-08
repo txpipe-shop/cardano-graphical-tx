@@ -19,7 +19,7 @@ describe('DbSyncProvider - Address Queries', () => {
   beforeAll(() => {
     config = testEnv.parse(process.env);
     pool = new Pool({ connectionString: config.DB_CONNECTION_STRING });
-    provider = new DbSyncProvider({ pool });
+    provider = new DbSyncProvider({ pool, addrPrefix: 'addr' });
     bfAddressClient = new CardanoAddressesApi(new Configuration({ basePath: config.BF_URL }));
   });
 

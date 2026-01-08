@@ -238,7 +238,8 @@ WITH
 SELECT json_build_object(
         'hash', encode(tx.hash, 'hex'), 'fee', tx.fee::text, 'block', (
             SELECT json_build_object(
-                    'hash', encode(b.hash, 'hex'), 'epochNo', b.epoch_no, 'height', b.block_no
+                    'hash', encode(b.hash, 'hex'), 'epochNo', b.epoch_no, 'height', b.block_no, 'txIndex', tx.block_index
+
                 )
             FROM block_info b
         ), 'createdAt', (

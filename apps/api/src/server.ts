@@ -6,13 +6,16 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import path from 'path';
 import { ZodError } from 'zod';
 import { routes } from './routes';
+import { Pool } from 'pg';
+import { env } from './env';
 
 const app = fastify({
   logger: {
     transport: {
       target: 'pino-pretty'
     }
-  }
+  },
+  maxParamLength: 256
 });
 
 app.setValidatorCompiler(validatorCompiler);
@@ -34,6 +37,30 @@ const start = async () => {
 
     await app.register(swaggerUi, {
       routePrefix: '/documentation'
+    });
+
+    // Build Postgres connection config from validated `env`
+    const pgConfig = env.DATABASE_URL
+      ? { connectionString: env.DATABASE_URL }
+      : {
+          host: env.PG_HOST,
+          port: env.PG_PORT,
+          user: env.PG_USER,
+          password: env.PG_PASSWORD,
+          database: env.PG_DATABASE,
+          max: env.PG_MAX,
+          ssl: env.PG_SSL ? { rejectUnauthorized: false } : undefined
+        };
+
+    const pool = new Pool(pgConfig as any);
+    app.decorate('pg', pool);
+    // Ensure pool is closed when the server shuts down
+    app.addHook('onClose', async (instance) => {
+      try {
+        await (instance as any).pg.end();
+      } catch (e) {
+        app.log.warn('Error closing pg pool: %s', String(e));
+      }
     });
 
     await app.register(routes);

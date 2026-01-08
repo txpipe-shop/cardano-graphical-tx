@@ -140,7 +140,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
       return {
         data: utxos,
-        total,
+        total: total,
         nextCursor
       };
     } finally {
@@ -236,7 +236,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
       }
 
       return {
-        total,
+        total: total,
         data: items,
         nextCursor
       };
@@ -277,7 +277,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
           txCount: BigInt(row.txCount),
           confirmations: BigInt(row.confirmations)
         })),
-        total,
+        total: total,
         nextCursor
       };
     } finally {

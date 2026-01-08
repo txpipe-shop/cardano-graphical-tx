@@ -14,6 +14,7 @@ export {
   isBase58,
   bech32ToHex,
   hexToAscii,
+  fingerprintFromUnit,
   policyFromUnit,
   assetNameFromUnit
 } from './utils';

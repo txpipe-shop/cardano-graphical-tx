@@ -10,11 +10,13 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
     },
     "./mappers": {
       "types": "./dist/mappers.d.ts",
-      "import": "./dist/mappers.js"
+      "import": "./dist/mappers.js",
+      "require": "./dist/mappers.js"
     }
   },
   "files": [
