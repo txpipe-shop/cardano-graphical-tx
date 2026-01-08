@@ -3,7 +3,6 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import cors from '@fastify/cors';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
-import fs from 'fs';
 import path from 'path';
 import { ZodError } from 'zod';
 import { routes } from './routes';
@@ -39,9 +38,9 @@ const start = async () => {
 
     await app.register(routes);
 
-    app.setErrorHandler((error, request, reply) => {
+    app.setErrorHandler(async (error, _request, reply) => {
       if (error instanceof ZodError) {
-        reply.status(400).send({
+        await reply.status(400).send({
           statusCode: 400,
           error: 'Bad Request',
           message: 'Validation error',
@@ -49,10 +48,10 @@ const start = async () => {
         });
         return;
       }
-      reply.send(error);
+      await reply.send(error);
     });
 
-    app.get('/health', async () => {
+    app.get('/health', () => {
       return { status: 'ok', timestamp: new Date().toISOString() };
     });
 
@@ -66,4 +65,6 @@ const start = async () => {
   }
 };
 
-start();
+start()
+  .then(() => console.log('Server started correctly'))
+  .catch((err) => console.log('Error starting server', err));

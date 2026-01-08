@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
 
-export async function gasRoutes(app: FastifyInstance) {
+export function gasRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
   server.get(
@@ -19,7 +19,7 @@ export async function gasRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    (_request, _reply) => {
       return {
         slow: { gwei: 1.0, dfm: 0.000000001, time: '~5 min' },
         standard: { gwei: 2.0, dfm: 0.000000002, time: '~2 min' },

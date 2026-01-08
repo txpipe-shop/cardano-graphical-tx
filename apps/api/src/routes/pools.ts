@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
 
-export async function poolsRoutes(app: FastifyInstance) {
+export function poolsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
   server.get(
@@ -22,7 +22,7 @@ export async function poolsRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       return {
         pools: [],
         pagination: {
@@ -53,7 +53,7 @@ export async function poolsRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       return {
         pool: {
           poolId: request.params.id,

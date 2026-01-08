@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
 
-export async function transactionsRoutes(app: FastifyInstance) {
+export function transactionsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
   server.get(
@@ -21,7 +21,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       return {
         transactions: [],
         pagination: {
@@ -47,7 +47,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (_request, _reply) => {
       return [];
     }
   );
@@ -68,7 +68,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       // Mock response matching schema
       return {
         hash: request.params.hash,

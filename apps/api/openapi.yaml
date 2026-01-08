@@ -3,14 +3,14 @@ info:
   title: Apex Fusion Data Provider API
   description: |
     Complete API specification for Apex Fusion blockchain data provider.
-    
+
     This API must support three networks:
     - **Prime**: UTXO-based Cardano-like network
     - **Vector**: UTXO-based Cardano-like network  
     - **Nexus**: EVM-based Ethereum-like network
-    
+
     All endpoints accept a `network` query parameter to specify which network to query.
-    
+
     **Important Notes:**
     - All timestamps are in ISO 8601 format
     - All monetary values are in native currency units (ADA for UTXO, AP3X for EVM)
@@ -78,22 +78,22 @@ paths:
                   value:
                     blocks:
                       - height: 12345
-                        hash: "a1b2c3d4e5f6..."
+                        hash: 'a1b2c3d4e5f6...'
                         slot: 12345678
                         epoch: 42
                         tx_count: 15
-                        timestamp: "2024-01-15T10:30:00Z"
+                        timestamp: '2024-01-15T10:30:00Z'
                         confirmations: 100
                 nexus:
                   summary: Nexus network example
                   value:
                     blocks:
                       - height: 5678
-                        hash: "0x1234567890abcdef..."
+                        hash: '0x1234567890abcdef...'
                         gas_used: 15000000
                         gas_limit: 30000000
                         tx_count: 120
-                        timestamp: "2024-01-15T10:30:00Z"
+                        timestamp: '2024-01-15T10:30:00Z'
                         confirmations: 50
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -140,7 +140,7 @@ paths:
                 example: 12345
               - type: string
                 pattern: '^(0x)?[0-9a-fA-F]{64}$'
-                example: "a1b2c3d4e5f6..."
+                example: 'a1b2c3d4e5f6...'
       responses:
         '200':
           description: Successful response
@@ -174,7 +174,7 @@ paths:
                 example: 12345
               - type: string
                 pattern: '^(0x)?[0-9a-fA-F]{64}$'
-                example: "a1b2c3d4e5f6..."
+                example: 'a1b2c3d4e5f6...'
       responses:
         '200':
           description: Successful response
@@ -253,7 +253,7 @@ paths:
           schema:
             type: string
             pattern: '^(0x)?[0-9a-fA-F]{64}$'
-            example: "a1b2c3d4e5f6..."
+            example: 'a1b2c3d4e5f6...'
       responses:
         '200':
           description: Successful response
@@ -282,7 +282,7 @@ paths:
           description: Address in hex or bech32 format
           schema:
             type: string
-            example: "addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj..."
+            example: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...'
       responses:
         '200':
           description: Successful response
@@ -353,7 +353,7 @@ paths:
           description: Token identifier (policy_id.asset_name for UTXO, contract address for EVM)
           schema:
             type: string
-            example: "a1b2c3d4e5f6..."
+            example: 'a1b2c3d4e5f6...'
       responses:
         '200':
           description: Successful response
@@ -383,7 +383,7 @@ paths:
           schema:
             type: string
             pattern: '^0x[0-9a-fA-F]{40}$'
-            example: "0x1234567890abcdef..."
+            example: '0x1234567890abcdef...'
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Offset'
       responses:
@@ -413,7 +413,7 @@ paths:
           schema:
             type: string
             pattern: '^0x[0-9a-fA-F]{40}$'
-            example: "0x1234567890abcdef..."
+            example: '0x1234567890abcdef...'
         - $ref: '#/components/parameters/Limit'
         - $ref: '#/components/parameters/Offset'
       responses:
@@ -444,7 +444,7 @@ paths:
           schema:
             type: string
             pattern: '^0x[0-9a-fA-F]{40}$'
-            example: "0x1234567890abcdef..."
+            example: '0x1234567890abcdef...'
       responses:
         '200':
           description: Successful response
@@ -524,7 +524,7 @@ paths:
           description: Search by pool ID, ticker, or name
           schema:
             type: string
-            example: "POOL"
+            example: 'POOL'
       responses:
         '200':
           description: Successful response
@@ -551,7 +551,7 @@ paths:
           description: Pool ID (hex string or bech32)
           schema:
             type: string
-            example: "a1b2c3d4e5f6..."
+            example: 'a1b2c3d4e5f6...'
       responses:
         '200':
           description: Successful response
@@ -584,7 +584,7 @@ paths:
           description: Search by contract name or address
           schema:
             type: string
-            example: "MyContract"
+            example: 'MyContract'
       responses:
         '200':
           description: Successful response
@@ -612,7 +612,7 @@ paths:
           schema:
             type: string
             pattern: '^0x[0-9a-fA-F]{40}$'
-            example: "0x1234567890abcdef..."
+            example: '0x1234567890abcdef...'
       responses:
         '200':
           description: Successful response
@@ -681,11 +681,11 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "ok"
+                    example: 'ok'
                   timestamp:
                     type: string
                     format: date-time
-                    example: "2024-01-15T10:30:00Z"
+                    example: '2024-01-15T10:30:00Z'
 
   /chart:
     get:
@@ -702,7 +702,7 @@ paths:
             type: string
             enum: [24h, 1w, 2w, 1m]
             default: 24h
-            example: "24h"
+            example: '24h'
       responses:
         '200':
           description: Successful response
@@ -725,7 +725,7 @@ components:
       schema:
         type: string
         enum: [prime, vector, nexus]
-        example: "prime"
+        example: 'prime'
     Limit:
       name: limit
       in: query
@@ -763,7 +763,7 @@ components:
           type: string
           description: Block hash (hex string)
           pattern: '^(0x)?[0-9a-fA-F]{64}$'
-          example: "a1b2c3d4e5f6..."
+          example: 'a1b2c3d4e5f6...'
         slot:
           type: integer
           nullable: true
@@ -783,12 +783,12 @@ components:
           format: date-time
           nullable: true
           description: Block timestamp
-          example: "2024-01-15T10:30:00Z"
+          example: '2024-01-15T10:30:00Z'
         time:
           type: string
           nullable: true
           description: Human-readable relative time (e.g., "5s ago", "2m ago")
-          example: "5s ago"
+          example: '5s ago'
         confirmations:
           type: integer
           nullable: true
@@ -836,7 +836,7 @@ components:
           type: string
           description: Transaction hash (hex string)
           pattern: '^(0x)?[0-9a-fA-F]{64}$'
-          example: "a1b2c3d4e5f6..."
+          example: 'a1b2c3d4e5f6...'
         block_height:
           type: integer
           description: Block height containing this transaction
@@ -872,28 +872,30 @@ components:
             type: string
           nullable: true
           description: Source addresses (hex format, for list endpoints)
-          example: ["a1b2c3d4e5f6..."]
+          example: ['a1b2c3d4e5f6...']
         to_addresses:
           type: array
           items:
             type: string
           nullable: true
           description: Destination addresses (hex format, for list endpoints)
-          example: ["f6e5d4c3b2a1..."]
+          example: ['f6e5d4c3b2a1...']
         from_addresses_bech32:
           type: array
           items:
             type: string
           nullable: true
           description: Source addresses (bech32 format, UTXO networks only, for list endpoints)
-          example: ["addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj..."]
+          example:
+            ['addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...']
         to_addresses_bech32:
           type: array
           items:
             type: string
           nullable: true
           description: Destination addresses (bech32 format, UTXO networks only, for list endpoints)
-          example: ["addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj..."]
+          example:
+            ['addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...']
         input_count:
           type: integer
           nullable: true
@@ -933,7 +935,7 @@ components:
           type: string
           enum: [success, failed, confirmed, invalid, pending]
           description: Transaction status
-          example: "success"
+          example: 'success'
         is_valid:
           type: boolean
           nullable: true
@@ -949,13 +951,13 @@ components:
           format: date-time
           nullable: true
           description: Transaction timestamp
-          example: "2024-01-15T10:30:00Z"
+          example: '2024-01-15T10:30:00Z'
         block_hash:
           type: string
           nullable: true
           description: Block hash containing this transaction
           pattern: '^(0x)?[0-9a-fA-F]{64}$'
-          example: "a1b2c3d4e5f6..."
+          example: 'a1b2c3d4e5f6...'
         inputs:
           type: array
           nullable: true
@@ -992,12 +994,12 @@ components:
           type: string
           nullable: true
           description: Transaction method signature (EVM networks only)
-          example: "transfer"
+          example: 'transfer'
         evmType:
           type: string
           nullable: true
           description: Transaction method signature (EVM networks only, alias for method)
-          example: "transfer"
+          example: 'transfer'
         error:
           type: string
           nullable: true
@@ -1010,17 +1012,17 @@ components:
         address:
           type: string
           description: Input address in hex format
-          example: "a1b2c3d4e5f6..."
+          example: 'a1b2c3d4e5f6...'
         address_bech32:
           type: string
           nullable: true
           description: Input address in bech32 format (UTXO networks only)
-          example: "addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj..."
+          example: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...'
         utxo_id:
           type: string
           nullable: true
           description: UTXO ID (UTXO networks only)
-          example: "12345"
+          example: '12345'
         input_index:
           type: integer
           nullable: true
@@ -1043,12 +1045,12 @@ components:
         address:
           type: string
           description: Output address in hex format
-          example: "f6e5d4c3b2a1..."
+          example: 'f6e5d4c3b2a1...'
         address_bech32:
           type: string
           nullable: true
           description: Output address in bech32 format (UTXO networks only)
-          example: "addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj..."
+          example: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...'
         output_index:
           type: integer
           description: Output index
@@ -1090,12 +1092,12 @@ components:
         address:
           type: string
           description: Address in hex format
-          example: "a1b2c3d4e5f6..."
+          example: 'a1b2c3d4e5f6...'
         address_bech32:
           type: string
           nullable: true
           description: Address in bech32 format (UTXO networks only)
-          example: "addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj..."
+          example: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...'
         balance_ada:
           type: number
           description: Balance in native currency
@@ -1161,10 +1163,10 @@ components:
       properties:
         utxo_id:
           type: string
-          example: "tx_hash#index"
+          example: 'tx_hash#index'
         tx_hash:
           type: string
-          example: "a1b2c3d4e5f6..."
+          example: 'a1b2c3d4e5f6...'
         output_index:
           type: integer
           example: 0
@@ -1186,7 +1188,7 @@ components:
       properties:
         hash:
           type: string
-          example: "a1b2c3d4e5f6..."
+          example: 'a1b2c3d4e5f6...'
         block_height:
           type: integer
           example: 12345
@@ -1200,7 +1202,7 @@ components:
         type:
           type: string
           enum: [sent, received, both]
-          example: "received"
+          example: 'received'
         amount_ada:
           type: number
           example: 100.5
@@ -1218,7 +1220,7 @@ components:
           type: string
           format: date-time
           nullable: true
-          example: "2024-01-15T10:30:00Z"
+          example: '2024-01-15T10:30:00Z'
 
     TokenBalance:
       type: object
@@ -1227,40 +1229,40 @@ components:
           type: string
           nullable: true
           description: Token contract address (EVM networks)
-          example: "0x1234567890abcdef..."
+          example: '0x1234567890abcdef...'
         policy_id:
           type: string
           nullable: true
           description: Policy ID (UTXO networks only)
-          example: "a1b2c3d4e5f6..."
+          example: 'a1b2c3d4e5f6...'
         asset_name:
           type: string
           nullable: true
           description: Asset name (UTXO networks only)
-          example: "TOKEN"
+          example: 'TOKEN'
         asset_name_hex:
           type: string
           nullable: true
           description: Asset name in hex (UTXO networks only)
-          example: "544f4b454e"
+          example: '544f4b454e'
         name:
           type: string
           nullable: true
-          example: "My Token"
+          example: 'My Token'
         token_name:
           type: string
           nullable: true
           description: Token name (EVM networks, alternative field name)
-          example: "My Token"
+          example: 'My Token'
         symbol:
           type: string
           nullable: true
-          example: "MTK"
+          example: 'MTK'
         token_symbol:
           type: string
           nullable: true
           description: Token symbol (EVM networks, alternative field name)
-          example: "MTK"
+          example: 'MTK'
         decimals:
           type: integer
           nullable: true
@@ -1269,7 +1271,7 @@ components:
           type: string
           nullable: true
           description: Balance as string (to handle large numbers)
-          example: "1000000000000000000"
+          example: '1000000000000000000'
         balance_formatted:
           type: number
           nullable: true
@@ -1279,17 +1281,17 @@ components:
           type: string
           nullable: true
           description: Balance as string (EVM networks, alternative field name)
-          example: "1000000000000000000"
+          example: '1000000000000000000'
         quantity:
           type: string
           nullable: true
           description: Quantity (UTXO networks only)
-          example: "1000000"
+          example: '1000000'
         fingerprint:
           type: string
           nullable: true
           description: Token fingerprint (UTXO networks only)
-          example: "a1b2c3d4...e5f6g7h8"
+          example: 'a1b2c3d4...e5f6g7h8'
 
     Stats:
       type: object
@@ -1297,19 +1299,19 @@ components:
         blockHeight:
           type: string
           description: Current block height (formatted string)
-          example: "12,345"
+          example: '12,345'
         transactions:
           type: string
           description: Total transaction count (formatted string)
-          example: "1.2M"
+          example: '1.2M'
         addresses:
           type: string
           description: Total address count (formatted string)
-          example: "500K"
+          example: '500K'
         avgBlockTime:
           type: string
           description: Average block time
-          example: "20s"
+          example: '20s'
 
     Token:
       type: object
@@ -1318,44 +1320,44 @@ components:
           type: string
           nullable: true
           description: Token contract address (EVM networks)
-          example: "0x1234567890abcdef..."
+          example: '0x1234567890abcdef...'
         policy_id:
           type: string
           nullable: true
           description: Policy ID (UTXO networks)
-          example: "a1b2c3d4e5f6..."
+          example: 'a1b2c3d4e5f6...'
         asset_name:
           type: string
           nullable: true
           description: Asset name (UTXO networks)
-          example: "TOKEN"
+          example: 'TOKEN'
         asset_name_hex:
           type: string
           nullable: true
           description: Asset name in hex (UTXO networks)
-          example: "544f4b454e"
+          example: '544f4b454e'
         name:
           type: string
-          example: "My Token"
+          example: 'My Token'
         symbol:
           type: string
-          example: "MTK"
+          example: 'MTK'
         decimals:
           type: integer
           example: 18
         total_supply:
           type: string
           description: Total supply as string
-          example: "1000000000000000000"
+          example: '1000000000000000000'
         total_supply_formatted:
           type: string
           description: Total supply formatted
-          example: "1,000,000"
+          example: '1,000,000'
         quantity:
           type: string
           nullable: true
           description: Quantity (UTXO networks)
-          example: "1000000"
+          example: '1000000'
         holders:
           type: integer
           nullable: true
@@ -1365,12 +1367,12 @@ components:
           type: string
           nullable: true
           description: Token type (EVM networks)
-          example: "ERC-20"
+          example: 'ERC-20'
         icon_url:
           type: string
           nullable: true
           description: Token icon URL
-          example: "https://example.com/icon.png"
+          example: 'https://example.com/icon.png'
         metadata:
           type: object
           nullable: true
@@ -1379,7 +1381,7 @@ components:
           type: string
           nullable: true
           description: Token fingerprint (UTXO networks)
-          example: "a1b2c3d4...e5f6g7h8"
+          example: 'a1b2c3d4...e5f6g7h8'
 
     TokensResponse:
       type: object
@@ -1401,15 +1403,15 @@ components:
             properties:
               address:
                 type: string
-                example: "0x1234567890abcdef..."
+                example: '0x1234567890abcdef...'
               value:
                 type: string
                 description: Balance as string
-                example: "1000000000000000000"
+                example: '1000000000000000000'
               balance:
                 type: string
                 description: Balance as string (alias for value)
-                example: "1000000000000000000"
+                example: '1000000000000000000'
         pagination:
           $ref: '#/components/schemas/Pagination'
 
@@ -1419,42 +1421,42 @@ components:
         transaction_hash:
           type: string
           description: Transaction hash
-          example: "0x1234567890abcdef..."
+          example: '0x1234567890abcdef...'
         hash:
           type: string
           nullable: true
           description: Transaction hash (alias for transaction_hash)
-          example: "0x1234567890abcdef..."
+          example: '0x1234567890abcdef...'
         from:
           type: string
           nullable: true
           description: From address (alias for from_address)
-          example: "0xabcdef1234567890..."
+          example: '0xabcdef1234567890...'
         from_address:
           type: string
           nullable: true
           description: From address
-          example: "0xabcdef1234567890..."
+          example: '0xabcdef1234567890...'
         from_address_hash:
           type: string
           nullable: true
           description: From address hash (alternative field name)
-          example: "0xabcdef1234567890..."
+          example: '0xabcdef1234567890...'
         to:
           type: string
           nullable: true
           description: To address (alias for to_address)
-          example: "0xfedcba0987654321..."
+          example: '0xfedcba0987654321...'
         to_address:
           type: string
           nullable: true
           description: To address
-          example: "0xfedcba0987654321..."
+          example: '0xfedcba0987654321...'
         to_address_hash:
           type: string
           nullable: true
           description: To address hash (alternative field name)
-          example: "0xfedcba0987654321..."
+          example: '0xfedcba0987654321...'
         amount:
           type: number
           nullable: true
@@ -1464,12 +1466,12 @@ components:
           type: string
           nullable: true
           description: Amount as string (raw)
-          example: "100500000000000000000"
+          example: '100500000000000000000'
         value:
           type: string
           nullable: true
           description: Amount as string (raw, alternative field name)
-          example: "100500000000000000000"
+          example: '100500000000000000000'
         block_number:
           type: integer
           example: 12345
@@ -1478,13 +1480,13 @@ components:
           format: date-time
           nullable: true
           description: Block timestamp
-          example: "2024-01-15T10:30:00Z"
+          example: '2024-01-15T10:30:00Z'
         timestamp:
           type: string
           format: date-time
           nullable: true
           description: Transfer timestamp (alias for block_timestamp)
-          example: "2024-01-15T10:30:00Z"
+          example: '2024-01-15T10:30:00Z'
         log_index:
           type: integer
           nullable: true
@@ -1493,20 +1495,20 @@ components:
           type: string
           nullable: true
           description: Token contract address
-          example: "0x1234567890abcdef..."
+          example: '0x1234567890abcdef...'
         token_contract_address_hash:
           type: string
           nullable: true
           description: Token contract address (alternative field name)
-          example: "0x1234567890abcdef..."
+          example: '0x1234567890abcdef...'
         token_symbol:
           type: string
           nullable: true
-          example: "MTK"
+          example: 'MTK'
         token_name:
           type: string
           nullable: true
-          example: "My Token"
+          example: 'My Token'
         token_decimals:
           type: integer
           nullable: true
@@ -1545,11 +1547,11 @@ components:
         start_time:
           type: string
           format: date-time
-          example: "2024-01-15T10:00:00Z"
+          example: '2024-01-15T10:00:00Z'
         end_time:
           type: string
           format: date-time
-          example: "2024-01-15T11:00:00Z"
+          example: '2024-01-15T11:00:00Z'
         start_height:
           type: integer
           example: 1000
@@ -1564,7 +1566,7 @@ components:
           example: 5000
         fees:
           type: string
-          example: "850.00"
+          example: '850.00'
         is_current:
           type: boolean
           example: false
@@ -1607,13 +1609,13 @@ components:
                 format: date-time
                 nullable: true
                 description: Epoch start time
-                example: "2024-01-15T10:00:00Z"
+                example: '2024-01-15T10:00:00Z'
               end_time:
                 type: string
                 format: date-time
                 nullable: true
                 description: Epoch end time
-                example: "2024-01-15T11:00:00Z"
+                example: '2024-01-15T11:00:00Z'
               blocks:
                 type: integer
                 nullable: true
@@ -1638,7 +1640,7 @@ components:
                 type: string
                 nullable: true
                 description: Estimated fees in epoch
-                example: "850.00"
+                example: '850.00'
               is_current:
                 type: boolean
                 nullable: true
@@ -1658,32 +1660,32 @@ components:
         poolId:
           type: string
           description: Pool ID in bech32 format
-          example: "pool1a1b2c3d4e5f6..."
+          example: 'pool1a1b2c3d4e5f6...'
         hex:
           type: string
           description: Pool ID in hex format
-          example: "a1b2c3d4e5f6..."
+          example: 'a1b2c3d4e5f6...'
         ticker:
           type: string
           nullable: true
-          example: "POOL"
+          example: 'POOL'
         name:
           type: string
           nullable: true
-          example: "My Pool"
+          example: 'My Pool'
         description:
           type: string
           nullable: true
-          example: "Pool description"
+          example: 'Pool description'
         homepage:
           type: string
           nullable: true
-          example: "https://example.com"
+          example: 'https://example.com'
         logo:
           type: string
           nullable: true
           description: Logo URL (from meta.logo or direct)
-          example: "https://example.com/logo.png"
+          example: 'https://example.com/logo.png'
         meta:
           type: object
           nullable: true
@@ -1708,7 +1710,7 @@ components:
           type: string
           nullable: true
           description: Total stake as string
-          example: "1000000000000"
+          example: '1000000000000'
         delegators:
           type: integer
           nullable: true
@@ -1722,17 +1724,17 @@ components:
           type: string
           nullable: true
           description: Fixed cost in lovelace
-          example: "340000000"
+          example: '340000000'
         cost:
           type: string
           nullable: true
           description: Fixed cost in lovelace (alias for fixed_cost)
-          example: "340000000"
+          example: '340000000'
         pledge:
           type: string
           nullable: true
           description: Pool pledge
-          example: "1000000000000"
+          example: '1000000000000'
 
     PoolsResponse:
       type: object
@@ -1759,21 +1761,21 @@ components:
       properties:
         address:
           type: string
-          example: "0x1234567890abcdef..."
+          example: '0x1234567890abcdef...'
         name:
           type: string
-          example: "MyContract"
+          example: 'MyContract'
         verified:
           type: boolean
           example: true
         compiler:
           type: string
           nullable: true
-          example: "Solidity 0.8.20"
+          example: 'Solidity 0.8.20'
         balance:
           type: string
           nullable: true
-          example: "1.5"
+          example: '1.5'
         balance_ada:
           type: number
           nullable: true
@@ -1785,12 +1787,12 @@ components:
           type: string
           nullable: true
           format: date
-          example: "2024-01-15"
+          example: '2024-01-15'
         verified_at:
           type: string
           nullable: true
           format: date-time
-          example: "2024-01-15T10:30:00Z"
+          example: '2024-01-15T10:30:00Z'
         optimization_enabled:
           type: boolean
           nullable: true
@@ -1802,7 +1804,7 @@ components:
         evm_version:
           type: string
           nullable: true
-          example: "london"
+          example: 'london'
         abi:
           type: array
           nullable: true
@@ -1839,7 +1841,7 @@ components:
               example: 0.000000001
             time:
               type: string
-              example: "~5 min"
+              example: '~5 min'
         standard:
           type: object
           properties:
@@ -1851,7 +1853,7 @@ components:
               example: 0.000000002
             time:
               type: string
-              example: "~2 min"
+              example: '~2 min'
         fast:
           type: object
           properties:
@@ -1863,7 +1865,7 @@ components:
               example: 0.000000003
             time:
               type: string
-              example: "~30 sec"
+              example: '~30 sec'
         instant:
           type: object
           properties:
@@ -1875,7 +1877,7 @@ components:
               example: 0.000000005
             time:
               type: string
-              example: "~15 sec"
+              example: '~15 sec'
         recentBlocks:
           type: array
           nullable: true
@@ -1925,7 +1927,7 @@ components:
                 type: string
                 format: date-time
                 nullable: true
-                example: "2024-01-15T10:30:00Z"
+                example: '2024-01-15T10:30:00Z'
         recent_blocks:
           type: array
           nullable: true
@@ -1951,15 +1953,15 @@ components:
         market_cap:
           type: string
           nullable: true
-          example: "$10M"
+          example: '$10M'
         volume_24h:
           type: string
           nullable: true
-          example: "$1M"
+          example: '$1M'
         source:
           type: string
           nullable: true
-          example: "CoinMarketCap"
+          example: 'CoinMarketCap'
 
     ChartData:
       type: object
@@ -1971,7 +1973,7 @@ components:
             properties:
               time:
                 type: string
-                example: "2024-01-15T10:00:00Z"
+                example: '2024-01-15T10:00:00Z'
               count:
                 type: integer
                 example: 100
@@ -2017,12 +2019,12 @@ components:
         error:
           type: string
           description: Error message
-          example: "Block not found"
+          example: 'Block not found'
         details:
           type: string
           nullable: true
           description: Additional error details
-          example: "Block height 99999 does not exist"
+          example: 'Block height 99999 does not exist'
 
   responses:
     BadRequest:
@@ -2032,8 +2034,8 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            error: "Invalid network parameter"
-            details: "Network must be one of: prime, vector, nexus"
+            error: 'Invalid network parameter'
+            details: 'Network must be one of: prime, vector, nexus'
 
     NotFound:
       description: Resource not found
@@ -2042,8 +2044,8 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            error: "Block not found"
-            details: "Block height 99999 does not exist"
+            error: 'Block not found'
+            details: 'Block height 99999 does not exist'
 
     InternalServerError:
       description: Internal server error
@@ -2052,5 +2054,5 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            error: "Internal server error"
-            details: "Database connection failed"
+            error: 'Internal server error'
+            details: 'Database connection failed'

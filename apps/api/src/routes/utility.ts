@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
 
-export async function utilityRoutes(app: FastifyInstance) {
+export function utilityRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
   server.get(
@@ -19,7 +19,7 @@ export async function utilityRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (_request, _reply) => {
       return {
         price: 0.5
       };
@@ -40,7 +40,7 @@ export async function utilityRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (_request, _reply) => {
       return {
         hourly: []
       };

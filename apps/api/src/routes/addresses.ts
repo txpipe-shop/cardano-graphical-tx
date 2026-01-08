@@ -7,7 +7,7 @@ const addressParamSchema = z.object({
   address: z.string()
 });
 
-export async function addressesRoutes(app: FastifyInstance) {
+export function addressesRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
   server.get(
@@ -24,7 +24,7 @@ export async function addressesRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    (request, _reply) => {
       const { address } = addressParamSchema.parse(request.params);
       return {
         address: address,

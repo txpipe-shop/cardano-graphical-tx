@@ -11,14 +11,14 @@ import { gasRoutes } from './gas';
 import { utilityRoutes } from './utility';
 
 export async function routes(app: FastifyInstance) {
-  app.register(blocksRoutes);
-  app.register(transactionsRoutes);
-  app.register(addressesRoutes);
-  app.register(statsRoutes);
-  app.register(tokensRoutes);
-  app.register(epochsRoutes);
-  app.register(poolsRoutes);
-  app.register(contractsRoutes);
-  app.register(gasRoutes);
-  app.register(utilityRoutes);
+  await app.register(blocksRoutes);
+  await app.register(transactionsRoutes);
+  await app.register(addressesRoutes);
+  await app.register(statsRoutes);
+  await app.register(tokensRoutes);
+  await app.register(epochsRoutes);
+  await app.register(poolsRoutes);
+  await app.register(contractsRoutes);
+  await app.register(gasRoutes);
+  await app.register(utilityRoutes);
 }

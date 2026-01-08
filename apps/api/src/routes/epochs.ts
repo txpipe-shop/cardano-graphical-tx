@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
 
-export async function epochsRoutes(app: FastifyInstance) {
+export function epochsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
   server.get(
@@ -21,7 +21,7 @@ export async function epochsRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       return {
         epochs: [],
         pagination: {
@@ -50,7 +50,7 @@ export async function epochsRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       return {
         epoch: request.params.number,
         start_slot: 0,

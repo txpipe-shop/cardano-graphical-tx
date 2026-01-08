@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
 
-export async function tokensRoutes(app: FastifyInstance) {
+export function tokensRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
   server.get(
@@ -21,7 +21,7 @@ export async function tokensRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       return {
         tokens: [],
         pagination: {
@@ -50,7 +50,7 @@ export async function tokensRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (_request, _reply) => {
       return {
         name: 'Mock Token',
         symbol: 'MTK',
@@ -79,7 +79,7 @@ export async function tokensRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       return {
         holders: [],
         pagination: {
@@ -110,7 +110,7 @@ export async function tokensRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       return {
         transfers: [],
         pagination: {
@@ -139,7 +139,7 @@ export async function tokensRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       return {
         transfers: [],
         pagination: {

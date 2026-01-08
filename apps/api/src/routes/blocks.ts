@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
 
-export async function blocksRoutes(app: FastifyInstance) {
+export function blocksRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
 
   server.get(
@@ -21,7 +21,7 @@ export async function blocksRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (request, _reply) => {
       // Mock response
       return {
         blocks: [],
@@ -48,7 +48,7 @@ export async function blocksRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (_request, _reply) => {
       return [];
     }
   );
@@ -69,7 +69,7 @@ export async function blocksRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (_request, _reply) => {
       // Mock response
       return {
         height: 12345,
@@ -98,7 +98,7 @@ export async function blocksRoutes(app: FastifyInstance) {
         }
       }
     },
-    async (request, reply) => {
+    async (_request, _reply) => {
       return { transactions: [] };
     }
   );
