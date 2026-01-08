@@ -39,7 +39,6 @@ const start = async () => {
       routePrefix: '/documentation'
     });
 
-    // Build Postgres connection config from validated `env`
     const pgConfig = env.DATABASE_URL
       ? { connectionString: env.DATABASE_URL }
       : {
@@ -52,12 +51,11 @@ const start = async () => {
           ssl: env.PG_SSL ? { rejectUnauthorized: false } : undefined
         };
 
-    const pool = new Pool(pgConfig as any);
+    const pool = new Pool(pgConfig);
     app.decorate('pg', pool);
-    // Ensure pool is closed when the server shuts down
     app.addHook('onClose', async (instance) => {
       try {
-        await (instance as any).pg.end();
+        await instance.pg.end();
       } catch (e) {
         app.log.warn('Error closing pg pool: %s', String(e));
       }

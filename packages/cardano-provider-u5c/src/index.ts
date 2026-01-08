@@ -52,7 +52,6 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
   }
   async getBlocks(_params: BlocksReq): Promise<BlocksRes> {
     return {
-      nextCursor: undefined,
       total: 0n,
       data: []
     };
@@ -61,7 +60,6 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
   async getAddressUTxOs(_params: AddressUTxOsReq): Promise<AddressUTxOsRes<cardano.UTxO>> {
     return {
       data: [],
-      nextCursor: undefined,
       total: 0n
     };
   }
@@ -125,55 +123,58 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     return Buffer.from(txResponse.tx?.nativeBytes).toString('hex');
   }
 
-  async getTxs({ before, limit }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
-    const lastHash = before ?? (await this.getLatestTx()).hash;
-    const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(lastHash, 'hex') });
-    assert(
-      txResponse.tx?.blockRef?.slot !== undefined,
-      'Slot of the transaction blockRef is undefined'
-    );
-    assert(
-      txResponse.tx?.blockRef?.hash !== undefined,
-      'Hash of the transaction blockRef is undefined'
-    );
-
-    let blockHash: Uint8Array<ArrayBuffer> = txResponse.tx?.blockRef?.hash;
-    assert(txResponse.tx?.chain.case === 'cardano', 'Transaction is not a Cardano transaction');
-    const blocks: Array<cardanoUtxoRpc.Block> = [];
-
-    do {
-      console.log(`About to fetch ${Buffer.from(blockHash).toString('hex')}`);
-      const { block: _block } = await this.utxoRpc.sync.fetchBlock(
-        new sync.FetchBlockRequest({
-          ref: [{ hash: blockHash }]
-        })
-      );
-      const [block] = _block;
-      assert(block, 'Block not found');
-      assert(block.chain.case === 'cardano', 'Chain should be Cardano');
-      blockHash = Buffer.from(await getBlockPreviousHash(block.nativeBytes), 'hex');
-      blocks.push(block.chain.value);
-    } while (blocks.flatMap((b) => b.body?.tx?.length || 0).reduce((a, c) => a + c, 0) < limit);
-
+  async getTxs({ limit }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
     return {
-      data: blocks.flatMap(
-        (t) =>
-          t.body?.tx.map((x) =>
-            u5cToCardanoTx(
-              x,
-              t.timestamp,
-              Hash(Buffer.from(t.header!.hash).toString('hex')),
-              t.header!.height
-            )
-          ) || []
-      ),
-      total: 0n,
-      nextCursor: undefined
+      data: [],
+      total: 0n
     };
+    //const lastHash = before ?? (await this.getLatestTx()).hash;
+    //const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(lastHash, 'hex') });
+    //assert(
+    //  txResponse.tx?.blockRef?.slot !== undefined,
+    //  'Slot of the transaction blockRef is undefined'
+    //);
+    //assert(
+    //  txResponse.tx?.blockRef?.hash !== undefined,
+    //  'Hash of the transaction blockRef is undefined'
+    //);
+
+    ////let blockHash: Uint8Array<ArrayBuffer> = txResponse.tx?.blockRef?.hash;
+    //assert(txResponse.tx?.chain.case === 'cardano', 'Transaction is not a Cardano transaction');
+    //const blocks: Array<cardanoUtxoRpc.Block> = [];
+
+    //do {
+    //  console.log(`About to fetch ${Buffer.from(blockHash).toString('hex')}`);
+    //  const { block: _block } = await this.utxoRpc.sync.fetchBlock(
+    //    new sync.FetchBlockRequest({
+    //      ref: [{ hash: blockHash }]
+    //    })
+    //  );
+    //  const [block] = _block;
+    //  assert(block, 'Block not found');
+    //  assert(block.chain.case === 'cardano', 'Chain should be Cardano');
+    //  blockHash = Buffer.from(await getBlockPreviousHash(block.nativeBytes), 'hex');
+    //  blocks.push(block.chain.value);
+    //} while (blocks.flatMap((b) => b.body?.tx?.length || 0).reduce((a, c) => a + c, 0) < limit);
+
+    //return {
+    //  data: blocks.flatMap(
+    //    (t) =>
+    //      t.body?.tx.map((x) =>
+    //        u5cToCardanoTx(
+    //          x,
+    //          t.timestamp,
+    //          Hash(Buffer.from(t.header!.hash).toString('hex')),
+    //          t.header!.height
+    //        )
+    //      ) || []
+    //  ),
+    //  total: 0n,
+    //};
   }
 
   async getEpochs(_params: EpochsReq): Promise<EpochsRes> {
-    return { data: [], total: 0n, nextCursor: undefined };
+    return { data: [], total: 0n };
   }
 }
 

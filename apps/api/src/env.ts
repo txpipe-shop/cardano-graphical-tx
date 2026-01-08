@@ -4,15 +4,24 @@ import { z, ZodError } from 'zod';
 dotenv.config();
 
 const EnvSchema = z.object({
-  DATABASE_URL: z.string().optional().refine((v) => (v === undefined) || v.length > 0, {
-    message: 'DATABASE_URL must be a non-empty string when provided'
-  }),
+  DATABASE_URL: z
+    .string()
+    .optional()
+    .refine((v) => v === undefined || v.length > 0, {
+      message: 'DATABASE_URL must be a non-empty string when provided'
+    }),
   PG_HOST: z.string().optional().default('localhost'),
-  PG_PORT: z.preprocess((v) => (v === undefined ? undefined : Number(v)), z.number().int().positive().default(5432)),
+  PG_PORT: z.preprocess(
+    (v) => (v === undefined ? undefined : Number(v)),
+    z.number().int().positive().default(5432)
+  ),
   PG_USER: z.string().default('postgres'),
   PG_PASSWORD: z.string().optional(),
   PG_DATABASE: z.string().default('postgres'),
-  PG_MAX: z.preprocess((v) => (v === undefined ? undefined : Number(v)), z.number().int().positive().default(10)),
+  PG_MAX: z.preprocess(
+    (v) => (v === undefined ? undefined : Number(v)),
+    z.number().int().positive().default(10)
+  ),
   PG_SSL: z.preprocess((v) => {
     if (v === undefined) return false;
     if (typeof v === 'string') return v.toLowerCase() === 'true';

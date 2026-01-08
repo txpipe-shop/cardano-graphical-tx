@@ -49,14 +49,14 @@ export function addressesRoutes(app: FastifyInstance) {
 
       // TODO: API needs to have pagination over this (I'd do this with different endpoints)
       const { data: txs, total: totalTxs } = await provider.getTxs({
-        limit: 100,
+        limit: 100n,
         query: { address: Address(rawAddress) }
       });
 
       // TODO: API needs to have pagination over this (I'd do this with different endpoints)
       const { data: outputs, total: totalUtxos } = await provider.getAddressUTxOs({
         query: { address },
-        limit: 100
+        limit: 100n
       });
       const transactions: AddressRes['transactions'] = txs.map((tx) => {
         return {
