@@ -17,7 +17,7 @@ describe('DbSyncProvider', () => {
   beforeAll(() => {
     config = testEnv.parse(process.env);
     pool = new Pool({ connectionString: config.DB_CONNECTION_STRING });
-    provider = new DbSyncProvider({ pool });
+    provider = new DbSyncProvider({ pool, addrPrefix: 'addr' });
     bfTxClient = new CardanoTransactionsApi(new Configuration({ basePath: config.BF_URL }));
   });
 
@@ -121,16 +121,13 @@ describe('DbSyncProvider', () => {
 
   describe('getTxs (paginated transactions)', () => {
     it('should fetch paginated transactions', async () => {
-      const page1 = await provider.getTxs({ limit: 5 });
+      const page1 = await provider.getTxs({ limit: 5n, query: undefined });
       expect(page1.data.length).toBeLessThanOrEqual(5);
       expect(page1.data.length).toBeGreaterThan(0);
       expect(page1.total).toBeGreaterThan(0n);
-      expect(page1.nextCursor).toBeDefined();
 
-      const cursor = page1.nextCursor;
-
-      if (cursor) {
-        const page2 = await provider.getTxs({ limit: 5, before: cursor });
+      if (page1.total > 5n) {
+        const page2 = await provider.getTxs({ limit: 5n, offset: 5n, query: undefined });
         expect(page2.data.length).toBeLessThanOrEqual(5);
         if (page2.data.length > 0 && page1.data.length > 0) {
           expect(page2.data[0]!.hash).not.toBe(page1.data[0]!.hash);
@@ -139,7 +136,7 @@ describe('DbSyncProvider', () => {
     });
 
     it('should fetch paginated transactions and match Blockfrost for each', async () => {
-      const page = await provider.getTxs({ limit: 3 });
+      const page = await provider.getTxs({ limit: 3n, query: undefined });
       expect(page.data.length).toBeGreaterThan(0);
 
       // each transaction matches Blockfrost
@@ -157,7 +154,7 @@ describe('DbSyncProvider', () => {
       const address = latest.outputs[0]!.address;
 
       const filtered = await provider.getTxs({
-        limit: 5,
+        limit: 5n,
         query: { address }
       });
 
@@ -174,7 +171,7 @@ describe('DbSyncProvider', () => {
       const address = latest.outputs[0]!.address;
 
       const filtered = await provider.getTxs({
-        limit: 3,
+        limit: 3n,
         query: { address: address }
       });
 
@@ -190,11 +187,11 @@ describe('DbSyncProvider', () => {
     });
 
     it('should maintain consistent ordering across pages', async () => {
-      const page1 = await provider.getTxs({ limit: 5 });
+      const page1 = await provider.getTxs({ limit: 5n, query: undefined });
       expect(page1.data.length).toBe(5);
 
-      if (page1.nextCursor) {
-        const page2 = await provider.getTxs({ limit: 5, before: page1.nextCursor });
+      if (page1.total > 5n) {
+        const page2 = await provider.getTxs({ limit: 5n, offset: 5n, query: undefined });
         expect(page2.data.length).toBeGreaterThan(0);
 
         // no overlap between pages
@@ -215,7 +212,7 @@ describe('DbSyncProvider', () => {
 
   describe('input/output ordering', () => {
     it('should return inputs in correct transaction order', async () => {
-      const page = await provider.getTxs({ limit: 10 });
+      const page = await provider.getTxs({ limit: 10n, query: undefined });
       const txWithMultipleInputs = page.data.find((tx) => tx.inputs.length > 1);
 
       if (txWithMultipleInputs) {
@@ -237,7 +234,7 @@ describe('DbSyncProvider', () => {
     });
 
     it('should return outputs in correct transaction order', async () => {
-      const page = await provider.getTxs({ limit: 10 });
+      const page = await provider.getTxs({ limit: 10n, query: undefined });
       const txWithMultipleOutputs = page.data.find((tx) => tx.outputs.length > 1);
 
       if (txWithMultipleOutputs) {

@@ -24,7 +24,7 @@ describe('DbSyncProvider Blocks & Epochs', () => {
   beforeAll(() => {
     config = testEnv.parse(process.env);
     pool = new Pool({ connectionString: config.DB_CONNECTION_STRING });
-    provider = new DbSyncProvider({ pool });
+    provider = new DbSyncProvider({ pool, addrPrefix: 'addr' });
     const bfConfig = new Configuration({ basePath: config.BF_URL });
     bfBlocksClient = new CardanoBlocksApi(bfConfig);
     bfEpochsClient = new CardanoEpochsApi(bfConfig);
@@ -38,7 +38,7 @@ describe('DbSyncProvider Blocks & Epochs', () => {
 
   describe('getBlocks', () => {
     it('should fetch paginated blocks and match Blockfrost', async () => {
-      const result = await provider.getBlocks({ limit: 5 });
+      const result = await provider.getBlocks({ limit: 5n, offset: undefined, query: undefined });
       expect(result.data.length).toBeLessThanOrEqual(5);
       expect(result.data.length).toBeGreaterThan(0);
 
@@ -59,7 +59,7 @@ describe('DbSyncProvider Blocks & Epochs', () => {
     });
 
     it('should fetch block by height and match Blockfrost', async () => {
-      const { data } = await provider.getBlocks({ limit: 1 });
+      const { data } = await provider.getBlocks({ limit: 1n, query: undefined });
       const targetBlock = data[0]!;
 
       const block = await provider.getBlock({ height: BigInt(targetBlock.height) });
@@ -69,7 +69,7 @@ describe('DbSyncProvider Blocks & Epochs', () => {
     });
 
     it('should fetch block by slot and match Blockfrost', async () => {
-      const { data } = await provider.getBlocks({ limit: 1 });
+      const { data } = await provider.getBlocks({ limit: 1n, query: undefined });
       const targetBlock = data[0]!;
 
       const block = await provider.getBlock({ slot: BigInt(targetBlock.slot) });
@@ -81,7 +81,7 @@ describe('DbSyncProvider Blocks & Epochs', () => {
 
   describe('getEpochs', () => {
     it('should fetch paginated epochs and match Blockfrost', async () => {
-      const result = await provider.getEpochs({ limit: 1 });
+      const result = await provider.getEpochs({ limit: 1n, query: undefined });
 
       if (result.data.length > 0) {
         expect(result.data.length).toBeLessThanOrEqual(3);

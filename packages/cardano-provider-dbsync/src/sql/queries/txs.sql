@@ -1,19 +1,10 @@
--- Get transactions with cursor-based pagination
+-- Get transactions with offset-based pagination
 WITH
     target_txs AS (
         SELECT *
         FROM tx
         WHERE (
                 (
-                    $1::text IS NULL
-                    OR id < (
-                        SELECT id
-                        FROM tx
-                        WHERE
-                            hash = decode($1, 'hex')
-                    )
-                )
-                AND (
                     $3::text IS NULL
                     OR EXISTS (
                         SELECT 1
@@ -64,6 +55,7 @@ WITH
                 )
             )
         ORDER BY id DESC
+        OFFSET $1
         LIMIT $2
     ),
     -- Block Info

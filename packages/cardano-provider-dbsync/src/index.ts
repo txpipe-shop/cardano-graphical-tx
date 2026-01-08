@@ -114,7 +114,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     const client = await this.getClient();
     try {
       const address = this.normalizeAddress(params.query.address, this.addrPrefix);
-      const offset = params.before ? Number(params.before) : 0;
+      const offset = (params.offset || 0n).toString();
       const limit = params.limit;
 
       const { rows } = await client.query<QueryTypes.AddressUTxOs>(SQLQuery.get('address_utxos'), [
@@ -126,8 +126,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
       if (rows.length === 0 || !rows[0]?.utxos) {
         return {
           data: [],
-          total: 0n,
-          nextCursor: undefined
+          total: 0n
         };
       }
 
@@ -135,13 +134,9 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
       const total = BigInt(row.total || '0');
       const utxos: cardano.UTxO[] = (row.utxos || []).map((utxo) => mapUtxo(utxo));
 
-      const nextOffset = offset + utxos.length;
-      const nextCursor = nextOffset < Number(total) ? BigInt(nextOffset) : undefined;
-
       return {
         data: utxos,
-        total: total,
-        nextCursor
+        total: total
       };
     } finally {
       this.gracefulRelease(client);
@@ -195,7 +190,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   }
 
   async getTxs({
-    before,
+    offset,
     limit,
     query
   }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
@@ -218,7 +213,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
       const total = BigInt(countRows[0]?.total || 0);
 
       const { rows } = await client.query<QueryTypes.Txs>(SQLQuery.get('txs'), [
-        before ? before.toString() : null,
+        (offset || 0n).toString(),
         limit,
         address,
         blockHash,
@@ -228,44 +223,32 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
       const items = rows.map((row) => mapTx(row.result));
 
-      let nextCursor: Hash | undefined;
-      const lastItem = items.at(-1);
-
-      if (lastItem) {
-        nextCursor = lastItem.hash;
-      }
-
       return {
         total: total,
-        data: items,
-        nextCursor
+        data: items
       };
     } finally {
       this.gracefulRelease(client);
     }
   }
 
-  async getBlocks({ before, query, limit }: BlocksReq): Promise<BlocksRes> {
+  async getBlocks({ offset, query, limit }: BlocksReq): Promise<BlocksRes> {
     const client = await this.getClient();
 
     try {
       const { epoch } = query || {};
+      console.log(epoch);
       const { rows } = await client.query<QueryTypes.Block>(SQLQuery.get('blocks'), [
-        before ? before.toString() : null,
-        limit
+        (offset || 0n).toString(),
+        limit,
+        epoch?.toString() ?? null
       ]);
+
       const { rows: countRows } = await client.query<QueryTypes.TotalBlocks>(
         SQLQuery.get('blocks_count'),
-        [epoch || null]
+        [epoch?.toString() || null]
       );
       const total = BigInt(countRows[0]?.total || 0);
-
-      let nextCursor: Hash | undefined;
-      const lastItem = rows.at(-1);
-
-      if (lastItem) {
-        nextCursor = Hash(lastItem.hash);
-      }
 
       return {
         data: rows.map((row) => ({
@@ -277,8 +260,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
           txCount: BigInt(row.txCount),
           confirmations: BigInt(row.confirmations)
         })),
-        total: total,
-        nextCursor
+        total: total
       };
     } finally {
       this.gracefulRelease(client);
@@ -288,15 +270,15 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   async getBlock(params: BlockReq): Promise<BlockRes> {
     const client = await this.getClient();
     let hash: string | null = null;
-    let height: number | null = null;
-    let slot: number | null = null;
+    let height: string | null = null;
+    let slot: string | null = null;
 
     if ('hash' in params) {
       hash = params.hash.toString();
     } else if ('height' in params) {
-      height = Number(params.height);
+      height = params.height.toString();
     } else {
-      slot = Number(params.slot);
+      slot = params.slot.toString();
     }
 
     try {
@@ -326,24 +308,17 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     }
   }
 
-  async getEpochs({ before, limit }: EpochsReq): Promise<EpochsRes> {
+  async getEpochs({ offset, limit }: EpochsReq): Promise<EpochsRes> {
     const client = await this.getClient();
 
     try {
       const { rows: epochsRows } = await client.query<QueryTypes.Epoch>(SQLQuery.get('epochs'), [
-        before ? Number(before) : null,
+        (offset || 0n).toString(),
         limit
       ]);
       const { rows: epochsCountRows } = await client.query<QueryTypes.TotalEpochs>(
         SQLQuery.get('epochs_count')
       );
-
-      let nextCursor: bigint | undefined;
-      const lastItem = epochsRows.at(-1);
-
-      if (lastItem) {
-        nextCursor = BigInt(lastItem.epoch);
-      }
 
       return {
         data: epochsRows.map((row) => ({
@@ -360,8 +335,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
           startHeight: 0n,
           endHeight: 0n
         })),
-        total: BigInt(epochsCountRows[0]!.total),
-        nextCursor
+        total: BigInt(epochsCountRows[0]!.total)
       };
     } finally {
       this.gracefulRelease(client);

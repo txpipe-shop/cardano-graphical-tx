@@ -1,4 +1,4 @@
--- Get epochs with cursor-based pagination
+-- Get epochs with offset-based pagination
 SELECT
     e.no as epoch,
     extract(
@@ -14,9 +14,6 @@ SELECT
     e.out_sum::text as output,
     e.fees::text as fees
 FROM epoch e
-WHERE (
-        $1::word31type IS NULL
-        OR e.no < $1
-    )
 ORDER BY e.no DESC
+OFFSET $1
 LIMIT $2;

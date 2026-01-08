@@ -96,7 +96,7 @@ describe('DbSyncProvider - Address Queries', () => {
 
       const result = await provider.getAddressUTxOs({
         query: { address: addressWithUtxos },
-        limit: 10
+        limit: 10n
       });
 
       expect(result).toBeDefined();
@@ -116,7 +116,7 @@ describe('DbSyncProvider - Address Queries', () => {
       const result = await provider.getAddressUTxOs({
         query: { address: addressWithUtxos },
         // TODO: do this more efficiently
-        limit: 100
+        limit: 100n
       });
 
       const { data: bfUtxos } = await bfAddressClient.addressesAddressUtxosGet(
@@ -180,16 +180,16 @@ describe('DbSyncProvider - Address Queries', () => {
 
       const page1 = await provider.getAddressUTxOs({
         query: { address: addressWithUtxos },
-        limit: 2
+        limit: 2n
       });
 
       expect(page1.data.length).toBeLessThanOrEqual(2);
 
-      if (page1.nextCursor && page1.total > 2n) {
+      if (page1.total > 2n) {
         const page2 = await provider.getAddressUTxOs({
           query: { address: addressWithUtxos },
-          limit: 2,
-          before: page1.nextCursor
+          limit: 2n,
+          offset: 2n
         });
 
         const page1Refs = new Set(page1.data.map((u) => `${u.outRef.hash}#${u.outRef.index}`));
@@ -208,17 +208,16 @@ describe('DbSyncProvider - Address Queries', () => {
 
       const result = await provider.getAddressUTxOs({
         query: { address: emptyAddress },
-        limit: 10
+        limit: 10n
       });
 
       expect(result.data).toEqual([]);
       expect(result.total).toBe(0n);
-      expect(result.nextCursor).toBeUndefined();
     });
 
     it('should handle address with native assets', async () => {
       // Get paginated transactions and find one with native assets
-      const txs = await provider.getTxs({ limit: 10, query: undefined });
+      const txs = await provider.getTxs({ limit: 10n, query: undefined });
       const txWithAssets = txs.data.find((tx) =>
         tx.outputs.some((out) => Object.keys(out.value).length > 0)
       );
@@ -238,7 +237,7 @@ describe('DbSyncProvider - Address Queries', () => {
 
       const result = await provider.getAddressUTxOs({
         query: { address: outputWithAssets.address },
-        limit: 100
+        limit: 100n
       });
 
       const { data: bfUtxos } = await bfAddressClient.addressesAddressUtxosGet(
@@ -290,7 +289,7 @@ describe('DbSyncProvider - Address Queries', () => {
 
       const utxos = await provider.getAddressUTxOs({
         query: { address: addressWithUtxos },
-        limit: 1000
+        limit: 1000n
       });
 
       let totalCoin = 0n;

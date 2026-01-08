@@ -15,18 +15,18 @@ export type BlocksQuery = {
 };
 
 /**
- * Cursor based pagination, if `before` is undefined (gets the `${limit}` latest txs)
+ * Offset based pagination, ordered by newest first.
+ * If `offset` is undefined, gets the `${limit}` latest items.
  */
-export type PaginatedRequest<Cursor, T> = {
-  before?: Cursor;
-  limit: number;
+export type PaginatedRequest<T> = {
+  offset?: bigint;
+  limit: bigint;
   query: T;
 };
 
-export type PaginatedResult<T, Cursor> = {
+export type PaginatedResult<T> = {
   data: T[];
   total: bigint;
-  nextCursor?: Cursor;
 };
 
 /**
@@ -56,21 +56,20 @@ export type Epoch = {
   txCount: bigint;
 };
 
-export type TxsReq = PaginatedRequest<Hash, TxQuery | undefined>;
-export type BlocksReq = PaginatedRequest<Hash, BlocksQuery | undefined>;
-export type EpochsReq = PaginatedRequest<Hash, undefined>;
+export type TxsReq = PaginatedRequest<TxQuery | undefined>;
+export type BlocksReq = PaginatedRequest<BlocksQuery | undefined>;
+export type EpochsReq = PaginatedRequest<undefined>;
 export type AddressFundsReq = { address: Address };
-// offset ordered by newest to oldest
-export type AddressUTxOsReq = PaginatedRequest<bigint, { address: Address }>;
+export type AddressUTxOsReq = PaginatedRequest<{ address: Address }>;
 
 export type BlockRes = BlockMetadata;
 export type TxsRes<
   U extends UTxO,
   T extends Tx<U>,
   Chain extends BaseChain<U, T>
-> = PaginatedResult<Chain['tx'], Hash>;
-export type BlocksRes = PaginatedResult<BlockMetadata, Hash>;
-export type EpochsRes = PaginatedResult<Epoch, bigint>;
+> = PaginatedResult<Chain['tx']>;
+export type BlocksRes = PaginatedResult<BlockMetadata>;
+export type EpochsRes = PaginatedResult<Epoch>;
 export type TipRes = { hash: Hash; slot: bigint };
 export type LatestTxRes<
   U extends UTxO,
@@ -79,7 +78,7 @@ export type LatestTxRes<
 > = Chain['tx'];
 export type GetTxRes<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> = Chain['tx'];
 export type AddressFundsRes = { value: Value; txCount: bigint };
-export type AddressUTxOsRes<U extends UTxO> = PaginatedResult<U, bigint>;
+export type AddressUTxOsRes<U extends UTxO> = PaginatedResult<U>;
 
 export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> {
   getLatestTx(): Promise<LatestTxRes<U, T, Chain>>;

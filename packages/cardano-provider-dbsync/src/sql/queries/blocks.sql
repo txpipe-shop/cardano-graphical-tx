@@ -1,4 +1,4 @@
--- Get blocks with cursor-based pagination
+-- Get blocks with offset-based pagination
 WITH
     latest_block AS (
         SELECT block_no
@@ -28,18 +28,9 @@ FROM
     block b
     CROSS JOIN latest_block lb
 WHERE (
-        (
-          $1::text IS NULL
-          OR b.id < (
-             SELECT id
-             FROM block
-             WHERE hash = decode($1, 'hex')
-          )
-        ) AND
-        (
-          $2::word31type IS NULL
-          OR b.epoch_no = $2
-        )
+        $3::word31type IS NULL
+        OR b.epoch_no = $3
     )
 ORDER BY b.id DESC
+OFFSET $1
 LIMIT $2;
