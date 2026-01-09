@@ -1,1 +1,1 @@
-export * from '@napi-rs/package-template-pnpm-wasm32-wasi'
+export * from '@laceanatomy/napi-pallas-wasm32-wasi'
