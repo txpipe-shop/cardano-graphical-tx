@@ -2,6 +2,21 @@ import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
+import { Transaction, TransactionsResponse } from '../types';
+import { listTransactions, resolveTx } from '../controllers/transactions';
+import { Hash } from '@alexandria/types';
+
+const txsQuerySchema = z.object({
+  network: schemas.NetworkSchema,
+  limit: z.coerce.number().min(1).max(100).default(20),
+  offset: z.coerce.number().min(0).default(0)
+});
+
+const txParamSchema = z.object({ hash: z.string() });
+
+const txQuerySchema = z.object({
+  network: schemas.NetworkSchema
+});
 
 export function transactionsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -11,29 +26,27 @@ export function transactionsRoutes(app: FastifyInstance) {
     {
       schema: {
         tags: ['Transactions'],
-        querystring: z.object({
-          network: schemas.NetworkSchema,
-          limit: z.coerce.number().min(1).max(100).default(20),
-          offset: z.coerce.number().min(0).default(0)
-        }),
+        querystring: txsQuerySchema,
         response: {
           200: schemas.TransactionsResponseSchema
         }
       }
     },
     async (request, _reply) => {
-      return {
-        transactions: [],
-        pagination: {
-          total: 0,
-          limit: request.query.limit,
-          offset: request.query.offset,
-          hasMore: false
-        }
-      };
+      const { /**network,*/ limit, offset } = txsQuerySchema.parse(request.query);
+      const pool = server.pg;
+
+      const txsRes: TransactionsResponse = await listTransactions(
+        BigInt(limit),
+        BigInt(offset),
+        pool
+      );
+
+      return txsRes;
     }
   );
 
+  // TODO: just fetch the latest txs with the offset stuff
   server.get(
     '/transactions/latest',
     {
@@ -57,25 +70,20 @@ export function transactionsRoutes(app: FastifyInstance) {
     {
       schema: {
         tags: ['Transactions'],
-        params: z.object({
-          hash: z.string()
-        }),
-        querystring: z.object({
-          network: schemas.NetworkSchema
-        }),
+        params: txParamSchema,
+        querystring: txQuerySchema,
         response: {
           200: schemas.TransactionSchema
         }
       }
     },
     async (request, _reply) => {
-      // Mock response matching schema
-      return {
-        hash: request.params.hash,
-        block_height: 12345,
-        status: 'success' as const,
-        timestamp: new Date().toISOString()
-      };
+      const { hash } = txParamSchema.parse(request.params);
+      const pool = server.pg;
+
+      const tx: Transaction = await resolveTx(Hash(hash), pool);
+
+      return tx;
     }
   );
 }
