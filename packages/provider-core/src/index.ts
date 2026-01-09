@@ -40,7 +40,7 @@ export type BlockMetadata = {
   fees: bigint;
   time: number;
   /** blocksProduced since this block */
-  confirmations?: bigint;
+  confirmations: bigint;
 };
 
 // TODO: think how to handle epochs in generic chains (currently cardano focused)
@@ -51,6 +51,8 @@ export type Epoch = {
   endSlot: bigint;
   startHeight: bigint;
   endHeight: bigint;
+  startTime: number;
+  endTime: number;
   fees: bigint;
   blocksProduced: bigint;
   txCount: bigint;

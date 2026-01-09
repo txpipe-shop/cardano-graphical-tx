@@ -84,7 +84,7 @@ export function hexToAscii(hex: HexString): string {
   return bytes.toString('ascii');
 }
 
-export function isHexString(s: string): boolean {
+export function isHexString(s: string): s is HexString {
   return /^[0-9a-fA-F]+$/.test(s) && s.length % 2 === 0;
 }
 

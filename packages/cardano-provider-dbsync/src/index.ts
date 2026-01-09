@@ -16,15 +16,7 @@ import {
   AddressUTxOsRes
 } from '@alexandria/provider-core';
 import type { Cardano } from '@alexandria/types';
-import {
-  cardano,
-  HexString,
-  hexToBech32,
-  isBase58,
-  Address,
-  Unit,
-  DatumType
-} from '@alexandria/types';
+import { cardano, HexString, hexToBech32, isBase58, Unit } from '@alexandria/types';
 import { Hash } from '@alexandria/types';
 import type { Pool, PoolClient } from 'pg';
 import { mapTx, mapUtxo } from './mappers';

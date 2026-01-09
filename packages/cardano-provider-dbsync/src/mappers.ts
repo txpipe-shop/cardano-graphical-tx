@@ -1,4 +1,3 @@
-import type { Tx } from '@alexandria/types';
 import { Address, cardano, DatumType, Hash, HexString, Unit } from '@alexandria/types';
 import * as QueryTypes from './types/queries';
 
@@ -120,6 +119,7 @@ export function mapTx(tx: QueryTypes.Tx): cardano.Tx {
     block: {
       hash: Hash(tx.block.hash),
       epochNo: BigInt(tx.block.epochNo),
+      slot: BigInt(tx.block.slot),
       height: BigInt(tx.block.height)
     },
     createdAt: tx.createdAt,

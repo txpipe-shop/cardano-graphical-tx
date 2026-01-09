@@ -43,7 +43,7 @@
     const client = loadProviderClient(provider);
 
     const txs = await client.getTxs({
-      limit: 100,
+      limit: 100n,
       query: undefined
     });
 

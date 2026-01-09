@@ -13,6 +13,7 @@ WITH
             b.hash,
             b.epoch_no,
             b.block_no,
+            b.slot_no,
             b.time
         FROM block b
             JOIN target_txs tx ON tx.block_id = b.id
@@ -245,8 +246,11 @@ WITH
 SELECT json_build_object(
         'hash', encode(tx.hash, 'hex'), 'fee', tx.fee::text, 'block', (
             SELECT json_build_object(
-                    'hash', encode(b.hash, 'hex'), 'epochNo', b.epoch_no, 'height', b.block_no, 'txIndex', tx.block_index
-
+                    'hash', encode(b.hash, 'hex'),
+                    'epochNo', b.epoch_no,
+                    'height', b.block_no,
+                    'txIndex', tx.block_index,
+                    'slot', b.slot
                 )
             FROM block_info b
             WHERE

@@ -65,8 +65,8 @@ export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block): cardano.Block {
       u5cToCardanoTx(
         tx,
         toBigInt(block.timestamp),
-        block.header?.hash ? uint8ToHash(block.header?.hash) : undefined,
-        block.header?.height ? toBigInt(block.header?.height) : undefined
+        uint8ToHash(block.header!.hash),
+        toBigInt(block.header!.height)
       )
     )
   };
@@ -161,8 +161,8 @@ export function u5cToCardanoMetadata(metadata: cardanoUtxoRpc.Metadata[]): Metad
 export function u5cToCardanoTx(
   tx: cardanoUtxoRpc.Tx,
   time: bigint,
-  blockHash: Hash | undefined,
-  blockHeight: bigint | undefined
+  blockHash: Hash,
+  blockHeight: bigint
 ): cardano.Tx {
   const fee = toBigInt(tx.fee?.bigInt.value);
   const hash = uint8ToHash(tx.hash);
@@ -201,8 +201,7 @@ export function u5cToCardanoTx(
     referenceInputs,
     createdAt: Number(time),
     witnesses: { scripts },
-    block:
-      blockHash && blockHeight ? { hash: blockHash, height: blockHeight, epochNo: 0n } : undefined,
+    block: { hash: blockHash, height: blockHeight, epochNo: 0n, slot: 0n },
     treasuryDonation: 0n,
     // TODO: fetch this information here
     indexInBlock: 0n

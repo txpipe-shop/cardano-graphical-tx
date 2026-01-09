@@ -14,6 +14,7 @@ export {
   isBase58,
   bech32ToHex,
   hexToAscii,
+  isHexString,
   fingerprintFromUnit,
   policyFromUnit,
   assetNameFromUnit

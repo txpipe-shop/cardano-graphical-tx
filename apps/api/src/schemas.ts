@@ -39,13 +39,30 @@ export const TransactionInputSchema = z.object({
   amount_lovelace: z.number().nullable().optional()
 });
 
+export const TokenBalanceSchema = z.object({
+  token_address: z.string().nullable().optional(),
+  policy_id: z.string().nullable().optional(),
+  asset_name: z.string().nullable().optional(),
+  asset_name_hex: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  token_name: z.string().nullable().optional(),
+  symbol: z.string().nullable().optional(),
+  token_symbol: z.string().nullable().optional(),
+  decimals: z.number().nullable().optional(),
+  balance: z.string().nullable().optional(),
+  balance_formatted: z.number().nullable().optional(),
+  value: z.string().nullable().optional(),
+  quantity: z.string().nullable().optional(),
+  fingerprint: z.string().nullable().optional()
+});
+
 export const TransactionOutputSchema = z.object({
   address: z.string(),
   address_bech32: z.string().nullable().optional(),
   output_index: z.number(),
   amount_ada: z.number().nullable().optional(),
   amount_lovelace: z.number().nullable().optional(),
-  tokens: z.array(z.object({})).nullable().optional()
+  tokens: z.array(TokenBalanceSchema).nullable().optional()
 });
 
 export const TransactionSchema = z.object({
@@ -109,23 +126,6 @@ export const AddressTransactionSchema = z.object({
   received_ada: z.number(),
   sent_ada: z.number(),
   timestamp: z.string().datetime().nullable()
-});
-
-export const TokenBalanceSchema = z.object({
-  token_address: z.string().nullable().optional(),
-  policy_id: z.string().nullable().optional(),
-  asset_name: z.string().nullable().optional(),
-  asset_name_hex: z.string().nullable().optional(),
-  name: z.string().nullable().optional(),
-  token_name: z.string().nullable().optional(),
-  symbol: z.string().nullable().optional(),
-  token_symbol: z.string().nullable().optional(),
-  decimals: z.number().nullable().optional(),
-  balance: z.string().nullable().optional(),
-  balance_formatted: z.number().nullable().optional(),
-  value: z.string().nullable().optional(),
-  quantity: z.string().nullable().optional(),
-  fingerprint: z.string().nullable().optional()
 });
 
 export const AddressSchema = z.object({

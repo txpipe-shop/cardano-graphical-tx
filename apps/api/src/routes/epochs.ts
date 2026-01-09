@@ -2,6 +2,14 @@ import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
+import { listEpochs } from '../controllers/epochs';
+import { EpochsResponse } from '../types';
+
+const epochsListQuerySchema = z.object({
+  network: schemas.NetworkSchema,
+  limit: z.coerce.number().min(1).max(100).default(20),
+  offset: z.coerce.number().min(0).default(0)
+});
 
 export function epochsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -11,26 +19,19 @@ export function epochsRoutes(app: FastifyInstance) {
     {
       schema: {
         tags: ['Epochs'],
-        querystring: z.object({
-          network: schemas.NetworkSchema,
-          limit: z.coerce.number().min(1).max(100).default(20),
-          offset: z.coerce.number().min(0).default(0)
-        }),
+        querystring: epochsListQuerySchema,
         response: {
           200: schemas.EpochsResponseSchema
         }
       }
     },
     async (request, _reply) => {
-      return {
-        epochs: [],
-        pagination: {
-          total: 0,
-          limit: request.query.limit,
-          offset: request.query.offset,
-          hasMore: false
-        }
-      };
+      const { limit, offset } = epochsListQuerySchema.parse(request.query);
+      const pool = server.pg;
+
+      const epochsListRes: EpochsResponse = await listEpochs(BigInt(limit), BigInt(offset), pool);
+
+      return epochsListRes;
     }
   );
 

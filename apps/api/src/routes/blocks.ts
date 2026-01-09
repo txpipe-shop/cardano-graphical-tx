@@ -2,9 +2,8 @@ import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
-import { DbSyncProvider } from '@alexandria/cardano-provider-dbsync';
-import { BlocksResponse, Block as BlockResponse } from '../types';
-import { listBlocks, resolveBlock } from '../controllers/blocks';
+import { BlocksResponse } from '../types';
+import { listBlocks, resolveBlock, resolveBlockTxs } from '../controllers/blocks';
 import {} from '@alexandria/provider-core';
 
 export const listBlocksQuerySchema = z.object({
@@ -24,6 +23,7 @@ const blocksIdParamsTxsSchema = blocksIdParamsSchema;
 const blocksTxsResponseSchema = z.object({
   transactions: z.array(schemas.TransactionSchema)
 });
+const blocksTxsQuerySchema = blocksIdQuerySchema;
 
 export function blocksRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -104,23 +104,26 @@ export function blocksRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Blocks', 'Transactions'],
         params: blocksIdParamsTxsSchema,
-        querystring: z.object({
-          network: schemas.NetworkSchema
-        }),
+        querystring: blocksTxsQuerySchema,
         response: {
           200: blocksTxsResponseSchema
         }
       }
     },
-    async (_request, _reply) => {
+    async (request, _reply) => {
       const { identifier } = blocksIdParamsSchema.parse(request.params);
-      //const { network } = blocksIdQuerySchema.parse(request.query);
+      //const { network} = blocksTxsQuerySchema.parse(request.query);
       const pool = server.pg;
-      const timeAgo = server.timeAgo;
 
-      const block = resolveBlock(identifier, pool, timeAgo);
+      // TODO: add proper pagination here
+      const blockTxs: z.infer<typeof blocksTxsResponseSchema> = await resolveBlockTxs(
+        identifier,
+        100n,
+        0n,
+        pool
+      );
 
-      return block;
+      return blockTxs;
     }
   );
 }

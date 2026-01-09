@@ -108,7 +108,7 @@ export type Tx<T extends UTxO> = {
   inputs: T[];
   referenceInputs: T[];
   metadata?: Metadata;
-  block?: { hash: Hash; height: bigint; epochNo: bigint };
+  block: { hash: Hash; height: bigint; slot: bigint; epochNo: bigint };
 };
 
 export type ChainPoint = {

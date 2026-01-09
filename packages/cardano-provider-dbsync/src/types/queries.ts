@@ -14,6 +14,7 @@ export interface Tx {
   block: {
     hash: string;
     epochNo: number;
+    slot: number;
     height: number;
     txIndex: string;
   };
