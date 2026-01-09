@@ -108,4 +108,7 @@ const { instance: __napiInstance, module: __wasiModule, napiModule: __napiModule
   },
 })
 module.exports = __napiModule.exports
-module.exports.plus100 = __napiModule.exports.plus100
+module.exports.cborParse = __napiModule.exports.cborParse
+module.exports.parseAddress = __napiModule.exports.parseAddress
+module.exports.parseDatumInfo = __napiModule.exports.parseDatumInfo
+module.exports.parseDsl = __napiModule.exports.parseDsl

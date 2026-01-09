@@ -576,4 +576,7 @@ if (!nativeBinding) {
 }
 
 module.exports = nativeBinding
-module.exports.plus100 = nativeBinding.plus100
+module.exports.cborParse = nativeBinding.cborParse
+module.exports.parseAddress = nativeBinding.parseAddress
+module.exports.parseDatumInfo = nativeBinding.parseDatumInfo
+module.exports.parseDsl = nativeBinding.parseDsl
