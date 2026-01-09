@@ -6,8 +6,8 @@ import {
   Configuration,
   AddressContent,
   AddressUtxoContentInner
-} from '@alexandria/blockfrost-sdk';
-import { Address, Unit, DatumType, hexToBech32, HexString } from '@alexandria/types';
+} from '@laceanatomy/blockfrost-sdk';
+import { Address, Unit, DatumType, hexToBech32, HexString } from '@laceanatomy/types';
 import { testEnv, TestEnv } from './setup';
 
 describe('DbSyncProvider - Address Queries', () => {

@@ -1,4 +1,4 @@
-import { createGrpcTransport } from '@alexandria/utxorpc-sdk/transport/node';
+import { createGrpcTransport } from '@laceanatomy/utxorpc-sdk/transport/node';
 
 export function createTransport(baseUrl: string, headers?: Record<string, string>) {
   return createGrpcTransport({

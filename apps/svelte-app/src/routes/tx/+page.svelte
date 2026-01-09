@@ -5,8 +5,8 @@
   import { Card, CardContent } from '@/components/ui/card';
   import { Input } from '@/components/ui/input';
   import { currentProvider } from '@/stores/provider-store';
-  import type { Cardano, cardano } from '@alexandria/types';
-  import type { ChainProvider } from '@alexandria/provider-core';
+  import type { Cardano, cardano } from '@laceanatomy/types';
+  import type { ChainProvider } from '@laceanatomy/provider-core';
   import type { ProviderConfig } from '@/providers/types';
   import { loadProviderClient } from '@/providers/load-client';
 

@@ -16,10 +16,10 @@ import {
   AddressUTxOsRes,
   EpochReq,
   EpochRes
-} from '@alexandria/provider-core';
-import type { Cardano } from '@alexandria/types';
-import { cardano, HexString, hexToBech32, isBase58, Unit } from '@alexandria/types';
-import { Hash } from '@alexandria/types';
+} from '@laceanatomy/provider-core';
+import type { Cardano } from '@laceanatomy/types';
+import { cardano, HexString, hexToBech32, isBase58, Unit } from '@laceanatomy/types';
+import { Hash } from '@laceanatomy/types';
 import type { Pool, PoolClient } from 'pg';
 import { mapTx, mapUtxo } from './mappers';
 import { SQLQuery } from './sql';

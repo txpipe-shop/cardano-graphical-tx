@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { SvelteURLSearchParams } from 'svelte/reactivity';
-  import type { cardano, OutRef } from '@alexandria/types';
+  import type { cardano, OutRef } from '@laceanatomy/types';
   import { formatAddress, getAssetName, trunc } from '../../primitive-utils';
   import { Badge } from '../../ui/badge';
   import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';

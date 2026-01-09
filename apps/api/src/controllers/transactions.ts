@@ -1,8 +1,8 @@
 import { Pool } from 'pg';
 import { TransactionsResponse } from '../types';
-import { DbSyncProvider } from '@alexandria/cardano-provider-dbsync';
+import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
 import { mapTx } from './common';
-import { Hash } from '@alexandria/types';
+import { Hash } from '@laceanatomy/types';
 import { Transaction } from '../types';
 
 export async function listTransactions(

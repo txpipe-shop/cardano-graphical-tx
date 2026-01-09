@@ -1,6 +1,6 @@
 <script lang="ts">
   import { formatAddress, getAssetName, trunc } from '@/components/primitive-utils';
-  import type { UTxO } from '@alexandria/types';
+  import type { UTxO } from '@laceanatomy/types';
   import { Circle, Group, Line, Rect, Text } from 'svelte-konva';
   import { KONVA_COLORS, POINT_SIZE, STROKE_WIDTH, TX_HEIGHT, TX_WIDTH } from './constants';
 

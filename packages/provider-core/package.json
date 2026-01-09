@@ -1,5 +1,5 @@
 {
-  "name": "@alexandria/provider-core",
+  "name": "@laceanatomy/provider-core",
   "version": "0.0.1",
   "private": false,
   "type": "module",
@@ -28,10 +28,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@alexandria/types": "workspace:*"
+    "@laceanatomy/types": "workspace:*"
   },
   "devDependencies": {
-    "@alexandria/typescript-config": "workspace:*",
+    "@laceanatomy/typescript-config": "workspace:*",
     "typescript": "^5.0.0"
   }
 }

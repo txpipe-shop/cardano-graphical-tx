@@ -1,5 +1,5 @@
 {
-  "name": "@alexandria/blockfrost-sdk",
+  "name": "@laceanatomy/blockfrost-sdk",
   "version": "0.0.1",
   "private": false,
   "type": "module",
@@ -32,7 +32,7 @@
     "axios": "^1.11.0"
   },
   "devDependencies": {
-    "@alexandria/typescript-config": "workspace:*",
+    "@laceanatomy/typescript-config": "workspace:*",
     "typescript": "^5.0.0"
   }
 }

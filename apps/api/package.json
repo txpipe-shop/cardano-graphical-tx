@@ -15,9 +15,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@alexandria/cardano-provider-dbsync": "workspace:*",
-    "@alexandria/provider-core": "workspace:*",
-    "@alexandria/types": "workspace:*",
+    "@laceanatomy/cardano-provider-dbsync": "workspace:*",
+    "@laceanatomy/provider-core": "workspace:*",
+    "@laceanatomy/types": "workspace:*",
     "@fastify/cors": "^11.2.0",
     "@fastify/postgres": "^6.0.2",
     "@fastify/swagger": "^9.6.1",

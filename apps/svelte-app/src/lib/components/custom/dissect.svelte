@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type cardano, type Metadata, DatumType } from '@alexandria/types';
+  import { type cardano, type Metadata, DatumType } from '@laceanatomy/types';
   import { formatAddress, getAssetName } from '../primitive-utils';
   import Box from './box.svelte';
   import Ccollapsible from './Ccollapsible.svelte';

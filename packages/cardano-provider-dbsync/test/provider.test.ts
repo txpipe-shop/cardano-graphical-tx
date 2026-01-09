@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Pool } from 'pg';
 import { DbSyncProvider } from '../src/index';
-import { CardanoTransactionsApi, Configuration } from '@alexandria/blockfrost-sdk';
+import { CardanoTransactionsApi, Configuration } from '@laceanatomy/blockfrost-sdk';
 import { toEqualBfTx } from './matchers/toEqualBfTx';
-import { Hash } from '@alexandria/types';
+import { Hash } from '@laceanatomy/types';
 import { testEnv, TestEnv } from './setup';
 
 expect.extend({ toEqualBfTx });

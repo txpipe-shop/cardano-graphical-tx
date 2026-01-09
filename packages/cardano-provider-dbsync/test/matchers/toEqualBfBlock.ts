@@ -1,5 +1,5 @@
-import { BlockContent } from '@alexandria/blockfrost-sdk';
-import { BlockRes } from '@alexandria/provider-core';
+import { BlockContent } from '@laceanatomy/blockfrost-sdk';
+import { BlockRes } from '@laceanatomy/provider-core';
 
 export function toEqualBfBlock(
   received: BlockRes,

@@ -1,5 +1,5 @@
-import { hexToBech32, hexToAscii } from '@alexandria/types';
-import { HexString, type Hash } from '@alexandria/types';
+import { hexToBech32, hexToAscii } from '@laceanatomy/types';
+import { HexString, type Hash } from '@laceanatomy/types';
 
 export function truncHash(hash: Hash): string {
   return hash;

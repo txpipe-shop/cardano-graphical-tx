@@ -20,13 +20,13 @@ importers:
 
   apps/api:
     dependencies:
-      '@alexandria/cardano-provider-dbsync':
+      '@laceanatomy/cardano-provider-dbsync':
         specifier: workspace:*
         version: link:../../packages/cardano-provider-dbsync
-      '@alexandria/provider-core':
+      '@laceanatomy/provider-core':
         specifier: workspace:*
         version: link:../../packages/provider-core
-      '@alexandria/types':
+      '@laceanatomy/types':
         specifier: workspace:*
         version: link:../../packages/types
       '@fastify/cors':
@@ -102,22 +102,22 @@ importers:
 
   apps/svelte-app:
     dependencies:
-      '@alexandria/blockfrost-sdk':
+      '@laceanatomy/blockfrost-sdk':
         specifier: workspace:*
         version: link:../../packages/blockfrost-sdk
-      '@alexandria/cardano-provider-dbsync':
+      '@laceanatomy/cardano-provider-dbsync':
         specifier: workspace:*
         version: link:../../packages/cardano-provider-dbsync
-      '@alexandria/cardano-provider-u5c':
+      '@laceanatomy/cardano-provider-u5c':
         specifier: workspace:*
         version: link:../../packages/cardano-provider-u5c
-      '@alexandria/provider-core':
+      '@laceanatomy/provider-core':
         specifier: workspace:*
         version: link:../../packages/provider-core
-      '@alexandria/types':
+      '@laceanatomy/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@alexandria/utxorpc-sdk':
+      '@laceanatomy/utxorpc-sdk':
         specifier: workspace:*
         version: link:../../packages/utxorpc-sdk
       '@connectrpc/connect':
@@ -178,7 +178,7 @@ importers:
         specifier: ^4.0.14
         version: 4.0.14
     devDependencies:
-      '@alexandria/typescript-config':
+      '@laceanatomy/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
       '@eslint/compat':
@@ -459,7 +459,7 @@ importers:
         specifier: ^1.11.0
         version: 1.11.0
     devDependencies:
-      '@alexandria/typescript-config':
+      '@laceanatomy/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       typescript:
@@ -468,20 +468,20 @@ importers:
 
   packages/cardano-provider-dbsync:
     dependencies:
-      '@alexandria/provider-core':
+      '@laceanatomy/provider-core':
         specifier: workspace:*
         version: link:../provider-core
-      '@alexandria/types':
+      '@laceanatomy/types':
         specifier: workspace:*
         version: link:../types
       pg:
         specifier: ^8.13.1
         version: 8.16.3
     devDependencies:
-      '@alexandria/blockfrost-sdk':
+      '@laceanatomy/blockfrost-sdk':
         specifier: workspace:*
         version: link:../blockfrost-sdk
-      '@alexandria/typescript-config':
+      '@laceanatomy/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       '@types/pg':
@@ -502,13 +502,13 @@ importers:
 
   packages/cardano-provider-u5c:
     dependencies:
-      '@alexandria/provider-core':
+      '@laceanatomy/provider-core':
         specifier: workspace:*
         version: link:../provider-core
-      '@alexandria/types':
+      '@laceanatomy/types':
         specifier: workspace:*
         version: link:../types
-      '@alexandria/utxorpc-sdk':
+      '@laceanatomy/utxorpc-sdk':
         specifier: workspace:*
         version: link:../utxorpc-sdk
       '@connectrpc/connect':
@@ -530,7 +530,7 @@ importers:
         specifier: latest
         version: 2.0.1
     devDependencies:
-      '@alexandria/typescript-config':
+      '@laceanatomy/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       '@emurgo/cardano-serialization-lib-nodejs':
@@ -599,11 +599,11 @@ importers:
 
   packages/provider-core:
     dependencies:
-      '@alexandria/types':
+      '@laceanatomy/types':
         specifier: workspace:*
         version: link:../types
     devDependencies:
-      '@alexandria/typescript-config':
+      '@laceanatomy/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       typescript:
@@ -622,7 +622,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
     devDependencies:
-      '@alexandria/typescript-config':
+      '@laceanatomy/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       typescript:
@@ -646,7 +646,7 @@ importers:
         specifier: ^0.18.1
         version: 0.18.1
     devDependencies:
-      '@alexandria/typescript-config':
+      '@laceanatomy/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
       typescript:

@@ -1,5 +1,5 @@
 {
-  "name": "alexandria",
+  "name": "laceanatomy",
   "private": true,
   "scripts": {
     "build": "turbo run build",

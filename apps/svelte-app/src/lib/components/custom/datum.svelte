@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type cardano, DatumType } from '@alexandria/types';
+  import { type cardano, DatumType } from '@laceanatomy/types';
   import * as cbor2 from 'cbor2';
   import { onMount } from 'svelte';
   import { trunc } from '../primitive-utils';

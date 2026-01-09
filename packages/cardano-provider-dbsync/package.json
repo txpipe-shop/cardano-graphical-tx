@@ -1,5 +1,5 @@
 {
-  "name": "@alexandria/cardano-provider-dbsync",
+  "name": "@laceanatomy/cardano-provider-dbsync",
   "version": "0.0.1",
   "private": false,
   "type": "module",
@@ -29,13 +29,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@alexandria/provider-core": "workspace:*",
-    "@alexandria/types": "workspace:*",
+    "@laceanatomy/provider-core": "workspace:*",
+    "@laceanatomy/types": "workspace:*",
     "pg": "^8.13.1"
   },
   "devDependencies": {
-    "@alexandria/blockfrost-sdk": "workspace:*",
-    "@alexandria/typescript-config": "workspace:*",
+    "@laceanatomy/blockfrost-sdk": "workspace:*",
+    "@laceanatomy/typescript-config": "workspace:*",
     "@types/pg": "^8.11.10",
     "dotenv": "^17.2.3",
     "typescript": "^5.0.0",

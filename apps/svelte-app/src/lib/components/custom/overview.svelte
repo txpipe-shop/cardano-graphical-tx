@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { cardano } from '@alexandria/types';
+  import type { cardano } from '@laceanatomy/types';
   import { formatDate } from '../primitive-utils';
   import { Card, CardContent } from '../ui/card';
   import MintList from './lists/mint-list.svelte';

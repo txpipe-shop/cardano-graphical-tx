@@ -1,5 +1,5 @@
 {
-  "name": "@alexandria/web",
+  "name": "@laceanatomy/web",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -14,7 +14,7 @@
     "lint": "prettier --check . && eslint ."
   },
   "devDependencies": {
-    "@alexandria/typescript-config": "workspace:*",
+    "@laceanatomy/typescript-config": "workspace:*",
     "@eslint/compat": "^1.2.5",
     "@eslint/js": "^9.18.0",
     "@internationalized/date": "^3.8.1",
@@ -53,12 +53,12 @@
     ]
   },
   "dependencies": {
-    "@alexandria/blockfrost-sdk": "workspace:*",
-    "@alexandria/cardano-provider-dbsync": "workspace:*",
-    "@alexandria/cardano-provider-u5c": "workspace:*",
-    "@alexandria/provider-core": "workspace:*",
-    "@alexandria/types": "workspace:*",
-    "@alexandria/utxorpc-sdk": "workspace:*",
+    "@laceanatomy/blockfrost-sdk": "workspace:*",
+    "@laceanatomy/cardano-provider-dbsync": "workspace:*",
+    "@laceanatomy/cardano-provider-u5c": "workspace:*",
+    "@laceanatomy/provider-core": "workspace:*",
+    "@laceanatomy/types": "workspace:*",
+    "@laceanatomy/utxorpc-sdk": "workspace:*",
     "@connectrpc/connect": "1.4",
     "@connectrpc/connect-node": "1.4",
     "@connectrpc/connect-web": "1.4",

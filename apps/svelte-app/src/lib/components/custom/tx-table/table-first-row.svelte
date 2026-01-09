@@ -3,7 +3,7 @@
   import { Badge } from '@/components/ui/badge';
   import { TableCell, TableRow } from '@/components/ui/table';
   import { currentProvider } from '@/stores/provider-store';
-  import type { cardano } from '@alexandria/types';
+  import type { cardano } from '@laceanatomy/types';
   import Copy from '../copy.svelte';
 
   let { tx }: { tx: cardano.Tx } = $props();

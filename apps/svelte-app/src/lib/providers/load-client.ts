@@ -1,5 +1,5 @@
 import type { ProviderConfig } from './types';
-import { U5CProvider } from '@alexandria/cardano-provider-u5c';
+import { U5CProvider } from '@laceanatomy/cardano-provider-u5c';
 import { createTransport as createBrowserTransport } from './u5c/web-loader';
 
 export function loadProviderClient(config: ProviderConfig) {

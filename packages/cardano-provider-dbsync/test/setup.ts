@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { BlockContent, EpochContent, TxContent, TxContentUtxo } from '@alexandria/blockfrost-sdk';
+import { BlockContent, EpochContent, TxContent, TxContentUtxo } from '@laceanatomy/blockfrost-sdk';
 import z from 'zod';
 
 export type BfComprehensiveTx = {
