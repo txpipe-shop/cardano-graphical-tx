@@ -13,7 +13,9 @@ import {
   type ChainProvider,
   type TxReq,
   AddressUTxOsReq,
-  AddressUTxOsRes
+  AddressUTxOsRes,
+  EpochReq,
+  EpochRes
 } from '@alexandria/provider-core';
 import type { Cardano } from '@alexandria/types';
 import { cardano, HexString, hexToBech32, isBase58, Unit } from '@alexandria/types';
@@ -314,12 +316,10 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
       return {
         data: epochsRows.map((row) => ({
-          epoch: BigInt(row.epoch),
           startTime: row.startTime,
           endTime: row.endTime,
           txCount: BigInt(row.txCount),
           blocksProduced: BigInt(row.blkCount),
-          output: BigInt(row.output),
           fees: BigInt(row.fees),
           index: BigInt(row.epoch),
           startSlot: 0n,
@@ -328,6 +328,37 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
           endHeight: 0n
         })),
         total: BigInt(epochsCountRows[0]!.total)
+      };
+    } finally {
+      this.gracefulRelease(client);
+    }
+  }
+
+  async getEpoch({ epochNo }: EpochReq): Promise<EpochRes> {
+    const client = await this.getClient();
+
+    try {
+      const { rows } = await client.query<QueryTypes.Epoch>(SQLQuery.get('epoch'), [
+        epochNo.toString()
+      ]);
+
+      if (rows.length === 0) {
+        throw new Error('Epoch not found');
+      }
+
+      const row = rows[0]!;
+
+      return {
+        startTime: row.startTime,
+        endTime: row.endTime,
+        txCount: BigInt(row.txCount),
+        blocksProduced: BigInt(row.blkCount),
+        fees: BigInt(row.fees),
+        index: BigInt(row.epoch),
+        startSlot: 0n,
+        endSlot: 0n,
+        startHeight: 0n,
+        endHeight: 0n
       };
     } finally {
       this.gracefulRelease(client);

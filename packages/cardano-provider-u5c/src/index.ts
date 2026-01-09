@@ -7,6 +7,8 @@ import {
   BlockRes,
   BlocksReq,
   BlocksRes,
+  EpochReq,
+  EpochRes,
   EpochsReq,
   EpochsRes,
   TxsRes,
@@ -171,6 +173,21 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     //  ),
     //  total: 0n,
     //};
+  }
+
+  async getEpoch(_params: EpochReq): Promise<EpochRes> {
+    return {
+      blocksProduced: 0n,
+      index: 0n,
+      endHeight: 0n,
+      endSlot: 0n,
+      endTime: 0,
+      fees: 0n,
+      startHeight: 0n,
+      startSlot: 0n,
+      startTime: 0,
+      txCount: 0n
+    };
   }
 
   async getEpochs(_params: EpochsReq): Promise<EpochsRes> {
