@@ -1,22 +1,59 @@
-FROM node:22-alpine AS build
+# Building phase
+# Change it so that it uses node 18
+FROM node:18-bullseye as builder
 WORKDIR /app
+# Install cargo deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  python3 \
+  curl \
+  gcc \
+  make \
+  libc6-dev \
+  build-essential \
+  libcairo2-dev \
+  libjpeg62-turbo-dev \
+  libpango1.0-dev \
+  libgif-dev
 
-COPY package.json pnpm-lock.yaml ./
-RUN npm i -g pnpm
-RUN pnpm install
+# Install cargo
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+# Add cargo to path
+ENV PATH "/root/.cargo/bin:${PATH}"
 
+# Skip environment variable validation at buildtime
+ENV SKIP_VALIDATION true
+
+# Define an ARG for the NEXT_PUBLIC_CBOR_ENDPOINT
+ARG NEXT_PUBLIC_CBOR_ENDPOINT
+
+# Define an ARG for the NEXT_PUBLIC_GA_TRACKING_ID
+ARG NEXT_PUBLIC_GA_TRACKING_ID
+
+# Set the ARG value to ENV so that it's available during build
+ENV NEXT_PUBLIC_CBOR_ENDPOINT=${NEXT_PUBLIC_CBOR_ENDPOINT}
+ENV NEXT_PUBLIC_GA_TRACKING_ID=${NEXT_PUBLIC_GA_TRACKING_ID}
+
+# Copy repo
 COPY . .
-RUN pnpm run build
 
-FROM node:22-alpine AS production
+
+# build and installs deps
+RUN yarn build:pallas
+RUN echo node --version
+RUN yarn install --immutable
+RUN yarn build
+
+# Runner image
+FROM node:18-bullseye
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
-RUN npm i -g pnpm
-RUN pnpm install --prod --frozen-lockfile
+# Copy from builder image
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/docs/schema.json ./docs/schema.json
 
-COPY --from=build /app/build ./build
 
 EXPOSE 3000
-
-CMD ["node", "build"]
+CMD ["yarn", "start"]
