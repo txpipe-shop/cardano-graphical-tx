@@ -1,0 +1,24 @@
+{
+  "name": "alexandria",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "clean": "find . -type d \\( -name node_modules -o -name dist -o -name build -o -name .next -o -name .turbo -o -name .vite -o -name coverage \\) -prune -exec rm -rf {} +",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "check": "turbo run check",
+    "format": "prettier --write \"**/*.{ts,tsx,svelte,md,json,css}\"",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build --filter=./packages/* && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.0",
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=18"
+  }
+}

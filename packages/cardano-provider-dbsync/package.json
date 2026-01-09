@@ -1,0 +1,45 @@
+{
+  "name": "@alexandria/cardano-provider-dbsync",
+  "version": "0.0.1",
+  "private": false,
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && mkdir -p dist/sql/queries && cp src/sql/queries/*.sql dist/sql/queries/",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "check": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@alexandria/provider-core": "workspace:*",
+    "@alexandria/types": "workspace:*",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@alexandria/blockfrost-sdk": "workspace:*",
+    "@alexandria/typescript-config": "workspace:*",
+    "@types/pg": "^8.11.10",
+    "dotenv": "^17.2.3",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.16",
+    "zod": "^4.0.14"
+  }
+}

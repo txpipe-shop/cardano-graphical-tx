@@ -1,0 +1,39 @@
+{
+  "name": "@alexandria/types",
+  "version": "0.0.1",
+  "private": false,
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@emurgo/cip14-js": "^3.0.1",
+    "bech32": "^2.0.0",
+    "buffer": "^6.0.3"
+  },
+  "devDependencies": {
+    "@alexandria/typescript-config": "workspace:*",
+    "typescript": "^5.0.0"
+  }
+}
