@@ -26,7 +26,7 @@ export function TxSearch({ chain }: TxSearchProps) {
   };
 
   return (
-    <div className="flex w-full max-w-md gap-2">
+    <div className="flex w-full gap-2">
       <Input
         placeholder="Search by transaction hash..."
         value={txHash}

@@ -104,7 +104,7 @@ function getAssetName(policyAndName: string): string {
 
 function getBadgeColor(
   assetId: string,
-  mintedAssets: Record<string, bigint> | undefined
+  mintedAssets: Record<string, bigint> | undefined,
 ): "success" | "danger" | "default" {
   if (mintedAssets && assetId in mintedAssets) {
     const amount = mintedAssets[assetId];
@@ -115,7 +115,7 @@ function getBadgeColor(
 }
 
 function getScriptBadges(
-  tx: Tx
+  tx: Tx,
 ): { type: string; color: "warning" | "secondary" | "primary" | "danger" }[] {
   const badges: {
     type: string;

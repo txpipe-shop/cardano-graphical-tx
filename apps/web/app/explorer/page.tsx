@@ -42,15 +42,12 @@ function LoadingState() {
   );
 }
 
-export default async function ExplorerPage({ searchParams }: ExplorerPageProps) {
+export default async function ExplorerPage({
+  searchParams,
+}: ExplorerPageProps) {
   const params = await searchParams;
   const chainParam = params.chain || "mainnet";
   const chain: ChainNetwork = isValidChain(chainParam) ? chainParam : "mainnet";
-
-  // TODO: Vector network doesn't have its own dbsync yet.
-  // When vector is selected, we're actually querying mainnet data.
-  // This should be fixed once Vector dbsync is available.
-  const isVectorFallback = chainParam === "vector";
 
   return (
     <div className="min-h-screen bg-white">
@@ -58,26 +55,19 @@ export default async function ExplorerPage({ searchParams }: ExplorerPageProps) 
 
       <main className="container mx-auto px-4 py-6">
         {/* Page Header */}
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="mb-6 flex flex-col gap-4">
           <h1 className="text-4xl font-extrabold text-gray-800">
             Transactions
           </h1>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <TxSearch chain={chain} />
-            <ChainSelector currentChain={chain} />
+          <div className="flex w-full gap-2">
+            <div className="min-w-0 flex-1">
+              <TxSearch chain={chain} />
+            </div>
+            <div className="min-w-[200px] shrink-0">
+              <ChainSelector currentChain={chain} />
+            </div>
           </div>
         </div>
-
-        {/* Vector Network Warning */}
-        {isVectorFallback && (
-          <div className="mb-4 rounded-lg border-2 border-dashed border-yellow-300 bg-yellow-50 p-4 text-yellow-800">
-            <p className="font-semibold">⚠️ Vector Network Not Available</p>
-            <p className="mt-1 text-sm">
-              Vector network dbsync is not yet available. Showing Cardano
-              Mainnet data as a fallback.
-            </p>
-          </div>
-        )}
 
         {/* Transactions List */}
         <Suspense fallback={<LoadingState />}>
