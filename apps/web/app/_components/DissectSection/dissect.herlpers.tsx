@@ -1,4 +1,4 @@
-import { type SelectionMode } from "@nextui-org/react";
+import { type SelectionMode } from "@heroui/react";
 
 interface IAccordionStyle {
   title: string;

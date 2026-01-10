@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, Card, CardBody, Link, Tooltip } from "@nextui-org/react";
+import { Badge, Button, Card, CardBody, Link, Tooltip } from "@heroui/react";
 import { bech32 } from "bech32";
 import { useRouter } from "next/navigation";
 

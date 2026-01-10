@@ -1,4 +1,4 @@
-import { Card, CardHeader, Tooltip } from "@nextui-org/react";
+import { Card, CardHeader, Tooltip } from "@heroui/react";
 import Image from "next/image";
 import { getAssetName, handleCopy } from "~/app/_utils";
 import type { Asset } from "@laceanatomy/napi-pallas";

@@ -1,4 +1,4 @@
-import { Tooltip } from "@nextui-org/react";
+import { Tooltip } from "@heroui/react";
 import Image from "next/image";
 import { Button } from "~/app/_components";
 import { useUI } from "~/app/_contexts";

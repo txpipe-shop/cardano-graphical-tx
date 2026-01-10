@@ -1,4 +1,4 @@
-import { Modal, ModalBody, ModalContent } from "@nextui-org/react";
+import { Modal, ModalBody, ModalContent } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { useGraphical } from "~/app/_contexts/graphical.context";
 import { OPTIONS } from "~/app/_utils";

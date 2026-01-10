@@ -4,7 +4,7 @@ import { json } from "@codemirror/lang-json";
 import type { Diagnostic } from "@codemirror/lint";
 import { lintGutter } from "@codemirror/lint";
 import { EditorView } from "@codemirror/view";
-import { Tab, Tabs } from "@nextui-org/tabs";
+import { Tab, Tabs } from "@heroui/tabs";
 import CodeMirror from "@uiw/react-codemirror";
 import jsonpointer from "jsonpointer";
 import { useSearchParams } from "next/navigation";

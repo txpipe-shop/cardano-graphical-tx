@@ -1,4 +1,4 @@
-import { Input, Select, SelectItem } from "@nextui-org/react";
+import { Input, Select, SelectItem } from "@heroui/react";
 import Image from "next/image";
 import {
   type ChangeEvent,

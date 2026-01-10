@@ -1,4 +1,4 @@
-import { Button, Input } from "@nextui-org/react";
+import { Button, Input } from "@heroui/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type Dispatch, type SetStateAction } from "react";

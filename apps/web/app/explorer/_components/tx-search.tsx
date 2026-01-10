@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input } from "@nextui-org/react";
+import { Button, Input } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -40,7 +40,7 @@ export function TxSearch({ chain }: TxSearchProps) {
       <Button
         variant="flat"
         className="font-mono shadow-md"
-        onClick={handleSearch}
+        onPress={handleSearch}
       >
         Search
       </Button>

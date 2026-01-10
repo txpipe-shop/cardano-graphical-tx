@@ -1,6 +1,6 @@
 "use client";
 
-import { Select, SelectItem, type SharedSelection } from "@nextui-org/react";
+import { Select, SelectItem, type SharedSelection } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
@@ -58,16 +58,10 @@ export function ChainSelector({ currentChain }: ChainSelectorProps) {
 
   return (
     <Select
-      label="Network"
       placeholder="Select a network"
+      labelPlacement="outside-left"
       selectedKeys={new Set([currentChain])}
       onSelectionChange={handleChainChange}
-      className="max-w-xs"
-      variant="bordered"
-      classNames={{
-        trigger: "border-2 border-dashed border-gray-300 shadow-md",
-        label: "text-gray-600",
-      }}
     >
       {CHAIN_OPTIONS.map((option) => (
         <SelectItem

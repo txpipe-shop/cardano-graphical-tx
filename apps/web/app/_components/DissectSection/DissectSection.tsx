@@ -1,5 +1,5 @@
-import { Accordion, AccordionItem } from "@nextui-org/accordion";
-import { Chip } from "@nextui-org/react";
+import { Accordion, AccordionItem } from "@heroui/accordion";
+import { Chip } from "@heroui/react";
 import { EmptyBlock, PropBlock } from "~/app/_components";
 import { useUI } from "~/app/_contexts";
 import type { IGraphicalTransaction } from "~/app/_interfaces";
