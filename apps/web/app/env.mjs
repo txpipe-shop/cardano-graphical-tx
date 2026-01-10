@@ -17,6 +17,10 @@ export const env = createEnv({
     PREPROD_BLOCKFROST_KEY: z.string(),
     MAINNET_BLOCKFROST_KEY: z.string(),
     PREVIEW_BLOCKFROST_KEY: z.string(),
+    MAINNET_DB_SYNC: z.string(),
+    PREPROD_DB_SYNC: z.string(),
+    PREVIEW_DB_SYNC: z.string(),
+    VECTOR_MAINNET_DB_SYNC: z.string(),
   },
   /*
    * Environment variables available on the client (and server).
@@ -37,6 +41,10 @@ export const env = createEnv({
     PREPROD_BLOCKFROST_KEY: process.env.PREPROD_BLOCKFROST_KEY,
     MAINNET_BLOCKFROST_KEY: process.env.MAINNET_BLOCKFROST_KEY,
     PREVIEW_BLOCKFROST_KEY: process.env.PREVIEW_BLOCKFROST_KEY,
+    MAINNET_DB_SYNC: process.env.MAINNET_DB_SYNC,
+    PREPROD_DB_SYNC: process.env.PREPROD_DB_SYNC,
+    PREVIEW_DB_SYNC: process.env.PREVIEW_DB_SYNC,
+    VECTOR_MAINNET_DB_SYNC: process.env.VECTOR_MAINNET_DB_SYNC,
     NEXT_PUBLIC_CBOR_ENDPOINT: process.env.NEXT_PUBLIC_CBOR_ENDPOINT,
     NEXT_PUBLIC_GA_TRACKING_ID: process.env.NEXT_PUBLIC_GA_TRACKING_ID,
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,

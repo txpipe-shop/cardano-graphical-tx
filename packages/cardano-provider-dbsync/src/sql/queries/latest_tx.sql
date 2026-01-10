@@ -242,7 +242,7 @@ SELECT json_build_object(
                     'epochNo', b.epoch_no,
                     'height', b.block_no,
                     'txIndex', tx.block_index,
-                    'slot', b.slot
+                    'slot', b.slot_no
                 )
             FROM block_info b
         ), 'createdAt', (

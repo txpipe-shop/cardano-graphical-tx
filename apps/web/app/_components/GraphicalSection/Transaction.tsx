@@ -1,3 +1,4 @@
+"use client";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { useState } from "react";
 import { Group, Rect, Text } from "react-konva";

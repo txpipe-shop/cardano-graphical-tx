@@ -1,3 +1,4 @@
+"use client";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
