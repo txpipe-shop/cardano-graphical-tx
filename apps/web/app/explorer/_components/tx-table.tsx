@@ -328,7 +328,7 @@ function UtxoItem({
     <div className="rounded-lg bg-gray-50 p-2">
       <div className="flex items-center gap-2">
         <Badge color="secondary" variant="flat" size="sm">
-          {(Number(utxo.coin) / 1_000_000).toFixed(2)} ₳
+          {(Number(utxo.coin) / 1_000_000).toFixed(6)} ₳
         </Badge>
         <span className="font-mono text-xs text-gray-600">
           {formatAddress(utxo.address)}
