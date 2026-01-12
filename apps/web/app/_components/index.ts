@@ -2,7 +2,6 @@ export { ByronSection, ShelleySection, StakeSection } from "./AddressSection";
 export { Button } from "./Button";
 export * from "./Constructors";
 export { DissectSection } from "./DissectSection/DissectSection";
-export { DslSection } from "./DslSection/DslSection";
 export { Error } from "./Error";
 export { Examples } from "./Examples";
 export { Line, Playground, Transaction, Utxo } from "./GraphicalSection/";

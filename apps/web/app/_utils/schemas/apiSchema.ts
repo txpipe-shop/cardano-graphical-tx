@@ -17,10 +17,6 @@ export const getTxFromHashSchema = z.object({
     .max(64, { message: "Transaction hash is too long" }),
 });
 
-export const getDSLFromSchema = z.object({
-  dsl: z.string({ required_error: "JSON is required" }),
-});
-
 export const getAddressFromScema = z.object({
   raw: z.string({ required_error: "Address is required" }),
 });
