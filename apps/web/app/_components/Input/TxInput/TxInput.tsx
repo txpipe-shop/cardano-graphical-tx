@@ -84,12 +84,8 @@ export const TxInput = () => {
               color="primary"
               labelPlacement="outside"
             >
-              <SelectItem key={OPTIONS.HASH} value={OPTIONS.HASH}>
-                TxHash
-              </SelectItem>
-              <SelectItem key={OPTIONS.CBOR} value={OPTIONS.CBOR}>
-                CBOR
-              </SelectItem>
+              <SelectItem key={OPTIONS.HASH}>TxHash</SelectItem>
+              <SelectItem key={OPTIONS.CBOR}>CBOR</SelectItem>
             </Select>
           }
         />

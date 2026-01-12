@@ -286,6 +286,9 @@ importers:
       '@codemirror/lint':
         specifier: ^6.9.2
         version: 6.9.2
+      '@codemirror/state':
+        specifier: ^6.5.3
+        version: 6.5.3
       '@codemirror/view':
         specifier: ^6.39.9
         version: 6.39.9
@@ -788,9 +791,6 @@ packages:
 
   '@codemirror/search@6.5.7':
     resolution: {integrity: sha512-6+iLsXvITWKHYlkgHPCs/qiX4dNzn8N78YfhOFvPtPYCkuXqZq10rAfsUMhOq7O/1VjJqdXRflyExlfVcu/9VQ==}
-
-  '@codemirror/state@6.4.1':
-    resolution: {integrity: sha512-QkEyUiLhsJoZkbumGZlswmAhA7CBU02Wrz7zvH4SrcifbsqwlXShVXg65f3v/ts57W3dqyamEriMhij1Z3Zz4A==}
 
   '@codemirror/state@6.5.3':
     resolution: {integrity: sha512-MerMzJzlXogk2fxWFU1nKp36bY5orBG59HnPiz0G9nLRebWa0zXuv2siH6PLIHBvv5TH8CkQRqjBs0MlxCZu+A==}
@@ -8326,7 +8326,7 @@ snapshots:
 
   '@codemirror/language@6.10.3':
     dependencies:
-      '@codemirror/state': 6.4.1
+      '@codemirror/state': 6.5.3
       '@codemirror/view': 6.39.9
       '@lezer/common': 1.2.3
       '@lezer/highlight': 1.2.1
@@ -8335,7 +8335,7 @@ snapshots:
 
   '@codemirror/lint@6.9.2':
     dependencies:
-      '@codemirror/state': 6.4.1
+      '@codemirror/state': 6.5.3
       '@codemirror/view': 6.39.9
       crelt: 1.0.6
 
@@ -8344,8 +8344,6 @@ snapshots:
       '@codemirror/state': 6.5.3
       '@codemirror/view': 6.39.9
       crelt: 1.0.6
-
-  '@codemirror/state@6.4.1': {}
 
   '@codemirror/state@6.5.3':
     dependencies:
