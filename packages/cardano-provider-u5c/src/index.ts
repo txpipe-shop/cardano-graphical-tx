@@ -1,3 +1,4 @@
+import type { Transport } from '@connectrpc/connect';
 import {
   AddressFundsReq,
   AddressFundsRes,
@@ -19,11 +20,10 @@ import {
 import type { Cardano, cardano } from '@laceanatomy/types';
 import { Hash } from '@laceanatomy/types';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
-import type { Transport } from '@connectrpc/connect';
-import { getBlockPreviousHash, u5cToCardanoTx } from './mappers';
+import { sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
-import { type cardano as cardanoUtxoRpc, sync } from '@utxorpc/spec';
 import { Buffer } from 'buffer';
+import { getBlockPreviousHash, outputsToValue, u5cToCardanoTx } from './mappers';
 
 export type Params = {
   /**
@@ -39,6 +39,52 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
   constructor({ transport }: Params) {
     this.utxoRpc = new UtxoRpcClient({ transport });
+  }
+
+  async getLatestTx(): Promise<cardano.Tx> {
+    const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
+    let hash = Buffer.from(tip.tip!.hash);
+    let block: cardanoUtxoRpc.Block;
+    let fetchCount = 0;
+    do {
+      const rawBlock = await this.fetchBlock(hash);
+      block = rawBlock.parsedBlock;
+      assert(block.header?.hash, 'Block header empty');
+      hash = Buffer.from(await getBlockPreviousHash(rawBlock.nativeBytes), 'hex');
+      fetchCount++;
+    } while (block.body?.tx.length === 0);
+    const latestTx = block.body!.tx.at(-1);
+    assert(latestTx, 'Latest transaction is undefined');
+    const time = block.timestamp;
+    const blockHash = block.header.hash;
+    const height = block.header.height;
+
+    return u5cToCardanoTx(latestTx, time, Hash(Buffer.from(blockHash).toString('hex')), height);
+  }
+
+  async getAddressFunds(params: AddressFundsReq): Promise<AddressFundsRes> {
+    const utxosResponse = await this.utxoRpc.query.searchUtxos({
+      predicate: {
+        match: {
+          utxoPattern: {
+            case: 'cardano',
+            value: {
+              address: {
+                exactAddress: Buffer.from(params.address, 'hex')
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const utxos = utxosResponse.items
+      .map((item) => item.parsedState)
+      .filter((item) => item.case === 'cardano')
+      .map((item) => item.value);
+
+    const value = outputsToValue(utxos);
+    return { value, txCount: 0n };
   }
 
   async getBlock(_params: BlockReq): Promise<BlockRes> {
@@ -66,10 +112,6 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     };
   }
 
-  async getAddressFunds(_params: AddressFundsReq): Promise<AddressFundsRes> {
-    return { value: {}, txCount: 0n };
-  }
-
   async readTip(): Promise<{ hash: Hash; slot: bigint }> {
     const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
     return {
@@ -85,27 +127,6 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     assert(block, 'Block not found');
     assert(block.chain.case === 'cardano', 'Chain should be Cardano');
     return { parsedBlock: block.chain.value, nativeBytes: block.nativeBytes };
-  }
-
-  async getLatestTx(): Promise<cardano.Tx> {
-    const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
-    let hash = Buffer.from(tip.tip!.hash);
-    let block: cardanoUtxoRpc.Block;
-    let fetchCount = 0;
-    do {
-      const rawBlock = await this.fetchBlock(hash);
-      block = rawBlock.parsedBlock;
-      assert(block.header?.hash, 'Block header empty');
-      hash = Buffer.from(await getBlockPreviousHash(rawBlock.nativeBytes), 'hex');
-      fetchCount++;
-    } while (block.body?.tx.length === 0);
-    const latestTx = block.body!.tx.at(-1);
-    assert(latestTx, 'Latest transaction is undefined');
-    const time = block.timestamp;
-    const blockHash = block.header.hash;
-    const height = block.header.height;
-
-    return u5cToCardanoTx(latestTx, time, Hash(Buffer.from(blockHash).toString('hex')), height);
   }
 
   async getTx({ hash }: TxReq): Promise<cardano.Tx> {

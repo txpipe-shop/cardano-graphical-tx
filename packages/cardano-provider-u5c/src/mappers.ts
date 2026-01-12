@@ -1,9 +1,14 @@
-import { type cardano, uint8ToAddr, uint8ToHash, uint8ToHexString } from '@laceanatomy/types';
 import {
   Address,
   Hash,
   HexString,
   MetadatumMap,
+  uint8ToAddr,
+  uint8ToHash,
+  uint8ToHexString,
+  Unit,
+  Value,
+  type cardano,
   type Metadata,
   type Metadatum
 } from '@laceanatomy/types';
@@ -84,6 +89,34 @@ function getRefScript(script: cardanoUtxoRpc.Script): cardano.Script | undefined
     return { type: s.case as cardano.ScriptType, bytes: HexString('') };
   }
   return undefined;
+}
+
+export function outputsToValue(outputs: cardanoUtxoRpc.TxOutput[]): Value {
+  const lovelaceUnit = Unit('lovelace');
+  const result: Value = {};
+
+  for (const output of outputs) {
+    if (output.coin?.bigInt?.value !== undefined) {
+      const lovelace = toBigInt(output.coin.bigInt.value);
+      result[lovelaceUnit] = (result[lovelaceUnit] ?? 0n) + lovelace;
+    }
+
+    if (output.assets) {
+      for (const multiasset of output.assets) {
+        const policyId = Buffer.from(multiasset.policyId).toString('hex');
+
+        for (const asset of multiasset.assets) {
+          const assetName = Buffer.from(asset.name).toString('hex');
+          const unit = Unit(`${policyId}${assetName}`);
+          const quantity = toBigInt(asset.quantity.value?.bigInt.value);
+
+          result[unit] = (result[unit] ?? 0n) + quantity;
+        }
+      }
+    }
+  }
+
+  return result;
 }
 
 export function u5cToCardanoUtxo(
