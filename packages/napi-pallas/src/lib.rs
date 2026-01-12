@@ -213,47 +213,6 @@ pub fn parse_datum_info(raw: String) -> Option<Datum> {
   utils::parse_datum_info(raw)
 }
 
-#[derive(Default)]
-#[napi(object)]
-pub struct DslResponse {
-  pub cbor_hex: String,
-  pub cbor_diagnostic: String,
-}
-
-#[derive(Default)]
-#[napi(object)]
-pub struct SafeDslResponse {
-  pub dsl_res: Option<DslResponse>,
-  pub error: String,
-  pub instance_path: String,
-}
-
-impl SafeDslResponse {
-  fn new() -> Self {
-    Default::default()
-  }
-
-  fn try_build<F>(mut self, func: F) -> Self
-  where
-    F: FnOnce() -> anyhow::Result<DslResponse, (String, String)>,
-  {
-    match func() {
-      Ok(x) => self.dsl_res = Some(x),
-      Err((err, instace)) => {
-        self.error = err;
-        self.instance_path = instace;
-      }
-    };
-
-    self
-  }
-}
-
-#[napi]
-pub fn parse_dsl(raw: String) -> SafeDslResponse {
-  cbor::parse_dsl(raw)
-}
-
 #[napi]
 pub fn parse_address(raw: String) -> address::SafeAddressResponse {
   match address::Address::from_str(&raw) {
