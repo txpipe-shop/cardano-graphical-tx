@@ -23,7 +23,7 @@ import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
 import { Buffer } from 'buffer';
-import { getBlockPreviousHash, outputsToValue, u5cToCardanoTx } from './mappers';
+import { getBlockPreviousHash, outputsToValue, u5cToCardanoTx, u5cToCardanoUtxo } from './mappers';
 
 export type Params = {
   /**
@@ -84,7 +84,52 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       .map((item) => item.value);
 
     const value = outputsToValue(utxos);
+    // TODO: get tx count
     return { value, txCount: 0n };
+  }
+
+  // TODO: implement offset
+  async getAddressUTxOs(params: AddressUTxOsReq): Promise<AddressUTxOsRes<cardano.UTxO>> {
+    const { limit, query, offset } = params;
+
+    const utxosResponse = await this.utxoRpc.query.searchUtxos({
+      predicate: {
+        match: {
+          utxoPattern: {
+            case: 'cardano',
+            value: {
+              address: {
+                exactAddress: Buffer.from(query.address, 'hex')
+              }
+            }
+          }
+        }
+      },
+      // NOTE: `maxItems` in the utxoRpc query is not being used yet
+      maxItems: Number(limit)
+    });
+
+    try {
+      const data = utxosResponse.items.map(({ parsedState, txoRef }) => {
+        assert(parsedState.case === 'cardano', Error('Invalid UTxO'));
+        assert(txoRef?.hash, Error('Invalid UTxO'));
+        assert(txoRef?.index !== undefined, Error('Invalid UTxO'));
+
+        return u5cToCardanoUtxo(
+          Hash(Buffer.from(txoRef.hash).toString('hex')),
+          parsedState.value,
+          txoRef.index
+        );
+      });
+
+      // TODO: get total from response
+      return {
+        data,
+        total: 0n
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getBlock(_params: BlockReq): Promise<BlockRes> {
@@ -102,13 +147,6 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     return {
       total: 0n,
       data: []
-    };
-  }
-
-  async getAddressUTxOs(_params: AddressUTxOsReq): Promise<AddressUTxOsRes<cardano.UTxO>> {
-    return {
-      data: [],
-      total: 0n
     };
   }
 
