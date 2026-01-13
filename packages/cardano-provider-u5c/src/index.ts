@@ -23,7 +23,13 @@ import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
 import { Buffer } from 'buffer';
-import { getBlockPreviousHash, outputsToValue, u5cToCardanoTx, u5cToCardanoUtxo } from './mappers';
+import {
+  getBlockPreviousHash,
+  outputsToValue,
+  u5cToCardanoBlock,
+  u5cToCardanoTx,
+  u5cToCardanoUtxo
+} from './mappers';
 
 export type Params = {
   /**
@@ -41,20 +47,27 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     this.utxoRpc = new UtxoRpcClient({ transport });
   }
 
+  // Check inputs
   async getLatestTx(): Promise<cardano.Tx> {
     const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
+
     let hash = Buffer.from(tip.tip!.hash);
     let block: cardanoUtxoRpc.Block;
+
     let fetchCount = 0;
     do {
       const rawBlock = await this.fetchBlock(hash);
       block = rawBlock.parsedBlock;
-      assert(block.header?.hash, 'Block header empty');
+      assert(block.header?.hash, 'Block header hash is undefined');
+
       hash = Buffer.from(await getBlockPreviousHash(rawBlock.nativeBytes), 'hex');
+
       fetchCount++;
     } while (block.body?.tx.length === 0);
+
     const latestTx = block.body!.tx.at(-1);
     assert(latestTx, 'Latest transaction is undefined');
+
     const time = block.timestamp;
     const blockHash = block.header.hash;
     const height = block.header.height;
@@ -88,7 +101,6 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     return { value, txCount: 0n };
   }
 
-  // TODO: implement offset
   async getAddressUTxOs(params: AddressUTxOsReq): Promise<AddressUTxOsRes<cardano.UTxO>> {
     const { limit, query, offset } = params;
 
@@ -104,13 +116,13 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
             }
           }
         }
-      },
+      }
       // NOTE: `maxItems` in the utxoRpc query is not being used yet
-      maxItems: Number(limit)
+      // maxItems: Number(limit)
     });
 
     try {
-      const data = utxosResponse.items.map(({ parsedState, txoRef }) => {
+      const allUtxos = utxosResponse.items.map(({ parsedState, txoRef }) => {
         assert(parsedState.case === 'cardano', Error('Invalid UTxO'));
         assert(txoRef?.hash, Error('Invalid UTxO'));
         assert(txoRef?.index !== undefined, Error('Invalid UTxO'));
@@ -122,69 +134,49 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
         );
       });
 
-      // TODO: get total from response
+      const total = BigInt(allUtxos.length);
+
+      let startIndex = 0;
+      if (offset !== undefined && offset > 0n) {
+        const cursorIndex = Number(offset);
+        if (cursorIndex >= 0 && cursorIndex < allUtxos.length) {
+          startIndex = cursorIndex + 1;
+        } else if (cursorIndex >= allUtxos.length) {
+          return {
+            data: [],
+            total
+          };
+        }
+      }
+
+      const endIndex = Math.min(startIndex + Number(limit), allUtxos.length);
+      const data = allUtxos.slice(startIndex, endIndex);
+
       return {
         data,
-        total: 0n
+        total
       };
     } catch (error) {
       throw error;
     }
   }
 
-  async getBlock(_params: BlockReq): Promise<BlockRes> {
-    return {
-      fees: 0n,
-      hash: Hash(''),
-      height: 0n,
-      slot: 0n,
-      time: 0,
-      txCount: 0n,
-      confirmations: 0n
-    };
-  }
-  async getBlocks(_params: BlocksReq): Promise<BlocksRes> {
-    return {
-      total: 0n,
-      data: []
-    };
-  }
-
-  async readTip(): Promise<{ hash: Hash; slot: bigint }> {
-    const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
-    return {
-      hash: Hash(Buffer.from(tip.tip!.hash).toString('hex')),
-      slot: BigInt(tip.tip?.slot || 0)
-    };
-  }
-
-  private async fetchBlock(hash: Buffer<ArrayBuffer>) {
-    const req = new sync.FetchBlockRequest({ ref: [new sync.BlockRef({ hash: hash })] });
-    const blocks = await this.utxoRpc.sync.fetchBlock(req);
-    const block = blocks.block[0];
-    assert(block, 'Block not found');
-    assert(block.chain.case === 'cardano', 'Chain should be Cardano');
-    return { parsedBlock: block.chain.value, nativeBytes: block.nativeBytes };
-  }
-
   async getTx({ hash }: TxReq): Promise<cardano.Tx> {
     const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') });
     assert(txResponse.ledgerTip, 'Ledger tip of transaction empty');
     assert(txResponse.tx?.chain.case === 'cardano', 'Transaction is not a Cardano transaction');
+
     const tx = txResponse.tx.chain.value;
     const time = txResponse.ledgerTip.timestamp;
     const blockHash = Buffer.from(txResponse.ledgerTip.hash).toString('hex');
     const height = txResponse.ledgerTip.height;
+
     return u5cToCardanoTx(tx, time, Hash(blockHash), height);
   }
 
-  async getCBOR({ hash }: TxReq): Promise<string> {
-    const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') });
-    assert(txResponse.tx?.nativeBytes, 'Empty CBOR of transaction');
-    return Buffer.from(txResponse.tx?.nativeBytes).toString('hex');
-  }
+  async getTxs(params: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
+    const { limit, query, offset } = params;
 
-  async getTxs({ limit }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
     return {
       data: [],
       total: 0n
@@ -234,6 +226,42 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     //};
   }
 
+  async getBlock(params: BlockReq): Promise<BlockRes> {
+    let blockResponse: sync.FetchBlockResponse | undefined;
+
+    if ('hash' in params) {
+      blockResponse = await this.utxoRpc.sync.fetchBlock({
+        ref: [{ hash: Buffer.from(params.hash, 'hex') }]
+      });
+    } else if ('height' in params) {
+      blockResponse = await this.utxoRpc.sync.fetchBlock({
+        ref: [{ height: params.height }]
+      });
+    } else {
+      blockResponse = await this.utxoRpc.sync.fetchBlock({
+        ref: [{ slot: params.slot }]
+      });
+    }
+
+    try {
+      assert(blockResponse.block[0]?.chain.case === 'cardano', 'Block is not a Cardano block');
+      const block = blockResponse.block[0]!.chain.value;
+
+      return u5cToCardanoBlock(block);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getBlocks(params: BlocksReq): Promise<BlocksRes> {
+    const { limit, query, offset } = params;
+
+    return {
+      total: 0n,
+      data: []
+    };
+  }
+
   async getEpoch(_params: EpochReq): Promise<EpochRes> {
     return {
       blocksProduced: 0n,
@@ -251,6 +279,29 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
   async getEpochs(_params: EpochsReq): Promise<EpochsRes> {
     return { data: [], total: 0n };
+  }
+
+  async readTip(): Promise<{ hash: Hash; slot: bigint }> {
+    const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
+    return {
+      hash: Hash(Buffer.from(tip.tip!.hash).toString('hex')),
+      slot: BigInt(tip.tip?.slot || 0)
+    };
+  }
+
+  // async getCBOR({ hash }: TxReq): Promise<string> {
+  //   const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') });
+  //   assert(txResponse.tx?.nativeBytes, 'Empty CBOR of transaction');
+  //   return Buffer.from(txResponse.tx?.nativeBytes).toString('hex');
+  // }
+
+  private async fetchBlock(hash: Buffer<ArrayBuffer>) {
+    const req = new sync.FetchBlockRequest({ ref: [new sync.BlockRef({ hash: hash })] });
+    const blocks = await this.utxoRpc.sync.fetchBlock(req);
+    const block = blocks.block[0];
+    assert(block, 'Block not found');
+    assert(block.chain.case === 'cardano', 'Chain should be Cardano');
+    return { parsedBlock: block.chain.value, nativeBytes: block.nativeBytes };
   }
 }
 
