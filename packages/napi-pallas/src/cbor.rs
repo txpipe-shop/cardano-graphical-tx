@@ -24,8 +24,6 @@ use pallas_primitives::conway::{
   TransactionOutput,
 };
 
-static SCHEMA_JSON: &str = include_str!("../../../docs/schema.json");
-
 fn preprocess_inputs(inputs: &mut Value) {
   if let Some(inputs_array) = inputs.as_array_mut() {
     let mut used_indices: HashSet<u64> = inputs_array
