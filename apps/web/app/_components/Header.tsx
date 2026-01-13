@@ -27,16 +27,14 @@ export const Header = () => {
           />
         </Link>
         <div className="flex gap-4">
-          <Badge color="success" content="New">
-            <Button
-              variant="flat"
-              className="p-5 font-mono text-lg shadow-md"
-              as={NextLink}
-              href={ROUTES.EXPLORER}
-            >
-              Explorer
-            </Button>
-          </Badge>
+          <Button
+            variant="flat"
+            className="p-5 font-mono text-lg shadow-md"
+            as={NextLink}
+            href={ROUTES.EXPLORER}
+          >
+            Explorer
+          </Button>
           <Button
             variant="flat"
             className="p-5 font-mono text-lg shadow-md"
