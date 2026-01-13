@@ -31,14 +31,6 @@ export const Header = () => {
             variant="flat"
             className="p-5 font-mono text-lg shadow-md"
             as={NextLink}
-            href={ROUTES.EXPLORER}
-          >
-            Explorer
-          </Button>
-          <Button
-            variant="flat"
-            className="p-5 font-mono text-lg shadow-md"
-            as={NextLink}
             href={ROUTES.TX}
           >
             Transaction
@@ -50,6 +42,14 @@ export const Header = () => {
             href={ROUTES.ADDRESS}
           >
             Address
+          </Button>
+          <Button
+            variant="flat"
+            className="p-5 font-mono text-lg shadow-md"
+            as={NextLink}
+            href={ROUTES.EXPLORER}
+          >
+            Explorer
           </Button>
         </div>
       </div>
