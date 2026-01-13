@@ -69,10 +69,17 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     assert(latestTx, 'Latest transaction is undefined');
 
     const time = block.timestamp;
-    const blockHash = block.header.hash;
+    const blockHash = Hash(Buffer.from(block.header.hash).toString('hex'));
     const height = block.header.height;
 
-    return u5cToCardanoTx(latestTx, time, Hash(Buffer.from(blockHash).toString('hex')), height);
+    const latestTxHash = Buffer.from(latestTx.hash).toString('hex');
+    const indexInBlock = block.body?.tx.findIndex((t) => {
+      const hash = Buffer.from(t.hash).toString('hex');
+      return hash === latestTxHash;
+    });
+    assert(indexInBlock !== undefined, 'Index in block not found');
+
+    return u5cToCardanoTx(latestTx, time, blockHash, height, indexInBlock);
   }
 
   async getAddressFunds(params: AddressFundsReq): Promise<AddressFundsRes> {
@@ -163,15 +170,24 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
   async getTx({ hash }: TxReq): Promise<cardano.Tx> {
     const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') });
-    assert(txResponse.ledgerTip, 'Ledger tip of transaction empty');
     assert(txResponse.tx?.chain.case === 'cardano', 'Transaction is not a Cardano transaction');
+    assert(txResponse.tx.blockRef, 'Block reference of transaction empty');
 
     const tx = txResponse.tx.chain.value;
-    const time = txResponse.ledgerTip.timestamp;
-    const blockHash = Buffer.from(txResponse.ledgerTip.hash).toString('hex');
-    const height = txResponse.ledgerTip.height;
+    const time = txResponse.tx.blockRef.timestamp;
+    const blockHash = Buffer.from(txResponse.tx.blockRef.hash).toString('hex');
+    const height = txResponse.tx.blockRef.height;
 
-    return u5cToCardanoTx(tx, time, Hash(blockHash), height);
+    const block = await this.utxoRpc.sync.fetchBlock({
+      ref: [{ hash: Buffer.from(blockHash, 'hex') }]
+    });
+    const indexInBlock = block.block[0]?.chain.value?.body?.tx.findIndex((t) => {
+      const txHash = Buffer.from(t.hash).toString('hex');
+      return txHash === hash;
+    });
+    assert(indexInBlock !== undefined, 'Index in block not found');
+
+    return u5cToCardanoTx(tx, time, Hash(blockHash), height, indexInBlock);
   }
 
   async getTxs(params: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
