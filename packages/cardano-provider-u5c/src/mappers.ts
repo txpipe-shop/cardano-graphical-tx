@@ -1,6 +1,7 @@
 import { BlockRes } from '@laceanatomy/provider-core';
 import {
   Address,
+  DatumType,
   Hash,
   HexString,
   MetadatumMap,
@@ -51,7 +52,7 @@ export async function getBlockPreviousHash(nativeBytes: Uint8Array): Promise<Has
   }
 }
 
-export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block): BlockRes {
+export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block, tipHeight: bigint): BlockRes {
   const fees = block.body!.tx.reduce((acc, tx) => acc + toBigInt(tx.fee?.bigInt.value), 0n);
   return {
     hash: uint8ToHash(block.header!.hash),
@@ -61,7 +62,7 @@ export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block): BlockRes {
     fees,
     time: Number(block.timestamp) * 1000,
     // TODO: get confirmations
-    confirmations: 0n
+    confirmations: tipHeight - toBigInt(block.header!.height)
   };
 }
 
@@ -79,15 +80,14 @@ function getRefScript(script: cardanoUtxoRpc.Script): cardano.Script | undefined
   return undefined;
 }
 
-export function outputsToValue(outputs: cardanoUtxoRpc.TxOutput[]): Value {
+export function u5cToCardanoValue(outputs: cardanoUtxoRpc.TxOutput[]): Value {
   const lovelaceUnit = Unit('lovelace');
   const result: Value = {};
 
   for (const output of outputs) {
-    if (output.coin?.bigInt?.value !== undefined) {
-      const lovelace = toBigInt(output.coin.bigInt.value);
-      result[lovelaceUnit] = (result[lovelaceUnit] ?? 0n) + lovelace;
-    }
+    assert(output.coin, 'Missing coin value');
+    const lovelace = toBigInt(output.coin.bigInt.value);
+    result[lovelaceUnit] = (result[lovelaceUnit] ?? 0n) + lovelace;
 
     if (output.assets) {
       for (const multiasset of output.assets) {
@@ -133,7 +133,12 @@ export function u5cToCardanoUtxo(
     coin: toBigInt(output?.coin?.bigInt.value),
     outRef: { hash: hash, index: BigInt(index) },
     value,
-    datum: undefined,
+    datum: output?.datum
+      ? {
+          type: DatumType.INLINE,
+          datumHex: HexString(Buffer.from(output.datum.originalCbor).toString('hex'))
+        }
+      : undefined,
     referenceScript: output?.script ? getRefScript(output.script) : undefined
   };
 }
