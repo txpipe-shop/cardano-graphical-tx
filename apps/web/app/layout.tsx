@@ -1,8 +1,8 @@
+import { GoogleTagManager } from "@next/third-parties/google";
 import type Konva from "konva";
 import { type Metadata } from "next";
 import { Lato, Source_Code_Pro } from "next/font/google";
 import { Toaster } from "react-hot-toast";
-import { GoogleTagManager } from "@next/third-parties/google";
 import "./globals.css";
 
 import { Providers } from "./providers";
@@ -35,9 +35,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${lato.variable} ${martianMono.variable}`}>
-      {process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_GA_TRACKING_ID && (
-        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GA_TRACKING_ID} />
-      )}
+      {process.env.NODE_ENV === "production" &&
+        process.env.NEXT_PUBLIC_GA_TRACKING_ID && (
+          <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GA_TRACKING_ID} />
+        )}
       <body>
         <Providers>
           <div className="m-auto flex w-full flex-col">{children}</div>

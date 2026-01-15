@@ -1,5 +1,5 @@
-import { EmptyBlock, PropBlock, Section } from "~/app/_components";
 import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
+import { EmptyBlock, PropBlock, Section } from "~/app/_components";
 
 export function ShelleySection({ data }: { data: AddressDiagnostic }) {
   return (

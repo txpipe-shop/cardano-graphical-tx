@@ -3,12 +3,12 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 import { Button, Input } from "~/app/_components";
 
-import { useConfigs, useUI } from "~/app/_contexts";
-import { getAddressInfo, USER_CONFIGS } from "~/app/_utils";
 import type {
   AddressDiagnostic,
   SafeAddressResponse,
 } from "@laceanatomy/napi-pallas";
+import { useConfigs, useUI } from "~/app/_contexts";
+import { getAddressInfo, USER_CONFIGS } from "~/app/_utils";
 
 export const AddressInput = ({
   setAddressInfo,

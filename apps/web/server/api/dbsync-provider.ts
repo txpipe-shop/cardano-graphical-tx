@@ -1,16 +1,16 @@
 import { DbSyncProvider } from "@laceanatomy/cardano-provider-dbsync";
 import pg from "pg";
 
-export type ChainNetwork = "mainnet" | "preprod" | "preview" | "vector";
+export type ChainNetwork = "mainnet" | "preprod" | "preview" | "vector-mainnet";
 
 const poolCache: Map<ChainNetwork, pg.Pool> = new Map();
 
 function getConnectionString(chain: ChainNetwork): string {
   // TODO: Vector network doesn't have its own dbsync yet, redirect to mainnet
   // Remove this fallback when Vector dbsync is available
-  if (chain === "vector") {
+  if (chain === "vector-mainnet") {
     console.warn(
-      "[DBSYNC] Vector network not available, falling back to mainnet"
+      "[DBSYNC] Vector network not available, falling back to mainnet",
     );
     return process.env.MAINNET_DB_SYNC || "";
   }
@@ -30,7 +30,7 @@ function getConnectionString(chain: ChainNetwork): string {
 function getAddressPrefix(chain: ChainNetwork): string {
   switch (chain) {
     case "mainnet":
-    case "vector": // TODO: Vector uses mainnet for now
+    case "vector-mainnet":
       return "addr";
     case "preprod":
     case "preview":

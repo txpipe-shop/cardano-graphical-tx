@@ -1,5 +1,3 @@
-import type Konva from "konva";
-import type { Vector2d } from "konva/lib/types";
 import type {
   Assets,
   Certificates,
@@ -9,6 +7,8 @@ import type {
   Withdrawal,
   Witnesses,
 } from "@laceanatomy/napi-pallas";
+import type Konva from "konva";
+import type { Vector2d } from "konva/lib/types";
 
 export interface TransactionsBox {
   transactions: IGraphicalTransaction[];

@@ -1,5 +1,5 @@
-import { PropBlock, Section } from "~/app/_components";
 import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
+import { PropBlock, Section } from "~/app/_components";
 
 export function ByronSection({ data }: { data: AddressDiagnostic }) {
   return (

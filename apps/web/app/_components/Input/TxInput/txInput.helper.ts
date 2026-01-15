@@ -23,11 +23,11 @@ import {
   type NETWORK,
 } from "~/app/_utils";
 
+import type { Utxo } from "@laceanatomy/napi-pallas";
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
 import toast from "react-hot-toast";
 import type { Address, IGraphicalUtxo } from "~/app/_interfaces";
-import type { Utxo } from "@laceanatomy/napi-pallas";
 
 interface IGenerateUTXO extends Utxo {
   existingTxs: TransactionsBox;

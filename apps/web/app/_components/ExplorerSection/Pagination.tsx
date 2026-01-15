@@ -4,12 +4,12 @@ import { Button } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
-interface PaginationControlsProps {
+export interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
 }
 
-export function PaginationControls({
+export default function Pagination({
   currentPage,
   totalPages,
 }: PaginationControlsProps) {

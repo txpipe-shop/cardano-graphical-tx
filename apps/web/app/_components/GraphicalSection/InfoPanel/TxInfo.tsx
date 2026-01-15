@@ -1,10 +1,5 @@
 "use client";
-import {
-  Accordion,
-  AccordionItem,
-  Card,
-  useDisclosure,
-} from "@heroui/react";
+import { Accordion, AccordionItem, Card, useDisclosure } from "@heroui/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { type ChangeEvent, useEffect, useState } from "react";

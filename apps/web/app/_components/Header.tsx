@@ -1,4 +1,4 @@
-import { Badge, Button, Link as NextLink } from "@heroui/react";
+import { Button, Link as NextLink } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "~/app/_utils";
