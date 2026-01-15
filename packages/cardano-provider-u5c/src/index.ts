@@ -418,39 +418,35 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
   }
 
   async getBlock(params: BlockReq): Promise<BlockRes> {
-    let blockResponse: sync.FetchBlockResponse | undefined;
-
-    if ('hash' in params) {
-      blockResponse = await this.utxoRpc.sync.fetchBlock({
-        ref: [{ hash: Buffer.from(params.hash, 'hex') }]
-      });
-    } else if ('height' in params) {
-      blockResponse = await this.utxoRpc.sync.fetchBlock({
-        ref: [{ height: params.height }]
-      });
-    } else {
-      blockResponse = await this.utxoRpc.sync.fetchBlock({
-        ref: [{ slot: params.slot }]
-      });
-    }
-
-    try {
-      assert(blockResponse.block[0]?.chain.case === 'cardano', 'Block is not a Cardano block');
-      const block = blockResponse.block[0]!.chain.value;
-
-      return u5cToCardanoBlock(block);
-    } catch (error) {
-      throw error;
-    }
+    const { block } = await this.fetchBlockByQuery(params);
+    return u5cToCardanoBlock(block);
   }
 
   async getBlocks(params: BlocksReq): Promise<BlocksRes> {
     const { limit, query, offset } = params;
 
-    return {
-      total: 0n,
-      data: []
-    };
+    if (!query || !Object.keys(query).length) {
+      const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
+      assert(tip.tip, 'Cannot read tip');
+      const { header: fullTipHeader } = await this.fetchBlockByQuery({
+        hash: Hash(Buffer.from(tip.tip.hash).toString('hex'))
+      });
+
+      const tipHeight = fullTipHeader.height;
+      let blockHeight = tipHeight - (offset || 0n);
+
+      const u5cBlocks: cardanoUtxoRpc.Block[] = [];
+      do {
+        const { block } = await this.fetchBlockByQuery({ height: blockHeight });
+        u5cBlocks.push(block);
+        blockHeight--;
+      } while (u5cBlocks.length < limit && blockHeight >= 0n);
+
+      return {
+        data: u5cBlocks.map((block) => u5cToCardanoBlock(block)),
+        total: 0n
+      };
+    } else throw new Error('U5C cannot get blocks by epoch');
   }
 
   async getEpoch(_params: EpochReq): Promise<EpochRes> {
