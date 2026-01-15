@@ -61,7 +61,6 @@ export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block, tipHeight: bigint
     txCount: BigInt(block.body!.tx.length),
     fees,
     time: Number(block.timestamp) * 1000,
-    // TODO: get confirmations
     confirmations: tipHeight - toBigInt(block.header!.height)
   };
 }
