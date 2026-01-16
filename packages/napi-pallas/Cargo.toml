@@ -12,13 +12,14 @@ anyhow = "1.0.79"
 hex = "0.4.3"
 jsonschema = "0.26.1"
 minicbor = "0.25.0"
-napi = "3.0.0"
+napi = { version = "3.0.0", features = ["async"] }
 napi-derive = "3.0.0"
-pallas = "0.29.0"
-pallas-addresses = "0.29.0"
-pallas-codec = "0.29.0"
-pallas-crypto = "0.29.0"
-pallas-primitives = "0.29.0"
+pallas = { version = "1.0.0-alpha.3" }
+pallas-addresses = { version = "1.0.0-alpha.3" }
+pallas-codec = { version = "1.0.0-alpha.3" }
+pallas-crypto = { version = "1.0.0-alpha.3" }
+pallas-network = { version = "1.0.0-alpha.3" }
+pallas-primitives = { version = "1.0.0-alpha.3" }
 regex = "1.11.1"
 serde_json = "1.0.64"
 

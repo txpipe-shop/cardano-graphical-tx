@@ -2,19 +2,19 @@ use crate::{
   Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
   SafeCborResponse, Utxo, Withdrawal, Witness, Witnesses,
 };
-use pallas::ledger::primitives::conway::PseudoDatumOption::{Data, Hash};
+use pallas::ledger::primitives::conway::DatumOption;
 use pallas::ledger::traverse::{
   MultiEraCert, MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer,
 };
 use pallas_crypto::hash::Hasher;
-use pallas_primitives::conway::{PseudoDatumOption, VKeyWitness};
+use pallas_primitives::conway::{VKeyWitness};
 use std::collections::HashMap;
 
 use pallas::ledger::{
-  primitives::{conway::PlutusData, ToCanonicalJson},
+  primitives::{ToCanonicalJson},
   traverse::{ComputeHash, MultiEraTx},
 };
-use pallas_codec::utils::{KeepRaw, KeyValuePairs};
+use pallas_codec::utils::{KeyValuePairs};
 use pallas_primitives::{
   alonzo::RedeemerTag,
   conway::{Metadatum, RedeemerTag as RedeemerTagConway},
@@ -31,14 +31,14 @@ fn get_inputs(inputs: &Vec<MultiEraInput<'_>>) -> Vec<Input> {
     .collect()
 }
 
-fn build_datum(datum: PseudoDatumOption<KeepRaw<'_, PlutusData>>) -> Datum {
+fn build_datum(datum: DatumOption) -> Datum {
   match datum {
-    Hash(x) => Datum {
+    DatumOption::Hash(x) => Datum {
       hash: x.to_string(),
       bytes: "".to_string(),
       json: "".to_string(),
     },
-    Data(x) => Datum {
+    DatumOption::Data(x) => Datum {
       hash: x.compute_hash().to_string(),
       bytes: hex::encode(x.raw_cbor()),
       json: serde_json::to_string(&x.to_json()).unwrap(),
@@ -75,16 +75,17 @@ fn get_outputs(tx: &MultiEraTx<'_>) -> Result<Vec<Utxo>, String> {
         index: index as i64,
         bytes: hex::encode(o.encode()),
         address: address.to_string(),
-        lovelace: o.lovelace_amount() as i64,
+        lovelace: o.value().coin() as i64,
         datum: o
           .datum()
-          .map(|x: PseudoDatumOption<KeepRaw<'_, PlutusData>>| build_datum(x)),
+          .map(|x: DatumOption| build_datum(x)),
         script_ref: o
           .script_ref()
           .map(|x| x.encode_fragment().ok().map(hex::encode))
           .flatten(),
         assets: o
-          .non_ada_assets()
+          .value()
+          .assets()
           .into_iter()
           .map(|x| build_assets_with_same_policy(x))
           .collect(),

@@ -109,5 +109,6 @@ const { instance: __napiInstance, module: __wasiModule, napiModule: __napiModule
 })
 module.exports = __napiModule.exports
 module.exports.cborParse = __napiModule.exports.cborParse
+module.exports.downloadBlock = __napiModule.exports.downloadBlock
 module.exports.parseAddress = __napiModule.exports.parseAddress
 module.exports.parseDatumInfo = __napiModule.exports.parseDatumInfo

@@ -3,12 +3,12 @@
 use std::{collections::HashMap, str::FromStr};
 
 use pallas::ledger::traverse::MultiEraTx;
+use pallas_network::{facades::PeerClient, miniprotocols::Point};
 
 #[macro_use]
 extern crate napi_derive;
 
 mod address;
-pub mod cbor;
 mod tx;
 mod utils;
 
@@ -225,4 +225,18 @@ pub fn parse_address(raw: String) -> address::SafeAddressResponse {
       address: None,
     },
   }
+}
+
+#[napi]
+pub async fn download_block(node_url: String, magic: u32, slot: u32, hash: String) -> Vec<u8> {
+  let mut peer = PeerClient::connect(node_url, magic as u64)
+    .await
+    .unwrap();
+
+  let point = Point::Specific(
+    slot as u64,
+    hex::decode(hash).unwrap(),
+  );
+
+  peer.blockfetch().fetch_single(point).await.unwrap()
 }
