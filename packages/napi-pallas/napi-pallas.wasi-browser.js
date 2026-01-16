@@ -57,5 +57,6 @@ const {
 })
 export default __napiModule.exports
 export const cborParse = __napiModule.exports.cborParse
+export const downloadBlock = __napiModule.exports.downloadBlock
 export const parseAddress = __napiModule.exports.parseAddress
 export const parseDatumInfo = __napiModule.exports.parseDatumInfo
