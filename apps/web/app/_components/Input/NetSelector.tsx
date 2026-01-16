@@ -4,7 +4,7 @@ import {
   PopoverContent,
   PopoverTrigger,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { useConfigs } from "~/app/_contexts";
 import { NETWORK, USER_CONFIGS } from "~/app/_utils";
 

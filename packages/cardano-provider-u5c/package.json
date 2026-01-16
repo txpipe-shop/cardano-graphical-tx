@@ -1,5 +1,5 @@
 {
-  "name": "@alexandria/cardano-provider-u5c",
+  "name": "@laceanatomy/cardano-provider-u5c",
   "version": "0.0.1",
   "private": false,
   "type": "module",
@@ -33,9 +33,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@alexandria/provider-core": "workspace:*",
-    "@alexandria/types": "workspace:*",
-    "@alexandria/utxorpc-sdk": "workspace:*",
+    "@laceanatomy/provider-core": "workspace:*",
+    "@laceanatomy/types": "workspace:*",
+    "@laceanatomy/utxorpc-sdk": "workspace:*",
     "@connectrpc/connect": "1.4",
     "@utxorpc/spec": "^0.18.1",
     "assert": "^2.1.0",
@@ -43,7 +43,7 @@
     "cbor2": "latest"
   },
   "devDependencies": {
-    "@alexandria/typescript-config": "workspace:*",
+    "@laceanatomy/typescript-config": "workspace:*",
     "@emurgo/cardano-serialization-lib-nodejs": "^15.0.3",
     "@types/node": "^24.1.0",
     "typescript": "^5.0.0"

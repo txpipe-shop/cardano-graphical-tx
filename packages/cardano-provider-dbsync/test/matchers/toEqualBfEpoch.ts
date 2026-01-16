@@ -1,5 +1,5 @@
-import { EpochContent } from '@alexandria/blockfrost-sdk';
-import { EpochsRes } from '@alexandria/provider-core';
+import { EpochContent } from '@laceanatomy/blockfrost-sdk';
+import { EpochsRes } from '@laceanatomy/provider-core';
 
 type EpochItem = EpochsRes['data'][number];
 

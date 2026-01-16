@@ -1,7 +1,7 @@
 <script lang="ts">
   import { formatAddress, getAssetName } from '@/components/primitive-utils';
   import { Badge } from '@/components/ui/badge';
-  import { Unit, type Value } from '@alexandria/types';
+  import { Unit, type Value } from '@laceanatomy/types';
   import Copy from '../copy.svelte';
 
   let { list, mints } = $props();

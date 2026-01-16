@@ -59,4 +59,3 @@ export default __napiModule.exports
 export const cborParse = __napiModule.exports.cborParse
 export const parseAddress = __napiModule.exports.parseAddress
 export const parseDatumInfo = __napiModule.exports.parseDatumInfo
-export const parseDsl = __napiModule.exports.parseDsl

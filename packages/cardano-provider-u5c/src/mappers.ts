@@ -1,4 +1,4 @@
-import { type cardano, uint8ToAddr, uint8ToHash, uint8ToHexString } from '@alexandria/types';
+import { type cardano, uint8ToAddr, uint8ToHash, uint8ToHexString } from '@laceanatomy/types';
 import {
   Address,
   Hash,
@@ -6,7 +6,7 @@ import {
   MetadatumMap,
   type Metadata,
   type Metadatum
-} from '@alexandria/types';
+} from '@laceanatomy/types';
 import type { cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
 import { Buffer } from 'buffer';

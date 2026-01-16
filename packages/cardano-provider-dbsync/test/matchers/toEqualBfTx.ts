@@ -1,5 +1,5 @@
-import { Address, cardano, HexString, hexToBech32, isBase58, DatumType } from '@alexandria/types';
-import { TxContentUtxoInputsInner, TxContentUtxoOutputsInner } from '@alexandria/blockfrost-sdk';
+import { Address, cardano, HexString, hexToBech32, isBase58, DatumType } from '@laceanatomy/types';
+import { TxContentUtxoInputsInner, TxContentUtxoOutputsInner } from '@laceanatomy/blockfrost-sdk';
 import { BfComprehensiveTx } from '../setup';
 
 type BfUtxoLike = TxContentUtxoInputsInner | TxContentUtxoOutputsInner;

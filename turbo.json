@@ -5,7 +5,7 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputLogs": "new-only",
-      "outputs": [".svelte-kit/**", "dist/**", "build/**"]
+      "outputs": [".svelte-kit/**", "dist/**", "build/**", ".next/**", "target/**"]
     },
     "dev": {
       "cache": false,

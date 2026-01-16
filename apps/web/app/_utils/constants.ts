@@ -2,11 +2,11 @@ import JSONbig from "json-bigint";
 
 export const ROUTES = {
   HOME: "/",
+  EXPLORER: "/explorer",
   GRAPHER: "/tx/grapher",
   TX: "/tx",
   ADDRESS: "/address",
   DISSECT: "/tx/dissect",
-  DSL: "/dsl",
 };
 
 export type ROUTES = (typeof ROUTES)[keyof typeof ROUTES];
@@ -14,7 +14,6 @@ export type ROUTES = (typeof ROUTES)[keyof typeof ROUTES];
 export const API_ROUTES = {
   CBOR: "api/cbor",
   HASH: "api/hash",
-  DSL: "api/dsl",
   ADDRESS: "api/address",
 };
 
@@ -148,150 +147,4 @@ export const TxExamples = [
   { title: "Dissect CBOR", code: cbor1 },
   { title: "Dissect Tx Hash", code: hash2 },
   { title: "Draw Multiple Tx Hashes", code: multipleHashes },
-];
-
-export const simpleDSL = `{
-  "transaction": {
-    "name": "simple example",
-    "fee": 2,
-    "inputs": [
-      {
-        "txHash": "328a2c5a860062fdfc968e476982561a8255ae31ae940d3022d3759fef8083d5",
-        "index": 1
-      }
-    ],
-    "outputs": [
-      {
-        "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk",
-        "values": [
-          {
-            "amount": 9000000,
-            "name": "lovelace"
-          },
-          {
-            "amount": 123,
-            "name": "New Token"
-          }
-        ]
-      }
-    ]
-  }
-}
-`;
-
-const complexDSL = `{
-  "transaction": {
-    "name": "complex example",
-    "fee": 1,
-    "start": 123,
-    "ttl": 321,
-    "inputs": [
-      {
-        "name": "wallet-A"
-      },
-      {
-        "txHash": "328a2c5a860062fdfc968e476982561a8255ae31ae940d3022d3759fef8083d5",
-        "index": 1
-      },
-      {
-        "address": "addr_test1xq0pg5k3gc47qe8ntj25548dprlnmdyd44h7u653ply9pkw8yq3wjqnaym5vvm2sewd4m2xpwdhv69gqj62c5dxw5xwqm3j3fa",
-        "redeemer": {
-          "name": "r",
-          "number": 1232112
-        }
-      },
-      {
-        "name": "wallet-A",
-        "values": [
-          {
-            "amount": 10000000,
-            "name": "lovelace"
-          }
-        ]
-      },
-      {
-        "name": "wallet-A",
-        "address": "addr_test1xq0pg5k3gc47qe8ntj25548dprlnmdyd44h7u653ply9pkw8yq3wjqnaym5vvm2sewd4m2xpwdhv69gqj62c5dxw5xwqm3j3fa",
-        "values": [
-          {
-            "amount": 10000000,
-            "name": "Token1"
-          },
-          {
-            "amount": 10,
-            "assetClass": "391589af6db9d9008e3e0952563f8d1d5c18cdb8ea0c300bfc1e60b6.414e4f4e3066396466613433"
-          }
-        ]
-      }
-    ],
-    "outputs": [
-      {
-        "name": "wallet-B",
-        "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk",
-        "values": [
-          {
-            "amount": 9000000,
-            "name": "lovelace"
-          },
-          {
-            "amount": 123,
-            "name": "New Token"
-          }
-        ],
-        "datum": {
-          "hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-        }
-      },
-      {
-        "address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk",
-        "values": [
-          {
-            "amount": 18000000,
-            "name": "lovelace"
-          },
-          {
-            "amount": 3463,
-            "name": "Token2"
-          }
-        ],
-        "datum": {
-          "bytes": "d87980"
-        }
-      }
-    ],
-    "minting": [
-      {
-        "amount": 12345,
-        "name": "New Token"
-      },
-      {
-        "amount": 123456,
-        "name": "Other Token"
-      },
-      {
-        "amount": 1234567,
-        "name": "Other Rare Token"
-      }
-    ],
-    "withdrawals": [
-      {
-        "raw_address": "addr_test1qq3w5yjst20qkscef9mjtw0xfc7fn6j3ptlq9qw0garsg4tu0dsummr50mcwm9ekwv547nly5n985n3w3wqw2g8uph0sky2tsk",
-        "amount": 123
-      }
-    ],
-    "metadata": [
-      {
-        "label": 674,
-        "json_metadata": {
-          "key": "value"
-        }
-      }
-    ]
-  }
-}
-`;
-
-export const DSLExamples = [
-  { title: "Simple", code: simpleDSL },
-  { title: "Complex", code: complexDSL },
 ];

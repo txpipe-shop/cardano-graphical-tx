@@ -5,7 +5,7 @@ import {
   Select,
   SelectItem,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type ChangeEvent, useEffect, useState } from "react";
@@ -84,12 +84,8 @@ export const TxInput = () => {
               color="primary"
               labelPlacement="outside"
             >
-              <SelectItem key={OPTIONS.HASH} value={OPTIONS.HASH}>
-                TxHash
-              </SelectItem>
-              <SelectItem key={OPTIONS.CBOR} value={OPTIONS.CBOR}>
-                CBOR
-              </SelectItem>
+              <SelectItem key={OPTIONS.HASH}>TxHash</SelectItem>
+              <SelectItem key={OPTIONS.CBOR}>CBOR</SelectItem>
             </Select>
           }
         />

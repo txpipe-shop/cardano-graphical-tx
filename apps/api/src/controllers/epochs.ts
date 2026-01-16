@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 import { EpochsResponse, Epoch as EpochApi } from '../types';
-import { DbSyncProvider } from '@alexandria/cardano-provider-dbsync';
-import { Epoch } from '@alexandria/provider-core';
+import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
+import { Epoch } from '@laceanatomy/provider-core';
 
 function mapEpoch(epoch: Epoch): EpochsResponse['epochs'][number] {
   const endTime = new Date(epoch.endTime * 1000);

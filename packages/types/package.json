@@ -1,5 +1,5 @@
 {
-  "name": "@alexandria/types",
+  "name": "@laceanatomy/types",
   "version": "0.0.1",
   "private": false,
   "type": "module",
@@ -33,7 +33,7 @@
     "buffer": "^6.0.3"
   },
   "devDependencies": {
-    "@alexandria/typescript-config": "workspace:*",
+    "@laceanatomy/typescript-config": "workspace:*",
     "typescript": "^5.0.0"
   }
 }

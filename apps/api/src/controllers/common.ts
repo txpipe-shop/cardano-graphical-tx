@@ -1,4 +1,4 @@
-import { BlockMetadata } from '@alexandria/provider-core';
+import { BlockMetadata } from '@laceanatomy/provider-core';
 import {
   Address,
   assetNameFromUnit,
@@ -8,7 +8,7 @@ import {
   isHexString,
   policyFromUnit,
   Unit
-} from '@alexandria/types';
+} from '@laceanatomy/types';
 import { TransactionsResponse } from '../types';
 
 type TxApi = TransactionsResponse['transactions'][number];

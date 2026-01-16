@@ -1,4 +1,4 @@
-import { Hash } from '@alexandria/types';
+import { Hash } from '@laceanatomy/types';
 import type { PageServerLoad } from './$types';
 import { getProviderById } from '@/providers/config';
 import { loadProviderServer } from '@/providers/load-server';

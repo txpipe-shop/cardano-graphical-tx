@@ -15,10 +15,10 @@ import {
   type ChainProvider,
   type TxReq,
   type TxsReq
-} from '@alexandria/provider-core';
-import type { Cardano, cardano } from '@alexandria/types';
-import { Hash } from '@alexandria/types';
-import { UtxoRpcClient } from '@alexandria/utxorpc-sdk';
+} from '@laceanatomy/provider-core';
+import type { Cardano, cardano } from '@laceanatomy/types';
+import { Hash } from '@laceanatomy/types';
+import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import type { Transport } from '@connectrpc/connect';
 import { getBlockPreviousHash, u5cToCardanoTx } from './mappers';
 import assert from 'assert';
@@ -28,8 +28,8 @@ import { Buffer } from 'buffer';
 export type Params = {
   /**
    * Pre-configured transport for the UTxORPC client.
-   * Use createGrpcTransport from '@alexandria/utxorpc-sdk/transport/node' for Node.js
-   * or from '@alexandria/utxorpc-sdk/transport/web' for browser.
+   * Use createGrpcTransport from '@laceanatomy/utxorpc-sdk/transport/node' for Node.js
+   * or from '@laceanatomy/utxorpc-sdk/transport/web' for browser.
    */
   transport: Transport;
 };

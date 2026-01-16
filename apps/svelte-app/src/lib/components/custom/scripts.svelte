@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { cardano } from '@alexandria/types';
+  import type { cardano } from '@laceanatomy/types';
   import { Button } from '../ui/button';
   import { Card, CardContent } from '../ui/card';
   let { tx }: { tx: cardano.Tx } = $props();

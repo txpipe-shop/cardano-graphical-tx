@@ -1,4 +1,4 @@
-import type { BaseChain, Tx, UTxO, Hash, Address, Value } from '@alexandria/types';
+import type { BaseChain, Tx, UTxO, Hash, Address, Value } from '@laceanatomy/types';
 
 export type EpochReq = { epochNo: bigint };
 

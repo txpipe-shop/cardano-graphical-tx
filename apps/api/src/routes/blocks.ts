@@ -4,7 +4,7 @@ import { z } from 'zod';
 import * as schemas from '../schemas';
 import { BlocksResponse } from '../types';
 import { listBlocks, resolveBlock, resolveBlockTxs } from '../controllers/blocks';
-import {} from '@alexandria/provider-core';
+import {} from '@laceanatomy/provider-core';
 
 export const listBlocksQuerySchema = z.object({
   network: schemas.NetworkSchema,

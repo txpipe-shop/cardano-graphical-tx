@@ -1,6 +1,6 @@
 <script lang="ts">
   import { trunc } from '@/components/primitive-utils';
-  import type { cardano } from '@alexandria/types';
+  import type { cardano } from '@laceanatomy/types';
   import { onMount } from 'svelte';
   import { KONVA_COLORS, TX_HEIGHT, TX_WIDTH } from './constants';
 

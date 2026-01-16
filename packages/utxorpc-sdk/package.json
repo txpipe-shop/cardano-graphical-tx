@@ -1,5 +1,5 @@
 {
-  "name": "@alexandria/utxorpc-sdk",
+  "name": "@laceanatomy/utxorpc-sdk",
   "version": "0.0.1",
   "private": false,
   "type": "module",
@@ -44,7 +44,7 @@
     "@utxorpc/spec": "^0.18.1"
   },
   "devDependencies": {
-    "@alexandria/typescript-config": "workspace:*",
+    "@laceanatomy/typescript-config": "workspace:*",
     "typescript": "^5.0.0"
   }
 }

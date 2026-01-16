@@ -1,9 +1,9 @@
 import { Pool } from 'pg';
 import { BlocksResponse, Block as BlockSchema, Transaction as TransactionSchema } from '../types';
 import TimeAgo from 'javascript-time-ago';
-import { DbSyncProvider } from '@alexandria/cardano-provider-dbsync';
-import { Hash } from '@alexandria/types';
-import { BlockMetadata } from '@alexandria/provider-core';
+import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
+import { Hash } from '@laceanatomy/types';
+import { BlockMetadata } from '@laceanatomy/provider-core';
 import { mapTx } from './common';
 
 function mapBlock(block: BlockMetadata, timeAgo: TimeAgo): BlockSchema {

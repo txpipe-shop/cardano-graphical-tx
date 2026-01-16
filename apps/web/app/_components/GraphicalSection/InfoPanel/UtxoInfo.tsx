@@ -5,7 +5,7 @@ import {
   Card,
   Chip,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useGraphical } from "~/app/_contexts";

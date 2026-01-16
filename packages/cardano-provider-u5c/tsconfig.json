@@ -1,5 +1,5 @@
 {
-  "extends": "@alexandria/typescript-config/base.json",
+  "extends": "@laceanatomy/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",

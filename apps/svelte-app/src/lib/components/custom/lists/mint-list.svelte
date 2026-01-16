@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Value } from '@alexandria/types';
+  import { type Value } from '@laceanatomy/types';
   import { getAssetName } from '../../primitive-utils';
   import { Badge } from '../../ui/badge';
   import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';

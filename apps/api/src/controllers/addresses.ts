@@ -9,8 +9,8 @@ import {
   isBase58,
   policyFromUnit,
   Unit
-} from '@alexandria/types';
-import { DbSyncProvider } from '@alexandria/cardano-provider-dbsync';
+} from '@laceanatomy/types';
+import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
 
 export async function resolveAddress(rawAddress: string, pool: Pool): Promise<AddressSchema> {
   const provider = new DbSyncProvider({ pool, addrPrefix: 'addr' });

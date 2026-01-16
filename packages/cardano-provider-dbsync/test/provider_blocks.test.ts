@@ -2,13 +2,13 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Pool } from 'pg';
 import { DbSyncProvider } from '../src/index';
 import { testEnv, TestEnv } from './setup';
-import { Hash } from '@alexandria/types';
+import { Hash } from '@laceanatomy/types';
 import {
   CardanoBlocksApi,
   CardanoEpochsApi,
   CardanoTransactionsApi,
   Configuration
-} from '@alexandria/blockfrost-sdk';
+} from '@laceanatomy/blockfrost-sdk';
 import { toEqualBfBlock } from './matchers/toEqualBfBlock';
 import { toEqualBfEpoch } from './matchers/toEqualBfEpoch';
 

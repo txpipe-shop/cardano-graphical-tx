@@ -11,7 +11,7 @@
   import { loadProviderClient } from '@/providers/load-client';
   import type { ProviderConfig } from '@/providers/types';
   import { currentProvider } from '@/stores/provider-store';
-  import type { cardano } from '@alexandria/types';
+  import type { cardano } from '@laceanatomy/types';
 
   interface Props {
     data: {
@@ -55,7 +55,7 @@
 
   async function loadCustomProviderData(provider: ProviderConfig) {
     const client = loadProviderClient(provider);
-    const hash = $page.params.hash as unknown as import('@alexandria/types').Hash;
+    const hash = $page.params.hash as unknown as import('@laceanatomy/types').Hash;
     clientTx = await client.getTx({ hash });
     try {
       cbor = await client.getCBOR({ hash });

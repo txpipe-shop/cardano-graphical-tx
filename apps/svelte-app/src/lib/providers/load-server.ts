@@ -1,7 +1,7 @@
 import { networkToAddrPrefix, type ProviderConfig } from './types';
-import { U5CProvider } from '@alexandria/cardano-provider-u5c';
+import { U5CProvider } from '@laceanatomy/cardano-provider-u5c';
 import { createTransport as createNodeTransport } from './u5c/node-loader';
-import { DbSyncProvider } from '@alexandria/cardano-provider-dbsync';
+import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
 import { Pool } from 'pg';
 
 export function loadProviderServer(config: ProviderConfig) {

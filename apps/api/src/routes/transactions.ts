@@ -4,7 +4,7 @@ import { z } from 'zod';
 import * as schemas from '../schemas';
 import { Transaction, TransactionsResponse } from '../types';
 import { listTransactions, resolveTx } from '../controllers/transactions';
-import { Hash } from '@alexandria/types';
+import { Hash } from '@laceanatomy/types';
 
 const txsQuerySchema = z.object({
   network: schemas.NetworkSchema,
