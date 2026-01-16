@@ -88,6 +88,7 @@ export function isHexString(s: string): s is HexString {
   return /^[0-9a-fA-F]+$/.test(s) && s.length % 2 === 0;
 }
 
+// TODO: Fix this function addr1wys7fzyk8kv943u9fez6v7ut4h69ut44nuwv6qhupcfczsc638w2s is bech32 but it's also base58
 export function isBase58(str: string): boolean {
   return /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/.test(str);
 }

@@ -15,9 +15,5 @@ export function normalizeAddress(
 
 export function formatSeconds(s?: number): string {
   if (!s) return "-";
-  try {
-    return new Date(s * 1000).toLocaleString();
-  } catch {
-    return "-";
-  }
+  return new Date(s * 1000).toLocaleString();
 }

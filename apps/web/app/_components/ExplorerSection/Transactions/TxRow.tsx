@@ -26,7 +26,6 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 bg-violet-100 p-4">
-      {/* Transaction Hash */}
       <div className="flex items-center gap-2">
         <Link
           href={`/tx/dissect?tx=${tx.hash}&chain=${chain}`}
@@ -92,11 +91,7 @@ function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
               <ColoredAddress address={utxo.address} />
             </div>
             {Object.keys(utxo.value).length > 0 && (
-              <div className="mt-2 space-y-2">
-                <div className="text-xs font-semibold uppercase text-gray-400">
-                  Tokens
-                </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mt-1">
                   {Object.entries(utxo.value).map(([unit, amount]) => (
                     <TokenPill
                       key={unit}
@@ -106,7 +101,6 @@ function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
                     />
                   ))}
                 </div>
-              </div>
             )}
           </div>
         ))}
@@ -119,9 +113,7 @@ export function TxRow({ tx, chain }: { tx: cardano.Tx; chain: string }) {
   return (
     <Card className="mb-4 border-2 border-dashed border-gray-200 shadow-md">
       <CardBody className="p-0">
-        {/* Header Row */}
         <TxRowHeader tx={tx} chain={chain} />
-
         <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
           <UTxOsColumn tx={tx} column="inputs" />
           <UTxOsColumn tx={tx} column="outputs" />
