@@ -45,16 +45,6 @@ export const Header = () => {
           >
             Transaction
           </Button>
-          <Badge color="danger" content="Beta">
-            <Button
-              variant="flat"
-              className="p-5 font-mono text-lg shadow-md"
-              as={NextLink}
-              href={ROUTES.DSL}
-            >
-              DSL
-            </Button>
-          </Badge>
           <Button
             variant="flat"
             className="p-5 font-mono text-lg shadow-md"
