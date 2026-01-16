@@ -114,12 +114,6 @@ importers:
       '@connectrpc/protoc-gen-connect-es':
         specifier: ^1.4.0
         version: 1.7.0(@connectrpc/connect@1.4.0(@bufbuild/protobuf@1.10.1))
-      '@emurgo/cardano-serialization-lib-browser':
-        specifier: ^15.0.3
-        version: 15.0.3
-      '@emurgo/cardano-serialization-lib-nodejs':
-        specifier: ^15.0.3
-        version: 15.0.3
       '@laceanatomy/blockfrost-sdk':
         specifier: workspace:*
         version: link:../../packages/blockfrost-sdk
@@ -292,12 +286,6 @@ importers:
       '@codemirror/view':
         specifier: ^6.39.9
         version: 6.39.9
-      '@emurgo/cardano-serialization-lib-browser':
-        specifier: ^15.0.3
-        version: 15.0.3
-      '@emurgo/cardano-serialization-lib-nodejs':
-        specifier: ^15.0.3
-        version: 15.0.3
       '@heroui/accordion':
         specifier: 2.2.26
         version: 2.2.26(@heroui/system@2.4.25(@heroui/theme@2.4.25(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@20.16.1)(typescript@5.5.4))))(framer-motion@10.18.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@heroui/theme@2.4.25(tailwindcss@3.4.14(ts-node@10.9.2(@types/node@20.16.1)(typescript@5.5.4))))(framer-motion@10.18.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -532,9 +520,6 @@ importers:
       '@connectrpc/connect':
         specifier: '1.4'
         version: 1.4.0(@bufbuild/protobuf@1.10.1)
-      '@emurgo/cardano-serialization-lib-browser':
-        specifier: ^15.0.3
-        version: 15.0.3
       '@laceanatomy/provider-core':
         specifier: workspace:*
         version: link:../provider-core
@@ -557,9 +542,6 @@ importers:
         specifier: latest
         version: 2.0.1
     devDependencies:
-      '@emurgo/cardano-serialization-lib-nodejs':
-        specifier: ^15.0.3
-        version: 15.0.3
       '@laceanatomy/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -866,12 +848,6 @@ packages:
 
   '@emotion/memoize@0.7.4':
     resolution: {integrity: sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==}
-
-  '@emurgo/cardano-serialization-lib-browser@15.0.3':
-    resolution: {integrity: sha512-gbhNh1E3be7/stq7THUxTc8ysW1lZOZaZTvsoV2vixUKp1zJCIp0nuH6SOhQNlWXY/5wxnB2LoYVZe3WWxFA4w==}
-
-  '@emurgo/cardano-serialization-lib-nodejs@15.0.3':
-    resolution: {integrity: sha512-CZkAF7P3Ip3gUCAa6v93DLKp9hGqsfE6F/b3Qrqvym7rEJKi3j+dDk/OPxtmynWWGHhqXL85vzFOOwVduhLAjA==}
 
   '@emurgo/cip14-js@3.0.1':
     resolution: {integrity: sha512-u0XobeajNSlmeGBmY3ntA+NE/Vns7hKP0xrFzWyAO7YubETOifTjUddJN4gpvXE4S08DPUcNBVe3sx1m5GPIOg==}
@@ -3660,9 +3636,6 @@ packages:
 
   '@types/node@20.16.1':
     resolution: {integrity: sha512-zJDo7wEadFtSyNz5QITDfRcrhqDvQI1xQNQ0VoizPjM/dVAODqqIUWbJPkvsxmTI0MYRGRikcdjMPhOssnPejQ==}
-
-  '@types/node@22.10.7':
-    resolution: {integrity: sha512-V09KvXxFiutGp6B7XkpaDXlNadZxrzajcY50EuoLIpQ6WWYCSvf19lVIazzfIzQvhUN2HjX12spLojTnhuKlGg==}
 
   '@types/node@24.1.0':
     resolution: {integrity: sha512-ut5FthK5moxFKH2T1CUOC6ctR67rQRvvHdFLCD2Ql6KXmMuCrjsSsRI9UsLCm9M18BMwClv4pn327UvB7eeO1w==}
@@ -7795,9 +7768,6 @@ packages:
   undici-types@6.19.6:
     resolution: {integrity: sha512-e/vggGopEfTKSvj4ihnOLTsqhrKRN3LeO6qSN/GxohhuRv8qH9bNQ4B8W7e/vFL+0XTnmHPB4/kegunZGA4Org==}
 
-  undici-types@6.20.0:
-    resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
-
   undici-types@7.8.0:
     resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
 
@@ -8425,10 +8395,6 @@ snapshots:
 
   '@emotion/memoize@0.7.4':
     optional: true
-
-  '@emurgo/cardano-serialization-lib-browser@15.0.3': {}
-
-  '@emurgo/cardano-serialization-lib-nodejs@15.0.3': {}
 
   '@emurgo/cip14-js@3.0.1':
     dependencies:
@@ -11710,10 +11676,6 @@ snapshots:
     dependencies:
       undici-types: 6.19.6
 
-  '@types/node@22.10.7':
-    dependencies:
-      undici-types: 6.20.0
-
   '@types/node@24.1.0':
     dependencies:
       undici-types: 7.8.0
@@ -14400,7 +14362,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 22.10.7
+      '@types/node': 24.1.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -16366,8 +16328,6 @@ snapshots:
       which-boxed-primitive: 1.1.1
 
   undici-types@6.19.6: {}
-
-  undici-types@6.20.0: {}
 
   undici-types@7.8.0: {}
 

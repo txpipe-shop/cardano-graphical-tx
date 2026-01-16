@@ -3,10 +3,7 @@ await import("./app/env.mjs");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: [
-      "@laceanatomy/napi-pallas",
-      "@emurgo/cardano-serialization-lib-nodejs",
-    ],
+    serverComponentsExternalPackages: ["@laceanatomy/napi-pallas"],
   },
   reactStrictMode: true,
   images: {
@@ -25,11 +22,7 @@ const nextConfig = {
     config.externals = [...config.externals, { canvas: "canvas" }]; // required to make Konva & react-konva work
 
     if (!isServer) {
-      config.externals = [
-        ...config.externals,
-        "@connectrpc/connect-node",
-        "@emurgo/cardano-serialization-lib-nodejs",
-      ];
+      config.externals = [...config.externals, "@connectrpc/connect-node"];
     }
 
     config.module.rules.push({

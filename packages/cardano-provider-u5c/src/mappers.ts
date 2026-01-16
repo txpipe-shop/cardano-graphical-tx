@@ -29,29 +29,6 @@ export function toBigInt(value: Uint8Array | bigint | undefined): bigint {
   return BigInt(value);
 }
 
-export async function getBlockPreviousHash(nativeBytes: Uint8Array): Promise<Hash> {
-  const cbor = await import('cbor2');
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const cborParsed = cbor.decode<any>(nativeBytes);
-
-  // let's ignore the era of the block
-  const blockCborDecoded = cborParsed[1];
-  const encoded = cbor.encode(blockCborDecoded);
-  if (typeof window !== 'undefined') {
-    const { Block } = await import('@emurgo/cardano-serialization-lib-browser');
-    const hash = Block.from_bytes(encoded).header().header_body().prev_hash()?.to_hex();
-    assert(hash);
-
-    return Hash(hash);
-  } else {
-    const { Block } = await import('@emurgo/cardano-serialization-lib-nodejs');
-    const hash = Block.from_bytes(encoded).header().header_body().prev_hash()?.to_hex();
-    assert(hash);
-
-    return Hash(hash);
-  }
-}
-
 export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block, tipHeight: bigint): BlockRes {
   const fees = block.body!.tx.reduce((acc, tx) => acc + toBigInt(tx.fee?.bigInt.value), 0n);
   return {
