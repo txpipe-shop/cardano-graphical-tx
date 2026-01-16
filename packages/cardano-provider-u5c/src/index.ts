@@ -212,7 +212,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       ref: [{ hash: currentBlockHash }]
     });
     const { block: tipBlock, header: tipHeader, body: tipBody } = this.validateBlock(tipBlockRes);
-    remainingOffset = this.processBlockForTxs(tipBlock, tipBody.tx, blocksAndTxs, remainingOffset);
+    remainingOffset = this.processBlockForTxs(tipBlock, tipBody.tx.reverse(), blocksAndTxs, remainingOffset);
 
     let nextBlockHeight = tipHeader.height - 1n;
     let totalTxsCollected = blocksAndTxs.reduce((acc, block) => acc + block.txs.length, 0);
@@ -222,7 +222,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
         ref: [{ height: nextBlockHeight }]
       });
       const { block, body: blockBody } = this.validateBlock(blockRes);
-      remainingOffset = this.processBlockForTxs(block, blockBody.tx, blocksAndTxs, remainingOffset);
+      remainingOffset = this.processBlockForTxs(block, blockBody.tx.reverse(), blocksAndTxs, remainingOffset);
 
       totalTxsCollected = blocksAndTxs.reduce((acc, block) => acc + block.txs.length, 0);
       nextBlockHeight--;
@@ -274,7 +274,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
         })
       : body.tx;
 
-    const paginatedTxs = filteredTxs.slice(offset, offset + limit);
+    const paginatedTxs = filteredTxs.reverse().slice(offset, offset + limit);
 
     const blockHash = Hash(Buffer.from(header.hash).toString('hex'));
     const data = paginatedTxs.map((tx) =>
