@@ -1,8 +1,8 @@
+import type { SafeAddressResponse } from "@laceanatomy/napi-pallas";
 import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
 import type { IBlockfrostResponse, ITransaction } from "~/app/_interfaces";
 import { env } from "~/app/env.mjs";
-import type { SafeAddressResponse } from "@laceanatomy/napi-pallas";
 import { API_ROUTES, ERRORS, NETWORK } from "./constants";
 
 export const getApiKey = (network: NETWORK): string => {
@@ -92,29 +92,6 @@ export const getCborFromHash = async (
       setError("Error processing Transaction Hash");
       throw error;
     }
-  }
-};
-
-export const getDSLFromJSON = async (
-  dsl: string,
-  setError: Dispatch<SetStateAction<string>>,
-): Promise<string> => {
-  try {
-    const formData = new FormData();
-    formData.append("dsl", dsl);
-
-    const res = await fetch(parseQuery(API_ROUTES.DSL, {}), {
-      method: "POST",
-      body: formData,
-    });
-    if (res.status !== StatusCodes.OK) throw res;
-
-    const responseJson = await res.json();
-    return responseJson || "Unknown error";
-  } catch (error) {
-    console.error("Error processing JSON:", error);
-    setError("Error processing JSON: " + error);
-    throw error;
   }
 };
 

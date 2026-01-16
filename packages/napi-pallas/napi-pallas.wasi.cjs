@@ -111,4 +111,3 @@ module.exports = __napiModule.exports
 module.exports.cborParse = __napiModule.exports.cborParse
 module.exports.parseAddress = __napiModule.exports.parseAddress
 module.exports.parseDatumInfo = __napiModule.exports.parseDatumInfo
-module.exports.parseDsl = __napiModule.exports.parseDsl

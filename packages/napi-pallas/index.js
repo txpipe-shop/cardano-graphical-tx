@@ -579,4 +579,3 @@ module.exports = nativeBinding
 module.exports.cborParse = nativeBinding.cborParse
 module.exports.parseAddress = nativeBinding.parseAddress
 module.exports.parseDatumInfo = nativeBinding.parseDatumInfo
-module.exports.parseDsl = nativeBinding.parseDsl

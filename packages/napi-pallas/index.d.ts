@@ -56,11 +56,6 @@ export interface Datum {
   json: string
 }
 
-export interface DslResponse {
-  cborHex: string
-  cborDiagnostic: string
-}
-
 export interface ExUnits {
   mem: number
   steps: number
@@ -80,8 +75,6 @@ export declare function parseAddress(raw: string): SafeAddressResponse
 
 export declare function parseDatumInfo(raw: string): Datum | null
 
-export declare function parseDsl(raw: string): SafeDslResponse
-
 export interface Redeemer {
   tag: string
   index: number
@@ -97,12 +90,6 @@ export interface SafeAddressResponse {
 export interface SafeCborResponse {
   cborRes?: CborResponse
   error: string
-}
-
-export interface SafeDslResponse {
-  dslRes?: DslResponse
-  error: string
-  instancePath: string
 }
 
 export interface ShelleyPart {
