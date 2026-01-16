@@ -20,6 +20,11 @@ const nextConfig = {
   },
   webpack: (config, { isServer }) => {
     config.externals = [...config.externals, { canvas: "canvas" }]; // required to make Konva & react-konva work
+
+    if (!isServer) {
+      config.externals = [...config.externals, "@connectrpc/connect-node"];
+    }
+
     config.module.rules.push({
       test: /\.node$/,
       use: [{ loader: "nextjs-node-loader" }],

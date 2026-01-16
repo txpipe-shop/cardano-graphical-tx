@@ -63,8 +63,6 @@
     "@connectrpc/connect-node": "1.4",
     "@connectrpc/connect-web": "1.4",
     "@connectrpc/protoc-gen-connect-es": "^1.4.0",
-    "@emurgo/cardano-serialization-lib-browser": "^15.0.3",
-    "@emurgo/cardano-serialization-lib-nodejs": "^15.0.3",
     "@utxorpc/spec": "^0.18.1",
     "assert": "^2.1.0",
     "axios": "^1.11.0",
