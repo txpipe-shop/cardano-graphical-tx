@@ -1,0 +1,21 @@
+import { z } from 'zod';
+import * as schemas from './schemas';
+
+export type Network = z.infer<typeof schemas.NetworkSchema>;
+export type Block = z.infer<typeof schemas.BlockSchema>;
+export type BlocksResponse = z.infer<typeof schemas.BlocksResponseSchema>;
+export type Transaction = z.infer<typeof schemas.TransactionSchema>;
+export type TransactionsResponse = z.infer<typeof schemas.TransactionsResponseSchema>;
+export type Address = z.infer<typeof schemas.AddressSchema>;
+export type Stats = z.infer<typeof schemas.StatsSchema>;
+export type Token = z.infer<typeof schemas.TokenSchema>;
+export type TokensResponse = z.infer<typeof schemas.TokensResponseSchema>;
+export type Epoch = z.infer<typeof schemas.EpochSchema>;
+export type EpochsResponse = z.infer<typeof schemas.EpochsResponseSchema>;
+export type Pool = z.infer<typeof schemas.PoolSchema>;
+export type PoolsResponse = z.infer<typeof schemas.PoolsResponseSchema>;
+export type Contract = z.infer<typeof schemas.ContractSchema>;
+export type ContractsResponse = z.infer<typeof schemas.ContractsResponseSchema>;
+export type GasEstimate = z.infer<typeof schemas.GasEstimateSchema>;
+export type Price = z.infer<typeof schemas.PriceSchema>;
+export type ChartData = z.infer<typeof schemas.ChartDataSchema>;

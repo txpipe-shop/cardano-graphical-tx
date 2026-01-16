@@ -1,0 +1,2058 @@
+openapi: 3.0.3
+info:
+  title: Apex Fusion Data Provider API
+  description: |
+    Complete API specification for Apex Fusion blockchain data provider.
+
+    This API must support three networks:
+    - **Prime**: UTXO-based Cardano-like network
+    - **Vector**: UTXO-based Cardano-like network  
+    - **Nexus**: EVM-based Ethereum-like network
+
+    All endpoints accept a `network` query parameter to specify which network to query.
+
+    **Important Notes:**
+    - All timestamps are in ISO 8601 format
+    - All monetary values are in native currency units (ADA for UTXO, AP3X for EVM)
+    - Hash values are hex strings (with or without 0x prefix)
+    - Addresses can be in hex or bech32 format for UTXO networks
+    - EVM addresses must include 0x prefix
+  version: 1.0.0
+  contact:
+    name: Apex Fusion Explorer
+    url: https://explorer.test
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.apexfusion.org/v1
+    description: Production API
+  - url: https://api-staging.apexfusion.org/v1
+    description: Staging API
+  - url: http://localhost:4010
+    description: Local development
+
+tags:
+  - name: Blocks
+    description: Block-related endpoints
+  - name: Transactions
+    description: Transaction-related endpoints
+  - name: Addresses
+    description: Address and account endpoints
+  - name: Stats
+    description: Network statistics
+  - name: Tokens
+    description: Token and asset endpoints
+  - name: Epochs
+    description: Epoch endpoints (UTXO networks only)
+  - name: Pools
+    description: Staking pool endpoints (UTXO networks only)
+  - name: Contracts
+    description: Smart contract endpoints (EVM networks only)
+  - name: Gas
+    description: Gas price estimation (EVM networks only)
+  - name: Utility
+    description: Utility endpoints (price, health, charts)
+
+paths:
+  /blocks:
+    get:
+      tags:
+        - Blocks
+      summary: List blocks
+      description: Get paginated list of blocks for the specified network
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlocksResponse'
+              examples:
+                prime:
+                  summary: Prime network example
+                  value:
+                    blocks:
+                      - height: 12345
+                        hash: 'a1b2c3d4e5f6...'
+                        slot: 12345678
+                        epoch: 42
+                        tx_count: 15
+                        timestamp: '2024-01-15T10:30:00Z'
+                        confirmations: 100
+                nexus:
+                  summary: Nexus network example
+                  value:
+                    blocks:
+                      - height: 5678
+                        hash: '0x1234567890abcdef...'
+                        gas_used: 15000000
+                        gas_limit: 30000000
+                        tx_count: 120
+                        timestamp: '2024-01-15T10:30:00Z'
+                        confirmations: 50
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /blocks/latest:
+    get:
+      tags:
+        - Blocks
+      summary: Get latest blocks
+      description: Get the most recent blocks (typically 10)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Block'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /blocks/{identifier}:
+    get:
+      tags:
+        - Blocks
+      summary: Get block details
+      description: Get detailed information about a specific block by height or hash
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - name: identifier
+          in: path
+          required: true
+          description: Block height (integer) or block hash (hex string)
+          schema:
+            oneOf:
+              - type: integer
+                example: 12345
+              - type: string
+                pattern: '^(0x)?[0-9a-fA-F]{64}$'
+                example: 'a1b2c3d4e5f6...'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Block'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /blocks/{identifier}/transactions:
+    get:
+      tags:
+        - Blocks
+        - Transactions
+      summary: Get block transactions
+      description: Get all transactions in a specific block
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - name: identifier
+          in: path
+          required: true
+          description: Block height (integer) or block hash (hex string)
+          schema:
+            oneOf:
+              - type: integer
+                example: 12345
+              - type: string
+                pattern: '^(0x)?[0-9a-fA-F]{64}$'
+                example: 'a1b2c3d4e5f6...'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /transactions:
+    get:
+      tags:
+        - Transactions
+      summary: List transactions
+      description: Get paginated list of transactions
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /transactions/latest:
+    get:
+      tags:
+        - Transactions
+      summary: Get latest transactions
+      description: Get the most recent transactions (typically 10)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /transactions/{hash}:
+    get:
+      tags:
+        - Transactions
+      summary: Get transaction details
+      description: Get detailed information about a specific transaction
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - name: hash
+          in: path
+          required: true
+          description: Transaction hash (hex string)
+          schema:
+            type: string
+            pattern: '^(0x)?[0-9a-fA-F]{64}$'
+            example: 'a1b2c3d4e5f6...'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /addresses/{address}:
+    get:
+      tags:
+        - Addresses
+      summary: Get address details
+      description: Get detailed information about an address including balance, transaction history, and token holdings
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - name: address
+          in: path
+          required: true
+          description: Address in hex or bech32 format
+          schema:
+            type: string
+            example: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /stats:
+    get:
+      tags:
+        - Stats
+      summary: Get network statistics
+      description: Get overall network statistics including block height, transaction count, addresses, and average block time
+      parameters:
+        - $ref: '#/components/parameters/Network'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tokens:
+    get:
+      tags:
+        - Tokens
+      summary: List tokens
+      description: Get paginated list of tokens/assets
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokensResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tokens/{identifier}:
+    get:
+      tags:
+        - Tokens
+      summary: Get token details
+      description: Get detailed information about a specific token. For UTXO networks, identifier is `policy_id.asset_name_hex`. For EVM networks, identifier is contract address.
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - name: identifier
+          in: path
+          required: true
+          description: Token identifier (policy_id.asset_name for UTXO, contract address for EVM)
+          schema:
+            type: string
+            example: 'a1b2c3d4e5f6...'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tokens/{identifier}/holders:
+    get:
+      tags:
+        - Tokens
+      summary: Get token holders
+      description: Get paginated list of token holders (EVM networks only)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - name: identifier
+          in: path
+          required: true
+          description: Token contract address
+          schema:
+            type: string
+            pattern: '^0x[0-9a-fA-F]{40}$'
+            example: '0x1234567890abcdef...'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenHoldersResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tokens/{identifier}/transfers:
+    get:
+      tags:
+        - Tokens
+      summary: Get token transfers
+      description: Get paginated list of token transfers for a specific token (EVM networks only)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - name: identifier
+          in: path
+          required: true
+          description: Token contract address
+          schema:
+            type: string
+            pattern: '^0x[0-9a-fA-F]{40}$'
+            example: '0x1234567890abcdef...'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenTransfersResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /token-transfers:
+    get:
+      tags:
+        - Tokens
+      summary: List all token transfers
+      description: Get paginated list of all token transfers (EVM networks only). Optionally filter by token address.
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - name: token
+          in: query
+          description: Filter by token contract address (optional)
+          schema:
+            type: string
+            pattern: '^0x[0-9a-fA-F]{40}$'
+            example: '0x1234567890abcdef...'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenTransfersResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /epochs:
+    get:
+      tags:
+        - Epochs
+      summary: List epochs
+      description: Get paginated list of epochs (UTXO networks only)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EpochsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /epochs/{number}:
+    get:
+      tags:
+        - Epochs
+      summary: Get epoch details
+      description: Get detailed information about a specific epoch (UTXO networks only)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - name: number
+          in: path
+          required: true
+          description: Epoch number
+          schema:
+            type: integer
+            minimum: 0
+            example: 42
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Epoch'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /pools:
+    get:
+      tags:
+        - Pools
+      summary: List staking pools
+      description: Get paginated list of staking pools (UTXO networks only)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - name: search
+          in: query
+          description: Search by pool ID, ticker, or name
+          schema:
+            type: string
+            example: 'POOL'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoolsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /pools/{id}:
+    get:
+      tags:
+        - Pools
+      summary: Get pool details
+      description: Get detailed information about a specific staking pool (UTXO networks only)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - name: id
+          in: path
+          required: true
+          description: Pool ID (hex string or bech32)
+          schema:
+            type: string
+            example: 'a1b2c3d4e5f6...'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pool:
+                    $ref: '#/components/schemas/Pool'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /contracts:
+    get:
+      tags:
+        - Contracts
+      summary: List smart contracts
+      description: Get paginated list of verified smart contracts (EVM networks only)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - name: search
+          in: query
+          description: Search by contract name or address
+          schema:
+            type: string
+            example: 'MyContract'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /contracts/{address}:
+    get:
+      tags:
+        - Contracts
+      summary: Get contract details
+      description: Get detailed information about a smart contract including ABI and source code (EVM networks only)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - name: address
+          in: path
+          required: true
+          description: Contract address
+          schema:
+            type: string
+            pattern: '^0x[0-9a-fA-F]{40}$'
+            example: '0x1234567890abcdef...'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /gas:
+    get:
+      tags:
+        - Gas
+      summary: Get gas price estimates
+      description: Get gas price estimates for different transaction speeds (EVM networks only)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GasEstimate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /price/ap3x:
+    get:
+      tags:
+        - Utility
+      summary: Get AP3X price
+      description: Get current AP3X token price from external sources
+      parameters:
+        - $ref: '#/components/parameters/Network'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Price'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /health:
+    get:
+      tags:
+        - Utility
+      summary: Health check
+      description: Check API health status
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'ok'
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2024-01-15T10:30:00Z'
+
+  /chart:
+    get:
+      tags:
+        - Utility
+      summary: Get chart data
+      description: Get historical data for charts (transaction volume over time)
+      parameters:
+        - $ref: '#/components/parameters/Network'
+        - name: range
+          in: query
+          description: Time range for chart data
+          schema:
+            type: string
+            enum: [24h, 1w, 2w, 1m]
+            default: 24h
+            example: '24h'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChartData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  parameters:
+    Network:
+      name: network
+      in: query
+      required: true
+      description: Network identifier
+      schema:
+        type: string
+        enum: [prime, vector, nexus]
+        example: 'prime'
+    Limit:
+      name: limit
+      in: query
+      description: Number of items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+        example: 20
+    Offset:
+      name: offset
+      in: query
+      description: Number of items to skip
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+        example: 0
+
+  schemas:
+    Block:
+      type: object
+      required:
+        - height
+        - hash
+        - tx_count
+        - timestamp
+      properties:
+        height:
+          type: integer
+          description: Block height
+          example: 12345
+        hash:
+          type: string
+          description: Block hash (hex string)
+          pattern: '^(0x)?[0-9a-fA-F]{64}$'
+          example: 'a1b2c3d4e5f6...'
+        slot:
+          type: integer
+          nullable: true
+          description: Slot number (UTXO networks only)
+          example: 12345678
+        epoch:
+          type: integer
+          nullable: true
+          description: Epoch number (UTXO networks only)
+          example: 42
+        tx_count:
+          type: integer
+          description: Number of transactions in block
+          example: 15
+        timestamp:
+          type: string
+          format: date-time
+          nullable: true
+          description: Block timestamp
+          example: '2024-01-15T10:30:00Z'
+        time:
+          type: string
+          nullable: true
+          description: Human-readable relative time (e.g., "5s ago", "2m ago")
+          example: '5s ago'
+        confirmations:
+          type: integer
+          nullable: true
+          description: Number of confirmations
+          example: 100
+        gas_used:
+          type: integer
+          nullable: true
+          description: Gas used (EVM networks only)
+          example: 15000000
+        gas_limit:
+          type: integer
+          nullable: true
+          description: Gas limit (EVM networks only)
+          example: 30000000
+        size:
+          type: integer
+          nullable: true
+          description: Block size in bytes
+          example: 2048
+        base_fee_per_gas:
+          type: number
+          nullable: true
+          description: Base fee per gas in native currency (EVM networks only)
+          example: 0.00000002
+
+    BlocksResponse:
+      type: object
+      properties:
+        blocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Block'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Transaction:
+      type: object
+      required:
+        - hash
+        - block_height
+        - status
+      properties:
+        hash:
+          type: string
+          description: Transaction hash (hex string)
+          pattern: '^(0x)?[0-9a-fA-F]{64}$'
+          example: 'a1b2c3d4e5f6...'
+        block_height:
+          type: integer
+          description: Block height containing this transaction
+          example: 12345
+        block_slot:
+          type: integer
+          nullable: true
+          description: Block slot (UTXO networks only)
+          example: 12345678
+        slot:
+          type: integer
+          nullable: true
+          description: Transaction slot (UTXO networks only, same as block_slot)
+          example: 12345678
+        epoch:
+          type: integer
+          nullable: true
+          description: Epoch number (UTXO networks only)
+          example: 42
+        index:
+          type: integer
+          nullable: true
+          description: Transaction index in block (for list endpoints)
+          example: 0
+        tx_index:
+          type: integer
+          nullable: true
+          description: Transaction index in block (for detail endpoints)
+          example: 0
+        from_addresses:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Source addresses (hex format, for list endpoints)
+          example: ['a1b2c3d4e5f6...']
+        to_addresses:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Destination addresses (hex format, for list endpoints)
+          example: ['f6e5d4c3b2a1...']
+        from_addresses_bech32:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Source addresses (bech32 format, UTXO networks only, for list endpoints)
+          example:
+            ['addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...']
+        to_addresses_bech32:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Destination addresses (bech32 format, UTXO networks only, for list endpoints)
+          example:
+            ['addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...']
+        input_count:
+          type: integer
+          nullable: true
+          description: Number of inputs (UTXO networks only, for list endpoints)
+          example: 2
+        output_count:
+          type: integer
+          nullable: true
+          description: Number of outputs (UTXO networks only, for list endpoints)
+          example: 1
+        ada_amount:
+          type: number
+          nullable: true
+          description: Transaction amount in native currency (for list endpoints)
+          example: 100.5
+        total_input_ada:
+          type: number
+          nullable: true
+          description: Total input amount in native currency (for detail endpoints)
+          example: 100.5
+        total_output_ada:
+          type: number
+          nullable: true
+          description: Total output amount in native currency (for detail endpoints)
+          example: 100.33
+        fee:
+          type: number
+          nullable: true
+          description: Transaction fee in native currency (for list endpoints)
+          example: 0.17
+        fee_ada:
+          type: number
+          nullable: true
+          description: Transaction fee in native currency (for detail endpoints)
+          example: 0.17
+        status:
+          type: string
+          enum: [success, failed, confirmed, invalid, pending]
+          description: Transaction status
+          example: 'success'
+        is_valid:
+          type: boolean
+          nullable: true
+          description: Whether transaction is valid (UTXO networks only)
+          example: true
+        confirmations:
+          type: integer
+          nullable: true
+          description: Number of confirmations
+          example: 100
+        timestamp:
+          type: string
+          format: date-time
+          nullable: true
+          description: Transaction timestamp
+          example: '2024-01-15T10:30:00Z'
+        block_hash:
+          type: string
+          nullable: true
+          description: Block hash containing this transaction
+          pattern: '^(0x)?[0-9a-fA-F]{64}$'
+          example: 'a1b2c3d4e5f6...'
+        inputs:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/TransactionInput'
+          description: Transaction inputs (for detail endpoints, UTXO networks only)
+        outputs:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/TransactionOutput'
+          description: Transaction outputs (for detail endpoints)
+        gas_used:
+          type: integer
+          nullable: true
+          description: Gas used (EVM networks only)
+          example: 21000
+        gas_price:
+          type: number
+          nullable: true
+          description: Gas price in native currency (EVM networks only)
+          example: 0.00000002
+        gas_limit:
+          type: integer
+          nullable: true
+          description: Gas limit (EVM networks only)
+          example: 21000
+        nonce:
+          type: integer
+          nullable: true
+          description: Transaction nonce (EVM networks only)
+          example: 5
+        method:
+          type: string
+          nullable: true
+          description: Transaction method signature (EVM networks only)
+          example: 'transfer'
+        evmType:
+          type: string
+          nullable: true
+          description: Transaction method signature (EVM networks only, alias for method)
+          example: 'transfer'
+        error:
+          type: string
+          nullable: true
+          description: Error message if transaction failed (EVM networks only)
+          example: null
+
+    TransactionInput:
+      type: object
+      properties:
+        address:
+          type: string
+          description: Input address in hex format
+          example: 'a1b2c3d4e5f6...'
+        address_bech32:
+          type: string
+          nullable: true
+          description: Input address in bech32 format (UTXO networks only)
+          example: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...'
+        utxo_id:
+          type: string
+          nullable: true
+          description: UTXO ID (UTXO networks only)
+          example: '12345'
+        input_index:
+          type: integer
+          nullable: true
+          description: Input index
+          example: 0
+        amount_ada:
+          type: number
+          nullable: true
+          description: Amount in native currency
+          example: 100.5
+        amount_lovelace:
+          type: integer
+          nullable: true
+          description: Amount in smallest unit (UTXO networks only)
+          example: 100500000
+
+    TransactionOutput:
+      type: object
+      properties:
+        address:
+          type: string
+          description: Output address in hex format
+          example: 'f6e5d4c3b2a1...'
+        address_bech32:
+          type: string
+          nullable: true
+          description: Output address in bech32 format (UTXO networks only)
+          example: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...'
+        output_index:
+          type: integer
+          description: Output index
+          example: 0
+        amount_ada:
+          type: number
+          nullable: true
+          description: Amount in native currency
+          example: 100.5
+        amount_lovelace:
+          type: integer
+          nullable: true
+          description: Amount in smallest unit (UTXO networks only)
+          example: 100500000
+        tokens:
+          type: array
+          nullable: true
+          items:
+            type: object
+          description: Tokens in this output (UTXO networks only)
+
+    TransactionsResponse:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Address:
+      type: object
+      required:
+        - address
+        - balance_ada
+        - tx_count
+      properties:
+        address:
+          type: string
+          description: Address in hex format
+          example: 'a1b2c3d4e5f6...'
+        address_bech32:
+          type: string
+          nullable: true
+          description: Address in bech32 format (UTXO networks only)
+          example: 'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj...'
+        balance_ada:
+          type: number
+          description: Balance in native currency
+          example: 1000.5
+        balance_lovelace:
+          type: integer
+          nullable: true
+          description: Balance in smallest unit (UTXO networks only)
+          example: 1000500000
+        tx_count:
+          type: integer
+          description: Total number of transactions
+          example: 42
+        unspent_utxo_count:
+          type: integer
+          nullable: true
+          description: Number of unspent UTXOs (UTXO networks only)
+          example: 5
+        total_utxo_count:
+          type: integer
+          nullable: true
+          description: Total number of UTXOs (UTXO networks only)
+          example: 10
+        first_seen_slot:
+          type: integer
+          nullable: true
+          description: First seen slot (UTXO networks only)
+          example: 12345678
+        last_seen_slot:
+          type: integer
+          nullable: true
+          description: Last seen slot (UTXO networks only)
+          example: 12345690
+        first_seen_height:
+          type: integer
+          nullable: true
+          description: First seen block height
+          example: 1000
+        last_seen_height:
+          type: integer
+          nullable: true
+          description: Last seen block height
+          example: 12345
+        utxos:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/UTXO'
+          description: Unspent UTXOs (UTXO networks only)
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddressTransaction'
+          description: Recent transactions
+        tokens:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenBalance'
+          description: Token balances
+
+    UTXO:
+      type: object
+      properties:
+        utxo_id:
+          type: string
+          example: 'tx_hash#index'
+        tx_hash:
+          type: string
+          example: 'a1b2c3d4e5f6...'
+        output_index:
+          type: integer
+          example: 0
+        amount_ada:
+          type: number
+          example: 100.5
+        amount_lovelace:
+          type: integer
+          example: 100500000
+        block_height:
+          type: integer
+          example: 12345
+        slot:
+          type: integer
+          example: 12345678
+
+    AddressTransaction:
+      type: object
+      properties:
+        hash:
+          type: string
+          example: 'a1b2c3d4e5f6...'
+        block_height:
+          type: integer
+          example: 12345
+        slot:
+          type: integer
+          nullable: true
+          example: 12345678
+        tx_index:
+          type: integer
+          example: 0
+        type:
+          type: string
+          enum: [sent, received, both]
+          example: 'received'
+        amount_ada:
+          type: number
+          example: 100.5
+        amount_lovelace:
+          type: integer
+          nullable: true
+          example: 100500000
+        received_ada:
+          type: number
+          example: 100.5
+        sent_ada:
+          type: number
+          example: 0
+        timestamp:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2024-01-15T10:30:00Z'
+
+    TokenBalance:
+      type: object
+      properties:
+        token_address:
+          type: string
+          nullable: true
+          description: Token contract address (EVM networks)
+          example: '0x1234567890abcdef...'
+        policy_id:
+          type: string
+          nullable: true
+          description: Policy ID (UTXO networks only)
+          example: 'a1b2c3d4e5f6...'
+        asset_name:
+          type: string
+          nullable: true
+          description: Asset name (UTXO networks only)
+          example: 'TOKEN'
+        asset_name_hex:
+          type: string
+          nullable: true
+          description: Asset name in hex (UTXO networks only)
+          example: '544f4b454e'
+        name:
+          type: string
+          nullable: true
+          example: 'My Token'
+        token_name:
+          type: string
+          nullable: true
+          description: Token name (EVM networks, alternative field name)
+          example: 'My Token'
+        symbol:
+          type: string
+          nullable: true
+          example: 'MTK'
+        token_symbol:
+          type: string
+          nullable: true
+          description: Token symbol (EVM networks, alternative field name)
+          example: 'MTK'
+        decimals:
+          type: integer
+          nullable: true
+          example: 18
+        balance:
+          type: string
+          nullable: true
+          description: Balance as string (to handle large numbers)
+          example: '1000000000000000000'
+        balance_formatted:
+          type: number
+          nullable: true
+          description: Balance in human-readable format
+          example: 1.0
+        value:
+          type: string
+          nullable: true
+          description: Balance as string (EVM networks, alternative field name)
+          example: '1000000000000000000'
+        quantity:
+          type: string
+          nullable: true
+          description: Quantity (UTXO networks only)
+          example: '1000000'
+        fingerprint:
+          type: string
+          nullable: true
+          description: Token fingerprint (UTXO networks only)
+          example: 'a1b2c3d4...e5f6g7h8'
+
+    Stats:
+      type: object
+      properties:
+        blockHeight:
+          type: string
+          description: Current block height (formatted string)
+          example: '12,345'
+        transactions:
+          type: string
+          description: Total transaction count (formatted string)
+          example: '1.2M'
+        addresses:
+          type: string
+          description: Total address count (formatted string)
+          example: '500K'
+        avgBlockTime:
+          type: string
+          description: Average block time
+          example: '20s'
+
+    Token:
+      type: object
+      properties:
+        address:
+          type: string
+          nullable: true
+          description: Token contract address (EVM networks)
+          example: '0x1234567890abcdef...'
+        policy_id:
+          type: string
+          nullable: true
+          description: Policy ID (UTXO networks)
+          example: 'a1b2c3d4e5f6...'
+        asset_name:
+          type: string
+          nullable: true
+          description: Asset name (UTXO networks)
+          example: 'TOKEN'
+        asset_name_hex:
+          type: string
+          nullable: true
+          description: Asset name in hex (UTXO networks)
+          example: '544f4b454e'
+        name:
+          type: string
+          example: 'My Token'
+        symbol:
+          type: string
+          example: 'MTK'
+        decimals:
+          type: integer
+          example: 18
+        total_supply:
+          type: string
+          description: Total supply as string
+          example: '1000000000000000000'
+        total_supply_formatted:
+          type: string
+          description: Total supply formatted
+          example: '1,000,000'
+        quantity:
+          type: string
+          nullable: true
+          description: Quantity (UTXO networks)
+          example: '1000000'
+        holders:
+          type: integer
+          nullable: true
+          description: Number of holders
+          example: 100
+        type:
+          type: string
+          nullable: true
+          description: Token type (EVM networks)
+          example: 'ERC-20'
+        icon_url:
+          type: string
+          nullable: true
+          description: Token icon URL
+          example: 'https://example.com/icon.png'
+        metadata:
+          type: object
+          nullable: true
+          description: Token metadata (UTXO networks)
+        fingerprint:
+          type: string
+          nullable: true
+          description: Token fingerprint (UTXO networks)
+          example: 'a1b2c3d4...e5f6g7h8'
+
+    TokensResponse:
+      type: object
+      properties:
+        tokens:
+          type: array
+          items:
+            $ref: '#/components/schemas/Token'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    TokenHoldersResponse:
+      type: object
+      properties:
+        holders:
+          type: array
+          items:
+            type: object
+            properties:
+              address:
+                type: string
+                example: '0x1234567890abcdef...'
+              value:
+                type: string
+                description: Balance as string
+                example: '1000000000000000000'
+              balance:
+                type: string
+                description: Balance as string (alias for value)
+                example: '1000000000000000000'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    TokenTransfer:
+      type: object
+      properties:
+        transaction_hash:
+          type: string
+          description: Transaction hash
+          example: '0x1234567890abcdef...'
+        hash:
+          type: string
+          nullable: true
+          description: Transaction hash (alias for transaction_hash)
+          example: '0x1234567890abcdef...'
+        from:
+          type: string
+          nullable: true
+          description: From address (alias for from_address)
+          example: '0xabcdef1234567890...'
+        from_address:
+          type: string
+          nullable: true
+          description: From address
+          example: '0xabcdef1234567890...'
+        from_address_hash:
+          type: string
+          nullable: true
+          description: From address hash (alternative field name)
+          example: '0xabcdef1234567890...'
+        to:
+          type: string
+          nullable: true
+          description: To address (alias for to_address)
+          example: '0xfedcba0987654321...'
+        to_address:
+          type: string
+          nullable: true
+          description: To address
+          example: '0xfedcba0987654321...'
+        to_address_hash:
+          type: string
+          nullable: true
+          description: To address hash (alternative field name)
+          example: '0xfedcba0987654321...'
+        amount:
+          type: number
+          nullable: true
+          description: Amount in human-readable format
+          example: 100.5
+        amount_raw:
+          type: string
+          nullable: true
+          description: Amount as string (raw)
+          example: '100500000000000000000'
+        value:
+          type: string
+          nullable: true
+          description: Amount as string (raw, alternative field name)
+          example: '100500000000000000000'
+        block_number:
+          type: integer
+          example: 12345
+        block_timestamp:
+          type: string
+          format: date-time
+          nullable: true
+          description: Block timestamp
+          example: '2024-01-15T10:30:00Z'
+        timestamp:
+          type: string
+          format: date-time
+          nullable: true
+          description: Transfer timestamp (alias for block_timestamp)
+          example: '2024-01-15T10:30:00Z'
+        log_index:
+          type: integer
+          nullable: true
+          example: 0
+        token_address:
+          type: string
+          nullable: true
+          description: Token contract address
+          example: '0x1234567890abcdef...'
+        token_contract_address_hash:
+          type: string
+          nullable: true
+          description: Token contract address (alternative field name)
+          example: '0x1234567890abcdef...'
+        token_symbol:
+          type: string
+          nullable: true
+          example: 'MTK'
+        token_name:
+          type: string
+          nullable: true
+          example: 'My Token'
+        token_decimals:
+          type: integer
+          nullable: true
+          example: 18
+
+    TokenTransfersResponse:
+      type: object
+      properties:
+        transfers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenTransfer'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Epoch:
+      type: object
+      properties:
+        epoch:
+          type: integer
+          example: 42
+        start_slot:
+          type: integer
+          example: 12345678
+        end_slot:
+          type: integer
+          example: 12345690
+        actual_start_slot:
+          type: integer
+          nullable: true
+          example: 12345678
+        actual_end_slot:
+          type: integer
+          nullable: true
+          example: 12345690
+        start_time:
+          type: string
+          format: date-time
+          example: '2024-01-15T10:00:00Z'
+        end_time:
+          type: string
+          format: date-time
+          example: '2024-01-15T11:00:00Z'
+        start_height:
+          type: integer
+          example: 1000
+        end_height:
+          type: integer
+          example: 2000
+        blocks:
+          type: integer
+          example: 1000
+        transactions:
+          type: integer
+          example: 5000
+        fees:
+          type: string
+          example: '850.00'
+        is_current:
+          type: boolean
+          example: false
+        blocks_list:
+          type: array
+          items:
+            type: object
+            properties:
+              height:
+                type: integer
+              slot:
+                type: integer
+              hash:
+                type: string
+              tx_count:
+                type: integer
+
+    EpochsResponse:
+      type: object
+      properties:
+        epochs:
+          type: array
+          items:
+            type: object
+            properties:
+              epoch:
+                type: integer
+                description: Epoch number
+                example: 42
+              start_slot:
+                type: integer
+                description: Start slot number
+                example: 12345678
+              end_slot:
+                type: integer
+                description: End slot number
+                example: 12345690
+              start_time:
+                type: string
+                format: date-time
+                nullable: true
+                description: Epoch start time
+                example: '2024-01-15T10:00:00Z'
+              end_time:
+                type: string
+                format: date-time
+                nullable: true
+                description: Epoch end time
+                example: '2024-01-15T11:00:00Z'
+              blocks:
+                type: integer
+                nullable: true
+                description: Number of blocks in epoch (alias for block_count)
+                example: 1000
+              block_count:
+                type: integer
+                nullable: true
+                description: Number of blocks in epoch
+                example: 1000
+              transactions:
+                type: integer
+                nullable: true
+                description: Number of transactions in epoch (alias for transaction_count)
+                example: 5000
+              transaction_count:
+                type: integer
+                nullable: true
+                description: Number of transactions in epoch
+                example: 5000
+              fees:
+                type: string
+                nullable: true
+                description: Estimated fees in epoch
+                example: '850.00'
+              is_current:
+                type: boolean
+                nullable: true
+                description: Whether this is the current epoch
+                example: false
+        current_epoch:
+          type: integer
+          nullable: true
+          description: Current epoch number
+          example: 42
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Pool:
+      type: object
+      properties:
+        poolId:
+          type: string
+          description: Pool ID in bech32 format
+          example: 'pool1a1b2c3d4e5f6...'
+        hex:
+          type: string
+          description: Pool ID in hex format
+          example: 'a1b2c3d4e5f6...'
+        ticker:
+          type: string
+          nullable: true
+          example: 'POOL'
+        name:
+          type: string
+          nullable: true
+          example: 'My Pool'
+        description:
+          type: string
+          nullable: true
+          example: 'Pool description'
+        homepage:
+          type: string
+          nullable: true
+          example: 'https://example.com'
+        logo:
+          type: string
+          nullable: true
+          description: Logo URL (from meta.logo or direct)
+          example: 'https://example.com/logo.png'
+        meta:
+          type: object
+          nullable: true
+          description: Pool metadata object from metadata.json
+          properties:
+            name:
+              type: string
+              nullable: true
+            ticker:
+              type: string
+              nullable: true
+            description:
+              type: string
+              nullable: true
+            homepage:
+              type: string
+              nullable: true
+            logo:
+              type: string
+              nullable: true
+        stake:
+          type: string
+          nullable: true
+          description: Total stake as string
+          example: '1000000000000'
+        delegators:
+          type: integer
+          nullable: true
+          example: 100
+        margin:
+          type: number
+          nullable: true
+          description: Pool margin (0-1)
+          example: 0.02
+        fixed_cost:
+          type: string
+          nullable: true
+          description: Fixed cost in lovelace
+          example: '340000000'
+        cost:
+          type: string
+          nullable: true
+          description: Fixed cost in lovelace (alias for fixed_cost)
+          example: '340000000'
+        pledge:
+          type: string
+          nullable: true
+          description: Pool pledge
+          example: '1000000000000'
+
+    PoolsResponse:
+      type: object
+      properties:
+        pools:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pool'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        totals:
+          type: object
+          nullable: true
+          properties:
+            total_pools:
+              type: integer
+            total_stake:
+              type: string
+            total_delegators:
+              type: integer
+
+    Contract:
+      type: object
+      properties:
+        address:
+          type: string
+          example: '0x1234567890abcdef...'
+        name:
+          type: string
+          example: 'MyContract'
+        verified:
+          type: boolean
+          example: true
+        compiler:
+          type: string
+          nullable: true
+          example: 'Solidity 0.8.20'
+        balance:
+          type: string
+          nullable: true
+          example: '1.5'
+        balance_ada:
+          type: number
+          nullable: true
+          example: 1.5
+        tx_count:
+          type: integer
+          example: 42
+        created:
+          type: string
+          nullable: true
+          format: date
+          example: '2024-01-15'
+        verified_at:
+          type: string
+          nullable: true
+          format: date-time
+          example: '2024-01-15T10:30:00Z'
+        optimization_enabled:
+          type: boolean
+          nullable: true
+          example: true
+        optimization_runs:
+          type: integer
+          nullable: true
+          example: 200
+        evm_version:
+          type: string
+          nullable: true
+          example: 'london'
+        abi:
+          type: array
+          nullable: true
+          description: Contract ABI
+          items:
+            type: object
+        source_code:
+          type: string
+          nullable: true
+          description: Contract source code
+
+    ContractsResponse:
+      type: object
+      properties:
+        contracts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contract'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    GasEstimate:
+      type: object
+      properties:
+        slow:
+          type: object
+          properties:
+            gwei:
+              type: number
+              example: 1.0
+            dfm:
+              type: number
+              description: Native currency equivalent
+              example: 0.000000001
+            time:
+              type: string
+              example: '~5 min'
+        standard:
+          type: object
+          properties:
+            gwei:
+              type: number
+              example: 2.0
+            dfm:
+              type: number
+              example: 0.000000002
+            time:
+              type: string
+              example: '~2 min'
+        fast:
+          type: object
+          properties:
+            gwei:
+              type: number
+              example: 3.0
+            dfm:
+              type: number
+              example: 0.000000003
+            time:
+              type: string
+              example: '~30 sec'
+        instant:
+          type: object
+          properties:
+            gwei:
+              type: number
+              example: 5.0
+            dfm:
+              type: number
+              example: 0.000000005
+            time:
+              type: string
+              example: '~15 sec'
+        recentBlocks:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              number:
+                type: integer
+                description: Block number
+                example: 12345
+              gasUsed:
+                type: integer
+                nullable: true
+                description: Gas used in this block
+                example: 15000000
+              gas_used:
+                type: integer
+                nullable: true
+                description: Gas used (alternative field name)
+                example: 15000000
+              gasLimit:
+                type: integer
+                nullable: true
+                description: Gas limit
+                example: 30000000
+              gas_limit:
+                type: integer
+                nullable: true
+                description: Gas limit (alternative field name)
+                example: 30000000
+              baseFee:
+                type: number
+                nullable: true
+                description: Base fee in native currency
+                example: 0.00000002
+              baseFeeGwei:
+                type: number
+                nullable: true
+                description: Base fee in gwei
+                example: 2.0
+              usage:
+                type: number
+                nullable: true
+                description: Usage percentage (0-100)
+                example: 50.0
+              timestamp:
+                type: string
+                format: date-time
+                nullable: true
+                example: '2024-01-15T10:30:00Z'
+        recent_blocks:
+          type: array
+          nullable: true
+          description: Recent blocks (alternative field name for recentBlocks)
+          items:
+            type: object
+        averageGasPrice:
+          type: number
+          nullable: true
+          description: Average gas price in native currency
+          example: 0.000000002
+
+    Price:
+      type: object
+      properties:
+        price:
+          type: number
+          example: 0.5
+        change_24h:
+          type: number
+          nullable: true
+          example: 0.05
+        market_cap:
+          type: string
+          nullable: true
+          example: '$10M'
+        volume_24h:
+          type: string
+          nullable: true
+          example: '$1M'
+        source:
+          type: string
+          nullable: true
+          example: 'CoinMarketCap'
+
+    ChartData:
+      type: object
+      properties:
+        hourly:
+          type: array
+          items:
+            type: object
+            properties:
+              time:
+                type: string
+                example: '2024-01-15T10:00:00Z'
+              count:
+                type: integer
+                example: 100
+        breakdown:
+          type: object
+          properties:
+            total:
+              type: integer
+            contract_calls:
+              type: integer
+            contract_deploys:
+              type: integer
+            token_transfers:
+              type: integer
+            regular_transfers:
+              type: integer
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Total number of items
+          example: 1000
+        limit:
+          type: integer
+          description: Items per page
+          example: 20
+        offset:
+          type: integer
+          description: Items skipped
+          example: 0
+        hasMore:
+          type: boolean
+          description: Whether there are more items
+          example: true
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: 'Block not found'
+        details:
+          type: string
+          nullable: true
+          description: Additional error details
+          example: 'Block height 99999 does not exist'
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Invalid network parameter'
+            details: 'Network must be one of: prime, vector, nexus'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Block not found'
+            details: 'Block height 99999 does not exist'
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 'Internal server error'
+            details: 'Database connection failed'

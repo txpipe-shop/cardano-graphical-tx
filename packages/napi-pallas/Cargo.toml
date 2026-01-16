@@ -1,0 +1,32 @@
+
+[package]
+edition = "2021"
+name = "napi_pallas"
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+anyhow = "1.0.79"
+hex = "0.4.3"
+jsonschema = "0.26.1"
+minicbor = "0.25.0"
+napi = "3.0.0"
+napi-derive = "3.0.0"
+pallas = "0.29.0"
+pallas-addresses = "0.29.0"
+pallas-codec = "0.29.0"
+pallas-crypto = "0.29.0"
+pallas-primitives = "0.29.0"
+regex = "1.11.1"
+serde_json = "1.0.64"
+
+[build-dependencies]
+napi-build = "2"
+
+[profile.release]
+lto = true
+
+[features]
+test-build = []

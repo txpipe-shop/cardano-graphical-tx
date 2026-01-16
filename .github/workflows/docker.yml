@@ -1,0 +1,44 @@
+name: Build and push dockers
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get commit hash
+        run: echo "COMMIT_HASH=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -f Dockerfile \
+            -t nicolasluduena/utxo-explorer:ui-${COMMIT_HASH} \
+            -t nicolasluduena/utxo-explorer:ui-${{ github.ref_name }} . \
+            --progress=plain
+
+      - name: Push Docker Image to Docker Hub
+        run: |
+          docker push nicolasluduena/utxo-explorer:ui-${COMMIT_HASH}
+          docker push nicolasluduena/utxo-explorer:ui-${{ github.ref_name }}
+
+      - name: Redeploy service in coolify
+        run: |
+          echo "Deploying UUID: ${{ vars.COOLIFY_SERVICE_UUID }}"
+          curl -X POST "https://${{ vars.COOLIFY_BASE_URL }}/api/v1/deploy?uuid=${{ vars.COOLIFY_SERVICE_UUID }}&force=false" \
+            -H "Authorization: Bearer ${{secrets.COOLIFY_API_TOKEN}}" \
+            -H "Content-Type: application/json"
