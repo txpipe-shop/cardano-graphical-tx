@@ -1,9 +1,16 @@
-import { type cardano, uint8ToAddr, uint8ToHash, uint8ToHexString } from '@laceanatomy/types';
+import { BlockRes } from '@laceanatomy/provider-core';
 import {
   Address,
+  DatumType,
   Hash,
   HexString,
   MetadatumMap,
+  uint8ToAddr,
+  uint8ToHash,
+  uint8ToHexString,
+  Unit,
+  Value,
+  type cardano,
   type Metadata,
   type Metadatum
 } from '@laceanatomy/types';
@@ -22,53 +29,16 @@ export function toBigInt(value: Uint8Array | bigint | undefined): bigint {
   return BigInt(value);
 }
 
-export async function getBlockPreviousHash(nativeBytes: Uint8Array): Promise<Hash> {
-  const cbor = await import('cbor2');
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  console.log('About to decode');
-  const cborParsed = cbor.decode<any>(nativeBytes);
-  console.log('Finished decoding');
-  console.log(Buffer.from(nativeBytes).toString('hex'));
-
-  // let's ignore the era of the block
-  const blockCborDecoded = cborParsed[1];
-  console.log('About to encode');
-  const encoded = cbor.encode(blockCborDecoded);
-  console.log('Decoded successfully');
-  if (typeof window !== 'undefined') {
-    console.log('Running in browser');
-    const { Block } = await import('@emurgo/cardano-serialization-lib-browser');
-    const hash = Block.from_bytes(encoded).header().header_body().prev_hash()?.to_hex();
-    assert(hash);
-    return Hash(hash);
-  } else {
-    console.log('Running in nodejs');
-    const { Block } = await import('@emurgo/cardano-serialization-lib-nodejs');
-    const hash = Block.from_bytes(encoded).header().header_body().prev_hash()?.to_hex();
-    assert(hash);
-    return Hash(hash);
-  }
-}
-
-export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block): cardano.Block {
+export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block, tipHeight: bigint): BlockRes {
+  const fees = block.body!.tx.reduce((acc, tx) => acc + toBigInt(tx.fee?.bigInt.value), 0n);
   return {
-    epochNo: 0n,
-    header: {
-      blockNumber: toBigInt(block.header!.height),
-      chainPoint: {
-        hash: uint8ToHash(block.header!.hash),
-        slot: toBigInt(block.header!.slot)
-      },
-      previousHash: undefined
-    },
-    txs: block.body!.tx.map((tx) =>
-      u5cToCardanoTx(
-        tx,
-        toBigInt(block.timestamp),
-        uint8ToHash(block.header!.hash),
-        toBigInt(block.header!.height)
-      )
-    )
+    hash: uint8ToHash(block.header!.hash),
+    height: toBigInt(block.header!.height),
+    slot: toBigInt(block.header!.slot),
+    txCount: BigInt(block.body!.tx.length),
+    fees,
+    time: Number(block.timestamp) * 1000,
+    confirmations: tipHeight - toBigInt(block.header!.height)
   };
 }
 
@@ -84,6 +54,33 @@ function getRefScript(script: cardanoUtxoRpc.Script): cardano.Script | undefined
     return { type: s.case as cardano.ScriptType, bytes: HexString('') };
   }
   return undefined;
+}
+
+export function u5cToCardanoValue(outputs: cardanoUtxoRpc.TxOutput[]): Value {
+  const lovelaceUnit = Unit('lovelace');
+  const result: Value = {};
+
+  for (const output of outputs) {
+    assert(output.coin, 'Missing coin value');
+    const lovelace = toBigInt(output.coin.bigInt.value);
+    result[lovelaceUnit] = (result[lovelaceUnit] ?? 0n) + lovelace;
+
+    if (output.assets) {
+      for (const multiasset of output.assets) {
+        const policyId = Buffer.from(multiasset.policyId).toString('hex');
+
+        for (const asset of multiasset.assets) {
+          const assetName = Buffer.from(asset.name).toString('hex');
+          const unit = Unit(`${policyId}${assetName}`);
+          const quantity = toBigInt(asset.quantity.value?.bigInt.value);
+
+          result[unit] = (result[unit] ?? 0n) + quantity;
+        }
+      }
+    }
+  }
+
+  return result;
 }
 
 export function u5cToCardanoUtxo(
@@ -112,7 +109,12 @@ export function u5cToCardanoUtxo(
     coin: toBigInt(output?.coin?.bigInt.value),
     outRef: { hash: hash, index: BigInt(index) },
     value,
-    datum: undefined,
+    datum: output?.datum
+      ? {
+          type: DatumType.INLINE,
+          datumHex: HexString(Buffer.from(output.datum.originalCbor).toString('hex'))
+        }
+      : undefined,
     referenceScript: output?.script ? getRefScript(output.script) : undefined
   };
 }
@@ -162,11 +164,14 @@ export function u5cToCardanoTx(
   tx: cardanoUtxoRpc.Tx,
   time: bigint,
   blockHash: Hash,
-  blockHeight: bigint
+  blockHeight: bigint,
+  indexInBlock: number
 ): cardano.Tx {
   const fee = toBigInt(tx.fee?.bigInt.value);
   const hash = uint8ToHash(tx.hash);
-  const inputs = tx.inputs.map((x) => u5cToCardanoUtxo(hash, x.asOutput, x.outputIndex));
+  const inputs = tx.inputs.map((x) =>
+    u5cToCardanoUtxo(uint8ToHash(x.txHash), x.asOutput, x.outputIndex)
+  );
   const outputs = tx.outputs.map((txOut, i) => u5cToCardanoUtxo(hash, txOut, i));
 
   const metadata = tx.auxiliary?.metadata ? u5cToCardanoMetadata(tx.auxiliary.metadata) : undefined;
@@ -203,7 +208,6 @@ export function u5cToCardanoTx(
     witnesses: { scripts },
     block: { hash: blockHash, height: blockHeight, epochNo: 0n, slot: 0n },
     treasuryDonation: 0n,
-    // TODO: fetch this information here
-    indexInBlock: 0n
+    indexInBlock: BigInt(indexInBlock)
   };
 }

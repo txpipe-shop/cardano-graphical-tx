@@ -44,20 +44,7 @@
   },
   "devDependencies": {
     "@laceanatomy/typescript-config": "workspace:*",
-    "@emurgo/cardano-serialization-lib-nodejs": "^15.0.3",
     "@types/node": "^24.1.0",
     "typescript": "^5.0.0"
-  },
-  "peerDependencies": {
-    "@emurgo/cardano-serialization-lib-browser": "^15.0.3",
-    "@emurgo/cardano-serialization-lib-nodejs": "^15.0.3"
-  },
-  "peerDependenciesMeta": {
-    "@emurgo/cardano-serialization-lib-browser": {
-      "optional": true
-    },
-    "@emurgo/cardano-serialization-lib-nodejs": {
-      "optional": true
-    }
   }
 }
