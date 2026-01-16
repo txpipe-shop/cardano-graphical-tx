@@ -1,10 +1,9 @@
 "use client";
-
 import { Select, SelectItem, type SharedSelection } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-export type ChainNetwork = "mainnet" | "preprod" | "preview" | "vector";
+export type ChainNetwork = "mainnet" | "preprod" | "preview" | "vector-mainnet";
 
 interface ChainOption {
   key: ChainNetwork;
@@ -29,17 +28,17 @@ const CHAIN_OPTIONS: ChainOption[] = [
     description: "Preview testnet",
   },
   {
-    key: "vector",
+    key: "vector-mainnet",
     label: "Vector",
     description: "AP3X Vector Mainnet",
   },
 ];
 
-interface ChainSelectorProps {
+export interface ChainSelectorProps {
   currentChain: ChainNetwork;
 }
 
-export function ChainSelector({ currentChain }: ChainSelectorProps) {
+export default function ChainSelector({ currentChain }: ChainSelectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

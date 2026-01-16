@@ -1,8 +1,8 @@
-import { StatusCodes } from "http-status-codes";
 import {
   parseAddress,
   type SafeAddressResponse,
 } from "@laceanatomy/napi-pallas";
+import { StatusCodes } from "http-status-codes";
 import { isEmpty } from "~/app/_utils";
 
 export const addressHandler = async (raw: string) => {

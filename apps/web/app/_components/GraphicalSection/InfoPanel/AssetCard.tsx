@@ -1,7 +1,7 @@
 import { Card, CardHeader, Tooltip } from "@heroui/react";
+import type { Asset } from "@laceanatomy/napi-pallas";
 import Image from "next/image";
 import { getAssetName, handleCopy } from "~/app/_utils";
-import type { Asset } from "@laceanatomy/napi-pallas";
 import CopyIcon from "~/public/copy.svg";
 
 interface AssetCardProps {

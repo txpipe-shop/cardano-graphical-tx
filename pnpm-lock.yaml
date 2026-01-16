@@ -14,6 +14,9 @@ importers:
       prettier:
         specifier: ^3.4.2
         version: 3.6.2
+      prettier-plugin-organize-imports:
+        specifier: ^4.3.0
+        version: 4.3.0(prettier@3.6.2)(typescript@5.9.3)
       turbo:
         specifier: ^2.3.0
         version: 2.7.1
@@ -240,7 +243,7 @@ importers:
         version: 3.4.0(prettier@3.6.2)(svelte@5.37.1)
       prettier-plugin-tailwindcss:
         specifier: ^0.6.11
-        version: 0.6.14(prettier-plugin-svelte@3.4.0(prettier@3.6.2)(svelte@5.37.1))(prettier@3.6.2)
+        version: 0.6.14(prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.9.3))(prettier-plugin-svelte@3.4.0(prettier@3.6.2)(svelte@5.37.1))(prettier@3.6.2)
       svelte:
         specifier: ^5.0.0
         version: 5.37.1
@@ -454,7 +457,7 @@ importers:
         version: 3.3.3
       prettier-plugin-tailwindcss:
         specifier: ^0.6.5
-        version: 0.6.6(prettier-plugin-svelte@3.4.0(prettier@3.3.3)(svelte@5.37.1))(prettier@3.3.3)
+        version: 0.6.6(prettier-plugin-organize-imports@4.3.0(prettier@3.3.3)(typescript@5.5.4))(prettier-plugin-svelte@3.4.0(prettier@3.3.3)(svelte@5.37.1))(prettier@3.3.3)
       prisma:
         specifier: ^5.19.1
         version: 5.19.1
@@ -6704,6 +6707,16 @@ packages:
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
+
+  prettier-plugin-organize-imports@4.3.0:
+    resolution: {integrity: sha512-FxFz0qFhyBsGdIsb697f/EkvHzi5SZOhWAjxcx2dLt+Q532bAlhswcXGYB1yzjZ69kW8UoadFBw7TyNwlq96Iw==}
+    peerDependencies:
+      prettier: '>=2.0'
+      typescript: '>=2.9'
+      vue-tsc: ^2.1.0 || 3
+    peerDependenciesMeta:
+      vue-tsc:
+        optional: true
 
   prettier-plugin-svelte@3.4.0:
     resolution: {integrity: sha512-pn1ra/0mPObzqoIQn/vUTR3ZZI6UuZ0sHqMK5x2jMLGrs53h0sXhkVuDcrlssHwIMk7FYrMjHBPoUSyyEEDlBQ==}
@@ -15224,6 +15237,17 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
+  prettier-plugin-organize-imports@4.3.0(prettier@3.3.3)(typescript@5.5.4):
+    dependencies:
+      prettier: 3.3.3
+      typescript: 5.5.4
+    optional: true
+
+  prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.9.3):
+    dependencies:
+      prettier: 3.6.2
+      typescript: 5.9.3
+
   prettier-plugin-svelte@3.4.0(prettier@3.3.3)(svelte@5.37.1):
     dependencies:
       prettier: 3.3.3
@@ -15235,16 +15259,18 @@ snapshots:
       prettier: 3.6.2
       svelte: 5.37.1
 
-  prettier-plugin-tailwindcss@0.6.14(prettier-plugin-svelte@3.4.0(prettier@3.6.2)(svelte@5.37.1))(prettier@3.6.2):
+  prettier-plugin-tailwindcss@0.6.14(prettier-plugin-organize-imports@4.3.0(prettier@3.6.2)(typescript@5.9.3))(prettier-plugin-svelte@3.4.0(prettier@3.6.2)(svelte@5.37.1))(prettier@3.6.2):
     dependencies:
       prettier: 3.6.2
     optionalDependencies:
+      prettier-plugin-organize-imports: 4.3.0(prettier@3.6.2)(typescript@5.9.3)
       prettier-plugin-svelte: 3.4.0(prettier@3.6.2)(svelte@5.37.1)
 
-  prettier-plugin-tailwindcss@0.6.6(prettier-plugin-svelte@3.4.0(prettier@3.3.3)(svelte@5.37.1))(prettier@3.3.3):
+  prettier-plugin-tailwindcss@0.6.6(prettier-plugin-organize-imports@4.3.0(prettier@3.3.3)(typescript@5.5.4))(prettier-plugin-svelte@3.4.0(prettier@3.3.3)(svelte@5.37.1))(prettier@3.3.3):
     dependencies:
       prettier: 3.3.3
     optionalDependencies:
+      prettier-plugin-organize-imports: 4.3.0(prettier@3.3.3)(typescript@5.5.4)
       prettier-plugin-svelte: 3.4.0(prettier@3.3.3)(svelte@5.37.1)
 
   prettier@2.8.8: {}

@@ -1,25 +1,52 @@
 import { Suspense } from "react";
+import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
+import Pagination from "~/app/_components/ExplorerSection/Pagination";
+import {
+  TxSearch,
+  TxTable,
+} from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
 import {
   getDbSyncProvider,
   isValidChain,
   type ChainNetwork,
 } from "~/server/api/dbsync-provider";
-import { ChainSelector, TxSearch, TxTable } from "./_components";
 
 interface ExplorerPageProps {
-  searchParams: Promise<{ chain?: string }>;
+  searchParams: Promise<{ chain?: string; page?: string }>;
 }
 
-async function TransactionsList({ chain }: { chain: ChainNetwork }) {
+const PAGE_SIZE = 500n;
+
+async function TransactionsList({
+  chain,
+  page,
+}: {
+  chain: ChainNetwork;
+  page: number;
+}) {
   try {
     const provider = getDbSyncProvider(chain);
+    const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
+    const offset = BigInt(currentPage - 1) * PAGE_SIZE;
     const result = await provider.getTxs({
-      limit: 50n,
+      limit: PAGE_SIZE,
+      offset,
       query: undefined,
     });
 
-    return <TxTable transactions={result.data} chain={chain} />;
+    const total = result.total ?? 0n;
+    const totalPages = total === 0n ? 1 : Number((total - 1n) / PAGE_SIZE + 1n);
+
+    return (
+      <div className="space-y-4">
+        <TxTable transactions={result.data} chain={chain} />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={Math.max(totalPages, 1)}
+        />
+      </div>
+    );
   } catch (error) {
     console.error("Failed to fetch transactions:", error);
     return (
@@ -48,6 +75,8 @@ export default async function ExplorerPage({
   const params = await searchParams;
   const chainParam = params.chain || "mainnet";
   const chain: ChainNetwork = isValidChain(chainParam) ? chainParam : "mainnet";
+  const pageParam = Number.parseInt(params.page ?? "1", 10);
+  const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
   return (
     <div className="min-h-screen bg-white">
@@ -69,9 +98,8 @@ export default async function ExplorerPage({
           </div>
         </div>
 
-        {/* Transactions List */}
         <Suspense fallback={<LoadingState />}>
-          <TransactionsList chain={chain} />
+          <TransactionsList chain={chain} page={page} />
         </Suspense>
       </main>
     </div>

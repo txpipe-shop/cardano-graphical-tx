@@ -16,6 +16,7 @@ export function TxSearch({ chain }: TxSearchProps) {
     const trimmedHash = txHash.trim();
     if (trimmedHash.length === 0) return;
 
+    // TODO: redirect to the actual single tx page
     router.push(`/tx/dissect?tx=${trimmedHash}&chain=${chain}`);
   };
 
@@ -34,7 +35,7 @@ export function TxSearch({ chain }: TxSearchProps) {
         onKeyDown={handleKeyDown}
         variant="bordered"
         classNames={{
-          inputWrapper: "border-2 border-dashed border-gray-300 shadow-md",
+          inputWrapper: "border-2 border-dashed border-gray-300 shadow-md ",
         }}
       />
       <Button

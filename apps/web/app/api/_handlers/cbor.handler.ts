@@ -1,4 +1,3 @@
-import { StatusCodes } from "http-status-codes";
 import {
   cborParse,
   parseDatumInfo,
@@ -7,6 +6,7 @@ import {
   type SafeCborResponse,
   type Utxo,
 } from "@laceanatomy/napi-pallas";
+import { StatusCodes } from "http-status-codes";
 import {
   ERRORS,
   getApiKey,

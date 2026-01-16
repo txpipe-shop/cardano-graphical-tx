@@ -1,4 +1,4 @@
-import { Badge, Button, Link as NextLink } from "@heroui/react";
+import { Button, Link as NextLink } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "~/app/_utils";
@@ -27,16 +27,6 @@ export const Header = () => {
           />
         </Link>
         <div className="flex gap-4">
-          <Badge color="success" content="New">
-            <Button
-              variant="flat"
-              className="p-5 font-mono text-lg shadow-md"
-              as={NextLink}
-              href={ROUTES.EXPLORER}
-            >
-              Explorer
-            </Button>
-          </Badge>
           <Button
             variant="flat"
             className="p-5 font-mono text-lg shadow-md"
@@ -52,6 +42,14 @@ export const Header = () => {
             href={ROUTES.ADDRESS}
           >
             Address
+          </Button>
+          <Button
+            variant="flat"
+            className="p-5 font-mono text-lg shadow-md"
+            as={NextLink}
+            href={ROUTES.EXPLORER}
+          >
+            Explorer
           </Button>
         </div>
       </div>

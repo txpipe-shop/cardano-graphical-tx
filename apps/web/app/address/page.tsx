@@ -1,5 +1,6 @@
 "use client";
 
+import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -14,7 +15,6 @@ import {
 import { useConfigs, useUI } from "~/app/_contexts";
 import { getAddressInfo, isEmpty } from "~/app/_utils";
 import Loading from "~/app/loading";
-import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
 
 export default function Index() {
   const { error, loading, setError } = useUI();

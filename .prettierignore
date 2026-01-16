@@ -4,6 +4,9 @@ pnpm-lock.yaml
 yarn.lock
 bun.lock
 bun.lockb
+**/.next
+**/target
+
 
 # Miscellaneous
 /static/

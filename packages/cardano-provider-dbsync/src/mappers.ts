@@ -117,10 +117,10 @@ export function mapTx(tx: QueryTypes.Tx): cardano.Tx {
     hash: Hash(tx.hash),
     fee: BigInt(tx.fee),
     block: {
-      hash: Hash(tx.block.hash),
-      epochNo: BigInt(tx.block.epochNo),
-      slot: BigInt(tx.block.slot),
-      height: BigInt(tx.block.height)
+      hash: Hash(tx.block.hash || ''),
+      epochNo: BigInt(tx.block.epochNo || 0),
+      slot: BigInt(tx.block.slot || 0),
+      height: BigInt(tx.block.height || 0)
     },
     createdAt: tx.createdAt,
     inputs: tx.inputs.map(mapUtxo),
