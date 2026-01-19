@@ -41,13 +41,6 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     this.utxoRpc = new UtxoRpcClient({ transport });
   }
 
-  async getCBOR({ hash }: TxReq): Promise<string> {
-    const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') });
-    const { cbor } = this.validateTx(txResponse);
-
-    return Buffer.from(cbor).toString('hex');
-  }
-
   async getLatestTx(): Promise<cardano.Tx> {
     const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
     assert(tip.tip, 'Cannot read tip');
@@ -526,11 +519,11 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     };
   }
 
-  private validateTx(tx: query.ReadTxResponse): { cbor: Uint8Array; tx: cardanoUtxoRpc.Tx; block: query.ChainPoint } {
+  private validateTx(tx: query.ReadTxResponse): { tx: cardanoUtxoRpc.Tx; block: query.ChainPoint } {
     assert(tx.tx?.chain.case === 'cardano', 'Transaction is not a Cardano transaction');
     assert(tx.tx.blockRef, 'Block reference of transaction empty');
 
-    return { cbor: tx.tx.nativeBytes, tx: tx.tx.chain.value, block: tx.tx.blockRef };
+    return { tx: tx.tx.chain.value, block: tx.tx.blockRef };
   }
 
   private findTxIndexInBlock(blockBody: cardanoUtxoRpc.BlockBody, tx: cardanoUtxoRpc.Tx): number {
