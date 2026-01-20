@@ -1,33 +1,37 @@
+import { type Utxo } from "@laceanatomy/napi-pallas";
+import type { cardano } from '@laceanatomy/types';
+import { DatumType, Hash, HexString, hexToBech32 } from "@laceanatomy/types";
+import { bech32 } from "bech32";
+import type { Vector2d } from "konva/lib/types";
 import { type Dispatch, type SetStateAction } from "react";
+import toast from "react-hot-toast";
 import type {
+  Address,
   IGraphicalTransaction,
+  IGraphicalUtxo,
   ITransaction,
   TransactionsBox,
   UtxoObject,
 } from "~/app/_interfaces";
 import {
+  defaultPosition,
+  getCborFromHash,
+  getTransaction,
+  getTxFromCbor,
+  getTxFromDevnetCBOR,
+  getUtxo,
+  isEmpty,
+  isHexa,
   KONVA_COLORS,
+  NETWORK,
   OPTIONS,
   POINT_SIZE,
   POLICY_LENGTH,
   TX_HEIGHT,
   TX_WIDTH,
-  UTXO_LINE_GAP,
-  defaultPosition,
-  getCborFromHash,
-  getTransaction,
-  getTxFromCbor,
-  getUtxo,
-  isEmpty,
-  isHexa,
-  type NETWORK,
+  UTXO_LINE_GAP
 } from "~/app/_utils";
-
-import type { Utxo } from "@laceanatomy/napi-pallas";
-import { bech32 } from "bech32";
-import type { Vector2d } from "konva/lib/types";
-import toast from "react-hot-toast";
-import type { Address, IGraphicalUtxo } from "~/app/_interfaces";
+import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface IGenerateUTXO extends Utxo {
   existingTxs: TransactionsBox;
@@ -37,30 +41,37 @@ interface IGenerateUTXO extends Utxo {
 }
 
 /**
- * Given a bech32 address, returns an object with the full address information.
+ * Given an bech32|hex address, returns an object with the full address information.
  *
- * @param address - A string representing an address in bech32 format.
- * @returns - An object containing the bech32 address, the header type, the network type,
+ * @param address - A string representing an address in bech32|hex format.
+ * @returns - An object containing the bech32|hex address, the header type, the network type,
  * the payment part, and the kind of address (key or script).
  */
-const formatAddress = (address: string): Address | undefined => {
+const formatAddress = (address: string, prefix?: string): Address | undefined => {
+  if (isEmpty(address)) return undefined;
+
   let hexAddress = "";
-  if (!isEmpty(address)) {
+  if (isHexa(address)) {
+    hexAddress = address;
+  } else {
     // TODO: Add base58 address decoding for byron addresses
     const result = bech32.decodeUnsafe(address, 108);
     if (!result) return undefined;
     const unwords = bech32.fromWords(result.words);
     hexAddress = Buffer.from(unwords).toString("hex");
   }
-  return isEmpty(address) || !hexAddress[0] || !hexAddress[1]
-    ? undefined
-    : {
-        bech32: address,
-        headerType: hexAddress[0],
-        netType: hexAddress[1],
-        payment: hexAddress.slice(2, POLICY_LENGTH),
-        kind: Number(hexAddress[0]) % 2 === 0 ? "key" : "script",
-      };
+
+  const headerType = hexAddress[0];
+  const netType = hexAddress[1];
+  if (!headerType || !netType) return undefined;
+
+  return {
+    bech32: isHexa(address) && prefix ? hexToBech32(HexString(address), prefix) : address,
+    headerType,
+    netType,
+    payment: hexAddress.slice(2, POLICY_LENGTH),
+    kind: Number(headerType) % 2 === 0 ? "key" : "script",
+  };
 };
 
 const generateGraphicalUTXO = ({
@@ -289,7 +300,134 @@ const setCBORs = async (
   }
 };
 
-export default async function addCBORsToContext(
+export async function addDevnetCBORsToContext(
+  uniqueInputs: string[],
+  setError: Dispatch<SetStateAction<string>>,
+  transactions: TransactionsBox,
+  setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
+  setLoading: Dispatch<SetStateAction<boolean>>,
+) {
+  try {
+    setLoading(true);
+    const u5c = getU5CProviderWeb(/*devnet*/);
+    const existingTxs = new Map<string, { tx: any; cbor: string }>();
+
+    const getTxAndCbor = async (hash: string): Promise<{ tx: cardano.Tx, cbor: string }> => {
+      const exist = existingTxs.get(hash);
+      if (exist) return exist;
+
+      const [tx, cbor] = await Promise.all([
+        u5c.getTx({ hash: Hash(hash) }),
+        u5c.getCBOR({ hash: Hash(hash) }),
+      ]);
+
+      const entry = { tx, cbor };
+      existingTxs.set(hash, entry);
+      return entry;
+    };
+
+    const cborAndTx = await Promise.all(
+      uniqueInputs.map(async (hash) => getTxAndCbor(hash)),
+    );
+
+    console.dir(cborAndTx, { depth: null });
+
+    const parsedTxs: ITransaction[] = await Promise.all(
+      cborAndTx.map(async ({ cbor, tx }) => {
+        const { tx: txResponse } = await getTxFromDevnetCBOR(cbor);
+
+        const buildUtxos = async (ioArray: cardano.UTxO[]) =>
+          Promise.all(
+            ioArray.map(async (i) => {
+              const hash = i.outRef.hash.toString();
+              const { tx: sourceTx, cbor } = await getTxAndCbor(hash);
+              const asOutput = sourceTx.outputs.find(
+                (o) => o.outRef.index === i.outRef.index,
+              );
+
+              return {
+                txHash: hash,
+                index: Number(i.outRef.index),
+                bytes: cbor,
+                address: asOutput?.address || "",
+                lovelace: Number(asOutput?.coin || 0),
+                assets: Object.entries(asOutput?.value || {}).map(
+                  ([unit, amount]) => ({
+                    policyId: unit.slice(0, POLICY_LENGTH),
+                    assetsPolicy: [
+                      {
+                        assetName: unit.slice(POLICY_LENGTH),
+                        assetNameAscii: unit.slice(POLICY_LENGTH),
+                        amount: Number(amount),
+                      },
+                    ],
+                  }),
+                ),
+                datum: asOutput?.datum?.type === DatumType.INLINE ? { bytes: asOutput.datum.datumHex } : undefined,
+                scriptRef: typeof asOutput?.referenceScript === 'string' ? asOutput.referenceScript : undefined,
+              } as Utxo;
+            }),
+          );
+
+        const [inputs, referenceInputs] = await Promise.all([
+          buildUtxos(tx.inputs),
+          buildUtxos(tx.referenceInputs),
+        ]);
+
+        return {
+          ...txResponse,
+          inputs,
+          referenceInputs,
+          blockHash: tx.block.hash,
+          blockHeight: Number(tx.block.height),
+          blockTxIndex: Number(tx.indexInBlock),
+          blockAbsoluteSlot: Number(tx.block.slot),
+        } as ITransaction;
+      })
+    );
+
+    const graphicalTxs = parseTxToGraphical(parsedTxs, transactions);
+    const positionedTxs = setPositions([
+      ...graphicalTxs,
+      ...transactions.transactions,
+    ]);
+
+    let newUtxosObject: UtxoObject = { ...transactions.utxos };
+    let newTransactionsList: IGraphicalTransaction[] = [
+      ...transactions.transactions,
+    ];
+
+    positionedTxs.forEach((tx) => {
+      const newUtxos = [...tx.inputs, ...tx.outputs];
+      const exists = getTransaction(transactions)(tx.txHash);
+
+      if (exists) {
+        // If the transaction already exists, update the position and add the new UTXOs
+        const txIndex = newTransactionsList.findIndex(
+          (txMap) => txMap.txHash === exists.txHash,
+        );
+        if (txIndex !== -1)
+          newTransactionsList[txIndex] = { ...tx, pos: tx.pos };
+      } else {
+        // If the transaction doesn't exist, add it and the new UTXOs
+        newTransactionsList.push(tx);
+      }
+
+      newUtxos.forEach((utxo) => (newUtxosObject[utxo.txHash] = utxo));
+    });
+    setTransactionBox({
+      transactions: newTransactionsList,
+      utxos: newUtxosObject,
+    });
+  } catch (error: Response | any) {
+    console.error(error);
+    setError(error.statusText);
+  } finally {
+    setLoading(false);
+  }
+}
+
+export async function addCBORsToContext(
   option: OPTIONS,
   uniqueInputs: string[],
   net: NETWORK,

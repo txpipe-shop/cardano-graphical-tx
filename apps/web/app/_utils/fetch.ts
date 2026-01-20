@@ -1,4 +1,4 @@
-import type { SafeAddressResponse } from "@laceanatomy/napi-pallas";
+import type { CborResponse, SafeAddressResponse } from "@laceanatomy/napi-pallas";
 import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
 import type { IBlockfrostResponse, ITransaction } from "~/app/_interfaces";
@@ -13,6 +13,8 @@ export const getApiKey = (network: NETWORK): string => {
       return env.PREPROD_BLOCKFROST_KEY;
     case NETWORK.PREVIEW:
       return env.PREVIEW_BLOCKFROST_KEY;
+    case NETWORK.DEVNET:
+      return "";
     default:
       throw new Error("Invalid network provided");
   }
@@ -39,6 +41,27 @@ const parseQuery = (
   });
   return url;
 };
+
+export const getTxFromDevnetCBOR = async (
+  tx: string,
+): Promise<{ tx: CborResponse }> => {
+  try {
+    const formData = new FormData();
+    formData.append("tx", tx);
+
+    const res = await fetch(parseQuery(API_ROUTES.DEVNET_CBOR, {}), {
+      method: "POST",
+      body: formData,
+    });
+
+    if (res.status !== StatusCodes.OK) throw res;
+    const data = await res.json();
+    return data;
+  } catch (err: any) {
+    console.error(err);
+    throw err;
+  };
+}
 
 export const getTxFromCbor = async (
   cbor: string,

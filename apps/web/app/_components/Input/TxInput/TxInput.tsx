@@ -11,11 +11,11 @@ import { useRouter } from "next/navigation";
 import { type ChangeEvent, useEffect, useState } from "react";
 import { Button, Input } from "~/app/_components";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
-import { isEmpty, OPTIONS, ROUTES, USER_CONFIGS } from "~/app/_utils";
+import { isEmpty, NETWORK, OPTIONS, ROUTES, USER_CONFIGS } from "~/app/_utils";
 import MultipleTxIcon from "~/public/multiple-txs.svg";
 import { MultipleInputModal } from "../MultipleInputModal/MultipleInputModal";
 import { NetSelector } from "../NetSelector";
-import addCBORsToContext from "./txInput.helper";
+import { addCBORsToContext, addDevnetCBORsToContext } from "./txInput.helper";
 
 export const TxInput = () => {
   const { transactions, setTransactionBox } = useGraphical();
@@ -37,19 +37,33 @@ export const TxInput = () => {
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!configs.query) return;
+
     router.push(toGo);
     setError("");
+
     const multiplesInputs = configs.query.split(",").map((tx) => tx.trim());
     const uniqueInputs = Array.from(new Set(multiplesInputs));
-    addCBORsToContext(
-      configs.option,
-      uniqueInputs,
-      configs.net,
-      setError,
-      transactions,
-      setTransactionBox,
-      setLoading,
-    );
+
+    if (configs.net === NETWORK.DEVNET) {
+      addDevnetCBORsToContext(
+        uniqueInputs,
+        setError,
+        transactions,
+        setTransactionBox,
+        setLoading,
+      );
+    } else {
+      addCBORsToContext(
+        configs.option,
+        uniqueInputs,
+        configs.net,
+        setError,
+        transactions,
+        setTransactionBox,
+        setLoading,
+      );
+    }
+
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
   }
 

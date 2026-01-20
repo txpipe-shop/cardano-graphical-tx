@@ -13,6 +13,7 @@ export type ROUTES = (typeof ROUTES)[keyof typeof ROUTES];
 
 export const API_ROUTES = {
   CBOR: "api/cbor",
+  DEVNET_CBOR: "api/cbor/devnet",
   HASH: "api/hash",
   ADDRESS: "api/address",
 };
@@ -61,6 +62,7 @@ export const NETWORK = {
   MAINNET: "mainnet",
   PREPROD: "preprod",
   PREVIEW: "preview",
+  DEVNET: "devnet",
 } as const;
 export type NETWORK = (typeof NETWORK)[keyof typeof NETWORK];
 
