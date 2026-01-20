@@ -1,6 +1,6 @@
-import { type Utxo } from "@laceanatomy/napi-pallas";
+import { Asset, Assets, type Utxo } from "@laceanatomy/napi-pallas";
 import type { cardano } from '@laceanatomy/types';
-import { DatumType, Hash, HexString, hexToBech32 } from "@laceanatomy/types";
+import { assetNameFromUnit, Hash, HexString, hexToAscii, hexToBech32, policyFromUnit, Unit } from "@laceanatomy/types";
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
 import { type Dispatch, type SetStateAction } from "react";
@@ -335,48 +335,44 @@ export async function addDevnetCBORsToContext(
       cborAndTx.map(async ({ cbor, tx }) => {
         const { tx: txResponse } = await getTxFromDevnetCBOR(cbor);
 
-        const buildUtxos = async (ioArray: cardano.UTxO[]) =>
-          Promise.all(
-            ioArray.map(async (i) => {
-              const hash = i.outRef.hash.toString();
-              const { tx: sourceTx, cbor } = await getTxAndCbor(hash);
-              const asOutput = sourceTx.outputs.find(
-                (o) => o.outRef.index === i.outRef.index,
-              );
+        const buildUtxo = (inputs: cardano.UTxO[]) => {
+          return inputs.map((i) => {
+            const assets: Assets[] = [];
+            for (const [unit, amount] of Object.entries(i.value)) {
+              const policyId = policyFromUnit(Unit(unit));
+              const assetName = assetNameFromUnit(Unit(unit));
+              const asset: Asset = {
+                assetName,
+                amount: Number(amount),
+                assetNameAscii: hexToAscii(assetName),
+              }
 
-              return {
-                txHash: hash,
-                index: Number(i.outRef.index),
-                bytes: cbor,
-                address: asOutput?.address || "",
-                lovelace: Number(asOutput?.coin || 0),
-                assets: Object.entries(asOutput?.value || {}).map(
-                  ([unit, amount]) => ({
-                    policyId: unit.slice(0, POLICY_LENGTH),
-                    assetsPolicy: [
-                      {
-                        assetName: unit.slice(POLICY_LENGTH),
-                        assetNameAscii: unit.slice(POLICY_LENGTH),
-                        amount: Number(amount),
-                      },
-                    ],
-                  }),
-                ),
-                datum: asOutput?.datum?.type === DatumType.INLINE ? { bytes: asOutput.datum.datumHex } : undefined,
-                scriptRef: typeof asOutput?.referenceScript === 'string' ? asOutput.referenceScript : undefined,
-              } as Utxo;
-            }),
-          );
+              const multiasset = assets.find(a => a.policyId === policyId);
+              if (multiasset) {
+                multiasset.assetsPolicy.push(asset);
+              } else {
+                assets.push({
+                  policyId,
+                  assetsPolicy: [asset],
+                });
+              }
+            }
 
-        const [inputs, referenceInputs] = await Promise.all([
-          buildUtxos(tx.inputs),
-          buildUtxos(tx.referenceInputs),
-        ]);
+            return {
+              txHash: i.outRef.hash,
+              index: Number(i.outRef.index),
+              bytes: "",
+              address: i.address,
+              lovelace: Number(i.coin),
+              assets,
+            };
+          });
+        }
 
         return {
           ...txResponse,
-          inputs,
-          referenceInputs,
+          inputs: buildUtxo(tx.inputs),
+          referenceInputs: buildUtxo(tx.referenceInputs),
           blockHash: tx.block.hash,
           blockHeight: Number(tx.block.height),
           blockTxIndex: Number(tx.indexInBlock),
