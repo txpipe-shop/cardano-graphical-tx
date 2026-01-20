@@ -1,4 +1,4 @@
-import type { BaseChain, Tx, UTxO, Hash, Address, Value } from '@laceanatomy/types';
+import type { Address, BaseChain, Hash, Tx, UTxO, Value } from '@laceanatomy/types';
 
 export type EpochReq = { epochNo: bigint };
 
