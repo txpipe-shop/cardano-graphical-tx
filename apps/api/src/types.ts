@@ -7,6 +7,7 @@ export type BlocksResponse = z.infer<typeof schemas.BlocksResponseSchema>;
 export type Transaction = z.infer<typeof schemas.TransactionSchema>;
 export type TransactionsResponse = z.infer<typeof schemas.TransactionsResponseSchema>;
 export type Address = z.infer<typeof schemas.AddressSchema>;
+export type UTxOsResponse = z.infer<typeof schemas.UTxOsReponseSchema>;
 export type Stats = z.infer<typeof schemas.StatsSchema>;
 export type Token = z.infer<typeof schemas.TokenSchema>;
 export type TokensResponse = z.infer<typeof schemas.TokensResponseSchema>;

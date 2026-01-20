@@ -115,6 +115,11 @@ export const UTXOSchema = z.object({
   slot: z.number()
 });
 
+export const UTxOsReponseSchema = z.object({
+  utxos: z.array(UTXOSchema),
+  pagination: PaginationSchema
+});
+
 export const AddressTransactionSchema = z.object({
   hash: z.string(),
   block_height: z.number(),
@@ -140,8 +145,6 @@ export const AddressSchema = z.object({
   last_seen_slot: z.number().nullable().optional(),
   first_seen_height: z.number().nullable().optional(),
   last_seen_height: z.number().nullable().optional(),
-  utxos: z.array(UTXOSchema).nullable().optional(),
-  transactions: z.array(AddressTransactionSchema),
   tokens: z.array(TokenBalanceSchema)
 });
 
