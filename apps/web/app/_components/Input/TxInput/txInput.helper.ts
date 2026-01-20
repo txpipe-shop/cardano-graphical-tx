@@ -41,7 +41,7 @@ interface IGenerateUTXO extends Utxo {
 }
 
 /**
- * Given an bech32|hex address, returns an object with the full address information.
+ * Given a bech32|hex address, returns an object with the full address information.
  *
  * @param address - A string representing an address in bech32|hex format.
  * @returns - An object containing the bech32|hex address, the header type, the network type,
