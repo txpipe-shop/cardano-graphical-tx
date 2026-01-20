@@ -331,8 +331,6 @@ export async function addDevnetCBORsToContext(
       uniqueInputs.map(async (hash) => getTxAndCbor(hash)),
     );
 
-    console.dir(cborAndTx, { depth: null });
-
     const parsedTxs: ITransaction[] = await Promise.all(
       cborAndTx.map(async ({ cbor, tx }) => {
         const { tx: txResponse } = await getTxFromDevnetCBOR(cbor);
