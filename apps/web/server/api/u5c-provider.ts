@@ -21,10 +21,9 @@ function createTransportNode(
   });
 }
 
-export function getU5CProviderNode(): U5CProvider {
-  // TODO: Change to the correct URL
+export function getU5CProviderNode(port: number): U5CProvider {
   return new U5CProvider({
-    transport: createTransportNode("http://localhost:50051"),
+    transport: createTransportNode(`http://localhost:${port}`),
   });
 }
 
