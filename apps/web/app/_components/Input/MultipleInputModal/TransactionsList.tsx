@@ -14,7 +14,7 @@ import {
 } from "~/app/_utils";
 import TrashRedIcon from "~/public/delete-red.svg";
 import NoContractsIcon from "~/public/no-contract.svg";
-import addCBORsToContext from "../TxInput/txInput.helper";
+import { addCBORsToContext } from "../TxInput/txInput.helper";
 import { type INewTx } from "./multipleInputModal.interface";
 
 export interface TransactionsListProps {

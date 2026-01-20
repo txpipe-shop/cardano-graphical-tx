@@ -11,7 +11,7 @@ import {
   TxExamples,
   USER_CONFIGS,
 } from "~/app/_utils";
-import addCBORsToContext from "./Input/TxInput/txInput.helper";
+import { addCBORsToContext } from "./Input/TxInput/txInput.helper";
 
 export function Examples({
   showTxExamples,
