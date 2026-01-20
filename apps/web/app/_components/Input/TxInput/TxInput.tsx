@@ -46,6 +46,7 @@ export const TxInput = () => {
 
     if (configs.net === NETWORK.DEVNET) {
       addDevnetCBORsToContext(
+        Number(configs.port || "50051"),
         uniqueInputs,
         setError,
         transactions,

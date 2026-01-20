@@ -301,6 +301,7 @@ const setCBORs = async (
 };
 
 export async function addDevnetCBORsToContext(
+  devnetPort: number,
   uniqueInputs: string[],
   setError: Dispatch<SetStateAction<string>>,
   transactions: TransactionsBox,
@@ -309,7 +310,7 @@ export async function addDevnetCBORsToContext(
 ) {
   try {
     setLoading(true);
-    const u5c = getU5CProviderWeb(/*devnet*/);
+    const u5c = getU5CProviderWeb(devnetPort);
     const existingTxs = new Map<string, { tx: any; cbor: string }>();
 
     const getTxAndCbor = async (hash: string): Promise<{ tx: cardano.Tx, cbor: string }> => {
@@ -421,7 +422,11 @@ export async function addDevnetCBORsToContext(
     });
   } catch (error: Response | any) {
     console.error(error);
-    setError(error.statusText);
+    if (error instanceof Error) {
+      setError(error.name === "ConnectError" ? "Could not connect to the devnet" : error.message);
+    } else {
+      setError(error.statusText);
+    }
   } finally {
     setLoading(false);
   }

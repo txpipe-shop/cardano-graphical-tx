@@ -17,8 +17,8 @@ function createTransportWeb(baseUrl: string, headers?: Record<string, string>) {
   });
 }
 
-export function getU5CProviderWeb(): U5CProvider {
+export function getU5CProviderWeb(devnetPort: number): U5CProvider {
   return new U5CProvider({
-    transport: createTransportWeb("http://localhost:50051"),
+    transport: createTransportWeb(`http://localhost:${devnetPort}`),
   });
 }

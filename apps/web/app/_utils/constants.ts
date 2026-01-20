@@ -22,6 +22,7 @@ export const USER_CONFIGS = {
   QUERY: "query",
   OPTION: "option",
   NET: "net",
+  PORT: "port",
 } as const;
 
 export const defaultPosition = { x: 0, y: 0 };
