@@ -165,6 +165,7 @@ export function u5cToCardanoTx(
   time: bigint,
   blockHash: Hash,
   blockHeight: bigint,
+  blockSlot: bigint,
   indexInBlock: number
 ): cardano.Tx {
   const fee = toBigInt(tx.fee?.bigInt.value);
@@ -206,7 +207,7 @@ export function u5cToCardanoTx(
     referenceInputs,
     createdAt: Number(time),
     witnesses: { scripts },
-    block: { hash: blockHash, height: blockHeight, epochNo: 0n, slot: 0n },
+    block: { hash: blockHash, height: blockHeight, epochNo: 0n, slot: blockSlot },
     treasuryDonation: 0n,
     indexInBlock: BigInt(indexInBlock)
   };

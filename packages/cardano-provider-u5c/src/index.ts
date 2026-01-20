@@ -44,7 +44,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
   async getCBOR(params: TxReq): Promise<string> {
     const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(params.hash, 'hex') });
     const { cbor } = this.validateTx(txResponse);
-    
+
     return Buffer.from(cbor).toString('hex');
   }
 
@@ -81,6 +81,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       foundBlock.timestamp,
       blockHash,
       foundHeader.height,
+      foundHeader.slot,
       this.findTxIndexInBlock(foundBody, latestTx)
     );
   }
@@ -169,7 +170,6 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
     const time = block.timestamp;
     const blockHash = Buffer.from(block.hash).toString('hex');
-    const height = block.height;
 
     const { body: fullBlockBody } = await this.fetchBlockByQuery({
       hash: Hash(Buffer.from(block.hash).toString('hex'))
@@ -179,7 +179,8 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       tx,
       time,
       Hash(blockHash),
-      height,
+      block.height,
+      block.slot,
       this.findTxIndexInBlock(fullBlockBody, tx)
     );
   }
@@ -241,6 +242,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
       const blockHash = Hash(Buffer.from(block.header.hash).toString('hex'));
       const blockHeight = block.header.height;
+      const blockSlot = block.header.slot;
       const blockBody = block.body;
 
       return txs.map((tx) =>
@@ -249,6 +251,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
           block.timestamp,
           blockHash,
           blockHeight,
+          blockSlot,
           this.findTxIndexInBlock(blockBody, tx)
         )
       );
@@ -271,14 +274,14 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     const addressHex = query.address;
     const filteredTxs = addressHex
       ? body.tx.filter((tx) => {
-          const addressMatchesInput = tx.inputs.some(
-            (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
-          );
-          const addressMatchesOutput = tx.outputs.some(
-            (output) => Buffer.from(output.address).toString('hex') === addressHex
-          );
-          return addressMatchesInput || addressMatchesOutput;
-        })
+        const addressMatchesInput = tx.inputs.some(
+          (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
+        );
+        const addressMatchesOutput = tx.outputs.some(
+          (output) => Buffer.from(output.address).toString('hex') === addressHex
+        );
+        return addressMatchesInput || addressMatchesOutput;
+      })
       : body.tx;
 
     const paginatedTxs = filteredTxs.reverse().slice(offset, offset + limit);
@@ -290,6 +293,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
         block.timestamp,
         blockHash,
         header.height,
+        header.slot,
         this.findTxIndexInBlock(body, tx)
       )
     );
@@ -403,6 +407,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
           block.timestamp,
           Hash(blockHashHex),
           header.height,
+          header.slot,
           this.findTxIndexInBlock(body, tx)
         )
       );
