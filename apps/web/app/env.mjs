@@ -56,5 +56,5 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
   },
   emptyStringAsUndefined: true,
-  skipValidation: !!process.env.SKIP_VALIDATION,
+  skipValidation: process.env.SKIP_VALIDATION === "1" || process.env.CI === "true",
 });
