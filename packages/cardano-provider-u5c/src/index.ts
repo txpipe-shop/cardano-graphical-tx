@@ -41,6 +41,8 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     this.utxoRpc = new UtxoRpcClient({ transport });
   }
 
+  async getCBOR(params: TxReq): Promise<string> { return ""; }
+
   async getLatestTx(): Promise<cardano.Tx> {
     const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
     assert(tip.tip, 'Cannot read tip');
@@ -264,14 +266,14 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     const addressHex = query.address;
     const filteredTxs = addressHex
       ? body.tx.filter((tx) => {
-          const addressMatchesInput = tx.inputs.some(
-            (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
-          );
-          const addressMatchesOutput = tx.outputs.some(
-            (output) => Buffer.from(output.address).toString('hex') === addressHex
-          );
-          return addressMatchesInput || addressMatchesOutput;
-        })
+        const addressMatchesInput = tx.inputs.some(
+          (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
+        );
+        const addressMatchesOutput = tx.outputs.some(
+          (output) => Buffer.from(output.address).toString('hex') === addressHex
+        );
+        return addressMatchesInput || addressMatchesOutput;
+      })
       : body.tx;
 
     const paginatedTxs = filteredTxs.reverse().slice(offset, offset + limit);

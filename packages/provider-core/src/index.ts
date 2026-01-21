@@ -86,6 +86,7 @@ export type AddressUTxOsRes<U extends UTxO> = PaginatedResult<U>;
 export type EpochRes = Epoch;
 
 export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> {
+  getCBOR(params: TxReq): Promise<string>;
   getLatestTx(): Promise<LatestTxRes<U, T, Chain>>;
   getAddressFunds(params: AddressFundsReq): Promise<AddressFundsRes>;
   getAddressUTxOs(params: AddressUTxOsReq): Promise<AddressUTxOsRes<U>>;
