@@ -14,8 +14,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      SKIP_VALIDATION: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,6 +50,8 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          SKIP_VALIDATION: "1"
 
       - name: Lint
         run: pnpm lint
