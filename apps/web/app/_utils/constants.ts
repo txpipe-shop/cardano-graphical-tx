@@ -2,7 +2,8 @@ import JSONbig from "json-bigint";
 
 export const ROUTES = {
   HOME: "/",
-  EXPLORER: "/explorer",
+  EXPLORER_TXS: "/explorer/txs",
+  EXPLORER_TX: (hash: string) => `/explorer/txs/${hash}`,
   GRAPHER: "/tx/grapher",
   TX: "/tx",
   ADDRESS: "/address",
