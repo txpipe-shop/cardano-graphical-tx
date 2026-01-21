@@ -51,7 +51,7 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
 
       const params = new URLSearchParams(searchParams.toString());
       params.set("chain", selectedKey);
-      router.push(`${ROUTES.EXPLORER}?${params.toString()}`);
+      router.push(`${ROUTES.EXPLORER_TXS}?${params.toString()}`);
     },
     [currentChain, router, searchParams],
   );

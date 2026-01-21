@@ -39,7 +39,7 @@ export default function TxTabs({
   tab: initialTab,
 }: TxTabsProps) {
   const [active, setActive] = useState<Tabs>(initialTab);
-  const { setTransactionBox, transactions, dimensions } = useGraphical();
+  const { setTransactionBox, dimensions } = useGraphical();
 
   // keep tab state in URL so links that open this page with ?tab=Dissect will auto-open
   useEffect(() => {
