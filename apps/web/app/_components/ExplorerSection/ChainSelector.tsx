@@ -2,6 +2,7 @@
 import { Select, SelectItem, type SharedSelection } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import { ROUTES } from "~/app/_utils";
 
 export type ChainNetwork = "mainnet" | "preprod" | "preview" | "vector-mainnet";
 
@@ -50,7 +51,7 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
 
       const params = new URLSearchParams(searchParams.toString());
       params.set("chain", selectedKey);
-      router.push(`/explorer?${params.toString()}`);
+      router.push(`${ROUTES.EXPLORER}?${params.toString()}`);
     },
     [currentChain, router, searchParams],
   );

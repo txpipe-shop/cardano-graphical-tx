@@ -47,7 +47,7 @@ export const Header = () => {
             variant="flat"
             className="p-5 font-mono text-lg shadow-md"
             as={NextLink}
-            href={ROUTES.EXPLORER}
+            href={ROUTES.EXPLORER_TXS}
           >
             Explorer
           </Button>
