@@ -27,27 +27,43 @@ export default function TxCbor({ cbor }: { cbor: string }) {
   }, [cbor]);
 
   return (
-    <Card className="h-full shadow-none border border-default-200">
-      <CardBody className="grid h-full grid-cols-1 gap-4 p-4 md:grid-cols-2">
-        <div className="flex flex-col gap-2">
+    <Card className="h-full min-h-0 border border-default-200 shadow-none">
+      <CardBody className="grid h-full min-h-0 grid-cols-1 gap-4 p-4 md:grid-cols-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="font-medium text-gray-700">Decoded</div>
           <Textarea
             readOnly
             value={decoded}
             placeholder="No decoded CBOR available"
-            minRows={20}
-            className="font-mono text-sm max-h-[600px] overflow-y-auto"
+            minRows={12}
+            disableAutosize
+            classNames={{
+              base: "min-h-0 flex-1",
+              mainWrapper: "min-h-0 flex-1",
+              inputWrapper: "min-h-0 h-full flex-1 items-stretch",
+              innerWrapper: "min-h-0 h-full flex-1",
+              input:
+                "min-h-0 h-full flex-1 resize-none overflow-auto font-mono text-sm",
+            }}
             variant="bordered"
           />
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
           <div className="font-medium text-gray-700">CBOR</div>
           <Textarea
             readOnly
             value={cbor}
             placeholder="CBOR not available"
-            minRows={20}
-            className="font-mono text-sm max-h-[600px] overflow-y-auto"
+            minRows={12}
+            disableAutosize
+            classNames={{
+              base: "min-h-0 flex-1",
+              mainWrapper: "min-h-0 flex-1",
+              inputWrapper: "min-h-0 h-full flex-1 items-stretch",
+              innerWrapper: "min-h-0 h-full flex-1",
+              input:
+                "min-h-0 h-full flex-1 resize-none overflow-auto font-mono text-sm",
+            }}
             variant="bordered"
           />
         </div>

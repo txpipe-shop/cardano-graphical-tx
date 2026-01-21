@@ -42,6 +42,7 @@ export default function TxTabs({
 }: TxTabsProps) {
   const [active, setActive] = useState<Tabs>(initialTab);
   const { setTransactionBox, dimensions } = useGraphical();
+  const shouldFill = active !== "Overview" && active !== "Dissect";
 
   useEffect(() => {
     if (dimensions.width === 0 || dimensions.height === 0) return;
@@ -57,8 +58,8 @@ export default function TxTabs({
   }, [setTransactionBox, dimensions.width, dimensions.height, tx]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2 border-b pb-2">
+    <div className={`flex w-full flex-col ${shouldFill ? "min-h-0 flex-1" : ""} space-y-4`}>
+      <div className="flex flex-shrink-0 gap-2 border-b pb-2">
         {TABS.map((t) => (
           <button
             key={t}
@@ -70,29 +71,43 @@ export default function TxTabs({
         ))}
       </div>
 
-      {active === "Overview" && <TxOverview tx={cardanoTx} />}
+      <div className={`${shouldFill ? "flex flex-1 flex-col min-h-0" : ""}`}>
+        {active === "Overview" && <TxOverview tx={cardanoTx} />}
 
-      {active === "CBOR" && <TxCbor cbor={initialCbor} />}
-
-      {active === "Dissect" && (
-        <div>
-          <DissectSection
-            tx={parseTxToGraphical([tx], { transactions: [], utxos: {} })[0]!}
-          />
-        </div>
-      )}
-
-      {active === "Diagram" && (
-        <div className="relative h-[60vh] w-full overflow-hidden rounded-lg border">
-          <div className="h-full w-full">
-            <Playground fillMode="parent" />
+        {active === "CBOR" && (
+          <div className="flex-1 min-h-0">
+            <TxCbor cbor={initialCbor} />
           </div>
-        </div>
-      )}
+        )}
 
-      {active === "Datum" && <TxDatum tx={cardanoTx} />}
+        {active === "Dissect" && (
+          <div className="overflow-visible">
+            <DissectSection
+              tx={parseTxToGraphical([tx], { transactions: [], utxos: {} })[0]!}
+            />
+          </div>
+        )}
 
-      {active === "Scripts" && <TxScripts tx={cardanoTx} />}
+        {active === "Diagram" && (
+          <div className="relative h-[60vh] w-full overflow-hidden rounded-lg border">
+            <div className="h-full w-full">
+              <Playground fillMode="parent" />
+            </div>
+          </div>
+        )}
+
+        {active === "Datum" && (
+          <div className="flex-1 min-h-0 overflow-auto">
+            <TxDatum tx={cardanoTx} />
+          </div>
+        )}
+
+        {active === "Scripts" && (
+          <div className="flex-1 min-h-0 overflow-auto">
+            <TxScripts tx={cardanoTx} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -61,8 +61,8 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
 
   if (!activeTab) {
     return (
-      <Card className="shadow-none border border-default-200">
-        <CardBody className="text-center text-gray-400 text-sm py-8">
+      <Card className="h-full min-h-0 border border-default-200 shadow-none">
+        <CardBody className="py-8 text-center text-sm text-gray-400">
           No inputs or outputs with datum in this transaction.
         </CardBody>
       </Card>
@@ -70,10 +70,10 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
   }
 
   return (
-    <Card className="shadow-none border border-default-200">
-      <CardBody className="flex flex-col md:flex-row gap-6 p-6">
+    <Card className="h-full min-h-0 border border-default-200 shadow-none">
+      <CardBody className="flex h-full min-h-0 flex-col gap-6 p-6 md:flex-row">
         {/* Sidebar Tabs */}
-        <div className="flex flex-col gap-4 min-w-[200px] border-r pr-4">
+        <div className="flex min-w-[200px] flex-col gap-4 border-r pr-4">
           {inputsWithDatum.length > 0 && (
             <div className="flex flex-col gap-2">
               <div className="font-bold text-sm text-gray-500 uppercase tracking-wider">
@@ -126,7 +126,7 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 space-y-6">
+        <div className="flex min-h-0 flex-1 flex-col space-y-6 overflow-auto">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-gray-700">Datum Type:</span>
             <span className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
@@ -139,7 +139,7 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
               <div className="font-semibold text-gray-700 mb-2">
                 Datum Hash:
               </div>
-              <Code className="w-full whitespace-pre-wrap break-all p-4 block">
+              <Code className="block w-full whitespace-pre-wrap break-all p-4">
                 {activeTab.datum.datumHashHex ?? "No hash"}
                 <div className="mt-2 inline-block">
                   <CopyButton
@@ -157,7 +157,7 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
                 <div className="font-semibold text-gray-700 mb-2">
                   INLINE DATUM (Hex):
                 </div>
-                <Code className="w-full whitespace-pre-wrap break-all p-4 block bg-gray-50">
+                <Code className="block w-full whitespace-pre-wrap break-all bg-gray-50 p-4">
                   {activeTab.datum.datumHex ?? "No CBOR"}
                 </Code>
               </div>
@@ -166,7 +166,7 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
                 <div className="font-semibold text-gray-700 mb-2">
                   Diagnostic:
                 </div>
-                <Code className="w-full whitespace-pre-wrap p-4 block bg-gray-50 max-h-[400px] overflow-y-auto">
+                <Code className="block max-h-[400px] w-full overflow-y-auto whitespace-pre-wrap bg-gray-50 p-4">
                   {diagnostic}
                 </Code>
               </div>

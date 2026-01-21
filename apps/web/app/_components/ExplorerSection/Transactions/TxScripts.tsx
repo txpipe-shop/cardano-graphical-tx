@@ -56,7 +56,7 @@ export default function TxScripts({ tx }: { tx: cardano.Tx }) {
 
   if (!activeRedeemer) {
     return (
-      <Card className="shadow-none border border-default-200">
+      <Card className="h-full min-h-0 border border-default-200 shadow-none">
         <CardBody className="py-8 text-center text-sm text-gray-400">
           No scripts on this transaction.
         </CardBody>
@@ -65,8 +65,8 @@ export default function TxScripts({ tx }: { tx: cardano.Tx }) {
   }
 
   return (
-    <Card className="shadow-none border border-default-200">
-      <CardBody className="flex flex-col gap-6 p-6 md:flex-row">
+    <Card className="h-full min-h-0 border border-default-200 shadow-none">
+      <CardBody className="flex h-full min-h-0 flex-col gap-6 p-6 md:flex-row">
         <div className="flex min-w-[200px] flex-col gap-2 border-r pr-4">
           <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
             Redeemers
@@ -90,7 +90,7 @@ export default function TxScripts({ tx }: { tx: cardano.Tx }) {
           })}
         </div>
 
-        <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-auto content-start items-start md:grid-cols-2 lg:grid-cols-3">
           <DetailItem
             label="Script Hash"
             value={formatHash(activeRedeemer.scriptHash)}
