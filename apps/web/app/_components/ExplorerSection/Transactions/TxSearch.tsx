@@ -3,6 +3,7 @@
 import { Button, Input } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ROUTES } from "~/app/_utils";
 
 interface TxSearchProps {
   chain: string;
@@ -16,8 +17,7 @@ export function TxSearch({ chain }: TxSearchProps) {
     const trimmedHash = txHash.trim();
     if (trimmedHash.length === 0) return;
 
-    // TODO: redirect to the actual single tx page
-    router.push(`/tx/dissect?tx=${trimmedHash}&chain=${chain}`);
+    router.push(`${ROUTES.EXPLORER_TX(txHash)}?chain=${chain}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

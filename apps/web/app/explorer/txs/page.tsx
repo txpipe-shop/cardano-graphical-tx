@@ -17,7 +17,7 @@ interface ExplorerPageProps {
   searchParams: Promise<{ chain?: string; page?: string }>;
 }
 
-const PAGE_SIZE = 500n;
+const PAGE_SIZE = 10n;
 
 async function TransactionsList({
   chain,

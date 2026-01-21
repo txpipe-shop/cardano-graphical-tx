@@ -11,7 +11,9 @@ import {
   setITransaction,
 } from "../../Input/TxInput/txInput.helper";
 import { type ChainNetwork } from "../ChainSelector";
-import { TxRow } from "./TxRow";
+import TxCbor from "./TxCbor";
+import TxDatum from "./TxDatum";
+import TxOverview from "./TxOverview";
 
 const TABS = [
   "Overview",
@@ -40,16 +42,6 @@ export default function TxTabs({
   const [active, setActive] = useState<Tabs>(initialTab);
   const { setTransactionBox, dimensions } = useGraphical();
 
-  // keep tab state in URL so links that open this page with ?tab=Dissect will auto-open
-  useEffect(() => {
-    try {
-      const url = new URL(window.location.href);
-      if (active) url.searchParams.set("tab", active);
-      else url.searchParams.delete("tab");
-      window.history.replaceState({}, "", url.toString());
-    } catch {}
-  }, [active]);
-
   useEffect(() => {
     if (dimensions.width === 0 || dimensions.height === 0) return;
 
@@ -77,13 +69,9 @@ export default function TxTabs({
         ))}
       </div>
 
-      {active === "Overview" && <TxRow tx={cardanoTx} chain={chain} />}
+      {active === "Overview" && <TxOverview tx={cardanoTx} />}
 
-      {active === "CBOR" && (
-        <pre className="rounded-lg bg-gray-100 p-4 overflow-auto text-sm">
-          {initialCbor ?? "CBOR not available"}
-        </pre>
-      )}
+      {active === "CBOR" && <TxCbor cbor={initialCbor} />}
 
       {active === "Dissect" && (
         <div>
@@ -101,11 +89,8 @@ export default function TxTabs({
         </div>
       )}
 
-      {active === "Datum" && (
-        <div className="text-sm text-gray-500">
-          Datum view (not implemented server-side)
-        </div>
-      )}
+      {active === "Datum" && <TxDatum tx={cardanoTx} />}
+
       {active === "Scripts" && (
         <div className="text-sm text-gray-500">
           Scripts view (not implemented server-side)
