@@ -6,7 +6,6 @@ import { useGraphical } from "~/app/_contexts";
 import { type ITransaction } from "~/app/_interfaces";
 import { DissectSection } from "../../DissectSection/DissectSection";
 import { Playground } from "../../GraphicalSection";
-import { InfoPanel, TxInfo, UtxoInfo } from "../../GraphicalSection/InfoPanel";
 import {
   parseTxToGraphical,
   setITransaction,
@@ -98,14 +97,6 @@ export default function TxTabs({
         <div className="relative h-[60vh] w-full overflow-hidden rounded-lg border">
           <div className="h-full w-full">
             <Playground fillMode="parent" />
-          </div>
-          <div className="absolute inset-0">
-            <InfoPanel isVisible={false} from="left" title="TX Information">
-              <TxInfo />
-            </InfoPanel>
-            <InfoPanel isVisible={false} from="right" title="UTXO Information">
-              <UtxoInfo />
-            </InfoPanel>
           </div>
         </div>
       )}

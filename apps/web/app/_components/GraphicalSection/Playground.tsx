@@ -195,7 +195,7 @@ export function Playground({ fillMode = "window" }: PlaygroundProps) {
       ref={containerRef}
       className={
         fillMode === "parent"
-          ? "h-full w-full border-2 border-dashed border-black"
+          ? "h-full w-full border-2 border-dashed border-gray-300 overflow-clip"
           : ""
       }
     >
