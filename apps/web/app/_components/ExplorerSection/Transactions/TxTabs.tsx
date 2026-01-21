@@ -14,6 +14,7 @@ import { type ChainNetwork } from "../ChainSelector";
 import TxCbor from "./TxCbor";
 import TxDatum from "./TxDatum";
 import TxOverview from "./TxOverview";
+import TxScripts from "./TxScripts";
 
 const TABS = [
   "Overview",
@@ -91,11 +92,7 @@ export default function TxTabs({
 
       {active === "Datum" && <TxDatum tx={cardanoTx} />}
 
-      {active === "Scripts" && (
-        <div className="text-sm text-gray-500">
-          Scripts view (not implemented server-side)
-        </div>
-      )}
+      {active === "Scripts" && <TxScripts tx={cardanoTx} />}
     </div>
   );
 }
