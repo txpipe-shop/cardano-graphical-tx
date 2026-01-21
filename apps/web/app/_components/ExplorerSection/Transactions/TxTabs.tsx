@@ -61,7 +61,7 @@ export default function TxTabs({
         {TABS.map((t) => (
           <button
             key={t}
-            className={`px-3 py-1 rounded ${active === t ? "bg-violet-400 text-white" : "border"}`}
+            className={`px-3 py-1 rounded hover:bg-violet-400 hover:text-white ${active === t ? "bg-violet-500 text-white" : "border"}`}
             onClick={() => setActive(t)}
           >
             {t}
