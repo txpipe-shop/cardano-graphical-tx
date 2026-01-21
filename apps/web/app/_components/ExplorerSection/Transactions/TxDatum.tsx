@@ -92,7 +92,7 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
                     className="justify-start font-mono text-xs"
                     onPress={() => setActiveTab(item)}
                   >
-                    {item.ref.hash.slice(0, 10)}...#{item.ref.index}
+                    {item.ref.hash.slice(0, 10)}...#{item.ref.index.toString()}
                   </Button>
                 );
               })}
@@ -110,14 +110,14 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
                   activeTab.ref.index === item.ref.index;
                 return (
                   <Button
-                    key={`${item.ref.hash}#${item.ref.index}`}
+                    key={`${item.ref.hash}#${item.ref.index.toString()}`}
                     size="sm"
                     variant={isActive ? "solid" : "ghost"}
                     color={isActive ? "primary" : "default"}
                     className="justify-start font-mono text-xs"
                     onPress={() => setActiveTab(item)}
                   >
-                    {item.ref.hash.slice(0, 10)}...#{item.ref.index}
+                    {item.ref.hash.slice(0, 10)}...#{item.ref.index.toString()}
                   </Button>
                 );
               })}
