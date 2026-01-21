@@ -41,7 +41,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     this.utxoRpc = new UtxoRpcClient({ transport });
   }
 
-  async getCBOR(params: TxReq): Promise<string> { return ""; }
+  async getCBOR(params: TxReq): Promise<string> { return "TODO"; }
 
   async getLatestTx(): Promise<cardano.Tx> {
     const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
