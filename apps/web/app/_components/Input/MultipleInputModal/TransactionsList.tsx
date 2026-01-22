@@ -1,4 +1,5 @@
 import { Button, Input } from "@heroui/react";
+import { Hash } from "@laceanatomy/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type Dispatch, type SetStateAction } from "react";
@@ -13,6 +14,7 @@ import {
   OPTIONS,
   ROUTES,
 } from "~/app/_utils";
+import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 import TrashRedIcon from "~/public/delete-red.svg";
 import NoContractsIcon from "~/public/no-contract.svg";
 import {
@@ -82,9 +84,15 @@ export const TransactionsList = ({
       );
 
       if (configs.net === NETWORK.DEVNET) {
+        const u5c = getU5CProviderWeb(Number(configs.port));
+        const hashesPromises = newHashes.map((hash) =>
+          u5c.getCBOR({ hash: Hash(hash.value) }),
+        );
+        const cbors = await Promise.all(hashesPromises);
         addDevnetCBORsToContext(
+          OPTIONS.CBOR,
           Number(configs.port),
-          [...newCbors, ...newHashes.map((h) => h.value)],
+          [...newCbors, ...cbors],
           setError,
           transactions,
           setTransactionBox,

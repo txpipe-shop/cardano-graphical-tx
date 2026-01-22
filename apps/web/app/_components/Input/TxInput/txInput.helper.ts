@@ -1,4 +1,4 @@
-import { CborResponse, type Asset, type Assets, type Utxo } from "@laceanatomy/napi-pallas";
+import { type Asset, type Assets, type CborResponse, type Utxo } from "@laceanatomy/napi-pallas";
 import type { cardano } from "@laceanatomy/types";
 import {
   assetNameFromUnit,

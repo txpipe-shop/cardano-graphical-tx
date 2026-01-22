@@ -96,7 +96,7 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
         clearTimeout(timeoutId);
       };
     }
-  }, [configs.port, configs.net]);
+  }, [configs.port, configs.net, setError]);
 
   return (
     <Popover
