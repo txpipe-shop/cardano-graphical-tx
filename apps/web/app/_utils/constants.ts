@@ -85,6 +85,8 @@ export const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
   hour12: false,
 };
 
+export const DEFAULT_DEVNET_PORT = "5164";
+
 export const TX_URL_PARAM = "tx";
 export const UTXO_URL_PARAM = "utxo";
 

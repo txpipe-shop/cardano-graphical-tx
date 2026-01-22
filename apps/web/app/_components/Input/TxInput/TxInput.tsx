@@ -20,7 +20,7 @@ import { addCBORsToContext, addDevnetCBORsToContext } from "./txInput.helper";
 export const TxInput = () => {
   const { transactions, setTransactionBox, dimensions } = useGraphical();
   const router = useRouter();
-  const { setError, setLoading } = useUI();
+  const { error, setError, setLoading } = useUI();
   const { configs, updateConfigs } = useConfigs();
   const [toGo, setToGo] = useState<string>("");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -47,6 +47,7 @@ export const TxInput = () => {
     const size = { x: dimensions.width, y: dimensions.height };
     if (configs.net === NETWORK.DEVNET) {
       addDevnetCBORsToContext(
+        configs.option,
         Number(configs.port),
         uniqueInputs,
         setError,
@@ -119,10 +120,10 @@ export const TxInput = () => {
           </NextButton>
         </abbr>
         <MultipleInputModal isOpen={isOpen} onOpenChange={onOpenChange} />
-        <Button type="submit" onClick={changeGoTo(ROUTES.GRAPHER)}>
+        <Button type="submit" onClick={changeGoTo(ROUTES.GRAPHER)} disabled={error !== ""}>
           Draw
         </Button>
-        <Button type="submit" onClick={changeGoTo(ROUTES.DISSECT)}>
+        <Button type="submit" onClick={changeGoTo(ROUTES.DISSECT)} disabled={error !== ""} >
           Dissect
         </Button>
       </form>

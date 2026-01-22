@@ -1,7 +1,8 @@
-import { type Asset, type Assets, type Utxo } from "@laceanatomy/napi-pallas";
+import { CborResponse, type Asset, type Assets, type Utxo } from "@laceanatomy/napi-pallas";
 import type { cardano } from "@laceanatomy/types";
 import {
   assetNameFromUnit,
+  DatumType,
   Hash,
   HexString,
   hexToAscii,
@@ -31,13 +32,13 @@ import {
   isEmpty,
   isHexa,
   KONVA_COLORS,
-  type NETWORK,
   OPTIONS,
   POINT_SIZE,
   POLICY_LENGTH,
   TX_HEIGHT,
   TX_WIDTH,
   UTXO_LINE_GAP,
+  type NETWORK,
 } from "~/app/_utils";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
@@ -371,6 +372,7 @@ const setCBORs = async (
 };
 
 export async function addDevnetCBORsToContext(
+  option: OPTIONS,
   devnetPort: number,
   uniqueInputs: string[],
   setError: Dispatch<SetStateAction<string>>,
@@ -400,13 +402,29 @@ export async function addDevnetCBORsToContext(
       return entry;
     };
 
-    const cborAndTx = await Promise.all(
-      uniqueInputs.map(async (hash) => getTxAndCbor(hash)),
-    );
+    const cborAndTx: { cbor: string; tx: cardano.Tx, cborParsed?: CborResponse }[] = [];
+    if (option === OPTIONS.CBOR) {
+      const incompleteTxs = await Promise.all(uniqueInputs.map(async (cbor) => {
+        const { tx } = await getTxFromDevnetCBOR(cbor);
+        return { tx, cbor }
+      }));
+
+      const completedTxs = await Promise.all(
+        incompleteTxs.map(async ({ tx, cbor }) => {
+          const fullTx = await u5c.getTx({ hash: Hash(tx.txHash) });
+          return { cbor, tx: fullTx, cborParsed: tx };
+        })
+      );
+      cborAndTx.push(...completedTxs);
+    } else {
+      cborAndTx.push(...await Promise.all(
+        uniqueInputs.map(async (hash) => getTxAndCbor(hash)),
+      ));
+    }
 
     const parsedTxs: ITransaction[] = await Promise.all(
-      cborAndTx.map(async ({ cbor, tx }) => {
-        const { tx: txResponse } = await getTxFromDevnetCBOR(cbor);
+      cborAndTx.map(async ({ cbor, tx, cborParsed }) => {
+        const txResponse = cborParsed ? cborParsed : (await getTxFromDevnetCBOR(cbor)).tx;
 
         const buildUtxo = (inputs: cardano.UTxO[]) => {
           return inputs.map((i) => {
@@ -438,6 +456,10 @@ export async function addDevnetCBORsToContext(
               address: i.address,
               lovelace: Number(i.coin),
               assets,
+              datum: i.datum && i.datum.type === DatumType.INLINE ? {
+                bytes: i.datum.datumHex,
+              } : undefined,
+              scriptRef: i.referenceScript?.bytes
             };
           });
         };

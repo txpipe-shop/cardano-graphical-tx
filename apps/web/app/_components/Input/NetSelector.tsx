@@ -5,8 +5,10 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from "@heroui/react";
-import { useConfigs } from "~/app/_contexts";
-import { NETWORK, USER_CONFIGS } from "~/app/_utils";
+import { useEffect, useState } from "react";
+import { useConfigs, useUI } from "~/app/_contexts";
+import { DEFAULT_DEVNET_PORT, NETWORK, USER_CONFIGS } from "~/app/_utils";
+import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface NetSelectorProps {
   network: NETWORK;
@@ -46,8 +48,10 @@ const PortInput = ({ port, onPortChange }: PortInputProps) => {
 };
 
 export const NetSelector = ({ network }: NetSelectorProps) => {
+  const [netStatus, setNetStatus] = useState<"success" | "danger" | "warning">("success");
   const { configs, updateConfigs } = useConfigs();
   const { isOpen, onClose, onOpenChange } = useDisclosure();
+  const { setError } = useUI();
 
   const handleClick = (network: NETWORK) => () => {
     updateConfigs(USER_CONFIGS.NET, network);
@@ -55,8 +59,44 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
   };
 
   const handlePortChange = (port: string) => {
+    setNetStatus("warning");
     updateConfigs(USER_CONFIGS.PORT, port);
   };
+
+  useEffect(() => {
+    setError("");
+    if (configs.net !== NETWORK.DEVNET) {
+      setNetStatus("success");
+    } else {
+      const port = configs.port || DEFAULT_DEVNET_PORT;
+      setNetStatus("warning");
+
+      const timeoutId = setTimeout(() => {
+        if (!port || port === "") {
+          setNetStatus("danger");
+          return;
+        }
+
+        const portNumber = parseInt(port, 10);
+        if (isNaN(portNumber) || portNumber <= 0 || portNumber > 65535) {
+          setNetStatus("danger");
+          return;
+        }
+
+        const u5c = getU5CProviderWeb(portNumber);
+        u5c.readTip().then(() => {
+          setNetStatus("success");
+        }).catch(() => {
+          setNetStatus("danger");
+          setError("Failed to connect to the devnet");
+        });
+      }, 1000);
+
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [configs.port, configs.net]);
 
   return (
     <Popover
@@ -69,7 +109,7 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
       <PopoverTrigger>
         <Chip
           variant="dot"
-          color="success"
+          color={netStatus}
           size="lg"
           classNames={{
             base: "py-0 flex items-center overflow-clip cursor-pointer",
@@ -78,7 +118,7 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
           endContent={
             configs.net === NETWORK.DEVNET ? (
               <PortInput
-                port={configs.port || "50051"}
+                port={configs.port || DEFAULT_DEVNET_PORT}
                 onPortChange={handlePortChange}
               />
             ) : null
