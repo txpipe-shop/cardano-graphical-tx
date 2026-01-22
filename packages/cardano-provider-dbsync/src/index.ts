@@ -24,7 +24,7 @@ import type { Pool, PoolClient } from 'pg';
 import { mapTx, mapUtxo } from './mappers';
 import { SQLQuery } from './sql';
 import type * as QueryTypes from './types/queries';
-import { downloadBlock, cborParseBlock } from '@laceanatomy/napi-pallas';
+import { cborParseBlock, downloadBlock } from '@laceanatomy/napi-pallas';
 import assert from 'assert';
 
 export type DbSyncParams = {

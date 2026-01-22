@@ -5,6 +5,7 @@ import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
 import { Hash } from '@laceanatomy/types';
 import { BlockMetadata } from '@laceanatomy/provider-core';
 import { mapTx } from './common';
+import { env } from '../env';
 
 function mapBlock(block: BlockMetadata, timeAgo: TimeAgo): BlockSchema {
   const date = new Date(block.time * 1000);
@@ -33,7 +34,12 @@ export async function listBlocks(
   pool: Pool,
   timeAgo: TimeAgo
 ): Promise<BlocksResponse> {
-  const provider = new DbSyncProvider({ pool, addrPrefix: 'addr' });
+  const provider = new DbSyncProvider({
+    pool,
+    addrPrefix: 'addr',
+    magic: env.MAGIC,
+    nodeUrl: env.NODE_URL
+  });
 
   const { data: blocks, total } = await provider.getBlocks({
     limit: BigInt(limit),
@@ -60,7 +66,12 @@ export async function resolveBlock(
   pool: Pool,
   timeAgo: TimeAgo
 ): Promise<BlockSchema> {
-  const provider = new DbSyncProvider({ pool, addrPrefix: 'addr' });
+  const provider = new DbSyncProvider({
+    pool,
+    addrPrefix: 'addr',
+    magic: env.MAGIC,
+    nodeUrl: env.NODE_URL
+  });
 
   const query = typeof id === 'string' ? { hash: Hash(id) } : { height: BigInt(id) };
   const block = await provider.getBlock(query);
@@ -73,7 +84,12 @@ export async function resolveBlockTxs(
   offset: bigint,
   pool: Pool
 ): Promise<{ transactions: TransactionSchema[] }> {
-  const provider = new DbSyncProvider({ pool, addrPrefix: 'addr' });
+  const provider = new DbSyncProvider({
+    pool,
+    addrPrefix: 'addr',
+    magic: env.MAGIC,
+    nodeUrl: env.NODE_URL
+  });
 
   const query = typeof id === 'string' ? { hash: Hash(id) } : { height: BigInt(id) };
 

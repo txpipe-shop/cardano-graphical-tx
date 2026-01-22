@@ -11,9 +11,15 @@ import {
   Unit
 } from '@laceanatomy/types';
 import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
+import { env } from '../env';
 
 export async function resolveAddress(rawAddress: string, pool: Pool): Promise<AddressSchema> {
-  const provider = new DbSyncProvider({ pool, addrPrefix: 'addr' });
+  const provider = new DbSyncProvider({
+    pool,
+    addrPrefix: 'addr',
+    nodeUrl: env.NODE_URL,
+    magic: env.MAGIC
+  });
   const address = Address(rawAddress);
 
   const funds = await provider.getAddressFunds({ address });
