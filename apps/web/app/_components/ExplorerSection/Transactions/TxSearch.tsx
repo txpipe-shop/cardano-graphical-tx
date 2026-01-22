@@ -4,9 +4,10 @@ import { Button, Input } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ROUTES } from "~/app/_utils";
+import { type ChainNetwork } from "../ChainSelector";
 
 interface TxSearchProps {
-  chain: string;
+  chain: ChainNetwork;
 }
 
 export function TxSearch({ chain }: TxSearchProps) {
@@ -17,7 +18,7 @@ export function TxSearch({ chain }: TxSearchProps) {
     const trimmedHash = txHash.trim();
     if (trimmedHash.length === 0) return;
 
-    router.push(`${ROUTES.EXPLORER_TX(txHash)}?chain=${chain}`);
+    router.push(ROUTES.EXPLORER_TX(chain, txHash));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

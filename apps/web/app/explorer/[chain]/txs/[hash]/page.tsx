@@ -6,14 +6,26 @@ import { type ChainNetwork, isValidChain } from "~/server/api/dbsync-provider";
 import { loadPageData } from "./_utils";
 
 interface Props {
-  params: { hash: string };
-  searchParams?: { chain?: string; datumTab?: string };
+  params: { chain: string; hash: string };
+  searchParams?: { tab?: string; datumTab?: string };
+}
+
+const TABS = ["Overview", "Diagram", "Dissect", "CBOR", "Datum", "Scripts"] as const;
+type TxTab = (typeof TABS)[number];
+
+function resolveTab(tab?: string): TxTab {
+  if (!tab) return "Overview";
+  const normalized = tab.toLowerCase();
+  const match = TABS.find((candidate) => candidate.toLowerCase() === normalized);
+  return match ?? "Overview";
 }
 
 export default async function TxPage({ params, searchParams }: Props) {
   const hash = params.hash;
-  const chainParam = (searchParams?.chain as string) || "mainnet";
+  const chainParam = params.chain || "mainnet";
   const chain: ChainNetwork = isValidChain(chainParam) ? chainParam : "mainnet";
+  const tabParam = searchParams?.tab ?? searchParams?.datumTab;
+  const tab = resolveTab(tabParam);
 
   try {
     const { cardanoTx, cbor, tx } = await loadPageData({
@@ -36,8 +48,7 @@ export default async function TxPage({ params, searchParams }: Props) {
               cbor={cbor}
               tx={tx}
               chain={chain}
-              // TODO: load initialTab from URL
-              tab="Overview"
+              tab={tab}
             />
           </div>
         </main>

@@ -28,7 +28,7 @@ export default function TokenPill({ unit, amount, mint }: TokenPillProps) {
   const rawPolicy = String(policyFromUnit(unit));
   const rawName = String(assetNameFromUnit(unit));
   const displayUnit = unit === "lovelace" ? unit : `0x${unit}`;
-  const displayName = rawName === "" ? "" : `0x${rawName}`;
+  const displayName = Buffer.from(rawName, "hex").toString("ascii");
 
   const stateClasses = {
     mint: "border-green-200 bg-green-50 text-green-700",
@@ -37,61 +37,57 @@ export default function TokenPill({ unit, amount, mint }: TokenPillProps) {
   };
 
   return (
-    <div
-      className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs shadow-sm transition-colors ${stateClasses[state]}`}
-    >
-      <span className="font-semibold">{displayName}</span>
-      <span className="font-mono text-[11px] opacity-90">{String(amount)}</span>
-      <div className="flex items-center gap-1 text-[10px] text-gray-500">
-        <Tooltip content={displayUnit} placement="bottom" delay={150}>
-          <span
-            className="max-w-[140px] truncate font-mono"
-            title={displayUnit}
+    <Tooltip content={displayUnit} placement="top" delay={150}>
+      <div
+        className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs shadow-sm transition-colors ${stateClasses[state]}`}
+      >
+        <span className="font-semibold">{displayName}</span>
+        <span className="font-mono text-[11px] opacity-90">
+          {String(amount)}
+        </span>
+        <div className="flex items-center gap-1 text-[10px] text-gray-500">
+          <Popover
+            placement="bottom-end"
+            isOpen={menuOpen}
+            onOpenChange={setMenuOpen}
           >
-            {displayUnit}
-          </span>
-        </Tooltip>
-        <Popover
-          placement="bottom-end"
-          isOpen={menuOpen}
-          onOpenChange={setMenuOpen}
-        >
-          <PopoverTrigger>
-            <button
-              type="button"
-              aria-label="Copy options"
-              className="ml-1 rounded-full p-1 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
-            >
-              <DotsIcon />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="p-0">
-            <Listbox
-              aria-label="Token copy options"
-              selectionMode="single"
-              onAction={(key) => {
-                const policy = rawPolicy;
-                const name = rawName;
-                const map: Record<string, string> = {
-                  unit: String(unit),
-                  policy,
-                  name,
-                };
-                const value = map[key as string];
-                if (value !== undefined && navigator?.clipboard?.writeText) {
-                  navigator.clipboard.writeText(value);
-                }
-                setMenuOpen(false);
-              }}
-            >
-              <ListboxItem key="unit">Copy unit</ListboxItem>
-              <ListboxItem key="policy">Copy policy</ListboxItem>
-              <ListboxItem key="name">Copy name</ListboxItem>
-            </Listbox>
-          </PopoverContent>
-        </Popover>
+            <PopoverTrigger>
+              <button
+                type="button"
+                aria-label="Copy options"
+                className="ml-1 rounded-full p-1 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+              >
+                <DotsIcon />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0">
+              <Listbox
+                aria-label="Token copy options"
+                selectionMode="single"
+                onAction={(key) => {
+                  const policy = rawPolicy;
+                  const name = rawName;
+                  const map: Record<string, string> = {
+                    unit: String(unit),
+                    policy,
+                    name,
+                  };
+                  const value = map[key as string];
+                  if (value !== undefined && navigator?.clipboard?.writeText) {
+                    navigator.clipboard.writeText(value);
+                  }
+                  setMenuOpen(false);
+                }}
+              >
+                <ListboxItem key="unit">Copy unit</ListboxItem>
+                <ListboxItem key="policy">Copy policy</ListboxItem>
+                <ListboxItem key="name">Copy name</ListboxItem>
+              </Listbox>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
-    </div>
+    </Tooltip>
   );
 }
 

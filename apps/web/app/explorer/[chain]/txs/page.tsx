@@ -12,9 +12,11 @@ import {
   isValidChain,
   type ChainNetwork,
 } from "~/server/api/dbsync-provider";
+import { ROUTES } from "~/app/_utils";
 
 interface ExplorerPageProps {
-  searchParams: Promise<{ chain?: string; page?: string }>;
+  params: { chain: string };
+  searchParams: { page?: string };
 }
 
 const PAGE_SIZE = 10n;
@@ -43,6 +45,7 @@ async function TransactionsList({
       <div className="space-y-4">
         <TxTable transactions={result.data} chain={chain} />
         <Pagination
+          basePath={ROUTES.EXPLORER_TXS(chain)}
           currentPage={currentPage}
           totalPages={Math.max(totalPages, 1)}
         />
@@ -62,12 +65,12 @@ async function TransactionsList({
 }
 
 export default async function ExplorerTxsPage({
+  params,
   searchParams,
 }: ExplorerPageProps) {
-  const params = await searchParams;
   const chainParam = params.chain || "mainnet";
   const chain: ChainNetwork = isValidChain(chainParam) ? chainParam : "mainnet";
-  const pageParam = Number.parseInt(params.page ?? "1", 10);
+  const pageParam = Number.parseInt(searchParams.page ?? "1", 10);
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
   return (

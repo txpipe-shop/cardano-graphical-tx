@@ -3,16 +3,17 @@
 import { Button } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { ROUTES } from "~/app/_utils";
 
 export interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
+  basePath: string;
 }
 
 export default function Pagination({
   currentPage,
   totalPages,
+  basePath,
 }: PaginationControlsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,9 +44,7 @@ export default function Pagination({
     }
 
     const query = params.toString();
-    router.push(
-      query ? `${ROUTES.EXPLORER_TXS}?${query}` : ROUTES.EXPLORER_TXS,
-    );
+    router.push(query ? `${basePath}?${query}` : basePath);
   };
 
   return (

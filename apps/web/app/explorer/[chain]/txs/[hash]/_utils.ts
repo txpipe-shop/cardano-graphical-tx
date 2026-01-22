@@ -17,6 +17,7 @@ import {
 } from "@laceanatomy/types";
 import assert from "assert";
 import { type ITransaction } from "~/app/_interfaces";
+import { isHexa } from "~/app/_utils";
 import {
   type ChainNetwork,
   getDbSyncProvider,
@@ -46,7 +47,9 @@ function providerToPreGraphicalUTxO(cUtxo: cardano.UTxO): Utxo {
   }
 
   return {
-    address: hexToBech32(HexString(cUtxo.address), "addr"),
+    address: isHexa(cUtxo.address)
+      ? hexToBech32(HexString(cUtxo.address), "addr")
+      : cUtxo.address,
     txHash: cUtxo.outRef.hash,
     assets,
     bytes: "",

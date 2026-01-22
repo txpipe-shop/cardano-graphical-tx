@@ -45,6 +45,10 @@ export default function TxTabs({
   const { setTransactionBox, dimensions } = useGraphical();
 
   useEffect(() => {
+    setActive(initialTab);
+  }, [initialTab]);
+
+  useEffect(() => {
     if (dimensions.width === 0 || dimensions.height === 0) return;
 
     setITransaction(

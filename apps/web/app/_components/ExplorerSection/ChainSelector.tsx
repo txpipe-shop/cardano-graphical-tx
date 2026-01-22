@@ -50,8 +50,12 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
       if (!selectedKey || selectedKey === currentChain) return;
 
       const params = new URLSearchParams(searchParams.toString());
-      params.set("chain", selectedKey);
-      router.push(`${ROUTES.EXPLORER_TXS}?${params.toString()}`);
+      const query = params.toString();
+      router.push(
+        query
+          ? `${ROUTES.EXPLORER_TXS(selectedKey)}?${query}`
+          : ROUTES.EXPLORER_TXS(selectedKey),
+      );
     },
     [currentChain, router, searchParams],
   );

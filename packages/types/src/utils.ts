@@ -92,3 +92,12 @@ export function isHexString(s: string): s is HexString {
 export function isBase58(str: string): boolean {
   return /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/.test(str);
 }
+
+export function isBech32(str: string): boolean {
+  try {
+    bech32.decode(str, 200);
+    return true;
+  } catch {
+    return false;
+  }
+}
