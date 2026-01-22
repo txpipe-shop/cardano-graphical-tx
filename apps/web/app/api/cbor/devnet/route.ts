@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     if (!isEmpty(txRes.error) || !txRes.cborRes) throw Error(txRes.error);
 
     return Response.json({
-      tx: txRes.cborRes
+      tx: txRes.cborRes,
     });
   } catch (err: any) {
     console.error(err);

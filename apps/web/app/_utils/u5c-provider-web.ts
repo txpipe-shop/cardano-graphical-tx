@@ -6,13 +6,13 @@ function createTransportWeb(baseUrl: string, headers?: Record<string, string>) {
     baseUrl,
     interceptors: headers
       ? [
-        (next) => async (req) => {
-          for (const [key, value] of Object.entries(headers)) {
-            req.header.set(key, value);
-          }
-          return next(req);
-        },
-      ]
+          (next) => async (req) => {
+            for (const [key, value] of Object.entries(headers)) {
+              req.header.set(key, value);
+            }
+            return next(req);
+          },
+        ]
       : [],
   });
 }

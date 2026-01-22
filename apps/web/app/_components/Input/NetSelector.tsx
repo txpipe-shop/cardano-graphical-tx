@@ -76,7 +76,12 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
             content: "px-2 min-h-max capitalize",
           }}
           endContent={
-            configs.net === NETWORK.DEVNET ? <PortInput port={configs.port || "50051"} onPortChange={handlePortChange} /> : null
+            configs.net === NETWORK.DEVNET ? (
+              <PortInput
+                port={configs.port || "50051"}
+                onPortChange={handlePortChange}
+              />
+            ) : null
           }
         >
           {network}
@@ -95,6 +100,6 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
           </Chip>
         ))}
       </PopoverContent>
-    </Popover >
+    </Popover>
   );
 };

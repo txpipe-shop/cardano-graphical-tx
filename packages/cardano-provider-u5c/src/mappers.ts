@@ -47,7 +47,7 @@ function getRefScript(script: cardanoUtxoRpc.Script): cardano.Script | undefined
   if (s.case && s.case !== 'native') {
     return {
       type: s.case as cardano.ScriptType,
-      bytes: s.value ? HexString(Buffer.from(s.value).toString('hex')) : HexString(''),
+      bytes: s.value ? HexString(Buffer.from(s.value).toString('hex')) : HexString('')
     };
   } else if (s.case === 'native' && s.value) {
     // TODO: figure out how to handle native scripts
@@ -109,12 +109,13 @@ export function u5cToCardanoUtxo(
     coin: toBigInt(output?.coin?.bigInt.value),
     outRef: { hash: hash, index: BigInt(index) },
     value,
-    datum: output?.datum && output.datum.originalCbor.length > 0
-      ? {
-        type: DatumType.INLINE,
-        datumHex: HexString(Buffer.from(output.datum.originalCbor).toString('hex'))
-      }
-      : undefined,
+    datum:
+      output?.datum && output.datum.originalCbor.length > 0
+        ? {
+            type: DatumType.INLINE,
+            datumHex: HexString(Buffer.from(output.datum.originalCbor).toString('hex'))
+          }
+        : undefined,
     referenceScript: output?.script ? getRefScript(output.script) : undefined
   };
 }
@@ -186,7 +187,9 @@ export function u5cToCardanoTx(
     }
   }
 
-  const referenceInputs = tx.referenceInputs.map((x) => u5cToCardanoUtxo(uint8ToHash(x.txHash), x.asOutput, x.outputIndex));
+  const referenceInputs = tx.referenceInputs.map((x) =>
+    u5cToCardanoUtxo(uint8ToHash(x.txHash), x.asOutput, x.outputIndex)
+  );
   const scripts = tx.witnesses?.script.map(({ script }) => {
     return {
       type: script.case as cardano.ScriptType,

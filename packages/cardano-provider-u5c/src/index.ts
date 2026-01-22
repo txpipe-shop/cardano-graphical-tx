@@ -284,14 +284,14 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     const addressHex = query.address;
     const filteredTxs = addressHex
       ? body.tx.filter((tx) => {
-        const addressMatchesInput = tx.inputs.some(
-          (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
-        );
-        const addressMatchesOutput = tx.outputs.some(
-          (output) => Buffer.from(output.address).toString('hex') === addressHex
-        );
-        return addressMatchesInput || addressMatchesOutput;
-      })
+          const addressMatchesInput = tx.inputs.some(
+            (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
+          );
+          const addressMatchesOutput = tx.outputs.some(
+            (output) => Buffer.from(output.address).toString('hex') === addressHex
+          );
+          return addressMatchesInput || addressMatchesOutput;
+        })
       : body.tx;
 
     const paginatedTxs = filteredTxs.reverse().slice(offset, offset + limit);
@@ -541,7 +541,11 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     };
   }
 
-  private validateTx(tx: query.ReadTxResponse): { tx: cardanoUtxoRpc.Tx; block: query.ChainPoint; cbor: Uint8Array } {
+  private validateTx(tx: query.ReadTxResponse): {
+    tx: cardanoUtxoRpc.Tx;
+    block: query.ChainPoint;
+    cbor: Uint8Array;
+  } {
     assert(tx.tx?.chain.case === 'cardano', 'Transaction is not a Cardano transaction');
     assert(tx.tx.blockRef, 'Block reference of transaction empty');
 

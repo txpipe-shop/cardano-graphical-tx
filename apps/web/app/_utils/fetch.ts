@@ -1,4 +1,7 @@
-import type { CborResponse, SafeAddressResponse } from "@laceanatomy/napi-pallas";
+import type {
+  CborResponse,
+  SafeAddressResponse,
+} from "@laceanatomy/napi-pallas";
 import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
 import type { IBlockfrostResponse, ITransaction } from "~/app/_interfaces";
@@ -60,8 +63,8 @@ export const getTxFromDevnetCBOR = async (
   } catch (err: any) {
     console.error(err);
     throw err;
-  };
-}
+  }
+};
 
 export const getTxFromCbor = async (
   cbor: string,

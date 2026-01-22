@@ -10,13 +10,13 @@ function createTransportNode(
     baseUrl,
     interceptors: headers
       ? [
-        (next) => async (req) => {
-          for (const [key, value] of Object.entries(headers)) {
-            req.header.set(key, value);
-          }
-          return next(req);
-        },
-      ]
+          (next) => async (req) => {
+            for (const [key, value] of Object.entries(headers)) {
+              req.header.set(key, value);
+            }
+            return next(req);
+          },
+        ]
       : [],
   });
 }
@@ -26,4 +26,3 @@ export function getU5CProviderNode(port: number): U5CProvider {
     transport: createTransportNode(`http://localhost:${port}`),
   });
 }
-
