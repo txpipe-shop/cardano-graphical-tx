@@ -35,10 +35,3 @@ jobs:
         run: |
           docker push nicolasluduena/utxo-explorer:ui-${COMMIT_HASH}
           docker push nicolasluduena/utxo-explorer:ui-${{ github.ref_name }}
-
-      - name: Redeploy service in coolify
-        run: |
-          echo "Deploying UUID: ${{ vars.COOLIFY_SERVICE_UUID }}"
-          curl -X POST "https://${{ vars.COOLIFY_BASE_URL }}/api/v1/deploy?uuid=${{ vars.COOLIFY_SERVICE_UUID }}&force=false" \
-            -H "Authorization: Bearer ${{secrets.COOLIFY_API_TOKEN}}" \
-            -H "Content-Type: application/json"
