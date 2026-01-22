@@ -1,8 +1,8 @@
-import { networkToAddrPrefix, type ProviderConfig } from './types';
-import { U5CProvider } from '@laceanatomy/cardano-provider-u5c';
-import { createTransport as createNodeTransport } from './u5c/node-loader';
 import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
+import { U5CProvider } from '@laceanatomy/cardano-provider-u5c';
 import { Pool } from 'pg';
+import { networkToAddrPrefix, type ProviderConfig } from './types';
+import { createTransport as createNodeTransport } from './u5c/node-loader';
 
 export function loadProviderServer(config: ProviderConfig) {
   switch (config.type) {
@@ -16,7 +16,13 @@ export function loadProviderServer(config: ProviderConfig) {
     }
     case 'dbsync': {
       const pool = new Pool({ connectionString: config.connectionString });
-      return new DbSyncProvider({ pool, addrPrefix: networkToAddrPrefix(config.network) });
+      // TODO: add nodeUrl and magic
+      return new DbSyncProvider({
+        pool,
+        addrPrefix: networkToAddrPrefix(config.network),
+        nodeUrl: '',
+        magic: 0
+      });
     }
     default: {
       throw new Error('Unsupported provider type for server');
