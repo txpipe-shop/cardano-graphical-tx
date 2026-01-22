@@ -41,7 +41,12 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     this.utxoRpc = new UtxoRpcClient({ transport });
   }
 
-  async getCBOR(params: TxReq): Promise<string> { return "TODO"; }
+  async getCBOR(params: TxReq): Promise<string> {
+    const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(params.hash, 'hex') });
+    const { cbor } = this.validateTx(txResponse);
+
+    return Buffer.from(cbor).toString('hex');
+  }
 
   async getLatestTx(): Promise<cardano.Tx> {
     const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
@@ -76,6 +81,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       foundBlock.timestamp,
       blockHash,
       foundHeader.height,
+      foundHeader.slot,
       this.findTxIndexInBlock(foundBody, latestTx)
     );
   }
@@ -164,7 +170,6 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
     const time = block.timestamp;
     const blockHash = Buffer.from(block.hash).toString('hex');
-    const height = block.height;
 
     const { body: fullBlockBody } = await this.fetchBlockByQuery({
       hash: Hash(Buffer.from(block.hash).toString('hex'))
@@ -174,7 +179,8 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       tx,
       time,
       Hash(blockHash),
-      height,
+      block.height,
+      block.slot,
       this.findTxIndexInBlock(fullBlockBody, tx)
     );
   }
@@ -246,6 +252,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
       const blockHash = Hash(Buffer.from(block.header.hash).toString('hex'));
       const blockHeight = block.header.height;
+      const blockSlot = block.header.slot;
       const blockBody = block.body;
 
       return txs.map((tx) =>
@@ -254,6 +261,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
           block.timestamp,
           blockHash,
           blockHeight,
+          blockSlot,
           this.findTxIndexInBlock(blockBody, tx)
         )
       );
@@ -295,6 +303,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
         block.timestamp,
         blockHash,
         header.height,
+        header.slot,
         this.findTxIndexInBlock(body, tx)
       )
     );
@@ -408,6 +417,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
           block.timestamp,
           Hash(blockHashHex),
           header.height,
+          header.slot,
           this.findTxIndexInBlock(body, tx)
         )
       );
@@ -531,11 +541,15 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     };
   }
 
-  private validateTx(tx: query.ReadTxResponse): { tx: cardanoUtxoRpc.Tx; block: query.ChainPoint } {
+  private validateTx(tx: query.ReadTxResponse): {
+    tx: cardanoUtxoRpc.Tx;
+    block: query.ChainPoint;
+    cbor: Uint8Array;
+  } {
     assert(tx.tx?.chain.case === 'cardano', 'Transaction is not a Cardano transaction');
     assert(tx.tx.blockRef, 'Block reference of transaction empty');
 
-    return { tx: tx.tx.chain.value, block: tx.tx.blockRef };
+    return { tx: tx.tx.chain.value, block: tx.tx.blockRef, cbor: tx.tx.nativeBytes };
   }
 
   private findTxIndexInBlock(blockBody: cardanoUtxoRpc.BlockBody, tx: cardanoUtxoRpc.Tx): number {

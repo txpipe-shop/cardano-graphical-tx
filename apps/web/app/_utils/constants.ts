@@ -16,6 +16,7 @@ export type ROUTES = (typeof ROUTES)[keyof typeof ROUTES];
 
 export const API_ROUTES = {
   CBOR: "api/cbor",
+  DEVNET_CBOR: "api/cbor/devnet",
   HASH: "api/hash",
   ADDRESS: "api/address",
 };
@@ -24,6 +25,7 @@ export const USER_CONFIGS = {
   QUERY: "query",
   OPTION: "option",
   NET: "net",
+  PORT: "port",
 } as const;
 
 export const defaultPosition = { x: 0, y: 0 };
@@ -64,6 +66,7 @@ export const NETWORK = {
   MAINNET: "mainnet",
   PREPROD: "preprod",
   PREVIEW: "preview",
+  DEVNET: "devnet",
 } as const;
 export type NETWORK = (typeof NETWORK)[keyof typeof NETWORK];
 
@@ -81,6 +84,8 @@ export const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
   minute: "2-digit",
   hour12: false,
 };
+
+export const DEFAULT_DEVNET_PORT = "5164";
 
 export const TX_URL_PARAM = "tx";
 export const UTXO_URL_PARAM = "utxo";

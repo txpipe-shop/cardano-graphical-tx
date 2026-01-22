@@ -1,4 +1,5 @@
 import { Button, Input } from "@heroui/react";
+import { Hash } from "@laceanatomy/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type Dispatch, type SetStateAction } from "react";
@@ -9,12 +10,17 @@ import {
   getTransaction,
   isInputUtxo,
   isOutputUtxo,
+  NETWORK,
   OPTIONS,
   ROUTES,
 } from "~/app/_utils";
+import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 import TrashRedIcon from "~/public/delete-red.svg";
 import NoContractsIcon from "~/public/no-contract.svg";
-import addCBORsToContext from "../TxInput/txInput.helper";
+import {
+  addCBORsToContext,
+  addDevnetCBORsToContext,
+} from "../TxInput/txInput.helper";
 import { type INewTx } from "./multipleInputModal.interface";
 
 export interface TransactionsListProps {
@@ -76,20 +82,41 @@ export const TransactionsList = ({
       const newHashes = newTxs.filter(
         (i) => i.type === OPTIONS.HASH && i.isNew,
       );
-      const hashesPromises = newHashes.map((hash) =>
-        getCborFromHash(hash.value, configs.net, setError),
-      );
-      const cbors = (await Promise.all(hashesPromises)).map(({ cbor }) => cbor);
-      addCBORsToContext(
-        OPTIONS.CBOR,
-        [...newCbors, ...cbors],
-        configs.net,
-        setError,
-        transactions,
-        setTransactionBox,
-        setLoading,
-        { x: dimensions.width, y: dimensions.height },
-      );
+
+      if (configs.net === NETWORK.DEVNET) {
+        const u5c = getU5CProviderWeb(Number(configs.port));
+        const hashesPromises = newHashes.map((hash) =>
+          u5c.getCBOR({ hash: Hash(hash.value) }),
+        );
+        const cbors = await Promise.all(hashesPromises);
+        addDevnetCBORsToContext(
+          OPTIONS.CBOR,
+          Number(configs.port),
+          [...newCbors, ...cbors],
+          setError,
+          transactions,
+          setTransactionBox,
+          setLoading,
+          { x: dimensions.width, y: dimensions.height },
+        );
+      } else {
+        const hashesPromises = newHashes.map((hash) =>
+          getCborFromHash(hash.value, configs.net, setError),
+        );
+        const cbors = (await Promise.all(hashesPromises)).map(
+          ({ cbor }) => cbor,
+        );
+        addCBORsToContext(
+          OPTIONS.CBOR,
+          [...newCbors, ...cbors],
+          configs.net,
+          setError,
+          transactions,
+          setTransactionBox,
+          setLoading,
+          { x: dimensions.width, y: dimensions.height },
+        );
+      }
       setError("");
       router.push(ROUTES.GRAPHER);
     } catch (error) {

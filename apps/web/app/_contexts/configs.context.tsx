@@ -2,12 +2,13 @@
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { createContext, useContext } from "react";
 import { useLocalStorage } from "~/app/_hooks/useLocalStorage";
-import { NETWORK, OPTIONS } from "~/app/_utils";
+import { DEFAULT_DEVNET_PORT, NETWORK, OPTIONS } from "~/app/_utils";
 
 interface IUserConfigs {
   net: NETWORK;
   option: OPTIONS;
   query: string;
+  port: string;
 }
 
 const LOCAL_STORAGE_KEYS = {
@@ -19,7 +20,7 @@ const ConfigsContext = createContext({
   updateConfigs: <T extends keyof IUserConfigs>(
     _configKey: T,
     _value: IUserConfigs[T],
-  ) => {},
+  ) => { },
 });
 
 export const useConfigs = () => {
@@ -34,6 +35,7 @@ export const ConfigsProvider = ({ children }: { children: ReactNode }) => {
     net: NETWORK.MAINNET,
     option: OPTIONS.CBOR,
     query: "",
+    port: DEFAULT_DEVNET_PORT,
   };
   const [configs, setConfigs] = useLocalStorage({
     key: LOCAL_STORAGE_KEYS.USER_CONFIGS,

@@ -1,12 +1,8 @@
 import { U5CProvider } from "@laceanatomy/cardano-provider-u5c";
-import { createGrpcTransport as createGrpcTransportNode } from "@laceanatomy/utxorpc-sdk/transport/node";
+import { createGrpcTransport } from "@laceanatomy/utxorpc-sdk/transport/web";
 
-function createTransportNode(
-  baseUrl: string,
-  headers?: Record<string, string>,
-) {
-  return createGrpcTransportNode({
-    httpVersion: "2",
+function createTransportWeb(baseUrl: string, headers?: Record<string, string>) {
+  return createGrpcTransport({
     baseUrl,
     interceptors: headers
       ? [
@@ -21,8 +17,8 @@ function createTransportNode(
   });
 }
 
-export function getU5CProviderNode(port: number): U5CProvider {
+export function getU5CProviderWeb(devnetPort: number): U5CProvider {
   return new U5CProvider({
-    transport: createTransportNode(`http://localhost:${port}`),
+    transport: createTransportWeb(`http://localhost:${devnetPort}`),
   });
 }

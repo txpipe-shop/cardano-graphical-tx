@@ -187,7 +187,7 @@ export const UtxoInfo = () => {
         <AccordionItem key="5" title="Script Reference">
           <Card className="flex h-16 w-full flex-row justify-between bg-content2 px-5 py-2 shadow-none">
             <p className="overflow-hidden text-ellipsis whitespace-normal break-words">
-              {trimString(scriptRef ?? "", 52)}
+              {scriptRef || ""}
             </p>
             <Image
               src={CopyIcon}

@@ -11,16 +11,16 @@ import { useRouter } from "next/navigation";
 import { type ChangeEvent, useEffect, useState } from "react";
 import { Button, Input } from "~/app/_components";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
-import { isEmpty, OPTIONS, ROUTES, USER_CONFIGS } from "~/app/_utils";
+import { isEmpty, NETWORK, OPTIONS, ROUTES, USER_CONFIGS } from "~/app/_utils";
 import MultipleTxIcon from "~/public/multiple-txs.svg";
 import { MultipleInputModal } from "../MultipleInputModal/MultipleInputModal";
 import { NetSelector } from "../NetSelector";
-import addCBORsToContext from "./txInput.helper";
+import { addCBORsToContext, addDevnetCBORsToContext } from "./txInput.helper";
 
 export const TxInput = () => {
   const { transactions, setTransactionBox, dimensions } = useGraphical();
   const router = useRouter();
-  const { setError, setLoading } = useUI();
+  const { error, setError, setLoading } = useUI();
   const { configs, updateConfigs } = useConfigs();
   const [toGo, setToGo] = useState<string>("");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -37,20 +37,38 @@ export const TxInput = () => {
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!configs.query) return;
+
     router.push(toGo);
     setError("");
+
     const multiplesInputs = configs.query.split(",").map((tx) => tx.trim());
     const uniqueInputs = Array.from(new Set(multiplesInputs));
-    addCBORsToContext(
-      configs.option,
-      uniqueInputs,
-      configs.net,
-      setError,
-      transactions,
-      setTransactionBox,
-      setLoading,
-      { x: dimensions.width, y: dimensions.height },
-    );
+
+    const size = { x: dimensions.width, y: dimensions.height };
+    if (configs.net === NETWORK.DEVNET) {
+      addDevnetCBORsToContext(
+        configs.option,
+        Number(configs.port),
+        uniqueInputs,
+        setError,
+        transactions,
+        setTransactionBox,
+        setLoading,
+        size,
+      );
+    } else {
+      addCBORsToContext(
+        configs.option,
+        uniqueInputs,
+        configs.net,
+        setError,
+        transactions,
+        setTransactionBox,
+        setLoading,
+        size,
+      );
+    }
+
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
   }
 
@@ -102,10 +120,10 @@ export const TxInput = () => {
           </NextButton>
         </abbr>
         <MultipleInputModal isOpen={isOpen} onOpenChange={onOpenChange} />
-        <Button type="submit" onClick={changeGoTo(ROUTES.GRAPHER)}>
+        <Button type="submit" onClick={changeGoTo(ROUTES.GRAPHER)} disabled={error !== ""}>
           Draw
         </Button>
-        <Button type="submit" onClick={changeGoTo(ROUTES.DISSECT)}>
+        <Button type="submit" onClick={changeGoTo(ROUTES.DISSECT)} disabled={error !== ""} >
           Dissect
         </Button>
       </form>

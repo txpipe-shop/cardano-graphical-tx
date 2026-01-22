@@ -109,12 +109,13 @@ export function u5cToCardanoUtxo(
     coin: toBigInt(output?.coin?.bigInt.value),
     outRef: { hash: hash, index: BigInt(index) },
     value,
-    datum: output?.datum
-      ? {
-          type: DatumType.INLINE,
-          datumHex: HexString(Buffer.from(output.datum.originalCbor).toString('hex'))
-        }
-      : undefined,
+    datum:
+      output?.datum && output.datum.originalCbor.length > 0
+        ? {
+            type: DatumType.INLINE,
+            datumHex: HexString(Buffer.from(output.datum.originalCbor).toString('hex'))
+          }
+        : undefined,
     referenceScript: output?.script ? getRefScript(output.script) : undefined
   };
 }
@@ -165,6 +166,7 @@ export function u5cToCardanoTx(
   time: bigint,
   blockHash: Hash,
   blockHeight: bigint,
+  blockSlot: bigint,
   indexInBlock: number
 ): cardano.Tx {
   const fee = toBigInt(tx.fee?.bigInt.value);
@@ -185,7 +187,9 @@ export function u5cToCardanoTx(
     }
   }
 
-  const referenceInputs = tx.referenceInputs.map((x, i) => u5cToCardanoUtxo(hash, x.asOutput!, i));
+  const referenceInputs = tx.referenceInputs.map((x) =>
+    u5cToCardanoUtxo(uint8ToHash(x.txHash), x.asOutput, x.outputIndex)
+  );
   const scripts = tx.witnesses?.script.map(({ script }) => {
     return {
       type: script.case as cardano.ScriptType,
@@ -206,7 +210,7 @@ export function u5cToCardanoTx(
     referenceInputs,
     createdAt: Number(time),
     witnesses: { scripts },
-    block: { hash: blockHash, height: blockHeight, epochNo: 0n, slot: 0n },
+    block: { hash: blockHash, height: blockHeight, epochNo: 0n, slot: blockSlot },
     treasuryDonation: 0n,
     indexInBlock: BigInt(indexInBlock)
   };
