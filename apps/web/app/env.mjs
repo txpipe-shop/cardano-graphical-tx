@@ -72,5 +72,5 @@ export const env = createEnv({
     VECTOR_MAINNET_NODE_URL: process.env.VECTOR_MAINNET_NODE_URL,
   },
   emptyStringAsUndefined: true,
-  skipValidation: !!process.env.SKIP_VALIDATION,
+  skipValidation: process.env.SKIP_VALIDATION === "1" || process.env.CI === "true",
 });

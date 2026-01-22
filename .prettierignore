@@ -10,3 +10,11 @@ bun.lockb
 
 # Miscellaneous
 /static/
+
+# Napi build
+/packages/napi-pallas/index.d.ts
+/packages/napi-pallas/index.js
+/packages/napi-pallas/napi-pallas.wasi-browser.cjs
+/packages/napi-pallas/napi-pallas.wasi.cjs
+/packages/napi-pallas/wasi-worker-browser.mjs
+/packages/napi-pallas/wasi-worker.mjs

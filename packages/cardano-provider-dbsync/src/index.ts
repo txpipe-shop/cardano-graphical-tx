@@ -1,25 +1,24 @@
 import {
-  AddressFundsRes,
   AddressFundsReq,
+  AddressFundsRes,
+  AddressUTxOsReq,
+  AddressUTxOsRes,
   BlockReq,
   BlockRes,
   BlocksReq,
   BlocksRes,
+  EpochReq,
+  EpochRes,
   EpochsReq,
   EpochsRes,
   LatestTxRes,
   TxsReq,
   TxsRes,
   type ChainProvider,
-  type TxReq,
-  AddressUTxOsReq,
-  AddressUTxOsRes,
-  EpochReq,
-  EpochRes
+  type TxReq
 } from '@laceanatomy/provider-core';
 import type { Cardano } from '@laceanatomy/types';
-import { cardano, HexString, hexToBech32, isBase58, Unit } from '@laceanatomy/types';
-import { Hash } from '@laceanatomy/types';
+import { cardano, Hash, HexString, hexToBech32, isBase58, Unit } from '@laceanatomy/types';
 import type { Pool, PoolClient } from 'pg';
 import { mapTx, mapUtxo } from './mappers';
 import { SQLQuery } from './sql';
@@ -212,7 +211,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         ? isBase58(query.address)
           ? query?.address
           : // TODO: set up address prefix as configurable
-            hexToBech32(HexString(query.address), 'addr')
+          hexToBech32(HexString(query.address), 'addr')
         : null;
 
       const [blockHash, blockHeight, blockSlot] = this.parseBlockFilter(query);
@@ -389,3 +388,4 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
 export { SQLQuery } from './sql';
 export type * from './types/queries';
+
