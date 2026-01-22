@@ -77,7 +77,12 @@ export interface Datum {
   json: string
 }
 
-export declare function downloadBlock(nodeUrl: string, magic: number, slot: number, hash: string): Promise<Array<number>>
+export declare function downloadBlock(
+  nodeUrl: string,
+  magic: number,
+  slot: number,
+  hash: string,
+): Promise<Array<number>>
 
 export interface ExUnits {
   mem: number
