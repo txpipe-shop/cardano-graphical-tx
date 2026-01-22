@@ -1,0 +1,115 @@
+"use client";
+
+import { Tab, Tabs } from "@heroui/react";
+import { type cardano } from "@laceanatomy/types";
+import { useEffect, useState } from "react";
+import { useGraphical } from "~/app/_contexts";
+import { type ITransaction } from "~/app/_interfaces";
+import { DissectSection } from "../../DissectSection/DissectSection";
+import { Playground } from "../../GraphicalSection";
+import {
+  parseTxToGraphical,
+  setITransaction,
+} from "../../Input/TxInput/txInput.helper";
+import TxCbor from "./TxCbor";
+import TxDatum from "./TxDatum";
+import TxOverview from "./TxOverview";
+import TxScripts from "./TxScripts";
+
+const TABS = [
+  "Overview",
+  "Diagram",
+  "Dissect",
+  "CBOR",
+  "Datum",
+  "Scripts",
+] as const;
+type Tabs = (typeof TABS)[number];
+interface TxTabsProps {
+  tx: ITransaction;
+  cardanoTx: cardano.Tx;
+  cbor: string;
+  tab: Tabs;
+}
+
+export default function TxTabs({
+  tx,
+  cardanoTx,
+  cbor: initialCbor,
+  tab: initialTab,
+}: TxTabsProps) {
+  const [active, setActive] = useState<Tabs>(initialTab);
+  const { setTransactionBox, dimensions } = useGraphical();
+
+  useEffect(() => {
+    setActive(initialTab);
+  }, [initialTab]);
+
+  useEffect(() => {
+    if (dimensions.width === 0 || dimensions.height === 0) return;
+
+    setITransaction(
+      [tx],
+      { transactions: [], utxos: {} },
+      setTransactionBox,
+      () => {},
+      () => {},
+      { x: dimensions.width, y: dimensions.height },
+    );
+  }, [setTransactionBox, dimensions.width, dimensions.height, tx]);
+
+  return (
+    <div className="flex w-full flex-col min-h-0 space-y-4">
+      <Tabs
+        aria-label="Transaction details"
+        selectedKey={active}
+        onSelectionChange={(key) => setActive(key as Tabs)}
+        variant="light"
+        classNames={{
+          tabList: "w-full",
+          tab: "px-3 py-1 rounded border bg-gray-200 h-full",
+          tabContent: "text-black text-sm font-medium",
+          panel: "flex min-h-0 flex-1 flex-col p-0",
+        }}
+      >
+        <Tab key="Overview" title="Overview">
+          <TxOverview tx={cardanoTx} />
+        </Tab>
+
+        <Tab key="Diagram" title="Diagram">
+          <div className="relative h-[60vh] w-full overflow-hidden rounded-lg border">
+            <div className="h-full w-full">
+              <Playground fillMode="parent" />
+            </div>
+          </div>
+        </Tab>
+
+        <Tab key="Dissect" title="Dissect">
+          <div className="overflow-visible">
+            <DissectSection
+              tx={parseTxToGraphical([tx], { transactions: [], utxos: {} })[0]!}
+            />
+          </div>
+        </Tab>
+
+        <Tab key="CBOR" title="CBOR">
+          <div className="flex-1 min-h-0">
+            <TxCbor cbor={initialCbor} />
+          </div>
+        </Tab>
+
+        <Tab key="Datum" title="Datum">
+          <div className="flex-1 min-h-0 overflow-auto">
+            <TxDatum tx={cardanoTx} />
+          </div>
+        </Tab>
+
+        <Tab key="Scripts" title="Scripts">
+          <div className="flex-1 min-h-0 overflow-auto">
+            <TxScripts tx={cardanoTx} />
+          </div>
+        </Tab>
+      </Tabs>
+    </div>
+  );
+}

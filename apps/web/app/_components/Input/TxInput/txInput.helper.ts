@@ -1,6 +1,14 @@
-import { Asset, Assets, type Utxo } from "@laceanatomy/napi-pallas";
-import type { cardano } from '@laceanatomy/types';
-import { assetNameFromUnit, Hash, HexString, hexToAscii, hexToBech32, policyFromUnit, Unit } from "@laceanatomy/types";
+import { type Asset, type Assets, type Utxo } from "@laceanatomy/napi-pallas";
+import type { cardano } from "@laceanatomy/types";
+import {
+  assetNameFromUnit,
+  Hash,
+  HexString,
+  hexToAscii,
+  hexToBech32,
+  policyFromUnit,
+  Unit,
+} from "@laceanatomy/types";
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
 import { type Dispatch, type SetStateAction } from "react";
@@ -23,13 +31,13 @@ import {
   isEmpty,
   isHexa,
   KONVA_COLORS,
-  NETWORK,
+  type NETWORK,
   OPTIONS,
   POINT_SIZE,
   POLICY_LENGTH,
   TX_HEIGHT,
   TX_WIDTH,
-  UTXO_LINE_GAP
+  UTXO_LINE_GAP,
 } from "~/app/_utils";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
@@ -47,9 +55,11 @@ interface IGenerateUTXO extends Utxo {
  * @returns - An object containing the bech32|hex address, the header type, the network type,
  * the payment part, and the kind of address (key or script).
  */
-const formatAddress = (address: string, prefix?: string): Address | undefined => {
+const formatAddress = (
+  address: string,
+  prefix?: string,
+): Address | undefined => {
   if (isEmpty(address)) return undefined;
-
   let hexAddress = "";
   if (isHexa(address)) {
     hexAddress = address;
@@ -66,7 +76,10 @@ const formatAddress = (address: string, prefix?: string): Address | undefined =>
   if (!headerType || !netType) return undefined;
 
   return {
-    bech32: isHexa(address) && prefix ? hexToBech32(HexString(address), prefix) : address,
+    bech32:
+      isHexa(address) && prefix
+        ? hexToBech32(HexString(address), prefix)
+        : address,
     headerType,
     netType,
     payment: hexAddress.slice(2, POLICY_LENGTH),
@@ -74,7 +87,7 @@ const formatAddress = (address: string, prefix?: string): Address | undefined =>
   };
 };
 
-const generateGraphicalUTXO = ({
+export const generateGraphicalUTXO = ({
   txHash,
   index,
   bytes,
@@ -107,7 +120,7 @@ const generateGraphicalUTXO = ({
   };
 };
 
-const parseTxToGraphical = (
+export const parseTxToGraphical = (
   txFromCbors: ITransaction[],
   existingTxs: TransactionsBox,
 ): IGraphicalTransaction[] =>
@@ -178,8 +191,9 @@ const setUtxoPosition = (
 };
 
 /** Calculates the position of the transaction on the canvas. */
-const setPositions = (
+export const setPositions = (
   transactions: IGraphicalTransaction[],
+  dimensions: { x: number; y: number },
 ): IGraphicalTransaction[] => {
   const blockWidth = 3 * TX_WIDTH;
   const blocks = new Set(transactions.map((tx) => tx.blockHeight).sort()); // Blocks containing the txs
@@ -200,12 +214,15 @@ const setPositions = (
   const maxAmountOfTxsInBLock = Math.max(
     ...Object.values(normalizedBlockIndex).map((txs) => txs.length),
   );
-  const boxSizeX = blockWidth * blocks.size - (1 / 2) * blockWidth;
-  const boxSizeY =
-    TX_HEIGHT * maxAmountOfTxsInBLock + 0.05 * window.innerHeight;
+
+  const totalWidth =
+    blocks.size * blockWidth +
+    (blocks.size > 1 ? (blocks.size - 1) * POINT_SIZE * 5 : 0);
+  const totalHeight = (maxAmountOfTxsInBLock - 1) * TX_HEIGHT * 1.5 + TX_HEIGHT;
+
   // Position of the first tx
-  const initialX = window.innerWidth / 2 - boxSizeX / 2;
-  const initialY = window.innerHeight / 2 - boxSizeY / 2;
+  const initialX = (dimensions.x - totalWidth) / 2 + TX_WIDTH;
+  const initialY = (dimensions.y - totalHeight) / 2;
 
   return transactions.map((tx) => {
     const blockIndex =
@@ -231,6 +248,58 @@ const setPositions = (
   });
 };
 
+export const setITransaction = (
+  cborTxs: ITransaction[],
+  existingTxs: TransactionsBox,
+  setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
+  setError: Dispatch<SetStateAction<string>>,
+  setLoading: Dispatch<SetStateAction<boolean>>,
+  dimensions: { x: number; y: number },
+) => {
+  try {
+    setLoading(true);
+
+    const graphicalTxs = parseTxToGraphical(cborTxs, existingTxs);
+    const positionedTxs = setPositions(
+      [...graphicalTxs, ...existingTxs.transactions],
+      dimensions,
+    );
+
+    let newUtxosObject: UtxoObject = { ...existingTxs.utxos };
+    let newTransactionsList: IGraphicalTransaction[] = [
+      ...existingTxs.transactions,
+    ];
+
+    positionedTxs.forEach((tx) => {
+      const newUtxos = [...tx.inputs, ...tx.outputs];
+      const exists = getTransaction(existingTxs)(tx.txHash);
+
+      if (exists) {
+        // If the transaction already exists, update the position and add the new UTXOs
+        const txIndex = newTransactionsList.findIndex(
+          (txMap) => txMap.txHash === exists.txHash,
+        );
+        if (txIndex !== -1)
+          newTransactionsList[txIndex] = { ...tx, pos: tx.pos };
+      } else {
+        // If the transaction doesn't exist, add it and the new UTXOs
+        newTransactionsList.push(tx);
+      }
+
+      newUtxos.forEach((utxo) => (newUtxosObject[utxo.txHash] = utxo));
+    });
+    setTransactionBox({
+      transactions: newTransactionsList,
+      utxos: newUtxosObject,
+    });
+  } catch (error: Response | any) {
+    console.error(`Error processing CBOR`, error);
+    setError(error.statusText);
+  } finally {
+    setLoading(false);
+  }
+};
+
 const setCBORs = async (
   network: NETWORK,
   uniqueInputs: string[],
@@ -238,6 +307,7 @@ const setCBORs = async (
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
   setError: Dispatch<SetStateAction<string>>,
   setLoading: Dispatch<SetStateAction<boolean>>,
+  dimensions: { x: number; y: number },
   fromHash?: boolean,
 ) => {
   try {
@@ -260,10 +330,10 @@ const setCBORs = async (
 
     const filteredCbors = cborTxs.filter((cbor) => !repeatedTxs.includes(cbor));
     const graphicalTxs = parseTxToGraphical(filteredCbors, existingTxs);
-    const positionedTxs = setPositions([
-      ...graphicalTxs,
-      ...existingTxs.transactions,
-    ]);
+    const positionedTxs = setPositions(
+      [...graphicalTxs, ...existingTxs.transactions],
+      dimensions,
+    );
 
     let newUtxosObject: UtxoObject = { ...existingTxs.utxos };
     let newTransactionsList: IGraphicalTransaction[] = [
@@ -307,13 +377,16 @@ export async function addDevnetCBORsToContext(
   transactions: TransactionsBox,
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
   setLoading: Dispatch<SetStateAction<boolean>>,
+  dimensions: { x: number; y: number },
 ) {
   try {
     setLoading(true);
     const u5c = getU5CProviderWeb(devnetPort);
     const existingTxs = new Map<string, { tx: any; cbor: string }>();
 
-    const getTxAndCbor = async (hash: string): Promise<{ tx: cardano.Tx, cbor: string }> => {
+    const getTxAndCbor = async (
+      hash: string,
+    ): Promise<{ tx: cardano.Tx; cbor: string }> => {
       const exist = existingTxs.get(hash);
       if (exist) return exist;
 
@@ -345,9 +418,9 @@ export async function addDevnetCBORsToContext(
                 assetName,
                 amount: Number(amount),
                 assetNameAscii: hexToAscii(assetName),
-              }
+              };
 
-              const multiasset = assets.find(a => a.policyId === policyId);
+              const multiasset = assets.find((a) => a.policyId === policyId);
               if (multiasset) {
                 multiasset.assetsPolicy.push(asset);
               } else {
@@ -367,7 +440,7 @@ export async function addDevnetCBORsToContext(
               assets,
             };
           });
-        }
+        };
 
         return {
           ...txResponse,
@@ -378,14 +451,14 @@ export async function addDevnetCBORsToContext(
           blockTxIndex: Number(tx.indexInBlock),
           blockAbsoluteSlot: Number(tx.block.slot),
         } as ITransaction;
-      })
+      }),
     );
 
     const graphicalTxs = parseTxToGraphical(parsedTxs, transactions);
-    const positionedTxs = setPositions([
-      ...graphicalTxs,
-      ...transactions.transactions,
-    ]);
+    const positionedTxs = setPositions(
+      [...graphicalTxs, ...transactions.transactions],
+      dimensions,
+    );
 
     let newUtxosObject: UtxoObject = { ...transactions.utxos };
     let newTransactionsList: IGraphicalTransaction[] = [
@@ -417,7 +490,11 @@ export async function addDevnetCBORsToContext(
   } catch (error: Response | any) {
     console.error(error);
     if (error instanceof Error) {
-      setError(error.name === "ConnectError" ? "Could not connect to the devnet" : error.message);
+      setError(
+        error.name === "ConnectError"
+          ? "Could not connect to the devnet"
+          : error.message,
+      );
     } else {
       setError(error.statusText);
     }
@@ -434,6 +511,7 @@ export async function addCBORsToContext(
   transactions: TransactionsBox,
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
   setLoading: Dispatch<SetStateAction<boolean>>,
+  dimensions: { x: number; y: number },
 ) {
   if (option === OPTIONS.HASH) {
     const hashesPromises = uniqueInputs.map((hash) =>
@@ -459,6 +537,7 @@ export async function addCBORsToContext(
       setTransactionBox,
       setError,
       setLoading,
+      dimensions,
       true,
     );
   } else {
@@ -469,6 +548,7 @@ export async function addCBORsToContext(
       setTransactionBox,
       setError,
       setLoading,
+      dimensions,
       false,
     );
   }

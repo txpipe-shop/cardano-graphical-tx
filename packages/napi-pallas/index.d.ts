@@ -20,7 +20,27 @@ export interface Assets {
   assetsPolicy: Array<Asset>
 }
 
+export interface BlockCborResponse {
+  header: BlockHeader
+  transactions: Array<CborResponse>
+  transactionsCount: number
+}
+
+export interface BlockHeader {
+  era: string
+  blockNumber?: number
+  slot?: number
+  hash: string
+  previousHash?: string
+  issuerVkey?: string
+  vrfVkey?: string
+  blockBodySize?: number
+  blockBodyHash?: string
+}
+
 export declare function cborParse(raw: string): SafeCborResponse
+
+export declare function cborParseBlock(raw: string): SafeBlockCborResponse
 
 export interface CborResponse {
   era: string
@@ -39,6 +59,7 @@ export interface CborResponse {
   collateral: Collateral
   witnesses: Witnesses
   size: number
+  cbor?: string
 }
 
 export interface Certificates {
@@ -56,7 +77,12 @@ export interface Datum {
   json: string
 }
 
-export declare function downloadBlock(nodeUrl: string, magic: number, slot: number, hash: string): Promise<Array<number>>
+export declare function downloadBlock(
+  nodeUrl: string,
+  magic: number,
+  slot: number,
+  hash: string,
+): Promise<Array<number>>
 
 export interface ExUnits {
   mem: number
@@ -87,6 +113,11 @@ export interface Redeemer {
 export interface SafeAddressResponse {
   error?: string
   address?: AddressDiagnostic
+}
+
+export interface SafeBlockCborResponse {
+  cborRes?: BlockCborResponse
+  error: string
 }
 
 export interface SafeCborResponse {

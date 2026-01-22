@@ -15,7 +15,10 @@ import {
 } from "~/app/_utils";
 import TrashRedIcon from "~/public/delete-red.svg";
 import NoContractsIcon from "~/public/no-contract.svg";
-import { addCBORsToContext, addDevnetCBORsToContext } from "../TxInput/txInput.helper";
+import {
+  addCBORsToContext,
+  addDevnetCBORsToContext,
+} from "../TxInput/txInput.helper";
 import { type INewTx } from "./multipleInputModal.interface";
 
 export interface TransactionsListProps {
@@ -29,7 +32,7 @@ export const TransactionsList = ({
   setNewTxs,
   onOpenChange,
 }: TransactionsListProps) => {
-  const { transactions, setTransactionBox } = useGraphical();
+  const { transactions, setTransactionBox, dimensions } = useGraphical();
   const { setError, setLoading } = useUI();
   const { configs } = useConfigs();
   const router = useRouter();
@@ -86,12 +89,15 @@ export const TransactionsList = ({
           transactions,
           setTransactionBox,
           setLoading,
+          { x: dimensions.width, y: dimensions.height },
         );
       } else {
         const hashesPromises = newHashes.map((hash) =>
           getCborFromHash(hash.value, configs.net, setError),
         );
-        const cbors = (await Promise.all(hashesPromises)).map(({ cbor }) => cbor);
+        const cbors = (await Promise.all(hashesPromises)).map(
+          ({ cbor }) => cbor,
+        );
         addCBORsToContext(
           OPTIONS.CBOR,
           [...newCbors, ...cbors],
@@ -100,6 +106,7 @@ export const TransactionsList = ({
           transactions,
           setTransactionBox,
           setLoading,
+          { x: dimensions.width, y: dimensions.height },
         );
       }
       setError("");

@@ -1,4 +1,4 @@
-import { type Address, isBase58 } from "@laceanatomy/types";
+import { type Address, isBech32 } from "@laceanatomy/types";
 import { normalizeAddress } from "~/app/_utils/explorer";
 import CopyButton from "./CopyButton";
 
@@ -8,12 +8,12 @@ export interface ColoredAddressProps {
 
 export default function ColoredAddress({ address }: ColoredAddressProps) {
   const normalizedAddress = normalizeAddress(address, "addr");
-  const uncoloredPrefix = isBase58(normalizedAddress)
-    ? ""
-    : `${normalizedAddress.slice(0, 12)}...${normalizedAddress.slice(-13, -5)}`;
-  const coloredSuffix = isBase58(normalizedAddress)
-    ? `${normalizedAddress.slice(0, 7)}...${normalizedAddress.slice(-7)}`
-    : normalizedAddress.slice(-5);
+  const uncoloredPrefix = isBech32(normalizedAddress)
+    ? `${normalizedAddress.slice(0, 12)}...${normalizedAddress.slice(-13, -5)}`
+    : "";
+  const coloredSuffix = isBech32(normalizedAddress)
+    ? normalizedAddress.slice(-5)
+    : `${normalizedAddress.slice(0, 7)}...${normalizedAddress.slice(-7)}`;
 
   return (
     <div className="flex items-center">

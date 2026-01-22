@@ -18,7 +18,7 @@ import { NetSelector } from "../NetSelector";
 import { addCBORsToContext, addDevnetCBORsToContext } from "./txInput.helper";
 
 export const TxInput = () => {
-  const { transactions, setTransactionBox } = useGraphical();
+  const { transactions, setTransactionBox, dimensions } = useGraphical();
   const router = useRouter();
   const { setError, setLoading } = useUI();
   const { configs, updateConfigs } = useConfigs();
@@ -44,6 +44,7 @@ export const TxInput = () => {
     const multiplesInputs = configs.query.split(",").map((tx) => tx.trim());
     const uniqueInputs = Array.from(new Set(multiplesInputs));
 
+    const size = { x: dimensions.width, y: dimensions.height };
     if (configs.net === NETWORK.DEVNET) {
       addDevnetCBORsToContext(
         Number(configs.port),
@@ -52,6 +53,7 @@ export const TxInput = () => {
         transactions,
         setTransactionBox,
         setLoading,
+        size,
       );
     } else {
       addCBORsToContext(
@@ -62,6 +64,7 @@ export const TxInput = () => {
         transactions,
         setTransactionBox,
         setLoading,
+        size,
       );
     }
 

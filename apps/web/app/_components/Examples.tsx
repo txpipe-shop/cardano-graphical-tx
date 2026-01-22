@@ -23,7 +23,7 @@ export function Examples({
   const router = useRouter();
   const { setError, setLoading } = useUI();
   const { configs, updateConfigs } = useConfigs();
-  const { transactions, setTransactionBox } = useGraphical();
+  const { transactions, setTransactionBox, dimensions } = useGraphical();
   const [query, setQuery] = useState<string>("");
   const [toGo, setToGo] = useState<string>("");
 
@@ -39,6 +39,7 @@ export function Examples({
         transactions,
         setTransactionBox,
         setLoading,
+        { x: dimensions.width, y: dimensions.height },
       );
       updateConfigs(USER_CONFIGS.QUERY, txs);
       updateConfigs(USER_CONFIGS.NET, "preprod");

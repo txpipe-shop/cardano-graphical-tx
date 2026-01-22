@@ -1,7 +1,7 @@
 "use client";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { Layer, Stage } from "react-konva";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
@@ -14,15 +14,24 @@ import {
 import Loading from "~/app/loading";
 import { Line, Transaction, Utxo } from ".";
 import { Error } from "../Error";
-export function Playground() {
-  const { transactions } = useGraphical();
+import { setPositions } from "../Input/TxInput/txInput.helper";
+
+interface PlaygroundProps {
+  /** Controls whether the playground fills the window or its parent container */
+  fillMode?: "window" | "parent";
+}
+
+export function Playground({ fillMode = "window" }: PlaygroundProps) {
+  const { transactions, dimensions, setDimensions, setTransactionBox } =
+    useGraphical();
   const { error } = useUI();
   const { configs } = useConfigs();
   const pathname = usePathname();
   const { replace } = useRouter();
   const searchParams = useSearchParams();
   const shownWarnings = useRef(new Set());
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const initialDimensionsRef = useRef({ width: 0, height: 0 });
 
   const scaleBy = 1.05;
   const MIN_SCALE = 0.1;
@@ -75,11 +84,66 @@ export function Playground() {
   };
 
   useEffect(() => {
-    setDimensions({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    });
-  }, []);
+    const updateDimensions = () => {
+      if (fillMode === "window") {
+        setDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      } else if (fillMode === "parent" && containerRef.current) {
+        const parent = containerRef.current.parentElement;
+        if (parent) {
+          const rect = parent.getBoundingClientRect();
+          setDimensions({
+            width: rect.width,
+            height: rect.height,
+          });
+        }
+      }
+    };
+
+    if (fillMode === "window") {
+      updateDimensions();
+      window.addEventListener("resize", updateDimensions);
+      return () => window.removeEventListener("resize", updateDimensions);
+    } else {
+      const parent = containerRef.current?.parentElement;
+      if (!parent) return;
+
+      const resizeObserver = new ResizeObserver(updateDimensions);
+      resizeObserver.observe(parent);
+
+      return () => resizeObserver.disconnect();
+    }
+  }, [fillMode, setDimensions]);
+
+  useEffect(() => {
+    if (
+      dimensions.width > 0 &&
+      dimensions.height > 0 &&
+      (initialDimensionsRef.current.width === 0 ||
+        initialDimensionsRef.current.height === 0) &&
+      transactions.transactions.length > 0
+    ) {
+      initialDimensionsRef.current = dimensions;
+      setTransactionBox((prev) => {
+        const newTxs = setPositions(prev.transactions, {
+          x: dimensions.width,
+          y: dimensions.height,
+        });
+        const newUtxos = { ...prev.utxos };
+        newTxs.forEach((tx) => {
+          tx.inputs.forEach((utxo) => (newUtxos[utxo.txHash] = utxo));
+          tx.outputs.forEach((utxo) => (newUtxos[utxo.txHash] = utxo));
+        });
+        return {
+          ...prev,
+          transactions: newTxs,
+          utxos: newUtxos,
+        };
+      });
+    }
+  }, [dimensions, transactions.transactions.length, setTransactionBox]);
 
   useEffect(() => {
     transactions.transactions.forEach((tx: any) => {
@@ -109,58 +173,82 @@ export function Playground() {
     });
   }, [transactions.transactions]);
 
-  if (error)
+  if (error) {
     return (
-      <Error action="fetching" goal="transaction" option={configs.option} />
+      <div
+        ref={containerRef}
+        className={
+          fillMode === "parent"
+            ? "h-full w-full border-2 border-dashed border-black"
+            : ""
+        }
+      >
+        <Error action="fetching" goal="transaction" option={configs.option} />
+      </div>
     );
-  if (dimensions.height == 0 || dimensions.width == 0) return <Loading />;
+  }
+
+  const isLoading = dimensions.height === 0 || dimensions.width === 0;
 
   return (
-    <Stage
-      width={dimensions.width}
-      height={dimensions.height}
-      onWheel={handleWheel}
-      draggable
-      className="h-auto w-full"
+    <div
+      ref={containerRef}
+      className={
+        fillMode === "parent"
+          ? "h-full w-full border-2 border-dashed border-gray-300 overflow-clip"
+          : ""
+      }
     >
-      <Layer>
-        {transactions.transactions.map((tx) => {
-          return tx.outputs.map((utxo, index) => (
-            <Line
-              key={index}
-              txHash={tx.txHash}
-              utxoHash={utxo.txHash || ""}
-              index={index}
-              isOutput
-            />
-          ));
-        })}
-        {transactions.transactions.map((tx) => {
-          return tx.inputs.map((utxo, index) => (
-            <Line
-              key={index}
-              txHash={tx.txHash}
-              utxoHash={utxo.txHash || ""}
-              index={index}
-              isReferenceInput={utxo.isReferenceInput}
-            />
-          ));
-        })}
-        {Object.keys(transactions.utxos).map((utxoHash, index) => (
-          <Utxo
-            key={index}
-            utxoHash={utxoHash}
-            utxoInfoVisible={utxoInfoVisible(utxoHash)}
-          />
-        ))}
-        {transactions.transactions.map((tx, index) => (
-          <Transaction
-            key={index}
-            txHash={tx.txHash}
-            txInfoVisible={txInfoVisible(tx.txHash)}
-          />
-        ))}
-      </Layer>
-    </Stage>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <Stage
+          width={dimensions.width}
+          height={dimensions.height}
+          onWheel={handleWheel}
+          draggable
+          className="h-auto w-full"
+        >
+          <Layer>
+            {transactions.transactions.map((tx) => {
+              return tx.outputs.map((utxo, index) => (
+                <Line
+                  key={index}
+                  txHash={tx.txHash}
+                  utxoHash={utxo.txHash || ""}
+                  index={index}
+                  isOutput
+                />
+              ));
+            })}
+            {transactions.transactions.map((tx) => {
+              return tx.inputs.map((utxo, index) => (
+                <Line
+                  key={index}
+                  txHash={tx.txHash}
+                  utxoHash={utxo.txHash || ""}
+                  index={index}
+                  isReferenceInput={utxo.isReferenceInput}
+                />
+              ));
+            })}
+            {Object.keys(transactions.utxos).map((utxoHash, index) => (
+              <Utxo
+                key={index}
+                utxoHash={utxoHash}
+                utxoInfoVisible={utxoInfoVisible(utxoHash)}
+              />
+            ))}
+            {transactions.transactions.map((tx, index) => (
+              <Transaction
+                key={index}
+                txHash={tx.txHash}
+                txInfoVisible={txInfoVisible(tx.txHash)}
+              />
+            ))}
+          </Layer>
+        </Stage>
+      )}
+    </div>
   );
 }
