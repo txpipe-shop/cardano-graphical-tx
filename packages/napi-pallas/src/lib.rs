@@ -9,6 +9,7 @@ use pallas_network::{facades::PeerClient, miniprotocols::Point};
 extern crate napi_derive;
 
 mod address;
+mod blocks;
 mod tx;
 mod utils;
 
@@ -136,12 +137,20 @@ pub struct CborResponse {
   pub collateral: Collateral,
   pub witnesses: Witnesses,
   pub size: i64,
+  pub cbor: Option<String>,
 }
 
 #[derive(Default)]
 #[napi(object)]
 pub struct SafeCborResponse {
   pub cbor_res: Option<CborResponse>,
+  pub error: String,
+}
+
+#[derive(Default)]
+#[napi(object)]
+pub struct SafeBlockCborResponse {
+  pub cbor_res: Option<blocks::BlockCborResponse>,
   pub error: String,
 }
 
@@ -162,6 +171,7 @@ impl CborResponse {
     certificates: Vec<Certificates>,
     collateral: Collateral,
     witnesses: Witnesses,
+    cbor: Option<String>,
   ) -> Self {
     Self {
       tx_hash: tx.hash().to_string(),
@@ -180,19 +190,37 @@ impl CborResponse {
       collateral,
       witnesses,
       size: tx.size() as i64,
-      ..self
+      cbor,
     }
   }
 }
 
 impl SafeCborResponse {
-  fn new() -> Self {
+  pub(crate) fn new() -> Self {
     Default::default()
   }
 
-  fn try_build<F>(mut self, func: F) -> Self
+  pub(crate) fn try_build<F>(mut self, func: F) -> Self
   where
-    F: FnOnce() -> anyhow::Result<CborResponse, String>,
+    F: FnOnce() -> Result<CborResponse, String>,
+  {
+    match func() {
+      Ok(x) => self.cbor_res = Some(x),
+      Err(x) => self.error = x,
+    };
+
+    self
+  }
+}
+
+impl SafeBlockCborResponse {
+  pub(crate) fn new() -> Self {
+    Default::default()
+  }
+
+  pub(crate) fn try_build<F>(mut self, func: F) -> Self
+  where
+    F: FnOnce() -> Result<blocks::BlockCborResponse, String>,
   {
     match func() {
       Ok(x) => self.cbor_res = Some(x),
@@ -206,6 +234,11 @@ impl SafeCborResponse {
 #[napi]
 pub fn cbor_parse(raw: String) -> SafeCborResponse {
   tx::cbor_to_tx(raw)
+}
+
+#[napi]
+pub fn cbor_parse_block(raw: String) -> SafeBlockCborResponse {
+  blocks::cbor_to_block(raw)
 }
 
 #[napi]
@@ -229,14 +262,9 @@ pub fn parse_address(raw: String) -> address::SafeAddressResponse {
 
 #[napi]
 pub async fn download_block(node_url: String, magic: u32, slot: u32, hash: String) -> Vec<u8> {
-  let mut peer = PeerClient::connect(node_url, magic as u64)
-    .await
-    .unwrap();
+  let mut peer = PeerClient::connect(node_url, magic as u64).await.unwrap();
 
-  let point = Point::Specific(
-    slot as u64,
-    hex::decode(hash).unwrap(),
-  );
+  let point = Point::Specific(slot as u64, hex::decode(hash).unwrap());
 
   peer.blockfetch().fetch_single(point).await.unwrap()
 }

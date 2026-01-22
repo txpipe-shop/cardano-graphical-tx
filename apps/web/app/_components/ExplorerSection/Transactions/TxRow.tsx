@@ -3,6 +3,7 @@ import { Button, Card, CardBody } from "@heroui/react";
 import type { cardano, Unit } from "@laceanatomy/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "~/app/_utils";
 import { formatSeconds } from "~/app/_utils/explorer";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
@@ -17,18 +18,18 @@ interface TxRowHeaderProps {
 function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
   const router = useRouter();
   const handleDissect = () => {
-    router.push(`/tx/dissect?tx=${tx.hash}&chain=${chain}`);
+    router.push(`${ROUTES.DISSECT}?tx=${tx.hash}&chain=${chain}`);
   };
 
   const handleDraw = () => {
-    router.push(`/tx/grapher?tx=${tx.hash}&chain=${chain}`);
+    router.push(`${ROUTES.GRAPHER}?tx=${tx.hash}&chain=${chain}`);
   };
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 bg-violet-100 p-4">
       <div className="flex items-center gap-2">
         <Link
-          href={`/tx/dissect?tx=${tx.hash}&chain=${chain}`}
+          href={`${ROUTES.EXPLORER_TX(tx.hash)}?chain=${chain}`}
           className="font-mono text-sm text-blue-600 hover:underline"
         >
           {tx.hash}
@@ -86,21 +87,29 @@ function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
       <div className="space-y-2">
         {utxos.map((utxo, i) => (
           <div className="rounded-lg bg-gray-100 p-2" key={i}>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 justify-between">
               {(Number(utxo.coin) / 1_000_000).toFixed(6)} ₳
               <ColoredAddress address={utxo.address} />
+              <div className="font-mono text-xs text-gray-600 flex items-center gap-1">
+                {utxo.outRef.hash.slice(0, 7)}...{utxo.outRef.hash.slice(-7)}#
+                {utxo.outRef.index.toString()}
+                <CopyButton
+                  size={12}
+                  text={`${utxo.outRef.hash}#${utxo.outRef.index}`}
+                />
+              </div>
             </div>
             {Object.keys(utxo.value).length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {Object.entries(utxo.value).map(([unit, amount]) => (
-                    <TokenPill
-                      key={unit}
-                      unit={unit as Unit}
-                      amount={amount}
-                      mint={tx.mint}
-                    />
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {Object.entries(utxo.value).map(([unit, amount]) => (
+                  <TokenPill
+                    key={unit}
+                    unit={unit as Unit}
+                    amount={amount}
+                    mint={tx.mint}
+                  />
+                ))}
+              </div>
             )}
           </div>
         ))}

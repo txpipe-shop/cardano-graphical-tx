@@ -43,7 +43,7 @@ interface IGenerateUTXO extends Utxo {
  * @returns - An object containing the bech32 address, the header type, the network type,
  * the payment part, and the kind of address (key or script).
  */
-const formatAddress = (address: string): Address | undefined => {
+export const formatAddress = (address: string): Address | undefined => {
   let hexAddress = "";
   if (!isEmpty(address)) {
     // TODO: Add base58 address decoding for byron addresses
@@ -63,7 +63,7 @@ const formatAddress = (address: string): Address | undefined => {
       };
 };
 
-const generateGraphicalUTXO = ({
+export const generateGraphicalUTXO = ({
   txHash,
   index,
   bytes,
@@ -96,7 +96,7 @@ const generateGraphicalUTXO = ({
   };
 };
 
-const parseTxToGraphical = (
+export const parseTxToGraphical = (
   txFromCbors: ITransaction[],
   existingTxs: TransactionsBox,
 ): IGraphicalTransaction[] =>
@@ -167,8 +167,9 @@ const setUtxoPosition = (
 };
 
 /** Calculates the position of the transaction on the canvas. */
-const setPositions = (
+export const setPositions = (
   transactions: IGraphicalTransaction[],
+  dimensions: { x: number; y: number },
 ): IGraphicalTransaction[] => {
   const blockWidth = 3 * TX_WIDTH;
   const blocks = new Set(transactions.map((tx) => tx.blockHeight).sort()); // Blocks containing the txs
@@ -189,12 +190,15 @@ const setPositions = (
   const maxAmountOfTxsInBLock = Math.max(
     ...Object.values(normalizedBlockIndex).map((txs) => txs.length),
   );
-  const boxSizeX = blockWidth * blocks.size - (1 / 2) * blockWidth;
-  const boxSizeY =
-    TX_HEIGHT * maxAmountOfTxsInBLock + 0.05 * window.innerHeight;
+
+  const totalWidth =
+    blocks.size * blockWidth +
+    (blocks.size > 1 ? (blocks.size - 1) * POINT_SIZE * 5 : 0);
+  const totalHeight = (maxAmountOfTxsInBLock - 1) * TX_HEIGHT * 1.5 + TX_HEIGHT;
+
   // Position of the first tx
-  const initialX = window.innerWidth / 2 - boxSizeX / 2;
-  const initialY = window.innerHeight / 2 - boxSizeY / 2;
+  const initialX = (dimensions.x - totalWidth) / 2 + TX_WIDTH;
+  const initialY = (dimensions.y - totalHeight) / 2;
 
   return transactions.map((tx) => {
     const blockIndex =
@@ -220,6 +224,58 @@ const setPositions = (
   });
 };
 
+export const setITransaction = (
+  cborTxs: ITransaction[],
+  existingTxs: TransactionsBox,
+  setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
+  setError: Dispatch<SetStateAction<string>>,
+  setLoading: Dispatch<SetStateAction<boolean>>,
+  dimensions: { x: number; y: number },
+) => {
+  try {
+    setLoading(true);
+
+    const graphicalTxs = parseTxToGraphical(cborTxs, existingTxs);
+    const positionedTxs = setPositions(
+      [...graphicalTxs, ...existingTxs.transactions],
+      dimensions,
+    );
+
+    let newUtxosObject: UtxoObject = { ...existingTxs.utxos };
+    let newTransactionsList: IGraphicalTransaction[] = [
+      ...existingTxs.transactions,
+    ];
+
+    positionedTxs.forEach((tx) => {
+      const newUtxos = [...tx.inputs, ...tx.outputs];
+      const exists = getTransaction(existingTxs)(tx.txHash);
+
+      if (exists) {
+        // If the transaction already exists, update the position and add the new UTXOs
+        const txIndex = newTransactionsList.findIndex(
+          (txMap) => txMap.txHash === exists.txHash,
+        );
+        if (txIndex !== -1)
+          newTransactionsList[txIndex] = { ...tx, pos: tx.pos };
+      } else {
+        // If the transaction doesn't exist, add it and the new UTXOs
+        newTransactionsList.push(tx);
+      }
+
+      newUtxos.forEach((utxo) => (newUtxosObject[utxo.txHash] = utxo));
+    });
+    setTransactionBox({
+      transactions: newTransactionsList,
+      utxos: newUtxosObject,
+    });
+  } catch (error: Response | any) {
+    console.error(`Error processing CBOR`, error);
+    setError(error.statusText);
+  } finally {
+    setLoading(false);
+  }
+};
+
 const setCBORs = async (
   network: NETWORK,
   uniqueInputs: string[],
@@ -227,6 +283,7 @@ const setCBORs = async (
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
   setError: Dispatch<SetStateAction<string>>,
   setLoading: Dispatch<SetStateAction<boolean>>,
+  dimensions: { x: number; y: number },
   fromHash?: boolean,
 ) => {
   try {
@@ -249,10 +306,10 @@ const setCBORs = async (
 
     const filteredCbors = cborTxs.filter((cbor) => !repeatedTxs.includes(cbor));
     const graphicalTxs = parseTxToGraphical(filteredCbors, existingTxs);
-    const positionedTxs = setPositions([
-      ...graphicalTxs,
-      ...existingTxs.transactions,
-    ]);
+    const positionedTxs = setPositions(
+      [...graphicalTxs, ...existingTxs.transactions],
+      dimensions,
+    );
 
     let newUtxosObject: UtxoObject = { ...existingTxs.utxos };
     let newTransactionsList: IGraphicalTransaction[] = [
@@ -297,6 +354,7 @@ export default async function addCBORsToContext(
   transactions: TransactionsBox,
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
   setLoading: Dispatch<SetStateAction<boolean>>,
+  dimensions: { x: number; y: number },
 ) {
   if (option === OPTIONS.HASH) {
     const hashesPromises = uniqueInputs.map((hash) =>
@@ -322,6 +380,7 @@ export default async function addCBORsToContext(
       setTransactionBox,
       setError,
       setLoading,
+      dimensions,
       true,
     );
   } else {
@@ -332,6 +391,7 @@ export default async function addCBORsToContext(
       setTransactionBox,
       setError,
       setLoading,
+      dimensions,
       false,
     );
   }

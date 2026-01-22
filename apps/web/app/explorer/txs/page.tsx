@@ -6,6 +6,7 @@ import {
   TxTable,
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
+import Loading from "~/app/loading";
 import {
   getDbSyncProvider,
   isValidChain,
@@ -16,7 +17,7 @@ interface ExplorerPageProps {
   searchParams: Promise<{ chain?: string; page?: string }>;
 }
 
-const PAGE_SIZE = 500n;
+const PAGE_SIZE = 10n;
 
 async function TransactionsList({
   chain,
@@ -60,16 +61,7 @@ async function TransactionsList({
   }
 }
 
-function LoadingState() {
-  return (
-    <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200 p-8 shadow-md">
-      <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-violet-600" />
-      <span className="text-gray-500">Loading transactions...</span>
-    </div>
-  );
-}
-
-export default async function ExplorerPage({
+export default async function ExplorerTxsPage({
   searchParams,
 }: ExplorerPageProps) {
   const params = await searchParams;
@@ -83,7 +75,6 @@ export default async function ExplorerPage({
       <Header />
 
       <main className="container mx-auto px-4 py-6">
-        {/* Page Header */}
         <div className="mb-6 flex flex-col gap-4">
           <h1 className="text-4xl font-extrabold text-gray-800">
             Transactions
@@ -98,7 +89,7 @@ export default async function ExplorerPage({
           </div>
         </div>
 
-        <Suspense fallback={<LoadingState />}>
+        <Suspense fallback={<Loading />}>
           <TransactionsList chain={chain} page={page} />
         </Suspense>
       </main>

@@ -18,7 +18,7 @@ import { NetSelector } from "../NetSelector";
 import addCBORsToContext from "./txInput.helper";
 
 export const TxInput = () => {
-  const { transactions, setTransactionBox } = useGraphical();
+  const { transactions, setTransactionBox, dimensions } = useGraphical();
   const router = useRouter();
   const { setError, setLoading } = useUI();
   const { configs, updateConfigs } = useConfigs();
@@ -49,6 +49,7 @@ export const TxInput = () => {
       transactions,
       setTransactionBox,
       setLoading,
+      { x: dimensions.width, y: dimensions.height },
     );
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
   }
