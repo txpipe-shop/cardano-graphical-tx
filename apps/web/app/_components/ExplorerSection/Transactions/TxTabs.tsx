@@ -11,7 +11,6 @@ import {
   parseTxToGraphical,
   setITransaction,
 } from "../../Input/TxInput/txInput.helper";
-import { type ChainNetwork } from "../ChainSelector";
 import TxCbor from "./TxCbor";
 import TxDatum from "./TxDatum";
 import TxOverview from "./TxOverview";
@@ -30,7 +29,6 @@ interface TxTabsProps {
   tx: ITransaction;
   cardanoTx: cardano.Tx;
   cbor: string;
-  chain: ChainNetwork;
   tab: Tabs;
 }
 
@@ -38,7 +36,6 @@ export default function TxTabs({
   tx,
   cardanoTx,
   cbor: initialCbor,
-  chain,
   tab: initialTab,
 }: TxTabsProps) {
   const [active, setActive] = useState<Tabs>(initialTab);
