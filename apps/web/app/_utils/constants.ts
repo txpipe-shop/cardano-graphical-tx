@@ -1,8 +1,11 @@
 import JSONbig from "json-bigint";
+import { type ChainNetwork } from "~/server/api/dbsync-provider";
 
 export const ROUTES = {
   HOME: "/",
-  EXPLORER: "/explorer",
+  EXPLORER_TXS: (chain: ChainNetwork) => `/explorer/${chain}/txs`,
+  EXPLORER_TX: (chain: ChainNetwork, hash: string) =>
+    `/explorer/${chain}/txs/${hash}`,
   GRAPHER: "/tx/grapher",
   TX: "/tx",
   ADDRESS: "/address",

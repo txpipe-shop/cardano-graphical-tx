@@ -12,6 +12,7 @@ export {
   addManyValues,
   hexToBech32,
   isBase58,
+  isBech32,
   bech32ToHex,
   hexToAscii,
   isHexString,

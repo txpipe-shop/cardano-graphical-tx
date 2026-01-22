@@ -47,7 +47,8 @@ export const Header = () => {
             variant="flat"
             className="p-5 font-mono text-lg shadow-md"
             as={NextLink}
-            href={ROUTES.EXPLORER}
+            // TODO: add network from local storage
+            href={ROUTES.EXPLORER_TXS("mainnet")}
           >
             Explorer
           </Button>

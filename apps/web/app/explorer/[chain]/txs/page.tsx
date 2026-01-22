@@ -6,6 +6,8 @@ import {
   TxTable,
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
+import { ROUTES } from "~/app/_utils";
+import Loading from "~/app/loading";
 import {
   getDbSyncProvider,
   isValidChain,
@@ -13,10 +15,11 @@ import {
 } from "~/server/api/dbsync-provider";
 
 interface ExplorerPageProps {
-  searchParams: Promise<{ chain?: string; page?: string }>;
+  params: { chain: string };
+  searchParams: { page?: string };
 }
 
-const PAGE_SIZE = 500n;
+const PAGE_SIZE = 10n;
 
 async function TransactionsList({
   chain,
@@ -42,6 +45,7 @@ async function TransactionsList({
       <div className="space-y-4">
         <TxTable transactions={result.data} chain={chain} />
         <Pagination
+          basePath={ROUTES.EXPLORER_TXS(chain)}
           currentPage={currentPage}
           totalPages={Math.max(totalPages, 1)}
         />
@@ -60,22 +64,13 @@ async function TransactionsList({
   }
 }
 
-function LoadingState() {
-  return (
-    <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200 p-8 shadow-md">
-      <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-violet-600" />
-      <span className="text-gray-500">Loading transactions...</span>
-    </div>
-  );
-}
-
-export default async function ExplorerPage({
+export default async function ExplorerTxsPage({
+  params,
   searchParams,
 }: ExplorerPageProps) {
-  const params = await searchParams;
   const chainParam = params.chain || "mainnet";
   const chain: ChainNetwork = isValidChain(chainParam) ? chainParam : "mainnet";
-  const pageParam = Number.parseInt(params.page ?? "1", 10);
+  const pageParam = Number.parseInt(searchParams.page ?? "1", 10);
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
   return (
@@ -83,7 +78,6 @@ export default async function ExplorerPage({
       <Header />
 
       <main className="container mx-auto px-4 py-6">
-        {/* Page Header */}
         <div className="mb-6 flex flex-col gap-4">
           <h1 className="text-4xl font-extrabold text-gray-800">
             Transactions
@@ -98,7 +92,7 @@ export default async function ExplorerPage({
           </div>
         </div>
 
-        <Suspense fallback={<LoadingState />}>
+        <Suspense fallback={<Loading />}>
           <TransactionsList chain={chain} page={page} />
         </Suspense>
       </main>

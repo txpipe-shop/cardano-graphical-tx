@@ -1,29 +1,51 @@
 import { DbSyncProvider } from "@laceanatomy/cardano-provider-dbsync";
 import pg from "pg";
+import { env } from "~/app/env.mjs";
 
 export type ChainNetwork = "mainnet" | "preprod" | "preview" | "vector-mainnet";
 
 const poolCache: Map<ChainNetwork, pg.Pool> = new Map();
 
 function getConnectionString(chain: ChainNetwork): string {
-  // TODO: Vector network doesn't have its own dbsync yet, redirect to mainnet
-  // Remove this fallback when Vector dbsync is available
   if (chain === "vector-mainnet") {
-    console.warn(
-      "[DBSYNC] Vector network not available, falling back to mainnet",
-    );
-    return process.env.MAINNET_DB_SYNC || "";
+    return env.VECTOR_MAINNET_DB_SYNC || "";
   }
 
   switch (chain) {
     case "mainnet":
-      return process.env.MAINNET_DB_SYNC || "";
+      return env.MAINNET_DB_SYNC || "";
     case "preprod":
-      return process.env.PREPROD_DB_SYNC || "";
+      return env.PREPROD_DB_SYNC || "";
     case "preview":
-      return process.env.PREVIEW_DB_SYNC || "";
+      return env.PREVIEW_DB_SYNC || "";
     default:
-      return process.env.MAINNET_DB_SYNC || "";
+      return env.MAINNET_DB_SYNC || "";
+  }
+}
+
+function getNetworkMagic(chain: ChainNetwork): number {
+  switch (chain) {
+    case "mainnet":
+      return env.MAINNET_MAGIC;
+    case "preprod":
+      return env.PREPROD_MAGIC;
+    case "preview":
+      return env.PREVIEW_MAGIC;
+    case "vector-mainnet":
+      return env.VECTOR_MAINNET_MAGIC;
+  }
+}
+
+function getNodeUrl(chain: ChainNetwork): string {
+  switch (chain) {
+    case "mainnet":
+      return env.MAINNET_NODE_URL;
+    case "preprod":
+      return env.PREPROD_NODE_URL;
+    case "preview":
+      return env.PREVIEW_NODE_URL;
+    case "vector-mainnet":
+      return env.VECTOR_MAINNET_NODE_URL;
   }
 }
 
@@ -63,10 +85,23 @@ function getPool(chain: ChainNetwork): pg.Pool {
 export function getDbSyncProvider(chain: ChainNetwork): DbSyncProvider {
   const pool = getPool(chain);
   const addrPrefix = getAddressPrefix(chain);
+  const nodeUrl = getNodeUrl(chain);
+  const magic = getNetworkMagic(chain);
 
-  return new DbSyncProvider({ pool, addrPrefix });
+  return new DbSyncProvider({
+    pool,
+    addrPrefix,
+    nodeUrl,
+    magic,
+  });
 }
 
 export function isValidChain(chain: string): chain is ChainNetwork {
-  return ["mainnet", "preprod", "preview", "vector"].includes(chain);
+  const chains: ChainNetwork[] = [
+    "mainnet",
+    "preprod",
+    "preview",
+    "vector-mainnet",
+  ];
+  return chains.includes(chain as ChainNetwork);
 }

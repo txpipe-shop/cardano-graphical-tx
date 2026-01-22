@@ -2,6 +2,7 @@ import { Pool } from 'pg';
 import { EpochsResponse, Epoch as EpochApi } from '../types';
 import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
 import { Epoch } from '@laceanatomy/provider-core';
+import { env } from '../env';
 
 function mapEpoch(epoch: Epoch): EpochsResponse['epochs'][number] {
   const endTime = new Date(epoch.endTime * 1000);
@@ -29,7 +30,12 @@ export async function listEpochs(
   offset: bigint,
   pool: Pool
 ): Promise<EpochsResponse> {
-  const provider = new DbSyncProvider({ pool, addrPrefix: 'addr' });
+  const provider = new DbSyncProvider({
+    pool,
+    addrPrefix: 'addr',
+    magic: env.MAGIC,
+    nodeUrl: env.NODE_URL
+  });
   const epochs = await provider.getEpochs({ limit, offset, query: undefined });
 
   return {
@@ -44,7 +50,12 @@ export async function listEpochs(
 }
 
 export async function resolveEpoch(epochNo: bigint, pool: Pool): Promise<EpochApi> {
-  const provider = new DbSyncProvider({ pool, addrPrefix: 'addr' });
+  const provider = new DbSyncProvider({
+    pool,
+    addrPrefix: 'addr',
+    magic: env.MAGIC,
+    nodeUrl: env.NODE_URL
+  });
 
   const epoch = await provider.getEpoch({ epochNo });
 

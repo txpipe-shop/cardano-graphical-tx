@@ -5,15 +5,12 @@ import {
   WASI as __WASI,
 } from '@napi-rs/wasm-runtime'
 
-
-
 const __wasi = new __WASI({
   version: 'preview1',
 })
 
 const __wasmUrl = new URL('./napi-pallas.wasm32-wasi.wasm', import.meta.url).href
 const __emnapiContext = __emnapiGetDefaultContext()
-
 
 const __sharedMemory = new WebAssembly.Memory({
   initial: 4000,
@@ -57,6 +54,7 @@ const {
 })
 export default __napiModule.exports
 export const cborParse = __napiModule.exports.cborParse
+export const cborParseBlock = __napiModule.exports.cborParseBlock
 export const downloadBlock = __napiModule.exports.downloadBlock
 export const parseAddress = __napiModule.exports.parseAddress
 export const parseDatumInfo = __napiModule.exports.parseDatumInfo
