@@ -28,7 +28,7 @@ export const TransactionsList = ({
   setNewTxs,
   onOpenChange,
 }: TransactionsListProps) => {
-  const { transactions, setTransactionBox } = useGraphical();
+  const { transactions, setTransactionBox, dimensions } = useGraphical();
   const { setError, setLoading } = useUI();
   const { configs } = useConfigs();
   const router = useRouter();
@@ -88,6 +88,7 @@ export const TransactionsList = ({
         transactions,
         setTransactionBox,
         setLoading,
+        { x: dimensions.width, y: dimensions.height },
       );
       setError("");
       router.push(ROUTES.GRAPHER);

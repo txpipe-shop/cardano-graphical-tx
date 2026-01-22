@@ -26,7 +26,9 @@ const EnvSchema = z.object({
     if (v === undefined) return false;
     if (typeof v === 'string') return v.toLowerCase() === 'true';
     return Boolean(v);
-  }, z.boolean().default(false))
+  }, z.boolean().default(false)),
+  MAGIC: z.coerce.number(),
+  NODE_URL: z.string()
 });
 
 type Env = z.infer<typeof EnvSchema>;

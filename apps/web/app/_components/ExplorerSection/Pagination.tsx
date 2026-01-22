@@ -7,11 +7,13 @@ import { useMemo } from "react";
 export interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
+  basePath: string;
 }
 
 export default function Pagination({
   currentPage,
   totalPages,
+  basePath,
 }: PaginationControlsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -42,7 +44,7 @@ export default function Pagination({
     }
 
     const query = params.toString();
-    router.push(query ? `/explorer?${query}` : "/explorer");
+    router.push(query ? `${basePath}?${query}` : basePath);
   };
 
   return (

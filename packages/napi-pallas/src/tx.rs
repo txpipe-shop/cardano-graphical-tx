@@ -7,21 +7,21 @@ use pallas::ledger::traverse::{
   MultiEraCert, MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer,
 };
 use pallas_crypto::hash::Hasher;
-use pallas_primitives::conway::{VKeyWitness};
+use pallas_primitives::conway::VKeyWitness;
 use std::collections::HashMap;
 
 use pallas::ledger::{
-  primitives::{ToCanonicalJson},
+  primitives::ToCanonicalJson,
   traverse::{ComputeHash, MultiEraTx},
 };
-use pallas_codec::utils::{KeyValuePairs};
+use pallas_codec::utils::KeyValuePairs;
 use pallas_primitives::{
   alonzo::RedeemerTag,
   conway::{Metadatum, RedeemerTag as RedeemerTagConway},
   Fragment,
 };
 
-fn get_inputs(inputs: &Vec<MultiEraInput<'_>>) -> Vec<Input> {
+pub(crate) fn get_inputs(inputs: &Vec<MultiEraInput<'_>>) -> Vec<Input> {
   inputs
     .iter()
     .map(|i| Input {
@@ -61,7 +61,7 @@ fn build_assets_with_same_policy(asset: MultiEraPolicyAssets<'_>) -> Assets {
   }
 }
 
-fn get_outputs(tx: &MultiEraTx<'_>) -> Result<Vec<Utxo>, String> {
+pub(crate) fn get_outputs(tx: &MultiEraTx<'_>) -> Result<Vec<Utxo>, String> {
   tx.outputs()
     .iter()
     .enumerate()
@@ -76,13 +76,10 @@ fn get_outputs(tx: &MultiEraTx<'_>) -> Result<Vec<Utxo>, String> {
         bytes: hex::encode(o.encode()),
         address: address.to_string(),
         lovelace: o.value().coin() as i64,
-        datum: o
-          .datum()
-          .map(|x: DatumOption| build_datum(x)),
+        datum: o.datum().map(|x: DatumOption| build_datum(x)),
         script_ref: o
           .script_ref()
-          .map(|x| x.encode_fragment().ok().map(hex::encode))
-          .flatten(),
+          .and_then(|x| x.encode_fragment().ok().map(hex::encode)),
         assets: o
           .value()
           .assets()
@@ -94,7 +91,7 @@ fn get_outputs(tx: &MultiEraTx<'_>) -> Result<Vec<Utxo>, String> {
     .collect()
 }
 
-fn get_mints(tx: &MultiEraTx<'_>) -> Vec<Assets> {
+pub(crate) fn get_mints(tx: &MultiEraTx<'_>) -> Vec<Assets> {
   tx.mints()
     .into_iter()
     .map(|x| Assets {
@@ -105,7 +102,7 @@ fn get_mints(tx: &MultiEraTx<'_>) -> Vec<Assets> {
         .map(|asset| Asset {
           asset_name: hex::encode(asset.name()),
           asset_name_ascii: asset.to_ascii_name(),
-          amount: asset.mint_coin().map(|x| x as i64),
+          amount: asset.mint_coin(),
         })
         .collect(),
     })
@@ -149,7 +146,7 @@ fn map_to_hashmap(map: &KeyValuePairs<Metadatum, Metadatum>) -> HashMap<String, 
     .collect()
 }
 
-fn get_metadata(tx: &MultiEraTx<'_>) -> Vec<Metadata> {
+pub(crate) fn get_metadata(tx: &MultiEraTx<'_>) -> Vec<Metadata> {
   match tx.metadata().as_alonzo() {
     Some(metadata) => metadata
       .iter()
@@ -174,7 +171,7 @@ fn get_metadata(tx: &MultiEraTx<'_>) -> Vec<Metadata> {
   }
 }
 
-fn get_withdrawals(tx: &MultiEraTx<'_>) -> Vec<Withdrawal> {
+pub(crate) fn get_withdrawals(tx: &MultiEraTx<'_>) -> Vec<Withdrawal> {
   match tx.withdrawals().as_alonzo() {
     Some(withdrawals) => withdrawals
       .iter()
@@ -190,7 +187,7 @@ fn get_withdrawals(tx: &MultiEraTx<'_>) -> Vec<Withdrawal> {
   }
 }
 
-fn get_certificates(tx: &MultiEraTx<'_>) -> Vec<Certificates> {
+pub(crate) fn get_certificates(tx: &MultiEraTx<'_>) -> Vec<Certificates> {
   tx.certs()
     .iter()
     .map(|cert| match cert {
@@ -210,7 +207,7 @@ fn get_certificates(tx: &MultiEraTx<'_>) -> Vec<Certificates> {
     .collect()
 }
 
-fn get_collaterals(tx: &MultiEraTx<'_>) -> Collateral {
+pub(crate) fn get_collaterals(tx: &MultiEraTx<'_>) -> Collateral {
   Collateral {
     total: tx.total_collateral().map(|x| x as i64),
     collateral_return: tx
@@ -273,13 +270,9 @@ fn build_redeemer(r: &MultiEraRedeemer<'_>) -> Redeemer {
   }
 }
 
-fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
+pub(crate) fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
   Witnesses {
-    vkey_witnesses: tx
-      .vkey_witnesses()
-      .iter()
-      .map(|wit| build_witness(wit))
-      .collect(),
+    vkey_witnesses: tx.vkey_witnesses().iter().map(build_witness).collect(),
     redeemers: tx.redeemers().iter().map(|x| build_redeemer(x)).collect(),
     plutus_data: tx
       .plutus_data()
@@ -290,50 +283,51 @@ fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
         json: x.to_json().to_string(),
       })
       .collect(),
-    plutus_v1_scripts: tx
-      .plutus_v1_scripts()
-      .iter()
-      .map(|x| hex::encode(x))
-      .collect(),
-    plutus_v2_scripts: tx
-      .plutus_v2_scripts()
-      .iter()
-      .map(|x| hex::encode(x))
-      .collect(),
-    plutus_v3_scripts: tx
-      .plutus_v3_scripts()
-      .iter()
-      .map(|x| hex::encode(x))
-      .collect(),
+    plutus_v1_scripts: tx.plutus_v1_scripts().iter().map(hex::encode).collect(),
+    plutus_v2_scripts: tx.plutus_v2_scripts().iter().map(hex::encode).collect(),
+    plutus_v3_scripts: tx.plutus_v3_scripts().iter().map(hex::encode).collect(),
   }
+}
+
+pub(crate) fn parse_tx_from_multiera(
+  tx: &MultiEraTx<'_>,
+  include_cbor: bool,
+) -> Result<CborResponse, String> {
+  let inputs = get_inputs(&tx.inputs());
+  let reference_inputs = get_inputs(&tx.reference_inputs());
+  let outputs = get_outputs(tx)?;
+  let mints = get_mints(tx);
+  let metadata = get_metadata(tx);
+  let withdrawals = get_withdrawals(tx);
+  let certificates = get_certificates(tx);
+  let collateral = get_collaterals(tx);
+  let witnesses = get_witnesses(tx);
+
+  let cbor = if include_cbor {
+    Some(hex::encode(tx.encode()))
+  } else {
+    None
+  };
+
+  Ok(CborResponse::new().with_cbor_attr(
+    tx.clone(),
+    inputs,
+    reference_inputs,
+    outputs,
+    mints,
+    metadata,
+    withdrawals,
+    certificates,
+    collateral,
+    witnesses,
+    cbor,
+  ))
 }
 
 pub fn cbor_to_tx(raw: String) -> SafeCborResponse {
   SafeCborResponse::new().try_build(|| {
     let cbor = hex::decode(raw).map_err(|e| format!("Failed to decode hex. {}", e))?;
     let tx = MultiEraTx::decode(&cbor).map_err(|e| format!("Failed to decode tx. {}", e))?;
-
-    let inputs: Vec<Input> = get_inputs(&tx.inputs());
-    let reference_inputs: Vec<Input> = get_inputs(&tx.reference_inputs());
-    let outputs: Vec<Utxo> = get_outputs(&tx)?;
-    let mints: Vec<Assets> = get_mints(&tx);
-    let metadata: Vec<Metadata> = get_metadata(&tx);
-    let withdrawals: Vec<Withdrawal> = get_withdrawals(&tx);
-    let certificates: Vec<Certificates> = get_certificates(&tx);
-    let collateral = get_collaterals(&tx);
-    let witnesses = get_witnesses(&tx);
-
-    Ok(CborResponse::new().with_cbor_attr(
-      tx,
-      inputs,
-      reference_inputs,
-      outputs,
-      mints,
-      metadata,
-      withdrawals,
-      certificates,
-      collateral,
-      witnesses,
-    ))
+    parse_tx_from_multiera(&tx, false)
   })
 }

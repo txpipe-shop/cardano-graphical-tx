@@ -23,19 +23,27 @@ import type { Pool, PoolClient } from 'pg';
 import { mapTx, mapUtxo } from './mappers';
 import { SQLQuery } from './sql';
 import type * as QueryTypes from './types/queries';
+import { cborParseBlock, downloadBlock } from '@laceanatomy/napi-pallas';
+import assert from 'assert';
 
 export type DbSyncParams = {
   pool: Pool;
   addrPrefix: string;
+  nodeUrl: string;
+  magic: number;
 };
 
 export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano> {
   private pool: Pool;
+  private nodeUrl: string;
+  private magic: number;
   private addrPrefix: string;
 
-  constructor({ pool, addrPrefix }: DbSyncParams) {
+  constructor({ pool, addrPrefix, nodeUrl, magic }: DbSyncParams) {
     this.pool = pool;
     this.addrPrefix = addrPrefix;
+    this.nodeUrl = nodeUrl;
+    this.magic = magic;
   }
 
   private async getClient(): Promise<PoolClient> {
@@ -166,8 +174,17 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     }
   }
 
-  async getCBOR({ hash }: TxReq): Promise<string> {
-    return '';
+  async getCBOR(txReq: TxReq): Promise<HexString> {
+    const tx = await this.getTx(txReq);
+    const blockCbor = new Buffer(
+      await downloadBlock(this.nodeUrl, this.magic, Number(tx.block.slot), tx.block.hash)
+    ).toString('hex');
+    const safeCbor = cborParseBlock(blockCbor);
+    assert(!safeCbor.error, safeCbor.error);
+    const cborParsed = safeCbor.cborRes!;
+    const parsedTx = cborParsed.transactions.find((x) => x.txHash === txReq.hash);
+    assert(parsedTx && parsedTx.cbor, `Cbor for tx not found`);
+    return HexString(parsedTx.cbor);
   }
 
   private parseBlockFilter(query: TxsReq['query']): [Hash | null, bigint | null, bigint | null] {

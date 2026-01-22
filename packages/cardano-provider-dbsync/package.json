@@ -31,6 +31,7 @@
   "dependencies": {
     "@laceanatomy/provider-core": "workspace:*",
     "@laceanatomy/types": "workspace:*",
+    "@laceanatomy/napi-pallas": "workspace:*",
     "pg": "^8.13.1"
   },
   "devDependencies": {
