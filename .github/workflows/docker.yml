@@ -27,6 +27,8 @@ jobs:
         run: |
           docker build \
             -f Dockerfile \
+            --build-arg NEXT_PUBLIC_CBOR_ENDPOINT=${{ secrets.NEXT_PUBLIC_CBOR_ENDPOINT }} \
+            --build-arg NEXT_PUBLIC_GA_TRACKING_ID=${{ secrets.NEXT_PUBLIC_GA_TRACKING_ID }} \
             -t nicolasluduena/utxo-explorer:ui-${COMMIT_HASH} \
             -t nicolasluduena/utxo-explorer:ui-${{ github.ref_name }} . \
             --progress=plain
