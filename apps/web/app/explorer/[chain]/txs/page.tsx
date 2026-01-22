@@ -6,13 +6,13 @@ import {
   TxTable,
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
+import { ROUTES } from "~/app/_utils";
 import Loading from "~/app/loading";
 import {
   getDbSyncProvider,
   isValidChain,
   type ChainNetwork,
 } from "~/server/api/dbsync-provider";
-import { ROUTES } from "~/app/_utils";
 
 interface ExplorerPageProps {
   params: { chain: string };

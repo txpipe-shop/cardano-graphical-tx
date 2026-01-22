@@ -111,10 +111,7 @@ export default function TxScripts({ tx }: { tx: cardano.Tx }) {
             label="CPU"
             value={formatNumber(activeRedeemer.unitSteps)}
           />
-          <DetailItem
-            label="Fee"
-            value={formatNumber(activeRedeemer.fee)}
-          />
+          <DetailItem label="Fee" value={formatNumber(activeRedeemer.fee)} />
         </div>
       </CardBody>
     </Card>

@@ -7,16 +7,25 @@ import { loadPageData } from "./_utils";
 
 interface Props {
   params: { chain: string; hash: string };
-  searchParams?: { tab?: string; datumTab?: string };
+  searchParams?: { tab?: string };
 }
 
-const TABS = ["Overview", "Diagram", "Dissect", "CBOR", "Datum", "Scripts"] as const;
+const TABS = [
+  "Overview",
+  "Diagram",
+  "Dissect",
+  "CBOR",
+  "Datum",
+  "Scripts",
+] as const;
 type TxTab = (typeof TABS)[number];
 
 function resolveTab(tab?: string): TxTab {
   if (!tab) return "Overview";
   const normalized = tab.toLowerCase();
-  const match = TABS.find((candidate) => candidate.toLowerCase() === normalized);
+  const match = TABS.find(
+    (candidate) => candidate.toLowerCase() === normalized,
+  );
   return match ?? "Overview";
 }
 
@@ -24,7 +33,7 @@ export default async function TxPage({ params, searchParams }: Props) {
   const hash = params.hash;
   const chainParam = params.chain || "mainnet";
   const chain: ChainNetwork = isValidChain(chainParam) ? chainParam : "mainnet";
-  const tabParam = searchParams?.tab ?? searchParams?.datumTab;
+  const tabParam = searchParams?.tab;
   const tab = resolveTab(tabParam);
 
   try {

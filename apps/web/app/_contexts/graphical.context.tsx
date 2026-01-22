@@ -15,9 +15,9 @@ const GraphicalContext = createContext<IGraphicalContext>({
     transactions: [],
     utxos: {},
   },
-  setTransactionBox: () => { },
+  setTransactionBox: () => {},
   dimensions: { width: 0, height: 0 },
-  setDimensions: () => { },
+  setDimensions: () => {},
 });
 
 export const useGraphical = () => {
