@@ -97,5 +97,11 @@ export function getDbSyncProvider(chain: ChainNetwork): DbSyncProvider {
 }
 
 export function isValidChain(chain: string): chain is ChainNetwork {
-  return ["mainnet", "preprod", "preview", "vector"].includes(chain);
+  const chains: ChainNetwork[] = [
+    "mainnet",
+    "preprod",
+    "preview",
+    "vector-mainnet",
+  ];
+  return chains.includes(chain as ChainNetwork);
 }
