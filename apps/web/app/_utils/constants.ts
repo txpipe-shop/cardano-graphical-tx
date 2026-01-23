@@ -6,10 +6,10 @@ export const ROUTES = {
   EXPLORER_TXS: (chain: ChainNetwork) => `/explorer/${chain}/txs`,
   EXPLORER_TX: (chain: ChainNetwork, hash: string) =>
     `/explorer/${chain}/txs/${hash}`,
-  GRAPHER: "/tx/grapher",
-  TX: "/tx",
+  TX: (chain?: NETWORK) => `/tx${chain ? `/${chain}` : ""}`,
+  GRAPHER: (chain: NETWORK, hash?: string) => `/tx/${chain}/grapher${hash ? `/${hash}` : ""}`,
+  DISSECT: (chain: NETWORK, hash?: string) => `/tx/${chain}/dissect${hash ? `?hash=${hash}` : ""}`,
   ADDRESS: "/address",
-  DISSECT: "/tx/dissect",
 };
 
 export type ROUTES = (typeof ROUTES)[keyof typeof ROUTES];
@@ -150,9 +150,10 @@ export const AddressExamples = [
 ];
 
 export const TxExamples = [
-  { title: "Draw CBOR", code: cbor1 },
-  { title: "Draw Tx Hash", code: hash1 },
-  { title: "Dissect CBOR", code: cbor1 },
-  { title: "Dissect Tx Hash", code: hash2 },
-  { title: "Draw Multiple Tx Hashes", code: multipleHashes },
+  { title: "Draw CBOR", code: cbor1, network: NETWORK.PREPROD },
+  { title: "Draw Tx Hash", code: hash1, network: NETWORK.PREPROD },
+  { title: "Dissect CBOR", code: cbor1, network: NETWORK.PREPROD },
+  { title: "Dissect Tx Hash", code: hash2, network: NETWORK.PREPROD },
+  { title: "Draw Multiple Tx Hashes", code: multipleHashes, network: NETWORK.PREPROD },
 ];
+export type TxExample = (typeof TxExamples)[number];

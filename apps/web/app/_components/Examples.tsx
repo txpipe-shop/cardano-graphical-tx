@@ -5,11 +5,11 @@ import { useEffect, useState } from "react";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   AddressExamples,
-  NETWORK,
   OPTIONS,
   ROUTES,
+  TxExample,
   TxExamples,
-  USER_CONFIGS,
+  USER_CONFIGS
 } from "~/app/_utils";
 import { addCBORsToContext } from "./Input/TxInput/txInput.helper";
 
@@ -28,13 +28,16 @@ export function Examples({
   const [toGo, setToGo] = useState<string>("");
 
   const handleClick =
-    (title: string, option: OPTIONS, txs: string) => async () => {
+    (example: TxExample) => async () => {
+      const { title, network, code: txs } = example;
+      const option = title.endsWith("CBOR") ? OPTIONS.CBOR : OPTIONS.HASH;
+
       const multiplesInputs = txs.split(",").map((tx) => tx.trim());
       const uniqueInputs = Array.from(new Set(multiplesInputs));
       addCBORsToContext(
         option,
         uniqueInputs,
-        NETWORK.PREPROD,
+        network,
         setError,
         transactions,
         setTransactionBox,
@@ -42,10 +45,13 @@ export function Examples({
         { x: dimensions.width, y: dimensions.height },
       );
       updateConfigs(USER_CONFIGS.QUERY, txs);
-      updateConfigs(USER_CONFIGS.NET, "preprod");
+      updateConfigs(USER_CONFIGS.NET, network);
       updateConfigs(USER_CONFIGS.OPTION, option);
       setQuery(txs);
-      setToGo(title.startsWith("Draw") ? ROUTES.GRAPHER : ROUTES.DISSECT);
+      setToGo(
+        title.startsWith("Draw")
+          ? ROUTES.GRAPHER(network, undefined)
+          : ROUTES.DISSECT(network, option === OPTIONS.HASH ? uniqueInputs[0] : undefined));
     };
 
   const handleAddressClick = async (raw: string) => {
@@ -68,11 +74,7 @@ export function Examples({
               key={index}
               type="submit"
               className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-gray-100 p-4 text-left shadow"
-              onClick={handleClick(
-                example.title,
-                example.title.endsWith("CBOR") ? OPTIONS.CBOR : OPTIONS.HASH,
-                example.code,
-              )}
+              onClick={handleClick(example)}
             >
               <h3 className="text-xl">{example.title}</h3>
 

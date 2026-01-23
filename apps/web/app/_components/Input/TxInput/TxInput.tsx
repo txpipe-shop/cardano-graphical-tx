@@ -1,97 +1,75 @@
 "use client";
 
 import {
-  Button as NextButton,
+  Button as HeroButton,
   Select,
   SelectItem,
-  useDisclosure,
+  useDisclosure
 } from "@heroui/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { type ChangeEvent, useEffect, useState } from "react";
 import { Button, Input } from "~/app/_components";
-import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
-import { isEmpty, NETWORK, OPTIONS, ROUTES, USER_CONFIGS } from "~/app/_utils";
+import { useConfigs, useUI } from "~/app/_contexts";
+import { isEmpty, OPTIONS, ROUTES, USER_CONFIGS } from "~/app/_utils";
 import MultipleTxIcon from "~/public/multiple-txs.svg";
 import { MultipleInputModal } from "../MultipleInputModal/MultipleInputModal";
 import { NetSelector } from "../NetSelector";
-import { addCBORsToContext, addDevnetCBORsToContext } from "./txInput.helper";
+
+const FUNCTIONS = {
+  DRAW: "draw",
+  DISSECT: "dissect",
+} as const;
+type Functions = (typeof FUNCTIONS)[keyof typeof FUNCTIONS];
 
 export const TxInput = () => {
-  const { transactions, setTransactionBox, dimensions } = useGraphical();
   const router = useRouter();
-  const { error, setError, setLoading } = useUI();
+
   const { configs, updateConfigs } = useConfigs();
-  const [toGo, setToGo] = useState<string>("");
+  const { error } = useUI();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const changeRaw = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateConfigs(USER_CONFIGS.QUERY, e.target.value);
-  };
+  const disabledButton = !isEmpty(error) || !configs.query;
 
-  useEffect(() => {
-    updateConfigs(USER_CONFIGS.QUERY, configs.query);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>, fn: Functions) => {
     e.preventDefault();
     if (!configs.query) return;
-
-    router.push(toGo);
-    setError("");
 
     const multiplesInputs = configs.query.split(",").map((tx) => tx.trim());
     const uniqueInputs = Array.from(new Set(multiplesInputs));
 
-    const size = { x: dimensions.width, y: dimensions.height };
-    if (configs.net === NETWORK.DEVNET) {
-      addDevnetCBORsToContext(
-        configs.option,
-        Number(configs.port),
-        uniqueInputs,
-        setError,
-        transactions,
-        setTransactionBox,
-        setLoading,
-        size,
-      );
-    } else {
-      addCBORsToContext(
-        configs.option,
-        uniqueInputs,
-        configs.net,
-        setError,
-        transactions,
-        setTransactionBox,
-        setLoading,
-        size,
-      );
+    if (configs.option === OPTIONS.HASH && fn === FUNCTIONS.DISSECT) {
+      const hash = uniqueInputs[0];
+      router.push(ROUTES.DISSECT(configs.net, hash));
+    } else if (configs.option === OPTIONS.HASH && fn === FUNCTIONS.DRAW) {
+      console.log("TODO")
+    } else if (configs.option === OPTIONS.CBOR && fn === FUNCTIONS.DRAW) {
+      console.log("TODO")
+    } else if (configs.option === OPTIONS.CBOR && fn === FUNCTIONS.DISSECT) {
+      // Para CBOR, navegar sin hash en query params
+      // La página de dissect verificará config.query y config.option
+      router.push(ROUTES.DISSECT(configs.net));
     }
-
-    updateConfigs(USER_CONFIGS.QUERY, configs.query);
   }
 
-  const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {
-    if (!isEmpty(e.target.value))
-      updateConfigs(USER_CONFIGS.OPTION, e.target.value as OPTIONS);
-  };
+  const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    updateConfigs(USER_CONFIGS.QUERY, e.target.value);
+  }
 
-  const changeGoTo = (route: string) => () => {
-    setToGo(route);
-  };
+  const handleChangeSelectedOption = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateConfigs(USER_CONFIGS.OPTION, e.target.value as OPTIONS);
+  }
 
   return (
     <div className="z-40 flex items-center justify-end pt-2">
       <form
-        onSubmit={handleSubmit}
         className="mr-3 flex w-full items-center justify-center gap-4"
       >
         <NetSelector network={configs.net} />
         <Input
           name="tx-input"
           value={configs.query}
-          onChange={changeRaw}
+          onChange={handleChangeInput}
           placeholder="Enter CBOR or hash for any Cardano Tx"
           startContent={
             <Select
@@ -99,7 +77,7 @@ export const TxInput = () => {
               selectedKeys={[configs.option]}
               size="sm"
               className="w-1/6"
-              onChange={changeSelectedOption}
+              onChange={handleChangeSelectedOption}
               color="primary"
               labelPlacement="outside"
             >
@@ -109,7 +87,7 @@ export const TxInput = () => {
           }
         />
         <abbr title="Add multiple transactions">
-          <NextButton
+          <HeroButton
             isIconOnly
             size="md"
             variant="flat"
@@ -117,16 +95,16 @@ export const TxInput = () => {
             onPress={onOpen}
           >
             <Image src={MultipleTxIcon} alt="Search" />
-          </NextButton>
+          </HeroButton>
         </abbr>
         <MultipleInputModal isOpen={isOpen} onOpenChange={onOpenChange} />
-        <Button type="submit" onClick={changeGoTo(ROUTES.GRAPHER)} disabled={error !== ""}>
+        <Button onClick={(e) => handleSubmit(e, FUNCTIONS.DRAW)} disabled={disabledButton}>
           Draw
         </Button>
-        <Button type="submit" onClick={changeGoTo(ROUTES.DISSECT)} disabled={error !== ""} >
+        <Button onClick={(e) => handleSubmit(e, FUNCTIONS.DISSECT)} disabled={disabledButton} >
           Dissect
         </Button>
       </form>
     </div>
   );
-};
+}

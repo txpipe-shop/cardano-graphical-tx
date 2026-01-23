@@ -31,7 +31,7 @@ export const Header = () => {
             variant="flat"
             className="p-5 font-mono text-lg shadow-md"
             as={NextLink}
-            href={ROUTES.TX}
+            href={ROUTES.TX()}
           >
             Transaction
           </Button>

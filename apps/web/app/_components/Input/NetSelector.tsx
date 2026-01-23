@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Chip,
   Popover,
@@ -5,9 +7,10 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from "@heroui/react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useConfigs, useUI } from "~/app/_contexts";
-import { DEFAULT_DEVNET_PORT, NETWORK, USER_CONFIGS } from "~/app/_utils";
+import { DEFAULT_DEVNET_PORT, NETWORK, ROUTES, USER_CONFIGS } from "~/app/_utils";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface NetSelectorProps {
@@ -52,10 +55,12 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
   const { configs, updateConfigs } = useConfigs();
   const { isOpen, onClose, onOpenChange } = useDisclosure();
   const { setError } = useUI();
+  const router = useRouter();
 
   const handleClick = (network: NETWORK) => () => {
     updateConfigs(USER_CONFIGS.NET, network);
     onClose();
+    router.push(ROUTES.TX(network));
   };
 
   const handlePortChange = (port: string) => {
