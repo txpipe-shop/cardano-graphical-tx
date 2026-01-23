@@ -44,9 +44,11 @@ describe('DbSyncProvider', () => {
         slot: undefined!
       },
       address: {
-        withUtxos: 'addr1q8z6ty5v2yk5crjpdx7rswru92lhlryxh7xwc9mfzdmg855kn8exqdeytyq2uvd88av4l05qrpnh4aynhj6mtpetczys0jr0a0',
+        withUtxos:
+          'addr1q8z6ty5v2yk5crjpdx7rswru92lhlryxh7xwc9mfzdmg855kn8exqdeytyq2uvd88av4l05qrpnh4aynhj6mtpetczys0jr0a0',
         withNativeAssets: undefined,
-        empty: 'addr1qxqs59lphg8g6qndelq8xwqn60ag3aeyfcp33c2kdp46a09re5df3pzwwmyq946axfcejy5n4x0y99wqpgtp2gd0k09qsgy6pz'
+        empty:
+          'addr1qxqs59lphg8g6qndelq8xwqn60ag3aeyfcp33c2kdp46a09re5df3pzwwmyq946axfcejy5n4x0y99wqpgtp2gd0k09qsgy6pz'
       }
     },
     cleanup: async (provider) => {

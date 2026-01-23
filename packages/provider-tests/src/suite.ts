@@ -7,7 +7,15 @@ import {
   CardanoEpochsApi,
   Configuration
 } from '@laceanatomy/blockfrost-sdk';
-import { cardano, Hash, Unit, Address, DatumType, hexToBech32, HexString } from '@laceanatomy/types';
+import {
+  cardano,
+  Hash,
+  Unit,
+  Address,
+  DatumType,
+  hexToBech32,
+  HexString
+} from '@laceanatomy/types';
 import { toEqualBfTx } from './matchers/toEqualBfTx';
 import { toEqualBfBlock } from './matchers/toEqualBfBlock';
 import { toEqualBfEpoch } from './matchers/toEqualBfEpoch';
@@ -102,7 +110,9 @@ export function defineProviderSuite(options: ProviderTestSuiteOptions) {
 
           for (const tx of page.data) {
             const { data: bfTx } = await bfClient.transactions.txsHashGet(tx.hash.toString());
-            const { data: bfUtxos } = await bfClient.transactions.txsHashUtxosGet(tx.hash.toString());
+            const { data: bfUtxos } = await bfClient.transactions.txsHashUtxosGet(
+              tx.hash.toString()
+            );
             expect(tx).toEqualBfTx({ tx: bfTx, utxos: bfUtxos });
           }
         });
@@ -167,12 +177,18 @@ export function defineProviderSuite(options: ProviderTestSuiteOptions) {
     describe('Blocks', () => {
       describe('getBlocks', () => {
         it('should fetch paginated blocks and match Blockfrost', async () => {
-          const result = await provider.getBlocks({ limit: 3n, offset: undefined, query: undefined });
+          const result = await provider.getBlocks({
+            limit: 3n,
+            offset: undefined,
+            query: undefined
+          });
           expect(result.data.length).toBeLessThanOrEqual(3);
           expect(result.data.length).toBeGreaterThan(0);
 
           for (const block of result.data) {
-            const { data: bfBlock } = await bfClient.blocks.blocksHashOrNumberGet(block.hash.toString());
+            const { data: bfBlock } = await bfClient.blocks.blocksHashOrNumberGet(
+              block.hash.toString()
+            );
             expect(block).toEqualBfBlock(bfBlock);
           }
         });
@@ -199,7 +215,9 @@ export function defineProviderSuite(options: ProviderTestSuiteOptions) {
           }
 
           const block = await provider.getBlock({ height });
-          const { data: bfBlock } = await bfClient.blocks.blocksHashOrNumberGet(block.hash.toString());
+          const { data: bfBlock } = await bfClient.blocks.blocksHashOrNumberGet(
+            block.hash.toString()
+          );
           expect(block).toEqualBfBlock(bfBlock);
         });
       });
@@ -231,11 +249,11 @@ export function defineProviderSuite(options: ProviderTestSuiteOptions) {
           const address = Address(addressStr);
           const funds = await provider.getAddressFunds({ address });
 
-          const { data: bfAddress } = await bfClient.addresses.addressesAddressGet(
-            addressStr
-          );
+          const { data: bfAddress } = await bfClient.addresses.addressesAddressGet(addressStr);
 
-          const bfLovelace = BigInt(bfAddress.amount.find((a) => a.unit === 'lovelace')?.quantity || '0');
+          const bfLovelace = BigInt(
+            bfAddress.amount.find((a) => a.unit === 'lovelace')?.quantity || '0'
+          );
           expect(funds.value[Unit('lovelace')]).toBe(bfLovelace);
 
           // Check other assets
@@ -274,7 +292,9 @@ export function defineProviderSuite(options: ProviderTestSuiteOptions) {
             const bfUtxo = bfUtxoMap.get(key);
             expect(bfUtxo).toBeDefined();
             if (bfUtxo) {
-              const bfCoin = BigInt(bfUtxo.amount.find((a: any) => a.unit === 'lovelace')?.quantity || '0');
+              const bfCoin = BigInt(
+                bfUtxo.amount.find((a: any) => a.unit === 'lovelace')?.quantity || '0'
+              );
               expect(utxo.coin).toBe(bfCoin);
             }
           }

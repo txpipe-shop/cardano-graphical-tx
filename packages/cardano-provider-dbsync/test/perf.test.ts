@@ -73,7 +73,9 @@ definePerformanceSuite({
           await provider.getTxs({
             limit: 5n,
             query: {
-              address: Address('addr1q8z6ty5v2yk5crjpdx7rswru92lhlryxh7xwc9mfzdmg855kn8exqdeytyq2uvd88av4l05qrpnh4aynhj6mtpetczys0jr0a0')
+              address: Address(
+                'addr1q8z6ty5v2yk5crjpdx7rswru92lhlryxh7xwc9mfzdmg855kn8exqdeytyq2uvd88av4l05qrpnh4aynhj6mtpetczys0jr0a0'
+              )
             }
           });
         } catch (e) {
@@ -101,7 +103,9 @@ definePerformanceSuite({
           await provider.getAddressUTxOs({
             limit: 50n,
             query: {
-              address: Address('addr1q8z6ty5v2yk5crjpdx7rswru92lhlryxh7xwc9mfzdmg855kn8exqdeytyq2uvd88av4l05qrpnh4aynhj6mtpetczys0jr0a0')
+              address: Address(
+                'addr1q8z6ty5v2yk5crjpdx7rswru92lhlryxh7xwc9mfzdmg855kn8exqdeytyq2uvd88av4l05qrpnh4aynhj6mtpetczys0jr0a0'
+              )
             }
           });
         } catch (e) {

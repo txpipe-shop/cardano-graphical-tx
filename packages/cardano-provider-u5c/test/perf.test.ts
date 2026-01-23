@@ -6,17 +6,17 @@ import { createGrpcTransport } from '@connectrpc/connect-node';
 let config: TestEnv;
 
 definePerformanceSuite({
-    providerName: 'U5CProvider',
-    createProvider: async () => {
-        config = testEnv.parse(process.env);
-        const transport = createGrpcTransport({
-            baseUrl: config.U5C_URL,
-            httpVersion: '2',
-        });
-        return new U5CProvider({ transport });
-    },
-    scenarios: [
-        /*
+  providerName: 'U5CProvider',
+  createProvider: async () => {
+    config = testEnv.parse(process.env);
+    const transport = createGrpcTransport({
+      baseUrl: config.U5C_URL,
+      httpVersion: '2'
+    });
+    return new U5CProvider({ transport });
+  },
+  scenarios: [
+    /*
         {
             name: 'getLatestTx',
             run: async (provider) => {
@@ -36,10 +36,10 @@ definePerformanceSuite({
             }
         }
         */
-    ],
-    options: {
-        duration: 5000,
-        warmup: 2000,
-        concurrency: 10
-    }
+  ],
+  options: {
+    duration: 5000,
+    warmup: 2000,
+    concurrency: 10
+  }
 });

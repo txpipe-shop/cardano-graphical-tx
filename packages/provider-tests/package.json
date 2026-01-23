@@ -1,41 +1,41 @@
 {
-    "name": "@laceanatomy/provider-tests",
-    "version": "0.0.1",
-    "private": false,
-    "type": "module",
-    "license": "MIT",
-    "main": "./dist/index.js",
-    "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js",
-            "require": "./dist/index.js"
-        }
-    },
-    "files": [
-        "dist"
-    ],
-    "scripts": {
-        "build": "tsc",
-        "dev": "tsc --watch",
-        "lint": "tsc --noEmit",
-        "check": "tsc --noEmit",
-        "clean": "rm -rf dist"
-    },
-    "publishConfig": {
-        "access": "public"
-    },
-    "dependencies": {
-        "@laceanatomy/provider-core": "workspace:*",
-        "@laceanatomy/types": "workspace:*",
-        "@laceanatomy/blockfrost-sdk": "workspace:*",
-        "vitest": "^2.1.8"
-    },
-    "devDependencies": {
-        "@laceanatomy/typescript-config": "workspace:*",
-        "@types/node": "^22.10.1",
-        "typescript": "^5.0.0"
+  "name": "@laceanatomy/provider-tests",
+  "version": "0.0.1",
+  "private": false,
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
     }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@laceanatomy/provider-core": "workspace:*",
+    "@laceanatomy/types": "workspace:*",
+    "@laceanatomy/blockfrost-sdk": "workspace:*",
+    "vitest": "^2.1.8"
+  },
+  "devDependencies": {
+    "@laceanatomy/typescript-config": "workspace:*",
+    "@types/node": "^22.10.1",
+    "typescript": "^5.0.0"
+  }
 }
