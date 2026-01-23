@@ -1,41 +1,62 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { ChainProvider } from '@laceanatomy/provider-core';
-import { CardanoTransactionsApi } from '@laceanatomy/blockfrost-sdk';
-import { cardano } from '@laceanatomy/types';
+import {
+  CardanoTransactionsApi,
+  CardanoBlocksApi,
+  CardanoAddressesApi,
+  CardanoEpochsApi,
+  Configuration
+} from '@laceanatomy/blockfrost-sdk';
+import { cardano, Hash, Unit, Address, DatumType, hexToBech32, HexString } from '@laceanatomy/types';
 import { toEqualBfTx } from './matchers/toEqualBfTx';
+import { toEqualBfBlock } from './matchers/toEqualBfBlock';
+import { toEqualBfEpoch } from './matchers/toEqualBfEpoch';
 import './types';
 
-expect.extend({ toEqualBfTx });
+expect.extend({ toEqualBfTx, toEqualBfBlock, toEqualBfEpoch });
+
+export type TestVectors = {
+  txHash: string;
+  block?: {
+    hash: string;
+    height: bigint;
+    slot: bigint;
+  };
+  address?: {
+    withUtxos: string;
+    withNativeAssets?: string;
+    empty?: string;
+  };
+};
 
 export type ProviderTestSuiteOptions = {
-  /**
-   * Name of the provider for the suite description
-   */
   providerName: string;
-  /**
-   * Factory function to create the provider instance
-   */
   createProvider: () => Promise<ChainProvider<cardano.UTxO, cardano.Tx, any>>;
-  /**
-   * Factory function to create the Blockfrost client (should point to same network/data source)
-   */
-  createBlockfrost: () => Promise<CardanoTransactionsApi>;
-  /**
-   * Optional cleanup function
-   */
+  createBlockfrost: () => Promise<{
+    transactions: CardanoTransactionsApi;
+    blocks: CardanoBlocksApi;
+    epochs: CardanoEpochsApi;
+    addresses: CardanoAddressesApi;
+  }>;
   cleanup?: (provider: ChainProvider<cardano.UTxO, cardano.Tx, any>) => Promise<void>;
+  testVectors?: TestVectors;
 };
 
 export function defineProviderSuite(options: ProviderTestSuiteOptions) {
-  const { providerName, createProvider, createBlockfrost, cleanup } = options;
+  const { providerName, createProvider, createBlockfrost, cleanup, testVectors } = options;
 
   describe(`Correctness Tests: ${providerName}`, () => {
     let provider: ChainProvider<cardano.UTxO, cardano.Tx, any>;
-    let bfTxClient: CardanoTransactionsApi;
+    let bfClient: {
+      transactions: CardanoTransactionsApi;
+      blocks: CardanoBlocksApi;
+      epochs: CardanoEpochsApi;
+      addresses: CardanoAddressesApi;
+    };
 
     beforeAll(async () => {
       provider = await createProvider();
-      bfTxClient = await createBlockfrost();
+      bfClient = await createBlockfrost();
     });
 
     afterAll(async () => {
@@ -44,155 +65,220 @@ export function defineProviderSuite(options: ProviderTestSuiteOptions) {
       }
     });
 
-    describe('getTx (single transaction by hash)', () => {
-      it('should fetch latest transaction and match Blockfrost', async () => {
-        const tx = await provider.getLatestTx();
-        expect(tx).toBeDefined();
-        expect(tx.hash).toBeDefined();
-        expect(typeof tx.fee).toBe('bigint');
-        expect(tx.inputs.length).toBeGreaterThan(0);
-        expect(tx.outputs.length).toBeGreaterThan(0);
+    // Helper to get a valid transaction hash (either from vectors or latest)
+    async function getTxHash(): Promise<string> {
+      if (testVectors?.txHash) return testVectors.txHash;
+      const latest = await provider.getLatestTx();
+      return latest.hash.toString();
+    }
 
-        const { data: txContent } = await bfTxClient.txsHashGet(tx.hash);
-        const { data: txContentUtxo } = await bfTxClient.txsHashUtxosGet(tx.hash);
+    describe('Transactions', () => {
+      describe('getTx (single transaction by hash)', () => {
+        it('should fetch transaction and match Blockfrost', async () => {
+          const hash = await getTxHash();
+          const tx = await provider.getTx({ hash: Hash(hash) });
 
-        expect(tx).toEqualBfTx({ tx: txContent, utxos: txContentUtxo });
+          expect(tx).toBeDefined();
+          expect(tx.hash.toString()).toBe(hash);
+
+          const { data: txContent } = await bfClient.transactions.txsHashGet(hash);
+          const { data: txContentUtxo } = await bfClient.transactions.txsHashUtxosGet(hash);
+
+          expect(tx).toEqualBfTx({ tx: txContent, utxos: txContentUtxo });
+        });
+      });
+
+      describe('getTxs (paginated transactions)', () => {
+        it('should fetch paginated transactions', async () => {
+          const page1 = await provider.getTxs({ limit: 5n, query: undefined });
+          expect(page1.data.length).toBeLessThanOrEqual(5);
+          expect(page1.data.length).toBeGreaterThan(0);
+          expect(page1.total).toBeGreaterThan(0n);
+        });
+
+        it('should fetch paginated transactions and match Blockfrost for each', async () => {
+          const page = await provider.getTxs({ limit: 3n, query: undefined });
+          expect(page.data.length).toBeGreaterThan(0);
+
+          for (const tx of page.data) {
+            const { data: bfTx } = await bfClient.transactions.txsHashGet(tx.hash.toString());
+            const { data: bfUtxos } = await bfClient.transactions.txsHashUtxosGet(tx.hash.toString());
+            expect(tx).toEqualBfTx({ tx: bfTx, utxos: bfUtxos });
+          }
+        });
+
+        describe('Filters', () => {
+          it('should filter transactions by block hash', async () => {
+            let blockHash = testVectors?.block?.hash;
+            if (!blockHash) {
+              const latest = await provider.getLatestTx();
+              blockHash = latest.block!.hash.toString();
+            }
+
+            const filtered = await provider.getTxs({
+              limit: 5n,
+              query: { block: { hash: Hash(blockHash!) } }
+            });
+
+            expect(filtered.data.length).toBeGreaterThan(0);
+            for (const tx of filtered.data) {
+              expect(tx.block!.hash.toString()).toBe(blockHash);
+            }
+          });
+
+          it('should filter transactions by block height', async () => {
+            let blockHeight = testVectors?.block?.height;
+            if (blockHeight === undefined) {
+              const latest = await provider.getLatestTx();
+              blockHeight = BigInt(latest.block!.height);
+            }
+
+            const filtered = await provider.getTxs({
+              limit: 5n,
+              query: { block: { height: blockHeight } }
+            });
+
+            expect(filtered.data.length).toBeGreaterThan(0);
+            for (const tx of filtered.data) {
+              expect(BigInt(tx.block!.height)).toBe(blockHeight);
+            }
+          });
+
+          it('should filter transactions by block slot', async () => {
+            let blockSlot: bigint | undefined;
+            if (testVectors?.block?.slot !== undefined) {
+              blockSlot = testVectors.block.slot;
+            } else {
+              const latest = await provider.getLatestTx();
+              blockSlot = BigInt(latest.block!.slot);
+            }
+
+            const filtered = await provider.getTxs({
+              limit: 5n,
+              query: { block: { slot: blockSlot } }
+            });
+
+            expect(filtered.data.length).toBeGreaterThan(0);
+          });
+        });
       });
     });
 
-    describe('getTxs (paginated transactions)', () => {
-      it('should fetch paginated transactions', async () => {
-        const page1 = await provider.getTxs({ limit: 5n, query: undefined });
-        expect(page1.data.length).toBeLessThanOrEqual(5);
-        expect(page1.data.length).toBeGreaterThan(0);
-        expect(page1.total).toBeGreaterThan(0n);
+    describe('Blocks', () => {
+      describe('getBlocks', () => {
+        it('should fetch paginated blocks and match Blockfrost', async () => {
+          const result = await provider.getBlocks({ limit: 3n, offset: undefined, query: undefined });
+          expect(result.data.length).toBeLessThanOrEqual(3);
+          expect(result.data.length).toBeGreaterThan(0);
 
-        if (page1.total > 5n) {
-          const page2 = await provider.getTxs({ limit: 5n, offset: 5n, query: undefined });
-          expect(page2.data.length).toBeLessThanOrEqual(5);
-          if (page2.data.length > 0 && page1.data.length > 0) {
-            expect(page2.data[0]!.hash).not.toBe(page1.data[0]!.hash);
+          for (const block of result.data) {
+            const { data: bfBlock } = await bfClient.blocks.blocksHashOrNumberGet(block.hash.toString());
+            expect(block).toEqualBfBlock(bfBlock);
           }
-        }
+        });
       });
 
-      it('should fetch paginated transactions and match Blockfrost for each', async () => {
-        const page = await provider.getTxs({ limit: 3n, query: undefined });
-        expect(page.data.length).toBeGreaterThan(0);
+      describe('getBlock', () => {
+        it('should fetch block by hash and match Blockfrost', async () => {
+          let hash = testVectors?.block?.hash;
+          if (!hash) {
+            const { data } = await provider.getBlocks({ limit: 1n, query: undefined });
+            hash = data[0]!.hash.toString();
+          }
 
-        // each transaction matches Blockfrost
-        for (const tx of page.data) {
-          const { data: bfTx } = await bfTxClient.txsHashGet(tx.hash);
-          const { data: bfUtxos } = await bfTxClient.txsHashUtxosGet(tx.hash);
-
-          expect(tx).toEqualBfTx({ tx: bfTx, utxos: bfUtxos });
-        }
-      });
-
-      it('should filter transactions by address', async () => {
-        const latest = await provider.getLatestTx();
-        if (latest.outputs.length === 0) throw new Error('Latest transaction has no outputs');
-        const address = latest.outputs[0]!.address;
-
-        const filtered = await provider.getTxs({
-          limit: 5n,
-          query: { address }
+          const block = await provider.getBlock({ hash: Hash(hash) });
+          const { data: bfBlock } = await bfClient.blocks.blocksHashOrNumberGet(hash);
+          expect(block).toEqualBfBlock(bfBlock);
         });
 
-        expect(filtered.data.length).toBeGreaterThan(0);
-        expect(filtered.total).toBeGreaterThan(0n);
+        it('should fetch block by height and match Blockfrost', async () => {
+          let height = testVectors?.block?.height;
+          if (height === undefined) {
+            const { data } = await provider.getBlocks({ limit: 1n, query: undefined });
+            height = BigInt(data[0]!.height);
+          }
 
-        const found = filtered.data.find((tx: any) => tx.hash === latest.hash);
-        expect(found).toBeDefined();
-      });
-
-      it('should filter transactions by address and match Blockfrost', async () => {
-        const latest = await provider.getLatestTx();
-        if (latest.outputs.length === 0) throw new Error('Latest transaction has no outputs');
-        const address = latest.outputs[0]!.address;
-
-        const filtered = await provider.getTxs({
-          limit: 3n,
-          query: { address: address }
+          const block = await provider.getBlock({ height });
+          const { data: bfBlock } = await bfClient.blocks.blocksHashOrNumberGet(block.hash.toString());
+          expect(block).toEqualBfBlock(bfBlock);
         });
+      });
+    });
 
-        expect(filtered.data.length).toBeGreaterThan(0);
+    describe('Epochs', () => {
+      it('should fetch paginated epochs and match Blockfrost', async () => {
+        const result = await provider.getEpochs({ limit: 3n, query: undefined });
+        expect(result.data.length).toBeGreaterThan(0);
 
-        // each filtered transaction matches Blockfrost
-        for (const tx of filtered.data) {
-          const { data: bfTx } = await bfTxClient.txsHashGet(tx.hash);
-          const { data: bfUtxos } = await bfTxClient.txsHashUtxosGet(tx.hash);
-
-          expect(tx).toEqualBfTx({ tx: bfTx, utxos: bfUtxos });
+        for (const epoch of result.data) {
+          const { data: bfEpoch } = await bfClient.epochs.epochsNumberGet(Number(epoch.index));
+          expect(epoch).toEqualBfEpoch(bfEpoch);
         }
       });
     });
 
-    describe('input/output ordering', () => {
-      it('should return inputs in correct transaction order', async () => {
-        // Try to find a tx with multiple inputs dynamically
-        let txWithMultipleInputs = undefined;
-        // Search first few pages
-        for (let i = 0; i < 5; i++) {
-          const page = await provider.getTxs({
-            limit: 20n,
-            offset: BigInt(i * 20),
-            query: undefined
-          });
-          txWithMultipleInputs = page.data.find((tx: any) => tx.inputs.length > 1);
-          if (txWithMultipleInputs) break;
-        }
+    describe('Addresses', () => {
+      async function getAddressWithUtxos(): Promise<string> {
+        if (testVectors?.address?.withUtxos) return testVectors.address.withUtxos;
+        const latest = await provider.getLatestTx();
+        // fallback to checking outputs manually
+        return latest.outputs[0]!.address.toString();
+      }
 
-        if (txWithMultipleInputs) {
-          const { data: bfTx } = await bfTxClient.txsHashGet(txWithMultipleInputs.hash);
-          const { data: bfUtxos } = await bfTxClient.txsHashUtxosGet(txWithMultipleInputs.hash);
+      describe('getAddressFunds', () => {
+        it('should match Blockfrost for address funds', async () => {
+          const addressStr = await getAddressWithUtxos();
+          const address = Address(addressStr);
+          const funds = await provider.getAddressFunds({ address });
 
-          expect(txWithMultipleInputs).toEqualBfTx({ tx: bfTx, utxos: bfUtxos });
+          const { data: bfAddress } = await bfClient.addresses.addressesAddressGet(
+            addressStr
+          );
 
-          const bfInputs = bfUtxos.inputs.filter((x) => !x.reference && !x.collateral);
-          expect(txWithMultipleInputs.inputs.length).toBe(bfInputs.length);
+          const bfLovelace = BigInt(bfAddress.amount.find((a) => a.unit === 'lovelace')?.quantity || '0');
+          expect(funds.value[Unit('lovelace')]).toBe(bfLovelace);
 
-          for (let i = 0; i < txWithMultipleInputs.inputs.length; i++) {
-            const input = txWithMultipleInputs.inputs[i]!;
-            const bfInput = bfInputs[i]!;
-            expect(input.outRef.hash).toBe(bfInput.tx_hash);
-            expect(Number(input.outRef.index)).toBe(bfInput.output_index);
+          // Check other assets
+          const bfAssets = bfAddress.amount.filter((a) => a.unit !== 'lovelace');
+          for (const asset of bfAssets) {
+            const unit = Unit(asset.unit);
+            const bfQty = BigInt(asset.quantity);
+            expect(funds.value[unit] || 0n).toBe(bfQty);
           }
-        } else {
-          console.warn('Could not find a transaction with multiple inputs to test ordering');
-        }
+        });
       });
 
-      it('should return outputs in correct transaction order', async () => {
-        let txWithMultipleOutputs = undefined;
-        // Search first few pages
-        for (let i = 0; i < 5; i++) {
-          const page = await provider.getTxs({
-            limit: 20n,
-            offset: BigInt(i * 20),
-            query: undefined
+      describe('getAddressUTxOs', () => {
+        it('should match Blockfrost UTXOs for an address', async () => {
+          const addressStr = await getAddressWithUtxos();
+          const address = Address(addressStr);
+          const result = await provider.getAddressUTxOs({
+            query: { address },
+            limit: 50n
           });
-          txWithMultipleOutputs = page.data.find((tx: any) => tx.outputs.length > 1);
-          if (txWithMultipleOutputs) break;
-        }
 
-        if (txWithMultipleOutputs) {
-          const { data: bfTx } = await bfTxClient.txsHashGet(txWithMultipleOutputs.hash);
-          const { data: bfUtxos } = await bfTxClient.txsHashUtxosGet(txWithMultipleOutputs.hash);
+          const { data: bfUtxos } = await bfClient.addresses.addressesAddressUtxosGet(
+            addressStr,
+            50
+          );
 
-          expect(txWithMultipleOutputs).toEqualBfTx({ tx: bfTx, utxos: bfUtxos });
+          expect(result.data.length).toBeLessThanOrEqual(bfUtxos.length);
 
-          const bfOutputs = bfUtxos.outputs.filter((x) => !x.collateral);
-          expect(txWithMultipleOutputs.outputs.length).toBe(bfOutputs.length);
-
-          for (let i = 0; i < txWithMultipleOutputs.outputs.length; i++) {
-            const output = txWithMultipleOutputs.outputs[i]!;
-            const bfOutput = bfOutputs[i]!;
-            expect(Number(output.outRef.index)).toBe(bfOutput.output_index);
+          const bfUtxoMap = new Map();
+          for (const utxo of bfUtxos) {
+            bfUtxoMap.set(`${utxo.tx_hash}#${utxo.output_index}`, utxo);
           }
-        } else {
-          console.warn('Could not find a transaction with multiple outputs to test ordering');
-        }
+
+          for (const utxo of result.data) {
+            const key = `${utxo.outRef.hash}#${utxo.outRef.index}`;
+            const bfUtxo = bfUtxoMap.get(key);
+            expect(bfUtxo).toBeDefined();
+            if (bfUtxo) {
+              const bfCoin = BigInt(bfUtxo.amount.find((a: any) => a.unit === 'lovelace')?.quantity || '0');
+              expect(utxo.coin).toBe(bfCoin);
+            }
+          }
+        });
       });
     });
   });

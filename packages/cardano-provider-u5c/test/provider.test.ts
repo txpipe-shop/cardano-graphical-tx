@@ -1,6 +1,12 @@
 import { describe } from 'vitest';
 import { U5CProvider } from '../src/index';
-import { CardanoTransactionsApi, Configuration } from '@laceanatomy/blockfrost-sdk';
+import {
+    CardanoTransactionsApi,
+    CardanoBlocksApi,
+    CardanoEpochsApi,
+    CardanoAddressesApi,
+    Configuration
+} from '@laceanatomy/blockfrost-sdk';
 import { testEnv, TestEnv } from './setup';
 import { defineProviderSuite } from '@laceanatomy/provider-tests';
 import { createGrpcTransport } from '@connectrpc/connect-node';
@@ -20,10 +26,16 @@ describe('U5CProvider', () => {
         },
         createBlockfrost: async () => {
             config = testEnv.parse(process.env);
-            return new CardanoTransactionsApi(new Configuration({
+            const bfConfig = new Configuration({
                 basePath: config.BF_URL,
                 apiKey: config.BF_PID
-            }));
+            });
+            return {
+                transactions: new CardanoTransactionsApi(bfConfig),
+                blocks: new CardanoBlocksApi(bfConfig),
+                epochs: new CardanoEpochsApi(bfConfig),
+                addresses: new CardanoAddressesApi(bfConfig)
+            };
         }
     });
 });
