@@ -28,7 +28,7 @@ export function definePerformanceSuite(options: PerformanceSuiteOptions) {
     describe(`Performance Tests: ${providerName}`, () => {
 
         for (const scenario of scenarios) {
-            it(`Benchmark: ${scenario.name}`, async () => {
+            it(`Benchmark: ${scenario.name}`, { timeout: config.duration + config.warmup + 5000 }, async () => {
                 // Create a pool of providers for concurrency simulation
                 // Ideally we might want one provider instance or multiple depending on what we track.
                 // Usually providers are stateless or singletons, so one instance is often enough.
@@ -90,7 +90,7 @@ export function definePerformanceSuite(options: PerformanceSuiteOptions) {
                 } finally {
                     if (cleanup) await cleanup(provider);
                 }
-            }, { timeout: config.duration + config.warmup + 5000 });
+            });
         }
     });
 }

@@ -24,6 +24,7 @@
     "check": "tsc --noEmit",
     "clean": "rm -rf dist",
     "test": "vitest run",
+    "test:perf": "vitest run test/perf.test.ts",
     "coverage": "vitest run --coverage"
   },
   "publishConfig": {

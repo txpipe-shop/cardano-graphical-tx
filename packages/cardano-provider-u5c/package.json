@@ -27,7 +27,8 @@
     "dev": "tsc --watch",
     "lint": "tsc --noEmit",
     "check": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:perf": "vitest run test/perf.test.ts"
   },
   "publishConfig": {
     "access": "public"
