@@ -264,6 +264,33 @@ export function defineProviderSuite(options: ProviderTestSuiteOptions) {
             expect(funds.value[unit] || 0n).toBe(bfQty);
           }
         });
+
+        it('should return firstSeen and lastSeen stats for an active address', async () => {
+          const addressStr = await getAddressWithUtxos();
+          const address = Address(addressStr);
+          const funds = await provider.getAddressFunds({ address });
+
+          expect(funds).toBeDefined();
+          expect(funds.firstSeen).toBeDefined();
+          expect(funds.lastSeen).toBeDefined();
+
+          if (funds.firstSeen) {
+            expect(typeof funds.firstSeen.blockHeight).toBe('bigint');
+            expect(typeof funds.firstSeen.slot).toBe('bigint');
+            expect(typeof funds.firstSeen.hash).toBe('string');
+          }
+
+          if (funds.lastSeen) {
+            expect(typeof funds.lastSeen.blockHeight).toBe('bigint');
+            expect(typeof funds.lastSeen.slot).toBe('bigint');
+            expect(typeof funds.lastSeen.hash).toBe('string');
+          }
+
+          // Logic check: first seen block height should be <= last seen block height
+          if (funds.firstSeen && funds.lastSeen) {
+            expect(funds.firstSeen.blockHeight).toBeLessThanOrEqual(funds.lastSeen.blockHeight);
+          }
+        });
       });
 
       describe('getAddressUTxOs', () => {

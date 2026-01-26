@@ -107,17 +107,17 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         txCount: BigInt(row.txCount || '0'),
         firstSeen: row.firstSeen
           ? {
-            blockHeight: BigInt(row.firstSeen.height),
-            slot: BigInt(row.firstSeen.slot),
-            hash: Hash(row.firstSeen.hash)
-          }
+              blockHeight: BigInt(row.firstSeen.height),
+              slot: BigInt(row.firstSeen.slot),
+              hash: Hash(row.firstSeen.hash)
+            }
           : undefined,
         lastSeen: row.lastSeen
           ? {
-            blockHeight: BigInt(row.lastSeen.height),
-            slot: BigInt(row.lastSeen.slot),
-            hash: Hash(row.lastSeen.hash)
-          }
+              blockHeight: BigInt(row.lastSeen.height),
+              slot: BigInt(row.lastSeen.slot),
+              hash: Hash(row.lastSeen.hash)
+            }
           : undefined
       };
     } finally {
