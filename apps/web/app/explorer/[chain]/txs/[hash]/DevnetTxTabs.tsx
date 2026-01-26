@@ -98,7 +98,7 @@ export default function DevnetTxTabs({ hash, tab }: DevnetTxTabsProps) {
 
   if (loading) {
     return (
-      <div className="rounded-lg border-2 border-dashed border-gray-200 p-8 text-center text-gray-600">
+      <div className="w-full rounded-lg border-2 border-dashed border-gray-200 p-8 text-center text-gray-600">
         Loading transaction...
       </div>
     );
@@ -106,7 +106,7 @@ export default function DevnetTxTabs({ hash, tab }: DevnetTxTabsProps) {
 
   if (error || !data) {
     return (
-      <div className="rounded-lg border-2 border-dashed border-red-300 bg-red-50 p-8 text-center text-red-600">
+      <div className="w-full rounded-lg border-2 border-dashed border-red-300 bg-red-50 p-8 text-center text-red-600">
         <p className="font-semibold">Transaction not found or could not be loaded.</p>
         {error ? <p className="mt-2 text-sm">{error}</p> : null}
       </div>
