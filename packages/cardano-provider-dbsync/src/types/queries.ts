@@ -106,6 +106,8 @@ export interface AddressFunds {
   lovelace: string;
   assets: Record<string, string>;
   txCount: string;
+  firstSeen?: { height: number; slot: number; hash: string } | null;
+  lastSeen?: { height: number; slot: number; hash: string } | null;
 }
 
 export interface AddressUTxOs {

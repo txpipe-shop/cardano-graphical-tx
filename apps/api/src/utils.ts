@@ -8,6 +8,7 @@ export interface NetworkConfig {
   magic: number;
   nodeUrl: string;
   addressPrefix: string;
+  tokenRegistryUrl: string;
 }
 
 export function getNetworkConfig(app: FastifyInstance, network?: string): NetworkConfig {
@@ -19,7 +20,8 @@ export function getNetworkConfig(app: FastifyInstance, network?: string): Networ
       pool: pools['vector'],
       magic: env.MAGIC_VECTOR,
       nodeUrl: env.NODE_URL_VECTOR,
-      addressPrefix: 'addr'
+      addressPrefix: 'addr',
+      tokenRegistryUrl: env.TOKEN_REGISTRY_URL_VECTOR
     };
   }
 
@@ -29,7 +31,8 @@ export function getNetworkConfig(app: FastifyInstance, network?: string): Networ
       pool: pools['prime-testnet'],
       magic: env.MAGIC_PRIME_TESTNET,
       nodeUrl: env.NODE_URL_PRIME_TESTNET,
-      addressPrefix: 'addr_test'
+      addressPrefix: 'addr_test',
+      tokenRegistryUrl: env.TOKEN_REGISTRY_URL_PRIME_TESTNET
     };
   }
 
@@ -39,7 +42,8 @@ export function getNetworkConfig(app: FastifyInstance, network?: string): Networ
       pool: pools['vector-testnet'],
       magic: env.MAGIC_VECTOR_TESTNET,
       nodeUrl: env.NODE_URL_VECTOR_TESTNET,
-      addressPrefix: 'addr'
+      addressPrefix: 'addr',
+      tokenRegistryUrl: env.TOKEN_REGISTRY_URL_VECTOR_TESTNET
     };
   }
 
@@ -49,7 +53,8 @@ export function getNetworkConfig(app: FastifyInstance, network?: string): Networ
       pool: pools['prime'],
       magic: env.MAGIC_PRIME,
       nodeUrl: env.NODE_URL_PRIME,
-      addressPrefix: 'addr'
+      addressPrefix: 'addr',
+      tokenRegistryUrl: env.TOKEN_REGISTRY_URL_PRIME
     };
   }
 

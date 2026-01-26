@@ -56,7 +56,7 @@ export const TokenBalanceSchema = z.object({
   token_symbol: z.string().nullable().optional(),
   decimals: z.number().nullable().optional(),
   balance: z.string().nullable().optional(),
-  balance_formatted: z.number().nullable().optional(),
+  balance_formatted: z.string().nullable().optional(),
   value: z.string().nullable().optional(),
   quantity: z.string().nullable().optional(),
   fingerprint: z.string().nullable().optional()

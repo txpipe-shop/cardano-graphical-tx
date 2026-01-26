@@ -104,7 +104,21 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
       return {
         value: valueResult,
-        txCount: BigInt(row.txCount || '0')
+        txCount: BigInt(row.txCount || '0'),
+        firstSeen: row.firstSeen
+          ? {
+              blockHeight: BigInt(row.firstSeen.height),
+              slot: BigInt(row.firstSeen.slot),
+              hash: Hash(row.firstSeen.hash)
+            }
+          : undefined,
+        lastSeen: row.lastSeen
+          ? {
+              blockHeight: BigInt(row.lastSeen.height),
+              slot: BigInt(row.lastSeen.slot),
+              hash: Hash(row.lastSeen.hash)
+            }
+          : undefined
       };
     } finally {
       this.gracefulRelease(client);
@@ -211,7 +225,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         ? isBase58(query.address)
           ? query?.address
           : // TODO: set up address prefix as configurable
-          hexToBech32(HexString(query.address), 'addr')
+            hexToBech32(HexString(query.address), 'addr')
         : null;
 
       const [blockHash, blockHeight, blockSlot] = this.parseBlockFilter(query);
@@ -413,4 +427,3 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
 export { SQLQuery } from './sql';
 export type * from './types/queries';
-
