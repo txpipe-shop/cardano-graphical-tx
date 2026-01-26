@@ -1,8 +1,6 @@
-import { Pool } from 'pg';
 import { EpochsResponse, Epoch as EpochApi } from '../types';
-import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
 import { Epoch } from '@laceanatomy/provider-core';
-import { env } from '../env';
+import { createProvider, NetworkConfig } from '../utils';
 
 function mapEpoch(epoch: Epoch): EpochsResponse['epochs'][number] {
   const endTime = new Date(epoch.endTime * 1000);
@@ -28,17 +26,9 @@ function mapEpoch(epoch: Epoch): EpochsResponse['epochs'][number] {
 export async function listEpochs(
   limit: bigint,
   offset: bigint,
-  pool: Pool,
-  magic: number,
-  nodeUrl: string,
-  addressPrefix: string
+  config: NetworkConfig
 ): Promise<EpochsResponse> {
-  const provider = new DbSyncProvider({
-    pool,
-    addrPrefix: addressPrefix,
-    magic: magic,
-    nodeUrl: nodeUrl
-  });
+  const provider = createProvider(config);
   const epochs = await provider.getEpochs({ limit, offset, query: undefined });
 
   return {
@@ -52,19 +42,8 @@ export async function listEpochs(
   };
 }
 
-export async function resolveEpoch(
-  epochNo: bigint,
-  pool: Pool,
-  magic: number,
-  nodeUrl: string,
-  addressPrefix: string
-): Promise<EpochApi> {
-  const provider = new DbSyncProvider({
-    pool,
-    addrPrefix: addressPrefix,
-    magic: magic,
-    nodeUrl: nodeUrl
-  });
+export async function resolveEpoch(epochNo: bigint, config: NetworkConfig): Promise<EpochApi> {
+  const provider = createProvider(config);
 
   const epoch = await provider.getEpoch({ epochNo });
 
@@ -83,8 +62,6 @@ export async function resolveEpoch(
     block_count: Number(epoch.blocksProduced),
     // TODO: What does this mean?
     blocks: Number(epoch.blocksProduced),
-    // TODO: Use blocks endpoint
-    blocks_list: [],
     // TODO: fetch this
     current_epoch: 0,
     fees: Number(epoch.fees).toString(),

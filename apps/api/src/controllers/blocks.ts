@@ -1,10 +1,9 @@
-import { Pool } from 'pg';
-import { BlocksResponse, Block as BlockSchema, Transaction as TransactionSchema } from '../types';
+import { BlocksResponse, Block as BlockSchema, BlockTxsResponse } from '../types';
 import TimeAgo from 'javascript-time-ago';
-import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
 import { Hash } from '@laceanatomy/types';
 import { BlockMetadata } from '@laceanatomy/provider-core';
 import { mapTx } from './common';
+import { createProvider, NetworkConfig } from '../utils';
 
 function mapBlock(block: BlockMetadata, timeAgo: TimeAgo): BlockSchema {
   const date = new Date(block.time * 1000);
@@ -30,28 +29,23 @@ function mapBlock(block: BlockMetadata, timeAgo: TimeAgo): BlockSchema {
 export async function listBlocks(
   limit: bigint,
   offset: bigint,
-  pool: Pool,
+  config: NetworkConfig,
   timeAgo: TimeAgo,
-  magic: number,
-  nodeUrl: string,
-  addressPrefix: string
+  epochNo?: bigint
 ): Promise<BlocksResponse> {
-  const provider = new DbSyncProvider({
-    pool,
-    addrPrefix: addressPrefix,
-    magic: magic,
-    nodeUrl: nodeUrl
-  });
+  const provider = createProvider(config);
 
   const { data: blocks, total } = await provider.getBlocks({
     limit: BigInt(limit),
     offset: BigInt(offset),
-    query: undefined
+    query: epochNo !== undefined ? { epoch: epochNo } : undefined
   });
 
-  const blocksRes: BlocksResponse['blocks'] = blocks.map((block) => mapBlock(block, timeAgo));
+  const blocksRes: BlocksResponse['blocks'] = blocks.map((block: BlockMetadata) =>
+    mapBlock(block, timeAgo)
+  );
 
-  const res: BlocksResponse = {
+  return {
     blocks: blocksRes,
     pagination: {
       total: Number(total),
@@ -60,23 +54,14 @@ export async function listBlocks(
       hasMore: BigInt(offset + limit) < total
     }
   };
-  return res;
 }
 
 export async function resolveBlock(
   id: string | number,
-  pool: Pool,
-  timeAgo: TimeAgo,
-  magic: number,
-  nodeUrl: string,
-  addressPrefix: string
+  config: NetworkConfig,
+  timeAgo: TimeAgo
 ): Promise<BlockSchema> {
-  const provider = new DbSyncProvider({
-    pool,
-    addrPrefix: addressPrefix,
-    magic: magic,
-    nodeUrl: nodeUrl
-  });
+  const provider = createProvider(config);
 
   const query = typeof id === 'string' ? { hash: Hash(id) } : { height: BigInt(id) };
   const block = await provider.getBlock(query);
@@ -87,26 +72,25 @@ export async function resolveBlockTxs(
   id: string | number,
   limit: bigint,
   offset: bigint,
-  pool: Pool,
-  magic: number,
-  nodeUrl: string,
-  addressPrefix: string
-): Promise<{ transactions: TransactionSchema[] }> {
-  const provider = new DbSyncProvider({
-    pool,
-    addrPrefix: addressPrefix,
-    magic: magic,
-    nodeUrl: nodeUrl
-  });
+  config: NetworkConfig
+): Promise<BlockTxsResponse> {
+  const provider = createProvider(config);
 
   const query = typeof id === 'string' ? { hash: Hash(id) } : { height: BigInt(id) };
 
   const block = await provider.getBlock(query);
 
-  // TODO: add pagination here
   const txs = await provider.getTxs({ query: { block: query }, limit, offset });
 
   const transactions = txs.data.map((tx) => mapTx(tx, block));
 
-  return { transactions };
+  return {
+    transactions,
+    pagination: {
+      total: Number(txs.total),
+      limit: Number(limit),
+      offset: Number(offset),
+      hasMore: limit + offset < txs.total
+    }
+  };
 }

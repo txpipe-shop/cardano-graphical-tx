@@ -40,10 +40,7 @@ export function transactionsRoutes(app: FastifyInstance) {
       const txsRes: TransactionsResponse = await listTransactions(
         BigInt(limit),
         BigInt(offset),
-        config.pool,
-        config.magic,
-        config.nodeUrl,
-        config.addressPrefix
+        config
       );
 
       return txsRes;
@@ -86,13 +83,7 @@ export function transactionsRoutes(app: FastifyInstance) {
       const { network } = txQuerySchema.parse(request.query);
       const config = getNetworkConfig(app, network);
 
-      const tx: Transaction = await resolveTx(
-        Hash(hash),
-        config.pool,
-        config.magic,
-        config.nodeUrl,
-        config.addressPrefix
-      );
+      const tx: Transaction = await resolveTx(Hash(hash), config);
 
       return tx;
     }

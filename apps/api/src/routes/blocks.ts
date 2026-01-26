@@ -2,14 +2,15 @@ import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
-import { BlocksResponse } from '../types';
+import { BlocksResponse, BlockTxsResponse } from '../types';
 import { listBlocks, resolveBlock, resolveBlockTxs } from '../controllers/blocks';
 import { getNetworkConfig } from '../utils';
 
 export const listBlocksQuerySchema = z.object({
   network: schemas.NetworkSchema,
   limit: z.coerce.number().min(1).max(100).default(20),
-  offset: z.coerce.number().min(0).default(0)
+  offset: z.coerce.number().min(0).default(0),
+  epoch: z.coerce.number().min(0).optional()
 });
 
 const blocksIdParamsSchema = z.object({
@@ -18,12 +19,11 @@ const blocksIdParamsSchema = z.object({
 
 const blocksIdQuerySchema = z.object({ network: schemas.NetworkSchema });
 
-const blocksIdParamsTxsSchema = blocksIdParamsSchema;
-
-const blocksTxsResponseSchema = z.object({
-  transactions: z.array(schemas.TransactionSchema)
+const blocksTxsQuerySchema = z.object({
+  network: schemas.NetworkSchema,
+  limit: z.coerce.number().min(1).max(100).default(20),
+  offset: z.coerce.number().min(0).default(0)
 });
-const blocksTxsQuerySchema = blocksIdQuerySchema;
 
 export function blocksRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -40,18 +40,16 @@ export function blocksRoutes(app: FastifyInstance) {
       }
     },
     async (request, _reply) => {
-      const { network, limit, offset } = listBlocksQuerySchema.parse(request.query);
+      const { network, limit, offset, epoch } = listBlocksQuerySchema.parse(request.query);
       const config = getNetworkConfig(app, network);
       const timeAgo = server.timeAgo;
 
       const blocks: BlocksResponse = await listBlocks(
         BigInt(limit),
         BigInt(offset),
-        config.pool,
+        config,
         timeAgo,
-        config.magic,
-        config.nodeUrl,
-        config.addressPrefix
+        epoch !== undefined ? BigInt(epoch) : undefined
       );
 
       return blocks;
@@ -97,11 +95,8 @@ export function blocksRoutes(app: FastifyInstance) {
 
       const block: z.infer<typeof schemas.BlockSchema> = await resolveBlock(
         identifier,
-        config.pool,
-        timeAgo,
-        config.magic,
-        config.nodeUrl,
-        config.addressPrefix
+        config,
+        timeAgo
       );
 
       return block;
@@ -113,27 +108,23 @@ export function blocksRoutes(app: FastifyInstance) {
     {
       schema: {
         tags: ['Blocks', 'Transactions'],
-        params: blocksIdParamsTxsSchema,
+        params: blocksIdParamsSchema,
         querystring: blocksTxsQuerySchema,
         response: {
-          200: blocksTxsResponseSchema
+          200: schemas.BlockTxsResponseSchema
         }
       }
     },
     async (request, _reply) => {
       const { identifier } = blocksIdParamsSchema.parse(request.params);
-      const { network } = blocksTxsQuerySchema.parse(request.query);
+      const { network, limit, offset } = blocksTxsQuerySchema.parse(request.query);
       const config = getNetworkConfig(app, network);
 
-      // TODO: add proper pagination here
-      const blockTxs: z.infer<typeof blocksTxsResponseSchema> = await resolveBlockTxs(
+      const blockTxs: BlockTxsResponse = await resolveBlockTxs(
         identifier,
-        100n,
-        0n,
-        config.pool,
-        config.magic,
-        config.nodeUrl,
-        config.addressPrefix
+        BigInt(limit),
+        BigInt(offset),
+        config
       );
 
       return blockTxs;

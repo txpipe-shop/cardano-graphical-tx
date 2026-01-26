@@ -5,9 +5,7 @@ dotenv.config();
 
 const EnvSchema = z.object({
   // Prime Network
-  DATABASE_URL_PRIME: z
-    .string()
-    .min(1, 'DATABASE_URL_PRIME must be a non-empty string'),
+  DATABASE_URL_PRIME: z.string().min(1, 'DATABASE_URL_PRIME must be a non-empty string'),
   MAGIC_PRIME: z.coerce.number(),
   NODE_URL_PRIME: z.string().min(1, 'NODE_URL_PRIME must be a non-empty string'),
 
@@ -16,14 +14,10 @@ const EnvSchema = z.object({
     .string()
     .min(1, 'DATABASE_URL_PRIME_TESTNET must be a non-empty string'),
   MAGIC_PRIME_TESTNET: z.coerce.number(),
-  NODE_URL_PRIME_TESTNET: z
-    .string()
-    .min(1, 'NODE_URL_PRIME_TESTNET must be a non-empty string'),
+  NODE_URL_PRIME_TESTNET: z.string().min(1, 'NODE_URL_PRIME_TESTNET must be a non-empty string'),
 
   // Vector Network
-  DATABASE_URL_VECTOR: z
-    .string()
-    .min(1, 'DATABASE_URL_VECTOR must be a non-empty string'),
+  DATABASE_URL_VECTOR: z.string().min(1, 'DATABASE_URL_VECTOR must be a non-empty string'),
   MAGIC_VECTOR: z.coerce.number(),
   NODE_URL_VECTOR: z.string().min(1, 'NODE_URL_VECTOR must be a non-empty string'),
 
@@ -32,9 +26,7 @@ const EnvSchema = z.object({
     .string()
     .min(1, 'DATABASE_URL_VECTOR_TESTNET must be a non-empty string'),
   MAGIC_VECTOR_TESTNET: z.coerce.number(),
-  NODE_URL_VECTOR_TESTNET: z
-    .string()
-    .min(1, 'NODE_URL_VECTOR_TESTNET must be a non-empty string')
+  NODE_URL_VECTOR_TESTNET: z.string().min(1, 'NODE_URL_VECTOR_TESTNET must be a non-empty string')
 });
 
 type Env = z.infer<typeof EnvSchema>;

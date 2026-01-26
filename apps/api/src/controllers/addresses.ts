@@ -1,5 +1,10 @@
-import { Pool } from 'pg';
-import type { Address as AddressSchema } from '../types';
+import type {
+  Address as AddressSchema,
+  AddressTransaction,
+  AddressTransactionsResponse,
+  AddressUtxo,
+  AddressUtxosResponse
+} from '../types';
 import {
   Address,
   assetNameFromUnit,
@@ -10,21 +15,13 @@ import {
   policyFromUnit,
   Unit
 } from '@laceanatomy/types';
-import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
+import { createProvider, NetworkConfig } from '../utils';
 
 export async function resolveAddress(
   rawAddress: string,
-  pool: Pool,
-  magic: number,
-  nodeUrl: string,
-  addressPrefix: string
+  config: NetworkConfig
 ): Promise<AddressSchema> {
-  const provider = new DbSyncProvider({
-    pool,
-    addrPrefix: addressPrefix,
-    nodeUrl: nodeUrl,
-    magic: magic
-  });
+  const provider = createProvider(config);
   const address = Address(rawAddress);
 
   const funds = await provider.getAddressFunds({ address });
@@ -32,49 +29,17 @@ export async function resolveAddress(
   const balanceLovelace = Number(funds.value[Unit('lovelace')]?.toString() || 0);
   const balanceAda = balanceLovelace / 10 ** 6;
 
-  // TODO: API needs to have pagination over this (recommendation: do this with different endpoints)
-  const { data: txs, total: totalTxs } = await provider.getTxs({
-    limit: 100n,
+  // TODO: improve it
+  // Get counts only for summary
+  const { total: totalTxs } = await provider.getTxs({
+    limit: 1n,
     query: { address: Address(rawAddress) }
   });
 
-  // TODO: API needs to have pagination over this (recommendation: do this with different endpoints)
-  const { data: outputs, total: totalUtxos } = await provider.getAddressUTxOs({
+  const { total: totalUtxos } = await provider.getAddressUTxOs({
     query: { address },
-    limit: 100n
+    limit: 1n
   });
-
-  const transactions: AddressSchema['transactions'] = txs.map((tx) => {
-    return {
-      // TODO: What amount of ADA (in inputs or outputs?)
-      amount_ada: 123,
-      amount_lovelace: 123,
-      block_height: Number(tx.block?.height),
-      hash: tx.hash,
-      // TODO: received ADA in which address?
-      received_ada: 123,
-      // TODO: sent ADA to which address?
-      sent_ada: 123,
-
-      // TODO: information not shown in UI
-      slot: 0,
-      timestamp: tx.createdAt ? new Date(tx.createdAt).toISOString() : null,
-      tx_index: Number(tx.indexInBlock),
-      // TODO: ask what type means for a tx
-      type: 'both'
-    };
-  });
-
-  const utxos: AddressSchema['utxos'] = outputs.map((x) => ({
-    amount_ada: Number(x.coin) / 10 ** 6,
-    amount_lovelace: Number(x.coin),
-    output_index: Number(x.outRef.index),
-    tx_hash: x.outRef.hash,
-    utxo_id: `${x.outRef.hash}#${x.outRef.index}`,
-    // TOOD: information not used by UI
-    block_height: 0,
-    slot: 0
-  }));
 
   const tokens: AddressSchema['tokens'] = Object.entries(funds.value).map(([u, amount]) => {
     const unit = u as Unit;
@@ -106,16 +71,89 @@ export async function resolveAddress(
     balance_lovelace: balanceLovelace,
     tx_count: Number(totalTxs),
     balance_ada: balanceAda,
-    address_bech32: isBase58(address) ? null : hexToBech32(HexString(address), 'addr'),
+    address_bech32: isBase58(address)
+      ? null
+      : hexToBech32(HexString(address), config.addressPrefix),
     unspent_utxo_count: Number(totalUtxos),
     tokens,
-    transactions,
-    utxos,
-    // TODO: fields are not being used in UI
     first_seen_height: undefined,
     first_seen_slot: undefined,
     last_seen_height: undefined,
     last_seen_slot: undefined,
     total_utxo_count: undefined
+  };
+}
+
+export async function listAddressTransactions(
+  rawAddress: string,
+  limit: bigint,
+  offset: bigint,
+  config: NetworkConfig
+): Promise<AddressTransactionsResponse> {
+  const provider = createProvider(config);
+
+  const { data: txs, total: totalTxs } = await provider.getTxs({
+    limit,
+    offset,
+    query: { address: Address(rawAddress) }
+  });
+
+  const transactions: AddressTransaction[] = txs.map((tx) => ({
+    amount_ada: 123,
+    amount_lovelace: 123,
+    block_height: Number(tx.block?.height),
+    hash: tx.hash,
+    received_ada: 123,
+    sent_ada: 123,
+    slot: 0,
+    timestamp: tx.createdAt ? new Date(tx.createdAt).toISOString() : null,
+    tx_index: Number(tx.indexInBlock),
+    type: 'both' as const
+  }));
+
+  return {
+    transactions,
+    pagination: {
+      total: Number(totalTxs),
+      limit: Number(limit),
+      offset: Number(offset),
+      hasMore: limit + offset < totalTxs
+    }
+  };
+}
+
+export async function listAddressUtxos(
+  rawAddress: string,
+  limit: bigint,
+  offset: bigint,
+  config: NetworkConfig
+): Promise<AddressUtxosResponse> {
+  const provider = createProvider(config);
+  const address = Address(rawAddress);
+
+  const { data: outputs, total: totalUtxos } = await provider.getAddressUTxOs({
+    query: { address },
+    limit,
+    offset
+  });
+
+  const utxos: AddressUtxo[] = outputs.map((x) => ({
+    amount_ada: Number(x.coin) / 10 ** 6,
+    amount_lovelace: Number(x.coin),
+    output_index: Number(x.outRef.index),
+    tx_hash: x.outRef.hash,
+    utxo_id: `${x.outRef.hash}#${x.outRef.index}`,
+    block_height: 0,
+    slot: 0
+  }));
+
+  return {
+    utxos,
+    pagination: {
+      total: Number(totalUtxos),
+      limit: Number(limit),
+      offset: Number(offset),
+      hasMore: limit + offset < totalUtxos
+    }
   };
 }
