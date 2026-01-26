@@ -4,6 +4,7 @@ import { z } from 'zod';
 import * as schemas from '../schemas';
 import { resolveEpoch, listEpochs } from '../controllers/epochs';
 import { Epoch, EpochsResponse } from '../types';
+import { getNetworkConfig } from '../utils';
 
 const epochsListQuerySchema = z.object({
   network: schemas.NetworkSchema,
@@ -34,10 +35,17 @@ export function epochsRoutes(app: FastifyInstance) {
       }
     },
     async (request, _reply) => {
-      const { limit, offset } = epochsListQuerySchema.parse(request.query);
-      const pool = server.pg;
+      const { network, limit, offset } = epochsListQuerySchema.parse(request.query);
+      const config = getNetworkConfig(app, network);
 
-      const epochsListRes: EpochsResponse = await listEpochs(BigInt(limit), BigInt(offset), pool);
+      const epochsListRes: EpochsResponse = await listEpochs(
+        BigInt(limit),
+        BigInt(offset),
+        config.pool,
+        config.magic,
+        config.nodeUrl,
+        config.addressPrefix
+      );
 
       return epochsListRes;
     }
@@ -57,10 +65,16 @@ export function epochsRoutes(app: FastifyInstance) {
     },
     async (request, _reply) => {
       const { number: epochNo } = epochParamSchema.parse(request.params);
-      //const { network } = epochQuerySchema.parse(request.query);
-      const pool = server.pg;
+      const { network } = epochQuerySchema.parse(request.query);
+      const config = getNetworkConfig(app, network);
 
-      const epoch: Epoch = await resolveEpoch(BigInt(epochNo), pool);
+      const epoch: Epoch = await resolveEpoch(
+        BigInt(epochNo),
+        config.pool,
+        config.magic,
+        config.nodeUrl,
+        config.addressPrefix
+      );
       return epoch;
     }
   );

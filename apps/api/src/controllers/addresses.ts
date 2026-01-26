@@ -11,14 +11,19 @@ import {
   Unit
 } from '@laceanatomy/types';
 import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
-import { env } from '../env';
 
-export async function resolveAddress(rawAddress: string, pool: Pool): Promise<AddressSchema> {
+export async function resolveAddress(
+  rawAddress: string,
+  pool: Pool,
+  magic: number,
+  nodeUrl: string,
+  addressPrefix: string
+): Promise<AddressSchema> {
   const provider = new DbSyncProvider({
     pool,
-    addrPrefix: 'addr',
-    nodeUrl: env.NODE_URL,
-    magic: env.MAGIC
+    addrPrefix: addressPrefix,
+    nodeUrl: nodeUrl,
+    magic: magic
   });
   const address = Address(rawAddress);
 

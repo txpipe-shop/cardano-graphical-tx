@@ -4,7 +4,7 @@ import { z } from 'zod';
 import * as schemas from '../schemas';
 import { BlocksResponse } from '../types';
 import { listBlocks, resolveBlock, resolveBlockTxs } from '../controllers/blocks';
-import {} from '@laceanatomy/provider-core';
+import { getNetworkConfig } from '../utils';
 
 export const listBlocksQuerySchema = z.object({
   network: schemas.NetworkSchema,
@@ -40,11 +40,19 @@ export function blocksRoutes(app: FastifyInstance) {
       }
     },
     async (request, _reply) => {
-      const { limit, offset } = listBlocksQuerySchema.parse(request.query);
-      const pool = server.pg;
+      const { network, limit, offset } = listBlocksQuerySchema.parse(request.query);
+      const config = getNetworkConfig(app, network);
       const timeAgo = server.timeAgo;
 
-      const blocks: BlocksResponse = await listBlocks(BigInt(limit), BigInt(offset), pool, timeAgo);
+      const blocks: BlocksResponse = await listBlocks(
+        BigInt(limit),
+        BigInt(offset),
+        config.pool,
+        timeAgo,
+        config.magic,
+        config.nodeUrl,
+        config.addressPrefix
+      );
 
       return blocks;
     }
@@ -83,15 +91,17 @@ export function blocksRoutes(app: FastifyInstance) {
     },
     async (request, _reply) => {
       const { identifier } = blocksIdParamsSchema.parse(request.params);
-      //TODO: add network
-      //const { network } = blocksIdQuerySchema.parse(request.query);
-      const pool = server.pg;
+      const { network } = blocksIdQuerySchema.parse(request.query);
+      const config = getNetworkConfig(app, network);
       const timeAgo = server.timeAgo;
 
       const block: z.infer<typeof schemas.BlockSchema> = await resolveBlock(
         identifier,
-        pool,
-        timeAgo
+        config.pool,
+        timeAgo,
+        config.magic,
+        config.nodeUrl,
+        config.addressPrefix
       );
 
       return block;
@@ -112,15 +122,18 @@ export function blocksRoutes(app: FastifyInstance) {
     },
     async (request, _reply) => {
       const { identifier } = blocksIdParamsSchema.parse(request.params);
-      //const { network} = blocksTxsQuerySchema.parse(request.query);
-      const pool = server.pg;
+      const { network } = blocksTxsQuerySchema.parse(request.query);
+      const config = getNetworkConfig(app, network);
 
       // TODO: add proper pagination here
       const blockTxs: z.infer<typeof blocksTxsResponseSchema> = await resolveBlockTxs(
         identifier,
         100n,
         0n,
-        pool
+        config.pool,
+        config.magic,
+        config.nodeUrl,
+        config.addressPrefix
       );
 
       return blockTxs;

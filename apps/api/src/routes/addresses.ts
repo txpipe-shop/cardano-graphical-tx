@@ -4,9 +4,14 @@ import { z } from 'zod';
 import * as schemas from '../schemas';
 import type { Address as AddressRes } from '../types';
 import { resolveAddress } from '../controllers/addresses';
+import { getNetworkConfig } from '../utils';
 
 const addressParamSchema = z.object({
   address: z.string()
+});
+
+const addressQuerySchema = z.object({
+  network: schemas.NetworkSchema
 });
 
 export function addressesRoutes(app: FastifyInstance) {
@@ -18,9 +23,7 @@ export function addressesRoutes(app: FastifyInstance) {
       schema: {
         tags: ['Addresses'],
         params: addressParamSchema,
-        querystring: z.object({
-          network: schemas.NetworkSchema
-        }),
+        querystring: addressQuerySchema,
         response: {
           200: schemas.AddressSchema
         }
@@ -28,9 +31,16 @@ export function addressesRoutes(app: FastifyInstance) {
     },
     async (request, _reply) => {
       const { address: rawAddress } = addressParamSchema.parse(request.params);
-      const pool = server.pg;
+      const { network } = addressQuerySchema.parse(request.query);
+      const config = getNetworkConfig(app, network);
 
-      const addressResponse: AddressRes = await resolveAddress(rawAddress, pool);
+      const addressResponse: AddressRes = await resolveAddress(
+        rawAddress,
+        config.pool,
+        config.magic,
+        config.nodeUrl,
+        config.addressPrefix
+      );
       return addressResponse;
     }
   );

@@ -5,6 +5,7 @@ import * as schemas from '../schemas';
 import { Transaction, TransactionsResponse } from '../types';
 import { listTransactions, resolveTx } from '../controllers/transactions';
 import { Hash } from '@laceanatomy/types';
+import { getNetworkConfig } from '../utils';
 
 const txsQuerySchema = z.object({
   network: schemas.NetworkSchema,
@@ -33,13 +34,16 @@ export function transactionsRoutes(app: FastifyInstance) {
       }
     },
     async (request, _reply) => {
-      const { /**network,*/ limit, offset } = txsQuerySchema.parse(request.query);
-      const pool = server.pg;
+      const { network, limit, offset } = txsQuerySchema.parse(request.query);
+      const config = getNetworkConfig(app, network);
 
       const txsRes: TransactionsResponse = await listTransactions(
         BigInt(limit),
         BigInt(offset),
-        pool
+        config.pool,
+        config.magic,
+        config.nodeUrl,
+        config.addressPrefix
       );
 
       return txsRes;
@@ -79,9 +83,16 @@ export function transactionsRoutes(app: FastifyInstance) {
     },
     async (request, _reply) => {
       const { hash } = txParamSchema.parse(request.params);
-      const pool = server.pg;
+      const { network } = txQuerySchema.parse(request.query);
+      const config = getNetworkConfig(app, network);
 
-      const tx: Transaction = await resolveTx(Hash(hash), pool);
+      const tx: Transaction = await resolveTx(
+        Hash(hash),
+        config.pool,
+        config.magic,
+        config.nodeUrl,
+        config.addressPrefix
+      );
 
       return tx;
     }

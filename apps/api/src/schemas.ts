@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const NetworkSchema = z.enum(['prime', 'vector', 'nexus']);
+export const NetworkSchema = z.enum(['prime', 'vector', 'prime-testnet', 'vector-testnet', 'nexus']);
 export type Network = z.infer<typeof NetworkSchema>;
 
 export const PaginationSchema = z.object({

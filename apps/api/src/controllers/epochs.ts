@@ -28,13 +28,16 @@ function mapEpoch(epoch: Epoch): EpochsResponse['epochs'][number] {
 export async function listEpochs(
   limit: bigint,
   offset: bigint,
-  pool: Pool
+  pool: Pool,
+  magic: number,
+  nodeUrl: string,
+  addressPrefix: string
 ): Promise<EpochsResponse> {
   const provider = new DbSyncProvider({
     pool,
-    addrPrefix: 'addr',
-    magic: env.MAGIC,
-    nodeUrl: env.NODE_URL
+    addrPrefix: addressPrefix,
+    magic: magic,
+    nodeUrl: nodeUrl
   });
   const epochs = await provider.getEpochs({ limit, offset, query: undefined });
 
@@ -49,12 +52,18 @@ export async function listEpochs(
   };
 }
 
-export async function resolveEpoch(epochNo: bigint, pool: Pool): Promise<EpochApi> {
+export async function resolveEpoch(
+  epochNo: bigint,
+  pool: Pool,
+  magic: number,
+  nodeUrl: string,
+  addressPrefix: string
+): Promise<EpochApi> {
   const provider = new DbSyncProvider({
     pool,
-    addrPrefix: 'addr',
-    magic: env.MAGIC,
-    nodeUrl: env.NODE_URL
+    addrPrefix: addressPrefix,
+    magic: magic,
+    nodeUrl: nodeUrl
   });
 
   const epoch = await provider.getEpoch({ epochNo });
