@@ -3,6 +3,7 @@ import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { Header } from "~/app/_components/Header";
 import { type ChainNetwork, isValidChain } from "~/server/api/dbsync-provider";
+import DevnetTxTabs from "./DevnetTxTabs";
 import { loadPageData } from "./_utils";
 
 interface Props {
@@ -35,6 +36,25 @@ export default async function TxPage({ params, searchParams }: Props) {
   const chain: ChainNetwork = isValidChain(chainParam) ? chainParam : "mainnet";
   const tabParam = searchParams?.tab;
   const tab = resolveTab(tabParam);
+
+  if (chain === "devnet") {
+    return (
+      <div className="flex min-h-screen flex-col bg-white">
+        <Header />
+        <main className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
+          <div className="mb-4 flex flex-shrink-0 items-center justify-between">
+            <h1 className="text-3xl font-extrabold">{hash}</h1>
+            <div className="flex items-center gap-2">
+              <CopyButton text={hash} size={16} />
+            </div>
+          </div>
+          <div className="flex min-h-0 flex-1">
+            <DevnetTxTabs hash={hash} tab={tab} />
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   try {
     const { cardanoTx, cbor, tx } = await loadPageData({
