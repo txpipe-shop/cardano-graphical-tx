@@ -1,4 +1,4 @@
-import { bech32ToHex, isBase58, isHexString } from './utils';
+import { bech32ToHex, isBase58, isHexString } from './utils.js';
 
 declare const __unit: unique symbol;
 declare const __hash: unique symbol;

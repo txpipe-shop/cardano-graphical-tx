@@ -1,5 +1,5 @@
 import { bech32 } from 'bech32';
-import { Address, Hash, HexString, Unit } from './utxo-model';
+import { Address, Hash, HexString, Unit } from './utxo-model.js';
 import { Buffer } from 'buffer';
 import cip14 from '@emurgo/cip14-js';
 
