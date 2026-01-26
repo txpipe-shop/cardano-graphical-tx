@@ -1,5 +1,5 @@
 {
-  "name": "@laceanatomy/cardano-provider-u5c",
+  "name": "@laceanatomy/provider-tests",
   "version": "0.0.1",
   "private": false,
   "type": "module",
@@ -12,11 +12,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.js"
-    },
-    "./mappers": {
-      "types": "./dist/mappers.d.ts",
-      "import": "./dist/mappers.js",
-      "require": "./dist/mappers.js"
     }
   },
   "files": [
@@ -27,30 +22,20 @@
     "dev": "tsc --watch",
     "lint": "tsc --noEmit",
     "check": "tsc --noEmit",
-    "test": "vitest run",
-    "test:perf": "vitest run test/perf.test.ts"
+    "clean": "rm -rf dist"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@connectrpc/connect": "1.4",
     "@laceanatomy/provider-core": "workspace:*",
     "@laceanatomy/types": "workspace:*",
-    "@laceanatomy/utxorpc-sdk": "workspace:*",
-    "@utxorpc/spec": "^0.18.1",
-    "assert": "^2.1.0",
-    "buffer": "^6.0.3",
-    "cbor2": "latest"
+    "@laceanatomy/blockfrost-sdk": "workspace:*",
+    "vitest": "^2.1.8"
   },
   "devDependencies": {
-    "@connectrpc/connect-node": "1.4",
-    "@laceanatomy/blockfrost-sdk": "workspace:*",
-    "@laceanatomy/provider-tests": "workspace:*",
     "@laceanatomy/typescript-config": "workspace:*",
-    "@types/node": "^24.1.0",
-    "@vitest/coverage-v8": "^4.0.18",
-    "typescript": "^5.0.0",
-    "vitest": "^4.0.16"
+    "@types/node": "^22.10.1",
+    "typescript": "^5.0.0"
   }
 }
