@@ -3,9 +3,9 @@ import {
   type Tx as BaseTx,
   type UTxO as BaseUTxO,
   HexString
-} from '../utxo-model';
+} from '../utxo-model.js';
 
-export * from './utils';
+export * from './utils.js';
 
 export enum RdmrPurpose {
   Spend = 'spend',

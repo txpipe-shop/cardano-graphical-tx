@@ -11,9 +11,12 @@ export default defineConfig(({ isSsrBuild }) => ({
   build: {
     rollupOptions: {
       // Externalize Node.js-only packages from client bundle
-      external: isSsrBuild
-        ? []
-        : ['@connectrpc/connect-node', '@emurgo/cardano-serialization-lib-nodejs']
+      external: [
+        '@connectrpc/connect-node',
+        '@emurgo/cardano-serialization-lib-nodejs',
+        '@laceanatomy/napi-pallas',
+        '@laceanatomy/cardano-provider-dbsync'
+      ]
     }
   },
   define: {

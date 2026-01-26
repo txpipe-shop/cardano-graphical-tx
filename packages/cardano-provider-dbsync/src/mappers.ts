@@ -1,5 +1,5 @@
 import { Address, cardano, DatumType, Hash, HexString, Unit } from '@laceanatomy/types';
-import * as QueryTypes from './types/queries';
+import * as QueryTypes from './types/queries.js';
 
 export const mapScriptType = (type: string): cardano.ScriptType => {
   switch (type) {

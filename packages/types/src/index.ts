@@ -1,8 +1,8 @@
-export * from './utxo-model';
+export * from './utxo-model.js';
 
-export * as cardano from './cardano';
+export * as cardano from './cardano/index.js';
 
-export type { Cardano, BaseChain } from './chains';
+export type { Cardano, BaseChain } from './chains.js';
 
 export {
   uint8ToHexString,
@@ -19,4 +19,4 @@ export {
   fingerprintFromUnit,
   policyFromUnit,
   assetNameFromUnit
-} from './utils';
+} from './utils.js';
