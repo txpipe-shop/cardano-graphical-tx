@@ -119,3 +119,10 @@ export interface AddressUTxOs {
     referenceScript?: { hash: string; type: string; bytes: string } | null;
   }> | null;
 }
+
+export interface NetworkStats {
+  block_height: number;
+  tx_count: string;
+  addresses: string;
+  avg_block_time: number;
+}

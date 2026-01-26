@@ -381,6 +381,31 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     }
   }
 
+  async getNetworkStats(): Promise<{
+    blockHeight: bigint;
+    txCount: bigint;
+    addresses: bigint;
+    avgBlockTime: number;
+  }> {
+    const client = await this.getClient();
+    try {
+      const { rows } = await client.query<QueryTypes.NetworkStats>(SQLQuery.get('network_stats'));
+      if (rows.length === 0) {
+        throw new Error('Network stats not found');
+      }
+
+      const row = rows[0]!;
+      return {
+        blockHeight: BigInt(row.block_height),
+        txCount: BigInt(row.tx_count),
+        addresses: BigInt(row.addresses),
+        avgBlockTime: row.avg_block_time
+      };
+    } finally {
+      this.gracefulRelease(client);
+    }
+  }
+
   async close(): Promise<void> {
     await this.pool.end();
   }
