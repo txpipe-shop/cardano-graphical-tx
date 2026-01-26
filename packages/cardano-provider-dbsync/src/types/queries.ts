@@ -89,6 +89,7 @@ export interface Block {
   fees: string;
   confirmations: string;
   size: number;
+  epoch: number;
   slotLeader: string;
 }
 

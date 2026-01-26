@@ -43,6 +43,8 @@ export type BlockMetadata = {
   time: number;
   /** blocksProduced since this block */
   confirmations: bigint;
+  size?: bigint;
+  epoch?: bigint;
 };
 
 // TODO: think how to handle epochs in generic chains (currently cardano focused)

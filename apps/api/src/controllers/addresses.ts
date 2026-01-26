@@ -31,13 +31,6 @@ export async function resolveAddress(
   const balanceLovelace = Number(funds.value[Unit('lovelace')]?.toString() || 0);
   const balanceAda = balanceLovelace / 10 ** 6;
 
-  // TODO: improve it
-  // Get counts only for summary
-  const { total: totalTxs } = await provider.getTxs({
-    limit: 1n,
-    query: { address: Address(rawAddress) }
-  });
-
   const { total: totalUtxos } = await provider.getAddressUTxOs({
     query: { address },
     limit: 1n

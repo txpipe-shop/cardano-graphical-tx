@@ -15,10 +15,8 @@ function mapBlock(block: BlockMetadata, timeAgo: TimeAgo): BlockSchema {
     time: timeAgo.format(date),
     tx_count: Number(block.txCount),
     confirmations: block.confirmations !== undefined ? Number(block.confirmations) : undefined,
-    // TODO: add (not sure if it's in the UI)
-    epoch: null,
-    // TODO: add  (not sure if it's in the UI)
-    size: null,
+    epoch: block.epoch !== undefined ? Number(block.epoch) : null,
+    size: block.size !== undefined ? Number(block.size) : null,
     // EVM fields
     base_fee_per_gas: undefined,
     gas_limit: undefined,

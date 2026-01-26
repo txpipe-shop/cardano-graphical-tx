@@ -3,7 +3,8 @@ WITH
     latest_block AS (
         SELECT block_no
         FROM block
-        WHERE block_no IS NOT NULL
+        WHERE
+            block_no IS NOT NULL
         ORDER BY block_no DESC
         LIMIT 1
     )
@@ -22,9 +23,10 @@ SELECT
         WHERE
             tx.block_id = b.id
     )::text as fees,
-    (lb.block_no - b.block_no) as confirmations
-FROM
-    block b
+    (lb.block_no - b.block_no) as confirmations,
+    b.size,
+    b.epoch_no as epoch
+FROM block b
     CROSS JOIN latest_block lb
 WHERE (
         $1::text IS NULL
