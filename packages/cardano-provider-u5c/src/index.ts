@@ -62,6 +62,14 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     let searchHeight = foundHeader.height - 1n;
 
     while (foundBody.tx.length === 0) {
+      if (
+        foundHeader.height === 0n &&
+        foundHeader.slot === 0n &&
+        Buffer.from(foundHeader.hash).toString('hex') === ''
+      ) {
+        throw new Error('Latest transaction not found');
+      }
+
       ({
         block: foundBlock,
         body: foundBody,
@@ -234,7 +242,16 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       const blockRes = await this.utxoRpc.sync.fetchBlock({
         ref: [{ height: nextBlockHeight }]
       });
-      const { block, body: blockBody } = this.validateBlock(blockRes);
+      const { block, header, body: blockBody } = this.validateBlock(blockRes);
+
+      if (
+        header.height === 0n &&
+        header.slot === 0n &&
+        Buffer.from(header.hash).toString('hex') === ''
+      ) {
+        break;
+      }
+
       remainingOffset = this.processBlockForTxs(
         block,
         blockBody.tx.reverse(),
@@ -456,7 +473,16 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
       const u5cBlocks: cardanoUtxoRpc.Block[] = [];
       do {
-        const { block } = await this.fetchBlockByQuery({ height: blockHeight });
+        const { block, header } = await this.fetchBlockByQuery({ height: blockHeight });
+
+        if (
+          header.height === 0n &&
+          header.slot === 0n &&
+          Buffer.from(header.hash).toString('hex') === ''
+        ) {
+          break;
+        }
+
         u5cBlocks.push(block);
         blockHeight--;
       } while (u5cBlocks.length < limit && blockHeight >= 0n);
