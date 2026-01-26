@@ -1,8 +1,8 @@
 "use client";
 import { Select, SelectItem, type SharedSelection } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import type { ChangeEvent, SyntheticEvent } from "react";
 import { useCallback } from "react";
-import type { ChangeEvent, FocusEvent, MouseEvent } from "react";
 import { useConfigs } from "~/app/_contexts";
 import { DEFAULT_DEVNET_PORT, ROUTES, USER_CONFIGS } from "~/app/_utils";
 import { type ChainNetwork } from "~/server/api/dbsync-provider";
@@ -58,22 +58,27 @@ const PortInput = ({ port, onPortChange }: PortInputProps) => {
     }
   };
 
-  const handleClick = (e: MouseEvent<HTMLInputElement>) =>
+  const stopPropagation = (e: SyntheticEvent) => {
     e.stopPropagation();
-  const handleFocus = (e: FocusEvent<HTMLInputElement>) =>
-    e.stopPropagation();
+  };
 
   return (
-    <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-2 py-1">
-      <span className="text-xs text-gray-500">localhost:</span>
+    <div
+      className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-2 py-1"
+      onClick={stopPropagation}
+      onMouseDown={stopPropagation}
+      onPointerDown={stopPropagation}
+    >
       <input
         type="text"
         inputMode="numeric"
         className="w-[5ch] bg-transparent text-center font-mono text-xs outline-none"
         value={port}
         onChange={handleChange}
-        onClick={handleClick}
-        onFocus={handleFocus}
+        onClick={stopPropagation}
+        onFocus={stopPropagation}
+        onMouseDown={stopPropagation}
+        onPointerDown={stopPropagation}
       />
     </div>
   );
@@ -111,6 +116,11 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
       labelPlacement="outside-left"
       selectedKeys={new Set([currentChain])}
       onSelectionChange={handleChainChange}
+      endContent={currentChain === "devnet" ? <PortInput
+        port={configs.port || DEFAULT_DEVNET_PORT}
+        onPortChange={handlePortChange}
+      /> : null
+      }
     >
       {CHAIN_OPTIONS.map((option) => (
         <SelectItem
@@ -118,14 +128,6 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
           key={option.key}
           textValue={option.label}
           description={option.description}
-          endContent={
-            option.key === "devnet" ? (
-              <PortInput
-                port={configs.port || DEFAULT_DEVNET_PORT}
-                onPortChange={handlePortChange}
-              />
-            ) : null
-          }
         >
           {option.label}
         </SelectItem>
