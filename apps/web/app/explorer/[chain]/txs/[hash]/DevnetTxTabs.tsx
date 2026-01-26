@@ -4,31 +4,14 @@ import { Hash } from "@laceanatomy/types";
 import { useEffect, useMemo, useState } from "react";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { useConfigs } from "~/app/_contexts";
-import { DEFAULT_DEVNET_PORT } from "~/app/_utils";
+import { TxTab } from "~/app/_utils";
+import { resolveDevnetPort } from "~/app/_utils/explorer";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 import { loadTxPageData } from "./_shared";
-
-const TABS = [
-  "Overview",
-  "Diagram",
-  "Dissect",
-  "CBOR",
-  "Datum",
-  "Scripts",
-] as const;
-type TxTab = (typeof TABS)[number];
 
 interface DevnetTxTabsProps {
   hash: string;
   tab: TxTab;
-}
-
-function resolveDevnetPort(port: string | undefined) {
-  const fallback = Number.parseInt(DEFAULT_DEVNET_PORT, 10);
-  if (!port) return fallback;
-  const value = Number.parseInt(port, 10);
-  if (Number.isNaN(value) || value <= 0 || value > 65535) return fallback;
-  return value;
 }
 
 export default function DevnetTxTabs({ hash, tab }: DevnetTxTabsProps) {

@@ -5,21 +5,14 @@ import { useEffect, useMemo, useState } from "react";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { useConfigs } from "~/app/_contexts";
-import { DEFAULT_DEVNET_PORT, ROUTES } from "~/app/_utils";
+import { ROUTES } from "~/app/_utils";
+import { resolveDevnetPort } from "~/app/_utils/explorer";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface DevnetTransactionsListProps {
   chain: string;
   page: number;
   pageSize: number;
-}
-
-function resolveDevnetPort(port: string | undefined) {
-  const fallback = Number.parseInt(DEFAULT_DEVNET_PORT, 10);
-  if (!port) return fallback;
-  const value = Number.parseInt(port, 10);
-  if (Number.isNaN(value) || value <= 0 || value > 65535) return fallback;
-  return value;
 }
 
 export default function DevnetTransactionsList({

@@ -2,6 +2,7 @@ import { Hash } from "@laceanatomy/types";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { Header } from "~/app/_components/Header";
+import { TX_TABS, TxTab } from "~/app/_utils";
 import { type ChainNetwork, isValidChain } from "~/server/api/dbsync-provider";
 import DevnetTxTabs from "./DevnetTxTabs";
 import { loadPageData } from "./_utils";
@@ -11,20 +12,10 @@ interface Props {
   searchParams?: { tab?: string };
 }
 
-const TABS = [
-  "Overview",
-  "Diagram",
-  "Dissect",
-  "CBOR",
-  "Datum",
-  "Scripts",
-] as const;
-type TxTab = (typeof TABS)[number];
-
 function resolveTab(tab?: string): TxTab {
   if (!tab) return "Overview";
   const normalized = tab.toLowerCase();
-  const match = TABS.find(
+  const match = TX_TABS.find(
     (candidate) => candidate.toLowerCase() === normalized,
   );
   return match ?? "Overview";
