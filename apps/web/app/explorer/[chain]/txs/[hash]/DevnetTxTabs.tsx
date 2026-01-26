@@ -4,7 +4,7 @@ import { Hash } from "@laceanatomy/types";
 import { useEffect, useMemo, useState } from "react";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { useConfigs } from "~/app/_contexts";
-import { TxTab } from "~/app/_utils";
+import { getTxFromDevnetCBOR, TxTab } from "~/app/_utils";
 import { resolveDevnetPort } from "~/app/_utils/explorer";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 import { loadTxPageData } from "./_shared";
@@ -35,24 +35,11 @@ export default function DevnetTxTabs({ hash, tab }: DevnetTxTabsProps) {
 
         const provider = getU5CProviderWeb(port);
         const parseCborViaApi = async (cbor: string) => {
-          const formData = new FormData();
-          formData.append("tx", cbor);
-
-          const res = await fetch("/api/cbor/devnet", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (!res.ok) {
-            throw new Error(res.statusText || "Failed to parse CBOR");
+          try {
+            return (await getTxFromDevnetCBOR(cbor)).tx;
+          } catch {
+            throw new Error("Failed to parse CBOR from devnet transaction");
           }
-
-          const data = await res.json();
-          if (!data?.tx) {
-            throw new Error("Transaction cbor could not be parsed");
-          }
-
-          return data.tx;
         };
 
         const result = await loadTxPageData(
