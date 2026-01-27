@@ -2,7 +2,8 @@
 import { Card, CardBody } from "@heroui/react";
 import type { cardano, Unit } from "@laceanatomy/types";
 import Link from "next/link";
-import { formatSeconds, ROUTES } from "~/app/_utils";
+import { ROUTES } from "~/app/_utils";
+import { formatSeconds } from "~/app/_utils/explorer";
 import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";

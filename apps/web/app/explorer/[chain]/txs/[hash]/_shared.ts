@@ -4,8 +4,10 @@ import {
   type Assets,
   type Utxo,
 } from "@laceanatomy/napi-pallas";
+import { ChainProvider } from "@laceanatomy/provider-core";
 import {
   assetNameFromUnit,
+  Cardano,
   type cardano,
   DatumType,
   type Hash,
@@ -18,11 +20,6 @@ import {
 import { type ITransaction } from "~/app/_interfaces";
 import { isHexa } from "~/app/_utils";
 import { getAddressPrefix, type Network } from "~/app/_utils/network-config";
-
-type TxProvider = {
-  getTx: (params: { hash: Hash }) => Promise<cardano.Tx>;
-  getCBOR: (params: { hash: Hash }) => Promise<string>;
-};
 
 type ParseCbor = (cbor: string) => Promise<CborResponse>;
 
@@ -71,7 +68,7 @@ function providerToPreGraphicalUTxO(
 }
 
 export async function loadTxPageData(
-  provider: TxProvider,
+  provider: ChainProvider<cardano.UTxO, cardano.Tx, Cardano>,
   hash: Hash,
   parseCbor: ParseCbor,
   chain: Network,

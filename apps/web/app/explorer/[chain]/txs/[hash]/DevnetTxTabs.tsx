@@ -78,7 +78,7 @@ export default function DevnetTxTabs({ hash, tab }: DevnetTxTabsProps) {
       <div className="w-full rounded-lg border-2 border-dashed border-red-300 bg-red-50 p-8 text-center text-red-600">
         <p className="font-semibold">Transaction not found or could not be loaded.</p>
         {error ? <p className="mt-2 text-sm">{error}</p> : null}
-      </div>
+      </div >
     );
   }
 
