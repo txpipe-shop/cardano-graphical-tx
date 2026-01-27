@@ -116,10 +116,13 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
       labelPlacement="outside-left"
       selectedKeys={new Set([currentChain])}
       onSelectionChange={handleChainChange}
-      endContent={currentChain === "devnet" ? <PortInput
-        port={configs.port || DEFAULT_DEVNET_PORT}
-        onPortChange={handlePortChange}
-      /> : null
+      endContent={
+        currentChain === "devnet" ? (
+          <PortInput
+            port={configs.port || DEFAULT_DEVNET_PORT}
+            onPortChange={handlePortChange}
+          />
+        ) : null
       }
     >
       {CHAIN_OPTIONS.map((option) => (

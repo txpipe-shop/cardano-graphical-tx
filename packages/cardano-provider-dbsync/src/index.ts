@@ -211,7 +211,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         ? isBase58(query.address)
           ? query?.address
           : // TODO: set up address prefix as configurable
-          hexToBech32(HexString(query.address), 'addr')
+            hexToBech32(HexString(query.address), 'addr')
         : null;
 
       const [blockHash, blockHeight, blockSlot] = this.parseBlockFilter(query);
@@ -388,4 +388,3 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
 export { SQLQuery } from './sql';
 export type * from './types/queries';
-
