@@ -1,93 +1,23 @@
 import { DbSyncProvider } from "@laceanatomy/cardano-provider-dbsync";
 import assert from "assert";
 import pg from "pg";
-import { env } from "~/app/env.mjs";
+import { NETWORK, type Network } from "~/app/_utils/network-config";
+import { getNetworkConfigServer } from "./server-network-config";
 
-export type ChainNetwork =
-  | "mainnet"
-  | "preprod"
-  | "preview"
-  | "vector-mainnet"
-  | "devnet";
+const poolCache: Map<Network, pg.Pool> = new Map();
 
-const poolCache: Map<ChainNetwork, pg.Pool> = new Map();
-
-function getConnectionString(chain: ChainNetwork): string {
-  assert(
-    chain !== "devnet",
-    "Db Connection String should not be used for a devnet",
-  );
-  if (chain === "vector-mainnet") {
-    return env.VECTOR_MAINNET_DB_SYNC || "";
-  }
-
-  switch (chain) {
-    case "mainnet":
-      return env.MAINNET_DB_SYNC || "";
-    case "preprod":
-      return env.PREPROD_DB_SYNC || "";
-    case "preview":
-      return env.PREVIEW_DB_SYNC || "";
-    default:
-      return env.MAINNET_DB_SYNC || "";
-  }
-}
-
-function getNetworkMagic(chain: ChainNetwork): number {
-  assert(chain !== "devnet", "Pointless to get magic for a Devnet");
-
-  switch (chain) {
-    case "mainnet":
-      return env.MAINNET_MAGIC;
-    case "preprod":
-      return env.PREPROD_MAGIC;
-    case "preview":
-      return env.PREVIEW_MAGIC;
-    case "vector-mainnet":
-      return env.VECTOR_MAINNET_MAGIC;
-  }
-}
-
-function getNodeUrl(chain: ChainNetwork): string {
-  assert(chain !== "devnet", "Pointless to get node url for a Devnet");
-
-  switch (chain) {
-    case "mainnet":
-      return env.MAINNET_NODE_URL;
-    case "preprod":
-      return env.PREPROD_NODE_URL;
-    case "preview":
-      return env.PREVIEW_NODE_URL;
-    case "vector-mainnet":
-      return env.VECTOR_MAINNET_NODE_URL;
-  }
-}
-
-function getAddressPrefix(chain: ChainNetwork): string {
-  switch (chain) {
-    case "mainnet":
-    case "vector-mainnet":
-      return "addr";
-    case "preprod":
-    case "preview":
-      return "addr_test";
-    default:
-      return "addr";
-  }
-}
-
-function getPool(chain: ChainNetwork): pg.Pool {
-  assert(chain !== "devnet", "Should not get a pool for Devnet");
+function getPool(chain: Network): pg.Pool {
+  assert(chain !== NETWORK.DEVNET, "Should not get a pool for Devnet");
+  const { dbSyncConnectionString } = getNetworkConfigServer(chain);
   const cached = poolCache.get(chain);
   if (cached) return cached;
 
-  const connectionString = getConnectionString(chain);
-  if (!connectionString) {
+  if (!dbSyncConnectionString) {
     throw new Error(`No connection string configured for chain: ${chain}`);
   }
 
   const pool = new pg.Pool({
-    connectionString,
+    connectionString: dbSyncConnectionString,
     max: 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
@@ -97,28 +27,18 @@ function getPool(chain: ChainNetwork): pg.Pool {
   return pool;
 }
 
-export function getDbSyncProvider(chain: ChainNetwork): DbSyncProvider {
-  assert(chain !== "devnet", "Should not get Db Sync for Devnet");
+export function getDbSyncProvider(chain: Network): DbSyncProvider {
+  assert(chain !== NETWORK.DEVNET, "Should not get Db Sync for Devnet");
+  const { addressPrefix, nodeUrl, networkMagic } = getNetworkConfigServer(chain);
   const pool = getPool(chain);
-  const addrPrefix = getAddressPrefix(chain);
-  const nodeUrl = getNodeUrl(chain);
-  const magic = getNetworkMagic(chain);
+
+  assert(nodeUrl, "Node URL is required");
+  assert(networkMagic, "Network magic is required");
 
   return new DbSyncProvider({
     pool,
-    addrPrefix,
-    nodeUrl,
-    magic,
+    addrPrefix: addressPrefix,
+    nodeUrl: nodeUrl,
+    magic: networkMagic,
   });
-}
-
-export function isValidChain(chain: string): chain is ChainNetwork {
-  const chains: ChainNetwork[] = [
-    "mainnet",
-    "preprod",
-    "preview",
-    "vector-mainnet",
-    "devnet",
-  ];
-  return chains.includes(chain as ChainNetwork);
 }
