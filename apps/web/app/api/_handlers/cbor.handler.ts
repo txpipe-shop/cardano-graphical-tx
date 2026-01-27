@@ -8,19 +8,18 @@ import {
 } from "@laceanatomy/napi-pallas";
 import { StatusCodes } from "http-status-codes";
 import {
+  BlockfrostUTxOSchema,
   ERRORS,
   getApiKey,
   getAssetName,
   getTransactionURL,
   getUTxOsURL,
   isEmpty,
-  POLICY_LENGTH,
-  type NETWORK,
+  POLICY_LENGTH, type Network,
 } from "~/app/_utils";
-import { BlockfrostUTxOSchema } from "~/app/_utils/schemas";
 
 interface ICborHandler {
-  network: NETWORK;
+  network: Network;
   cbor: string;
 }
 
@@ -30,7 +29,7 @@ const inputsHandle = async ({
   apiKey,
 }: {
   inputs: Input[];
-  network: NETWORK;
+  network: Network;
   apiKey: string;
 }): Promise<Utxo[]> => {
   const inputPromises = inputs.map(async (input) => {
@@ -64,10 +63,10 @@ const inputsHandle = async ({
   return inputResponses.map((input) => {
     const datum = input.inline_datum
       ? {
-          hash: parseDatumInfo(input.inline_datum)?.hash || "",
-          bytes: parseDatumInfo(input.inline_datum)?.bytes || "",
-          json: JSON.parse(parseDatumInfo(input.inline_datum)?.json || "null"),
-        }
+        hash: parseDatumInfo(input.inline_datum)?.hash || "",
+        bytes: parseDatumInfo(input.inline_datum)?.bytes || "",
+        json: JSON.parse(parseDatumInfo(input.inline_datum)?.json || "null"),
+      }
       : undefined;
     return {
       txHash: input.hash,
@@ -77,8 +76,8 @@ const inputsHandle = async ({
       lovelace:
         input.amount.length > 0
           ? Number(
-              input.amount.find((asset) => asset.unit === "lovelace")!.quantity,
-            )
+            input.amount.find((asset) => asset.unit === "lovelace")!.quantity,
+          )
           : 0,
       assets: input.amount.reduce((acc, { unit, quantity }) => {
         if (unit == "lovelace") return acc;

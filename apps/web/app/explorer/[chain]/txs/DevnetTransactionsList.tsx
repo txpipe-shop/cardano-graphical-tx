@@ -5,9 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { useConfigs } from "~/app/_contexts";
-import { ROUTES } from "~/app/_utils";
-import { resolveDevnetPort } from "~/app/_utils/explorer";
-import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
+import { getU5CProviderWeb, NETWORK, resolveDevnetPort, ROUTES } from "~/app/_utils";
 
 interface DevnetTransactionsListProps {
   chain: string;
@@ -100,7 +98,7 @@ export default function DevnetTransactionsList({
     <div className="space-y-4">
       <TxTable transactions={transactions} chain={chain} />
       <Pagination
-        basePath={ROUTES.EXPLORER_TXS("devnet")}
+        basePath={ROUTES.EXPLORER_TXS(NETWORK.DEVNET)}
         currentPage={currentPage}
         totalPages={Math.max(totalPages, 1)}
       />

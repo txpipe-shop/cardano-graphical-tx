@@ -1,13 +1,19 @@
+"use client";
+
 import { type Address, isBech32 } from "@laceanatomy/types";
-import { normalizeAddress } from "~/app/_utils/explorer";
+import { useNetwork } from "~/app/_hooks/useNetwork";
+import { normalizeAddress } from "~/app/_utils";
 import CopyButton from "./CopyButton";
 
 export interface ColoredAddressProps {
   address: Address;
 }
 
-export default function ColoredAddress({ address }: ColoredAddressProps) {
-  const normalizedAddress = normalizeAddress(address, "addr");
+export default function ColoredAddress({
+  address,
+}: ColoredAddressProps) {
+  const { addressPrefix } = useNetwork();
+  const normalizedAddress = normalizeAddress(address, addressPrefix);
   const uncoloredPrefix = isBech32(normalizedAddress)
     ? `${normalizedAddress.slice(0, 12)}...${normalizedAddress.slice(-13, -5)}`
     : "";

@@ -5,7 +5,7 @@ import { type cardano } from "@laceanatomy/types";
 import { useEffect, useState } from "react";
 import { useGraphical } from "~/app/_contexts";
 import { type ITransaction } from "~/app/_interfaces";
-import { TxTab } from "~/app/_utils";
+import { type TxTab } from "~/app/_utils";
 import { DissectSection } from "../../DissectSection/DissectSection";
 import { Playground } from "../../GraphicalSection";
 import {

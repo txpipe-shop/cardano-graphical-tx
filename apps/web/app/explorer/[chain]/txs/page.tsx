@@ -6,12 +6,11 @@ import {
   TxTable,
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
-import { ROUTES } from "~/app/_utils";
+import { EXPLORER_PAGE_SIZE, ROUTES } from "~/app/_utils";
+import { isValidChain, NETWORK, type Network } from "~/app/_utils/network-config";
 import Loading from "~/app/loading";
 import {
   getDbSyncProvider,
-  isValidChain,
-  type ChainNetwork,
 } from "~/server/api/dbsync-provider";
 import DevnetTransactionsList from "./DevnetTransactionsList";
 
@@ -20,21 +19,20 @@ interface ExplorerPageProps {
   searchParams: { page?: string };
 }
 
-const PAGE_SIZE = 1n;
 
 async function TransactionsList({
   chain,
   page,
 }: {
-  chain: ChainNetwork;
+  chain: Network;
   page: number;
 }) {
-  if (chain === "devnet") {
+  if (chain === NETWORK.DEVNET) {
     return (
       <DevnetTransactionsList
         chain={chain}
         page={page}
-        pageSize={Number(PAGE_SIZE)}
+        pageSize={Number(EXPLORER_PAGE_SIZE)}
       />
     );
   }
@@ -42,15 +40,15 @@ async function TransactionsList({
   try {
     const provider = getDbSyncProvider(chain);
     const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
-    const offset = BigInt(currentPage - 1) * PAGE_SIZE;
+    const offset = BigInt(currentPage - 1) * EXPLORER_PAGE_SIZE;
     const result = await provider.getTxs({
-      limit: PAGE_SIZE,
+      limit: EXPLORER_PAGE_SIZE,
       offset,
       query: undefined,
     });
 
     const total = result.total ?? 0n;
-    const totalPages = total === 0n ? 1 : Number((total - 1n) / PAGE_SIZE + 1n);
+    const totalPages = total === 0n ? 1 : Number((total - 1n) / EXPLORER_PAGE_SIZE + 1n);
 
     return (
       <div className="space-y-4">
@@ -79,8 +77,8 @@ export default async function ExplorerTxsPage({
   params,
   searchParams,
 }: ExplorerPageProps) {
-  const chainParam = params.chain || "mainnet";
-  const chain: ChainNetwork = isValidChain(chainParam) ? chainParam : "mainnet";
+  const chainParam = params.chain || NETWORK.MAINNET;
+  const chain: Network = isValidChain(chainParam) ? chainParam : NETWORK.MAINNET;
   const pageParam = Number.parseInt(searchParams.page ?? "1", 10);
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 

@@ -7,11 +7,10 @@ import {
 } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { useConfigs, useUI } from "~/app/_contexts";
-import { DEFAULT_DEVNET_PORT, NETWORK, USER_CONFIGS } from "~/app/_utils";
-import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
+import { DEFAULT_DEVNET_PORT, getU5CProviderWeb, NETWORK, type Network, USER_CONFIGS } from "~/app/_utils";
 
 interface NetSelectorProps {
-  network: NETWORK;
+  network: Network;
 }
 
 interface PortInputProps {
@@ -53,7 +52,7 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
   const { isOpen, onClose, onOpenChange } = useDisclosure();
   const { setError } = useUI();
 
-  const handleClick = (network: NETWORK) => () => {
+  const handleClick = (network: Network) => () => {
     updateConfigs(USER_CONFIGS.NET, network);
     onClose();
   };

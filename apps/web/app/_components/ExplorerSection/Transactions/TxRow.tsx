@@ -2,9 +2,8 @@
 import { Card, CardBody } from "@heroui/react";
 import type { cardano, Unit } from "@laceanatomy/types";
 import Link from "next/link";
-import { ROUTES } from "~/app/_utils";
-import { formatSeconds } from "~/app/_utils/explorer";
-import { type ChainNetwork } from "../ChainSelector";
+import { formatSeconds, ROUTES } from "~/app/_utils";
+import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
 import ClockIcon from "../Icons/ClockIcon";
@@ -31,7 +30,7 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
     <div className="flex flex-wrap items-center justify-between gap-4 bg-violet-100 p-4">
       <div className="flex items-center gap-2">
         <Link
-          href={ROUTES.EXPLORER_TX(chain as ChainNetwork, tx.hash)}
+          href={ROUTES.EXPLORER_TX(chain as Network, tx.hash)}
           className="font-mono text-sm text-blue-600 hover:underline"
         >
           {tx.hash}

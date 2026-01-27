@@ -5,44 +5,10 @@ import type { ChangeEvent, SyntheticEvent } from "react";
 import { useCallback } from "react";
 import { useConfigs } from "~/app/_contexts";
 import { DEFAULT_DEVNET_PORT, ROUTES, USER_CONFIGS } from "~/app/_utils";
-import { type ChainNetwork } from "~/server/api/dbsync-provider";
-
-interface ChainOption {
-  key: ChainNetwork;
-  label: string;
-  description: string;
-}
-
-const CHAIN_OPTIONS: ChainOption[] = [
-  {
-    key: "mainnet",
-    label: "Mainnet",
-    description: "Cardano Mainnet",
-  },
-  {
-    key: "devnet",
-    label: "Devnet",
-    description: "Local devnet (localhost)",
-  },
-  {
-    key: "preprod",
-    label: "Preprod",
-    description: "Pre-production testnet",
-  },
-  {
-    key: "preview",
-    label: "Preview",
-    description: "Preview testnet",
-  },
-  {
-    key: "vector-mainnet",
-    label: "Vector",
-    description: "AP3X Vector Mainnet",
-  },
-];
+import { NETWORK, NETWORK_CONFIGS_BASE, type Network } from "~/app/_utils/network-config";
 
 export interface ChainSelectorProps {
-  currentChain: ChainNetwork;
+  currentChain: Network;
 }
 
 interface PortInputProps {
@@ -96,7 +62,7 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
   const handleChainChange = useCallback(
     (keys: SharedSelection) => {
       if (keys === "all") return;
-      const selectedKey = Array.from(keys)[0] as ChainNetwork;
+      const selectedKey = Array.from(keys)[0] as Network;
       if (!selectedKey || selectedKey === currentChain) return;
 
       const params = new URLSearchParams(searchParams.toString());
@@ -112,24 +78,25 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
 
   return (
     <Select
+      aria-label="Select a network"
       placeholder="Select a network"
       labelPlacement="outside-left"
       selectedKeys={new Set([currentChain])}
       onSelectionChange={handleChainChange}
-      endContent={currentChain === "devnet" ? <PortInput
+      endContent={currentChain === NETWORK.DEVNET ? <PortInput
         port={configs.port || DEFAULT_DEVNET_PORT}
         onPortChange={handlePortChange}
       /> : null
       }
     >
-      {CHAIN_OPTIONS.map((option) => (
+      {Object.values(NETWORK_CONFIGS_BASE).map((option) => (
         <SelectItem
           variant="flat"
-          key={option.key}
-          textValue={option.label}
+          key={option.network}
+          textValue={option.displayName}
           description={option.description}
         >
-          {option.label}
+          {option.displayName}
         </SelectItem>
       ))}
     </Select>

@@ -4,9 +4,7 @@ import { Hash } from "@laceanatomy/types";
 import { useEffect, useMemo, useState } from "react";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { useConfigs } from "~/app/_contexts";
-import { getTxFromDevnetCBOR, TxTab } from "~/app/_utils";
-import { resolveDevnetPort } from "~/app/_utils/explorer";
-import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
+import { getTxFromDevnetCBOR, getU5CProviderWeb, NETWORK, resolveDevnetPort, type TxTab } from "~/app/_utils";
 import { loadTxPageData } from "./_shared";
 
 interface DevnetTxTabsProps {
@@ -46,6 +44,7 @@ export default function DevnetTxTabs({ hash, tab }: DevnetTxTabsProps) {
           provider,
           hashValue,
           parseCborViaApi,
+          NETWORK.DEVNET,
         );
 
         if (!isActive) return;

@@ -2,8 +2,8 @@ import { Hash } from "@laceanatomy/types";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { Header } from "~/app/_components/Header";
-import { TX_TABS, TxTab } from "~/app/_utils";
-import { type ChainNetwork, isValidChain } from "~/server/api/dbsync-provider";
+import { TX_TABS, type TxTab } from "~/app/_utils";
+import { isValidChain, NETWORK, type Network } from "~/app/_utils/network-config";
 import DevnetTxTabs from "./DevnetTxTabs";
 import { loadPageData } from "./_utils";
 
@@ -23,12 +23,12 @@ function resolveTab(tab?: string): TxTab {
 
 export default async function TxPage({ params, searchParams }: Props) {
   const hash = params.hash;
-  const chainParam = params.chain || "mainnet";
-  const chain: ChainNetwork = isValidChain(chainParam) ? chainParam : "mainnet";
+  const chainParam = params.chain || NETWORK.MAINNET;
+  const chain: Network = isValidChain(chainParam) ? chainParam : NETWORK.MAINNET;
   const tabParam = searchParams?.tab;
   const tab = resolveTab(tabParam);
 
-  if (chain === "devnet") {
+  if (chain === NETWORK.DEVNET) {
     return (
       <div className="flex min-h-screen flex-col bg-white">
         <Header />

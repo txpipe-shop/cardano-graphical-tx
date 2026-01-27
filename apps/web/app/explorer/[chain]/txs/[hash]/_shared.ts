@@ -17,6 +17,7 @@ import {
 } from "@laceanatomy/types";
 import { type ITransaction } from "~/app/_interfaces";
 import { isHexa } from "~/app/_utils";
+import { getAddressPrefix, type Network } from "~/app/_utils/network-config";
 
 type TxProvider = {
   getTx: (params: { hash: Hash }) => Promise<cardano.Tx>;
@@ -25,7 +26,10 @@ type TxProvider = {
 
 type ParseCbor = (cbor: string) => Promise<CborResponse>;
 
-function providerToPreGraphicalUTxO(cUtxo: cardano.UTxO): Utxo {
+function providerToPreGraphicalUTxO(
+  cUtxo: cardano.UTxO,
+  addressPrefix: string,
+): Utxo {
   const datum = cUtxo.datum;
   const assets: Assets[] = [];
   for (const [unit, amount] of Object.entries(cUtxo.value)) {
@@ -50,7 +54,7 @@ function providerToPreGraphicalUTxO(cUtxo: cardano.UTxO): Utxo {
 
   return {
     address: isHexa(cUtxo.address)
-      ? hexToBech32(HexString(cUtxo.address), "addr")
+      ? hexToBech32(HexString(cUtxo.address), addressPrefix)
       : cUtxo.address,
     txHash: cUtxo.outRef.hash,
     assets,
@@ -70,15 +74,17 @@ export async function loadTxPageData(
   provider: TxProvider,
   hash: Hash,
   parseCbor: ParseCbor,
+  chain: Network,
 ) {
+  const addressPrefix = getAddressPrefix(chain);
   const cardanoTx = await provider.getTx({ hash });
   const cbor = await provider.getCBOR({ hash });
   const analyzedCbor = await parseCbor(cbor);
-  const inputs: ITransaction["inputs"] = cardanoTx.inputs.map(
-    providerToPreGraphicalUTxO,
+  const inputs: ITransaction["inputs"] = cardanoTx.inputs.map((utxo) =>
+    providerToPreGraphicalUTxO(utxo, addressPrefix),
   );
-  const referenceInputs = cardanoTx.referenceInputs.map(
-    providerToPreGraphicalUTxO,
+  const referenceInputs = cardanoTx.referenceInputs.map((utxo) =>
+    providerToPreGraphicalUTxO(utxo, addressPrefix),
   );
 
   const tx: ITransaction = {

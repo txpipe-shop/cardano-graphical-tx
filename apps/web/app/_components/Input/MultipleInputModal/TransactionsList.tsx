@@ -8,13 +8,13 @@ import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   getCborFromHash,
   getTransaction,
+  getU5CProviderWeb,
   isInputUtxo,
   isOutputUtxo,
   NETWORK,
   OPTIONS,
-  ROUTES,
+  ROUTES
 } from "~/app/_utils";
-import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 import TrashRedIcon from "~/public/delete-red.svg";
 import NoContractsIcon from "~/public/no-contract.svg";
 import {
