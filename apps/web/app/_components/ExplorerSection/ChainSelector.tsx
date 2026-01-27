@@ -5,7 +5,7 @@ import type { ChangeEvent, SyntheticEvent } from "react";
 import { useCallback } from "react";
 import { useConfigs } from "~/app/_contexts";
 import { DEFAULT_DEVNET_PORT, ROUTES, USER_CONFIGS } from "~/app/_utils";
-import { type ChainNetwork } from "~/server/api/dbsync-provider";
+import { ChainNetwork } from "~/server/api/dbsync-provider";
 
 interface ChainOption {
   key: ChainNetwork;

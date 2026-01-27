@@ -3,7 +3,7 @@ import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { Header } from "~/app/_components/Header";
 import { TX_TABS, type TxTab } from "~/app/_utils";
-import { type ChainNetwork, isValidChain } from "~/server/api/dbsync-provider";
+import { ChainNetwork, isValidChain } from "~/server/api/dbsync-provider";
 import DevnetTxTabs from "./DevnetTxTabs";
 import { loadPageData } from "./_utils";
 

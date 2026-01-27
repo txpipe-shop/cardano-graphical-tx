@@ -1,5 +1,5 @@
 import JSONbig from "json-bigint";
-import { type ChainNetwork } from "~/server/api/dbsync-provider";
+import { ChainNetwork } from "~/server/api/dbsync-provider";
 
 export const ROUTES = {
   HOME: "/",

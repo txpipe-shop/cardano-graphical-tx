@@ -4,7 +4,7 @@ import { Button, Input } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ROUTES } from "~/app/_utils";
-import { type ChainNetwork } from "../ChainSelector";
+import { ChainNetwork } from "~/server/api/dbsync-provider";
 
 interface TxSearchProps {
   chain: ChainNetwork;
