@@ -20,11 +20,11 @@ export const useTransactionLoader = () => {
   const { configs, updateConfigs } = useConfigs();
   const searchParams = useSearchParams();
 
+  const hashParam = searchParams.get(HASH_URL_PARAM);
+  const netParam = searchParams.get(NET_URL_PARAM);
+
   useEffect(() => {
     const fetchTransactions = async () => {
-      const hashParam = searchParams.get(HASH_URL_PARAM);
-      const netParam = searchParams.get(NET_URL_PARAM);
-
       // Prioritize URL params
       const query = hashParam || configs.query;
       const network = (netParam as Network) || configs.net;
@@ -75,5 +75,13 @@ export const useTransactionLoader = () => {
 
     fetchTransactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, refreshTrigger]);
+  }, [
+    hashParam,
+    netParam,
+    refreshTrigger,
+    configs.query,
+    configs.net,
+    configs.option,
+    configs.port,
+  ]);
 };
