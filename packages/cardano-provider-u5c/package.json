@@ -27,24 +27,30 @@
     "dev": "tsc --watch",
     "lint": "tsc --noEmit",
     "check": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "test": "vitest run",
+    "test:perf": "vitest run test/perf.test.ts"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
+    "@connectrpc/connect": "1.4",
     "@laceanatomy/provider-core": "workspace:*",
     "@laceanatomy/types": "workspace:*",
     "@laceanatomy/utxorpc-sdk": "workspace:*",
-    "@connectrpc/connect": "1.4",
     "@utxorpc/spec": "^0.18.1",
     "assert": "^2.1.0",
     "buffer": "^6.0.3",
     "cbor2": "latest"
   },
   "devDependencies": {
+    "@connectrpc/connect-node": "1.4",
+    "@laceanatomy/blockfrost-sdk": "workspace:*",
+    "@laceanatomy/provider-tests": "workspace:*",
     "@laceanatomy/typescript-config": "workspace:*",
     "@types/node": "^24.1.0",
-    "typescript": "^5.0.0"
+    "@vitest/coverage-v8": "^4.0.18",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.16"
   }
 }

@@ -25,8 +25,6 @@ const app = fastify({
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
-// TODO: add multiple network support (multiple pools per each one, each with its own prefix). Monolith. Otherwise to allow individual scaling, each instance can handle a single network -> At this point it's overengineering
-
 const start = async () => {
   try {
     const openApiParams = {
@@ -45,28 +43,23 @@ const start = async () => {
       routePrefix: '/documentation'
     });
 
-    const pgConfig = env.DATABASE_URL
-      ? { connectionString: env.DATABASE_URL }
-      : {
-          host: env.PG_HOST,
-          port: env.PG_PORT,
-          user: env.PG_USER,
-          password: env.PG_PASSWORD,
-          database: env.PG_DATABASE,
-          max: env.PG_MAX,
-          ssl: env.PG_SSL ? { rejectUnauthorized: false } : undefined
-        };
+    // Initialize pools for supported networks
+    const pools: Record<string, Pool> = {};
 
-    const pool = new Pool(pgConfig);
+    pools['prime'] = new Pool({ connectionString: env.DATABASE_URL_PRIME });
+    pools['vector'] = new Pool({ connectionString: env.DATABASE_URL_VECTOR });
+    pools['prime-testnet'] = new Pool({ connectionString: env.DATABASE_URL_PRIME_TESTNET });
+    pools['vector-testnet'] = new Pool({ connectionString: env.DATABASE_URL_VECTOR_TESTNET });
 
     const timeAgo = new TimeAgo('en-US');
-    app.decorate('pg', pool);
+
+    app.decorate('pools', pools);
     app.decorate('timeAgo', timeAgo);
-    app.addHook('onClose', async (instance) => {
+    app.addHook('onClose', async () => {
       try {
-        await instance.pg.end();
+        await Promise.all(Object.values(pools).map((p) => p.end()));
       } catch (e) {
-        app.log.warn('Error closing pg pool: %s', String(e));
+        app.log.warn('Error closing pg pools: %s', String(e));
       }
     });
 

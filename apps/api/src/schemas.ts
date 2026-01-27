@@ -1,6 +1,12 @@
 import { z } from 'zod';
 
-export const NetworkSchema = z.enum(['prime', 'vector', 'nexus']);
+export const NetworkSchema = z.enum([
+  'prime',
+  'vector',
+  'prime-testnet',
+  'vector-testnet',
+  'nexus'
+]);
 export type Network = z.infer<typeof NetworkSchema>;
 
 export const PaginationSchema = z.object({
@@ -50,7 +56,7 @@ export const TokenBalanceSchema = z.object({
   token_symbol: z.string().nullable().optional(),
   decimals: z.number().nullable().optional(),
   balance: z.string().nullable().optional(),
-  balance_formatted: z.number().nullable().optional(),
+  balance_formatted: z.string().nullable().optional(),
   value: z.string().nullable().optional(),
   quantity: z.string().nullable().optional(),
   fingerprint: z.string().nullable().optional()
@@ -140,9 +146,25 @@ export const AddressSchema = z.object({
   last_seen_slot: z.number().nullable().optional(),
   first_seen_height: z.number().nullable().optional(),
   last_seen_height: z.number().nullable().optional(),
-  utxos: z.array(UTXOSchema).nullable().optional(),
-  transactions: z.array(AddressTransactionSchema),
   tokens: z.array(TokenBalanceSchema)
+});
+
+// Alias for address-specific endpoints
+export const AddressUtxoSchema = UTXOSchema;
+
+export const AddressTransactionsResponseSchema = z.object({
+  transactions: z.array(AddressTransactionSchema),
+  pagination: PaginationSchema
+});
+
+export const AddressUtxosResponseSchema = z.object({
+  utxos: z.array(AddressUtxoSchema),
+  pagination: PaginationSchema
+});
+
+export const BlockTxsResponseSchema = z.object({
+  transactions: z.array(TransactionSchema),
+  pagination: PaginationSchema
 });
 
 export const StatsSchema = z.object({
@@ -230,17 +252,7 @@ export const EpochSchema = z.object({
   transaction_count: z.number().nullable().optional(),
   fees: z.string().nullable().optional(),
   is_current: z.boolean().nullable().optional(),
-  current_epoch: z.number().nullable().optional(),
-  blocks_list: z
-    .array(
-      z.object({
-        height: z.number().optional(),
-        slot: z.number().optional(),
-        hash: z.string().optional(),
-        tx_count: z.number().optional()
-      })
-    )
-    .optional()
+  current_epoch: z.number().nullable().optional()
 });
 
 export const EpochsResponseSchema = z.object({

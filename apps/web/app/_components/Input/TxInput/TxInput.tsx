@@ -121,10 +121,18 @@ export const TxInput = () => {
           </NextButton>
         </abbr>
         <MultipleInputModal isOpen={isOpen} onOpenChange={onOpenChange} />
-        <Button type="submit" onClick={changeGoTo(ROUTES.GRAPHER)} disabled={error !== ""}>
+        <Button
+          type="submit"
+          onClick={changeGoTo(ROUTES.GRAPHER)}
+          disabled={error !== ""}
+        >
           Draw
         </Button>
-        <Button type="submit" onClick={changeGoTo(ROUTES.DISSECT)} disabled={error !== ""} >
+        <Button
+          type="submit"
+          onClick={changeGoTo(ROUTES.DISSECT)}
+          disabled={error !== ""}
+        >
           Dissect
         </Button>
       </form>

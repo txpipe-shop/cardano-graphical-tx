@@ -1,4 +1,4 @@
-import { type Metadata } from '../utxo-model';
+import { type Metadata } from '../utxo-model.js';
 
 export function tryToParseCip20Metadata(metadata?: Metadata): string[] | undefined {
   const maybeMsg = metadata?.get(674n);

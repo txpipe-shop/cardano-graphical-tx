@@ -47,7 +47,9 @@ const PortInput = ({ port, onPortChange }: PortInputProps) => {
 };
 
 export const NetSelector = ({ network }: NetSelectorProps) => {
-  const [netStatus, setNetStatus] = useState<"success" | "danger" | "warning">("success");
+  const [netStatus, setNetStatus] = useState<"success" | "danger" | "warning">(
+    "success",
+  );
   const { configs, updateConfigs } = useConfigs();
   const { isOpen, onClose, onOpenChange } = useDisclosure();
   const { setError } = useUI();
@@ -83,12 +85,15 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
         }
 
         const u5c = getU5CProviderWeb(portNumber);
-        u5c.readTip().then(() => {
-          setNetStatus("success");
-        }).catch(() => {
-          setNetStatus("danger");
-          setError("Failed to connect to the devnet");
-        });
+        u5c
+          .readTip()
+          .then(() => {
+            setNetStatus("success");
+          })
+          .catch(() => {
+            setNetStatus("danger");
+            setError("Failed to connect to the devnet");
+          });
       }, 1000);
 
       return () => {
