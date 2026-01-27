@@ -1,15 +1,15 @@
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
 import {
+  BlockfrostResponseSchema,
   ERRORS,
   getApiKey,
   getBlockfrostURL,
-  type NETWORK,
+  type Network,
 } from "~/app/_utils";
-import { BlockfrostResponseSchema } from "~/app/_utils/schemas";
 
 interface IHashHandler {
-  network: NETWORK;
+  network: Network;
   hash: string;
 }
 

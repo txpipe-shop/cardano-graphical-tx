@@ -8,6 +8,7 @@ import {
 } from "@laceanatomy/napi-pallas";
 import { StatusCodes } from "http-status-codes";
 import {
+  BlockfrostUTxOSchema,
   ERRORS,
   getApiKey,
   getAssetName,
@@ -15,12 +16,11 @@ import {
   getUTxOsURL,
   isEmpty,
   POLICY_LENGTH,
-  type NETWORK,
+  type Network,
 } from "~/app/_utils";
-import { BlockfrostUTxOSchema } from "~/app/_utils/schemas";
 
 interface ICborHandler {
-  network: NETWORK;
+  network: Network;
   cbor: string;
 }
 
@@ -30,7 +30,7 @@ const inputsHandle = async ({
   apiKey,
 }: {
   inputs: Input[];
-  network: NETWORK;
+  network: Network;
   apiKey: string;
 }): Promise<Utxo[]> => {
   const inputPromises = inputs.map(async (input) => {

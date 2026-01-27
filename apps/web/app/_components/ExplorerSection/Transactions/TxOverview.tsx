@@ -2,7 +2,7 @@
 
 import { Card, CardBody, Chip } from "@heroui/react";
 import { type cardano, type Unit, type Value } from "@laceanatomy/types";
-import { formatSeconds } from "~/app/_utils/explorer";
+import { formatSeconds } from "~/app/_utils";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
 import TokenPill from "../TokenPill";
@@ -54,7 +54,6 @@ function UtxoList({
   mint?: Value;
 }) {
   if (list.length === 0) return null;
-
   return (
     <Card className="shadow-none border border-default-200">
       <div className="border-b px-4 py-2 bg-gray-50 font-semibold text-lg text-gray-700">
@@ -163,7 +162,10 @@ function MintList({ list }: { list: Value }) {
   );
 }
 
-export default function TxOverview({ tx }: { tx: cardano.Tx }) {
+interface TxOverviewProps {
+  tx: cardano.Tx;
+}
+export default function TxOverview({ tx }: TxOverviewProps) {
   return (
     <div className="space-y-6">
       <OverviewStats tx={tx} />

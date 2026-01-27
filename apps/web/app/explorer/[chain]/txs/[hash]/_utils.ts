@@ -1,13 +1,11 @@
 import { type Hash } from "@laceanatomy/types";
 import { headers } from "next/headers";
-import {
-  type ChainNetwork,
-  getDbSyncProvider,
-} from "~/server/api/dbsync-provider";
+import { type Network } from "~/app/_utils/network-config";
+import { getDbSyncProvider } from "~/server/api/dbsync-provider";
 import { loadTxPageData } from "./_shared";
 
 type PageData = {
-  chain: ChainNetwork;
+  chain: Network;
   hash: Hash;
 };
 
@@ -44,5 +42,5 @@ export async function loadPageData({ chain, hash }: PageData) {
     return data.tx;
   };
 
-  return loadTxPageData(provider, hash, parseCborViaApi);
+  return loadTxPageData(provider, hash, parseCborViaApi, chain);
 }

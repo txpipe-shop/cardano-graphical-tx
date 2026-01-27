@@ -6,9 +6,10 @@ import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
 import type { IBlockfrostResponse, ITransaction } from "~/app/_interfaces";
 import { env } from "~/app/env.mjs";
-import { API_ROUTES, ERRORS, NETWORK } from "./constants";
+import { API_ROUTES, ERRORS } from "./constants";
+import { NETWORK, type Network } from "./network-config";
 
-export const getApiKey = (network: NETWORK): string => {
+export const getApiKey = (network: Network): string => {
   switch (network) {
     case NETWORK.MAINNET:
       return env.MAINNET_BLOCKFROST_KEY;
@@ -23,14 +24,14 @@ export const getApiKey = (network: NETWORK): string => {
   }
 };
 
-export const getBlockfrostURL = (network: NETWORK, hash: string) => {
+export const getBlockfrostURL = (network: Network, hash: string) => {
   return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/cbor`;
 };
-export const getUTxOsURL = (network: NETWORK, hash: string) => {
+export const getUTxOsURL = (network: Network, hash: string) => {
   return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/utxos`;
 };
 
-export const getTransactionURL = (network: NETWORK, hash: string) => {
+export const getTransactionURL = (network: Network, hash: string) => {
   return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}`;
 };
 
@@ -68,7 +69,7 @@ export const getTxFromDevnetCBOR = async (
 
 export const getTxFromCbor = async (
   cbor: string,
-  network: NETWORK,
+  network: Network,
 ): Promise<ITransaction> => {
   try {
     const query = { network };
@@ -93,7 +94,7 @@ export const getTxFromCbor = async (
 
 export const getCborFromHash = async (
   txId: string,
-  network: NETWORK,
+  network: Network,
   setError: Dispatch<SetStateAction<string>>,
 ): Promise<IBlockfrostResponse> => {
   try {
