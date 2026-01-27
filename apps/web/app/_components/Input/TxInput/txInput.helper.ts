@@ -474,8 +474,8 @@ export async function addDevnetCBORsToContext(
               datum:
                 i.datum && i.datum.type === DatumType.INLINE
                   ? {
-                      bytes: i.datum.datumHex,
-                    }
+                    bytes: i.datum.datumHex,
+                  }
                   : undefined,
               scriptRef: i.referenceScript?.bytes,
             };
@@ -553,43 +553,49 @@ export async function addCBORsToContext(
   setLoading: Dispatch<SetStateAction<boolean>>,
   dimensions: { x: number; y: number },
 ) {
-  if (option === OPTIONS.HASH) {
-    const hashesPromises = uniqueInputs.map((hash) =>
-      getCborFromHash(hash, net, setError),
-    );
-    const cbors = await Promise.all(hashesPromises);
-    const cborsToSet: string[] = [];
-    cbors.map(({ warning, cbor }) => {
-      if (warning) {
-        toast.error(warning, {
-          icon: "🚫",
-          style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
-          duration: 5000,
-        });
-        return;
-      }
-      cborsToSet.push(cbor);
-    });
-    await setCBORs(
-      net,
-      cborsToSet,
-      transactions,
-      setTransactionBox,
-      setError,
-      setLoading,
-      dimensions,
-      true,
-    );
-  } else {
-    await setCBORs(
-      net,
-      uniqueInputs,
-      transactions,
-      setTransactionBox,
-      setError,
-      setLoading,
-      dimensions,
-      false,
-    );
+  setLoading(true);
+  try {
+    if (option === OPTIONS.HASH) {
+      const hashesPromises = uniqueInputs.map((hash) =>
+        getCborFromHash(hash, net, setError),
+      );
+      const cbors = await Promise.all(hashesPromises);
+      const cborsToSet: string[] = [];
+      cbors.map(({ warning, cbor }) => {
+        if (warning) {
+          toast.error(warning, {
+            icon: "🚫",
+            style: { fontWeight: "bold", color: KONVA_COLORS.RED_WARNING },
+            duration: 5000,
+          });
+          return;
+        }
+        cborsToSet.push(cbor);
+      });
+      await setCBORs(
+        net,
+        cborsToSet,
+        transactions,
+        setTransactionBox,
+        setError,
+        setLoading,
+        dimensions,
+        true,
+      );
+    } else {
+      await setCBORs(
+        net,
+        uniqueInputs,
+        transactions,
+        setTransactionBox,
+        setError,
+        setLoading,
+        dimensions,
+        false,
+      );
+    }
+  } catch (error) {
+    console.error(error);
+    setLoading(false);
   }
 }
