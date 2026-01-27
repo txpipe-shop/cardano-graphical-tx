@@ -4,7 +4,7 @@ import type { cardano, Unit } from "@laceanatomy/types";
 import Link from "next/link";
 import { ROUTES } from "~/app/_utils";
 import { formatSeconds } from "~/app/_utils/explorer";
-import { type ChainNetwork } from "../ChainSelector";
+import { type ChainNetwork } from "~/server/api/dbsync-provider";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
 import ClockIcon from "../Icons/ClockIcon";

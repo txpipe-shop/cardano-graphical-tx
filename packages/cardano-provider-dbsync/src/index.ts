@@ -1,3 +1,4 @@
+import { cborParseBlock, downloadBlock } from '@laceanatomy/napi-pallas';
 import {
   AddressFundsReq,
   AddressFundsRes,
@@ -19,12 +20,11 @@ import {
 } from '@laceanatomy/provider-core';
 import type { Cardano } from '@laceanatomy/types';
 import { cardano, Hash, HexString, hexToBech32, isBase58, Unit } from '@laceanatomy/types';
+import assert from 'assert';
 import type { Pool, PoolClient } from 'pg';
 import { mapTx, mapUtxo } from './mappers.js';
 import { SQLQuery } from './sql/index.js';
 import type * as QueryTypes from './types/queries.js';
-import { cborParseBlock, downloadBlock } from '@laceanatomy/napi-pallas';
-import assert from 'assert';
 
 export type DbSyncParams = {
   pool: Pool;

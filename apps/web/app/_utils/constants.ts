@@ -156,3 +156,13 @@ export const TxExamples = [
   { title: "Dissect Tx Hash", code: hash2 },
   { title: "Draw Multiple Tx Hashes", code: multipleHashes },
 ];
+
+export const TX_TABS = [
+  "Overview",
+  "Diagram",
+  "Dissect",
+  "CBOR",
+  "Datum",
+  "Scripts",
+] as const;
+export type TxTab = (typeof TX_TABS)[number];

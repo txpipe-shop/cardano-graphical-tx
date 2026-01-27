@@ -13,6 +13,7 @@ import {
   isValidChain,
   type ChainNetwork,
 } from "~/server/api/dbsync-provider";
+import DevnetTransactionsList from "./DevnetTransactionsList";
 
 interface ExplorerPageProps {
   params: { chain: string };
@@ -28,6 +29,16 @@ async function TransactionsList({
   chain: ChainNetwork;
   page: number;
 }) {
+  if (chain === "devnet") {
+    return (
+      <DevnetTransactionsList
+        chain={chain}
+        page={page}
+        pageSize={Number(PAGE_SIZE)}
+      />
+    );
+  }
+
   try {
     const provider = getDbSyncProvider(chain);
     const currentPage = Number.isFinite(page) && page > 0 ? page : 1;

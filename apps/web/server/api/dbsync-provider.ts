@@ -1,12 +1,22 @@
 import { DbSyncProvider } from "@laceanatomy/cardano-provider-dbsync";
+import assert from "assert";
 import pg from "pg";
 import { env } from "~/app/env.mjs";
 
-export type ChainNetwork = "mainnet" | "preprod" | "preview" | "vector-mainnet";
+export type ChainNetwork =
+  | "mainnet"
+  | "preprod"
+  | "preview"
+  | "vector-mainnet"
+  | "devnet";
 
 const poolCache: Map<ChainNetwork, pg.Pool> = new Map();
 
 function getConnectionString(chain: ChainNetwork): string {
+  assert(
+    chain !== "devnet",
+    "Db Connection String should not be used for a devnet",
+  );
   if (chain === "vector-mainnet") {
     return env.VECTOR_MAINNET_DB_SYNC || "";
   }
@@ -24,6 +34,8 @@ function getConnectionString(chain: ChainNetwork): string {
 }
 
 function getNetworkMagic(chain: ChainNetwork): number {
+  assert(chain !== "devnet", "Pointless to get magic for a Devnet");
+
   switch (chain) {
     case "mainnet":
       return env.MAINNET_MAGIC;
@@ -37,6 +49,8 @@ function getNetworkMagic(chain: ChainNetwork): number {
 }
 
 function getNodeUrl(chain: ChainNetwork): string {
+  assert(chain !== "devnet", "Pointless to get node url for a Devnet");
+
   switch (chain) {
     case "mainnet":
       return env.MAINNET_NODE_URL;
@@ -63,6 +77,7 @@ function getAddressPrefix(chain: ChainNetwork): string {
 }
 
 function getPool(chain: ChainNetwork): pg.Pool {
+  assert(chain !== "devnet", "Should not get a pool for Devnet");
   const cached = poolCache.get(chain);
   if (cached) return cached;
 
@@ -83,6 +98,7 @@ function getPool(chain: ChainNetwork): pg.Pool {
 }
 
 export function getDbSyncProvider(chain: ChainNetwork): DbSyncProvider {
+  assert(chain !== "devnet", "Should not get Db Sync for Devnet");
   const pool = getPool(chain);
   const addrPrefix = getAddressPrefix(chain);
   const nodeUrl = getNodeUrl(chain);
@@ -102,6 +118,7 @@ export function isValidChain(chain: string): chain is ChainNetwork {
     "preprod",
     "preview",
     "vector-mainnet",
+    "devnet",
   ];
   return chains.includes(chain as ChainNetwork);
 }
