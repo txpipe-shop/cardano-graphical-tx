@@ -25,7 +25,7 @@ import { NetSelector } from "../NetSelector";
 
 export const TxInput = () => {
   const router = useRouter();
-  const { error, setError } = useUI();
+  const { error, setError, triggerRefresh } = useUI();
   const { configs, updateConfigs } = useConfigs();
   const [toGo, setToGo] = useState<string>("");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -39,15 +39,23 @@ export const TxInput = () => {
     if (!configs.query) return;
 
     const params = new URLSearchParams();
+    let target = toGo;
     if (configs.option === OPTIONS.HASH) {
       params.set(HASH_URL_PARAM, configs.query);
+      params.set(NET_URL_PARAM, configs.net);
+      target = target.concat("?", params.toString());
     }
-    params.set(NET_URL_PARAM, configs.net);
 
-    router.push(`${toGo}?${params.toString()}`);
+    router.push(target);
+
     setError("");
 
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
+
+    // Trigger refresh for CBOR inputs (hash inputs will trigger via URL change)
+    if (configs.option === OPTIONS.CBOR) {
+      triggerRefresh();
+    }
   }
 
   const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {

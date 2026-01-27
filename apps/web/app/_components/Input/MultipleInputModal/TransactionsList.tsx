@@ -89,7 +89,7 @@ export const TransactionsList = ({
           u5c.getCBOR({ hash: Hash(hash.value) }),
         );
         const cbors = await Promise.all(hashesPromises);
-        addDevnetCBORsToContext(
+        await addDevnetCBORsToContext(
           OPTIONS.CBOR,
           Number(configs.port),
           [...newCbors, ...cbors],
@@ -106,7 +106,7 @@ export const TransactionsList = ({
         const cbors = (await Promise.all(hashesPromises)).map(
           ({ cbor }) => cbor,
         );
-        addCBORsToContext(
+        await addCBORsToContext(
           OPTIONS.CBOR,
           [...newCbors, ...cbors],
           configs.net,

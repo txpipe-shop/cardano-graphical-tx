@@ -15,7 +15,7 @@ import {
 
 export const useTransactionLoader = () => {
   const { transactions, setTransactionBox, dimensions } = useGraphical();
-  const { setError, setLoading } = useUI();
+  const { setError, setLoading, refreshTrigger } = useUI();
   const { configs, updateConfigs } = useConfigs();
   const searchParams = useSearchParams();
 
@@ -74,5 +74,5 @@ export const useTransactionLoader = () => {
 
     fetchTransactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchParams, refreshTrigger]);
 };
