@@ -4,27 +4,27 @@ import { env } from "~/app/env.mjs";
 const NETWORK_CONFIGS_SERVER: Record<Network, NetworkConfig> = {
   mainnet: {
     ...NETWORK_CONFIGS_BASE.mainnet,
-    nodeUrl: env.MAINNET_NODE_URL || undefined,
-    networkMagic: env.MAINNET_MAGIC || undefined,
-    dbSyncConnectionString: env.MAINNET_DB_SYNC || undefined,
+    nodeUrl: env.MAINNET_NODE_URL,
+    networkMagic: env.MAINNET_MAGIC,
+    dbSyncConnectionString: env.MAINNET_DB_SYNC,
   },
   preprod: {
     ...NETWORK_CONFIGS_BASE.preprod,
-    nodeUrl: env.PREPROD_NODE_URL || undefined,
-    networkMagic: env.PREPROD_MAGIC || undefined,
-    dbSyncConnectionString: env.PREPROD_DB_SYNC || undefined,
+    nodeUrl: env.PREPROD_NODE_URL,
+    networkMagic: env.PREPROD_MAGIC,
+    dbSyncConnectionString: env.PREPROD_DB_SYNC,
   },
   preview: {
     ...NETWORK_CONFIGS_BASE.preview,
-    nodeUrl: env.PREVIEW_NODE_URL || undefined,
-    networkMagic: env.PREVIEW_MAGIC || undefined,
-    dbSyncConnectionString: env.PREVIEW_DB_SYNC || undefined,
+    nodeUrl: env.PREVIEW_NODE_URL,
+    networkMagic: env.PREVIEW_MAGIC,
+    dbSyncConnectionString: env.PREVIEW_DB_SYNC,
   },
-  "vector-mainnet": {
-    ...NETWORK_CONFIGS_BASE["vector-mainnet"],
-    nodeUrl: env.VECTOR_MAINNET_NODE_URL || undefined,
-    networkMagic: env.VECTOR_MAINNET_MAGIC || undefined,
-    dbSyncConnectionString: env.VECTOR_MAINNET_DB_SYNC || undefined,
+  vector: {
+    ...NETWORK_CONFIGS_BASE.vector,
+    nodeUrl: env.VECTOR_MAINNET_NODE_URL,
+    networkMagic: env.VECTOR_MAINNET_MAGIC,
+    dbSyncConnectionString: env.VECTOR_MAINNET_DB_SYNC,
   },
   devnet: {
     ...NETWORK_CONFIGS_BASE.devnet,

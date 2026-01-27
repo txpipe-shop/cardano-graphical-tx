@@ -3,7 +3,7 @@ export const NETWORK = {
   PREPROD: "preprod",
   PREVIEW: "preview",
   DEVNET: "devnet",
-  VECTOR_MAINNET: "vector-mainnet",
+  VECTOR: "vector",
 } as const;
 export type Network = (typeof NETWORK)[keyof typeof NETWORK];
 
@@ -36,8 +36,8 @@ export const NETWORK_CONFIGS_BASE: Record<Network, NetworkConfig> = {
     displayName: "Preview",
     description: "Preview testnet",
   },
-  "vector-mainnet": {
-    network: "vector-mainnet",
+  vector: {
+    network: "vector",
     addressPrefix: "addr",
     displayName: "Vector",
     description: "AP3X Vector Mainnet",
