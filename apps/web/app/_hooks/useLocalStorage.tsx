@@ -9,6 +9,7 @@ interface IUseLocalStorage {
 
 export const useLocalStorage = ({ key, initialState }: IUseLocalStorage) => {
   const [state, setState] = useState(initialState);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const item = localStorage.getItem(key);
@@ -19,15 +20,16 @@ export const useLocalStorage = ({ key, initialState }: IUseLocalStorage) => {
         setState(parsedItem);
       }
     }
+    setIsInitialized(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (state) {
+    if (isInitialized) {
       localStorage.setItem(key, JSON.stringify(state));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, setState]);
+  }, [state, isInitialized]);
 
   return [state, setState];
 };

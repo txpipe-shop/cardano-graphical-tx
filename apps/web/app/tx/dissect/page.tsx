@@ -4,8 +4,10 @@ import { DissectSection, Error, Header, TxInput } from "~/app/_components";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import { isEmpty } from "~/app/_utils";
 import Loading from "~/app/loading";
+import { useTransactionLoader } from "~/app/_hooks/useTransactionLoader";
 
 export default function Index() {
+  useTransactionLoader();
   const { transactions } = useGraphical();
   const { error, loading } = useUI();
   const { configs } = useConfigs();

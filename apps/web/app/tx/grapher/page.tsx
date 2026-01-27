@@ -12,6 +12,7 @@ import {
 import { useUI } from "~/app/_contexts";
 import { ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
 import Loading from "~/app/loading";
+import { useTransactionLoader } from "~/app/_hooks/useTransactionLoader";
 
 interface GrapherProps {
   searchParams?: {
@@ -21,6 +22,7 @@ interface GrapherProps {
 }
 
 export default function Index({ searchParams }: GrapherProps) {
+  useTransactionLoader();
   const { replace } = useRouter();
   const { loading } = useUI();
   const { [TX_URL_PARAM]: selectedTx, [UTXO_URL_PARAM]: selectedUtxo } =
