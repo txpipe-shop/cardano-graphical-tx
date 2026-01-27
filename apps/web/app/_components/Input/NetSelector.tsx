@@ -132,7 +132,7 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
             key={index}
             variant="dot"
             color={network === value ? "success" : "danger"}
-            className="cursor-pointer capitalize"
+            className="cursor-pointer capitalize min-w-full text-center"
             onClick={handleClick(value)}
           >
             {value}
