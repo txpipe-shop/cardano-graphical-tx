@@ -1,10 +1,12 @@
 "use client";
 
-import { Tab, Tabs } from "@heroui/react";
+import { Button, Tab, Tabs } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useGraphical } from "~/app/_contexts";
 import { type ITransaction } from "~/app/_interfaces";
+import { ROUTES } from "~/app/_utils";
 import { DissectSection } from "../../DissectSection/DissectSection";
 import { Playground } from "../../GraphicalSection";
 import {
@@ -30,6 +32,7 @@ interface TxTabsProps {
   cardanoTx: cardano.Tx;
   cbor: string;
   tab: Tabs;
+  chain: string;
 }
 
 export default function TxTabs({
@@ -37,6 +40,7 @@ export default function TxTabs({
   cardanoTx,
   cbor: initialCbor,
   tab: initialTab,
+  chain,
 }: TxTabsProps) {
   const [active, setActive] = useState<Tabs>(initialTab);
   const { setTransactionBox, dimensions } = useGraphical();
@@ -59,7 +63,7 @@ export default function TxTabs({
   }, [setTransactionBox, dimensions.width, dimensions.height, tx]);
 
   return (
-    <div className="flex w-full flex-col min-h-0 space-y-4">
+    <div className="flex min-h-0 w-full flex-col space-y-4">
       <Tabs
         aria-label="Transaction details"
         selectedKey={active}
@@ -78,6 +82,16 @@ export default function TxTabs({
 
         <Tab key="Diagram" title="Diagram">
           <div className="relative h-[60vh] w-full overflow-hidden rounded-lg border">
+            <Button
+              as={Link}
+              size="sm"
+              variant="flat"
+              className="absolute right-4 top-4 z-10 font-mono text-black shadow-md bg-white"
+              href={`${ROUTES.GRAPHER}?hash=${tx.txHash}&net=${chain}`}
+              target="_blank"
+            >
+              Playground
+            </Button>
             <div className="h-full w-full">
               <Playground fillMode="parent" />
             </div>

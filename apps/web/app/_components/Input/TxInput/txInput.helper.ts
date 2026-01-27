@@ -474,8 +474,8 @@ export async function addDevnetCBORsToContext(
               datum:
                 i.datum && i.datum.type === DatumType.INLINE
                   ? {
-                    bytes: i.datum.datumHex,
-                  }
+                      bytes: i.datum.datumHex,
+                    }
                   : undefined,
               scriptRef: i.referenceScript?.bytes,
             };

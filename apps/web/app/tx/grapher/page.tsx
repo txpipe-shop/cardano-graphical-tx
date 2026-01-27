@@ -8,9 +8,9 @@ import {
   UtxoInfo,
 } from "~/app/_components";
 import { useUI } from "~/app/_contexts";
+import { useTransactionLoader } from "~/app/_hooks/useTransactionLoader";
 import { TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
 import Loading from "~/app/loading";
-import { useTransactionLoader } from "~/app/_hooks/useTransactionLoader";
 
 interface GrapherProps {
   searchParams?: {
