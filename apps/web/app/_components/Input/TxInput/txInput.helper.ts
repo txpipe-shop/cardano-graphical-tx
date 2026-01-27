@@ -33,6 +33,7 @@ import {
   getTransaction,
   getTxFromCbor,
   getTxFromDevnetCBOR,
+  getU5CProviderWeb,
   getUtxo,
   isEmpty,
   isHexa,
@@ -43,9 +44,8 @@ import {
   TX_HEIGHT,
   TX_WIDTH,
   UTXO_LINE_GAP,
-  type NETWORK,
+  type Network,
 } from "~/app/_utils";
-import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface IGenerateUTXO extends Utxo {
   existingTxs: TransactionsBox;
@@ -307,7 +307,7 @@ export const setITransaction = (
 };
 
 const setCBORs = async (
-  network: NETWORK,
+  network: Network,
   uniqueInputs: string[],
   existingTxs: TransactionsBox,
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,
@@ -546,7 +546,7 @@ export async function addDevnetCBORsToContext(
 export async function addCBORsToContext(
   option: OPTIONS,
   uniqueInputs: string[],
-  net: NETWORK,
+  net: Network,
   setError: Dispatch<SetStateAction<string>>,
   transactions: TransactionsBox,
   setTransactionBox: Dispatch<SetStateAction<TransactionsBox>>,

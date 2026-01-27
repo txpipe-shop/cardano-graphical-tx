@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useGraphical } from "~/app/_contexts";
 import { type ITransaction } from "~/app/_interfaces";
-import { ROUTES } from "~/app/_utils";
+import { type Network, ROUTES, type TxTab } from "~/app/_utils";
 import { DissectSection } from "../../DissectSection/DissectSection";
 import { Playground } from "../../GraphicalSection";
 import {
@@ -18,21 +18,12 @@ import TxDatum from "./TxDatum";
 import TxOverview from "./TxOverview";
 import TxScripts from "./TxScripts";
 
-const TABS = [
-  "Overview",
-  "Diagram",
-  "Dissect",
-  "CBOR",
-  "Datum",
-  "Scripts",
-] as const;
-type Tabs = (typeof TABS)[number];
 interface TxTabsProps {
   tx: ITransaction;
   cardanoTx: cardano.Tx;
   cbor: string;
-  tab: Tabs;
-  chain: string;
+  chain: Network;
+  tab: TxTab;
 }
 
 export default function TxTabs({
@@ -42,7 +33,7 @@ export default function TxTabs({
   tab: initialTab,
   chain,
 }: TxTabsProps) {
-  const [active, setActive] = useState<Tabs>(initialTab);
+  const [active, setActive] = useState<TxTab>(initialTab);
   const { setTransactionBox, dimensions } = useGraphical();
 
   useEffect(() => {
@@ -67,7 +58,7 @@ export default function TxTabs({
       <Tabs
         aria-label="Transaction details"
         selectedKey={active}
-        onSelectionChange={(key) => setActive(key as Tabs)}
+        onSelectionChange={(key) => setActive(key as TxTab)}
         variant="light"
         classNames={{
           tabList: "w-full",

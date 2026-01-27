@@ -1,10 +1,12 @@
 import JSONbig from "json-bigint";
-import { type ChainNetwork } from "~/server/api/dbsync-provider";
+import { type Network } from "./network-config";
+
+export const EXPLORER_PAGE_SIZE = 1n;
 
 export const ROUTES = {
   HOME: "/",
-  EXPLORER_TXS: (chain: ChainNetwork) => `/explorer/${chain}/txs`,
-  EXPLORER_TX: (chain: ChainNetwork, hash: string) =>
+  EXPLORER_TXS: (chain: Network) => `/explorer/${chain}/txs`,
+  EXPLORER_TX: (chain: Network, hash: string) =>
     `/explorer/${chain}/txs/${hash}`,
   GRAPHER: "/tx/grapher",
   TX: "/tx",
@@ -61,14 +63,6 @@ export const KONVA_COLORS = {
   YELLOW_WARNING: "#fcefb4",
 };
 export type KONVA_COLORS = (typeof KONVA_COLORS)[keyof typeof KONVA_COLORS];
-
-export const NETWORK = {
-  MAINNET: "mainnet",
-  PREPROD: "preprod",
-  PREVIEW: "preview",
-  DEVNET: "devnet",
-} as const;
-export type NETWORK = (typeof NETWORK)[keyof typeof NETWORK];
 
 export const JSONBIG = JSONbig({
   useNativeBigInt: true,
@@ -159,3 +153,13 @@ export const TxExamples = [
   { title: "Dissect Tx Hash", code: hash2 },
   { title: "Draw Multiple Tx Hashes", code: multipleHashes },
 ];
+
+export const TX_TABS = [
+  "Overview",
+  "Diagram",
+  "Dissect",
+  "CBOR",
+  "Datum",
+  "Scripts",
+] as const;
+export type TxTab = (typeof TX_TABS)[number];

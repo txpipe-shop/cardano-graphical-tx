@@ -42,7 +42,7 @@ export function Examples({
         { x: dimensions.width, y: dimensions.height },
       );
       updateConfigs(USER_CONFIGS.QUERY, txs);
-      updateConfigs(USER_CONFIGS.NET, "preprod");
+      updateConfigs(USER_CONFIGS.NET, NETWORK.PREPROD);
       updateConfigs(USER_CONFIGS.OPTION, option);
       setQuery(txs);
       setToGo(title.startsWith("Draw") ? ROUTES.GRAPHER : ROUTES.DISSECT);

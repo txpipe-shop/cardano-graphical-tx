@@ -4,10 +4,10 @@ import { Button, Input } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ROUTES } from "~/app/_utils";
-import { type ChainNetwork } from "../ChainSelector";
+import { type Network } from "~/app/_utils/network-config";
 
 interface TxSearchProps {
-  chain: ChainNetwork;
+  chain: Network;
 }
 
 export function TxSearch({ chain }: TxSearchProps) {

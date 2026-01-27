@@ -8,6 +8,7 @@ import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   HASH_URL_PARAM,
   NET_URL_PARAM,
+  type Network,
   NETWORK,
   OPTIONS,
   USER_CONFIGS,
@@ -26,7 +27,7 @@ export const useTransactionLoader = () => {
 
       // Prioritize URL params
       const query = hashParam || configs.query;
-      const network = (netParam as NETWORK) || configs.net;
+      const network = (netParam as Network) || configs.net;
 
       if (!query) return;
 
@@ -35,7 +36,7 @@ export const useTransactionLoader = () => {
         updateConfigs(USER_CONFIGS.QUERY, hashParam);
       }
       if (netParam && netParam !== configs.net) {
-        updateConfigs(USER_CONFIGS.NET, netParam as NETWORK);
+        updateConfigs(USER_CONFIGS.NET, netParam as Network);
       }
 
       const multiplesInputs = query.split(",").map((tx) => tx.trim());

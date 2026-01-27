@@ -2,7 +2,13 @@ import { Hash } from "@laceanatomy/types";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { Header } from "~/app/_components/Header";
-import { type ChainNetwork, isValidChain } from "~/server/api/dbsync-provider";
+import { TX_TABS, type TxTab } from "~/app/_utils";
+import {
+  isValidChain,
+  NETWORK,
+  type Network,
+} from "~/app/_utils/network-config";
+import DevnetTxTabs from "./DevnetTxTabs";
 import { loadPageData } from "./_utils";
 
 interface Props {
@@ -10,20 +16,10 @@ interface Props {
   searchParams?: { tab?: string };
 }
 
-const TABS = [
-  "Overview",
-  "Diagram",
-  "Dissect",
-  "CBOR",
-  "Datum",
-  "Scripts",
-] as const;
-type TxTab = (typeof TABS)[number];
-
 function resolveTab(tab?: string): TxTab {
   if (!tab) return "Overview";
   const normalized = tab.toLowerCase();
-  const match = TABS.find(
+  const match = TX_TABS.find(
     (candidate) => candidate.toLowerCase() === normalized,
   );
   return match ?? "Overview";
@@ -31,10 +27,31 @@ function resolveTab(tab?: string): TxTab {
 
 export default async function TxPage({ params, searchParams }: Props) {
   const hash = params.hash;
-  const chainParam = params.chain || "mainnet";
-  const chain: ChainNetwork = isValidChain(chainParam) ? chainParam : "mainnet";
+  const chainParam = params.chain || NETWORK.MAINNET;
+  const chain: Network = isValidChain(chainParam)
+    ? chainParam
+    : NETWORK.MAINNET;
   const tabParam = searchParams?.tab;
   const tab = resolveTab(tabParam);
+
+  if (chain === NETWORK.DEVNET) {
+    return (
+      <div className="flex min-h-screen flex-col bg-white">
+        <Header />
+        <main className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
+          <div className="mb-4 flex flex-shrink-0 items-center justify-between">
+            <h1 className="text-3xl font-extrabold">{hash}</h1>
+            <div className="flex items-center gap-2">
+              <CopyButton text={hash} size={16} />
+            </div>
+          </div>
+          <div className="flex min-h-0 flex-1">
+            <DevnetTxTabs hash={hash} tab={tab} />
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   try {
     const { cardanoTx, cbor, tx } = await loadPageData({

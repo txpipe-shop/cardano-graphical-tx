@@ -25,6 +25,7 @@
     "@heroui/theme": "2.4.25",
     "@laceanatomy/cardano-provider-dbsync": "workspace:*",
     "@laceanatomy/cardano-provider-u5c": "workspace:*",
+    "@laceanatomy/provider-core": "workspace:*",
     "@laceanatomy/napi-pallas": "workspace:*",
     "@laceanatomy/types": "workspace:*",
     "@laceanatomy/utxorpc-sdk": "workspace:*",
