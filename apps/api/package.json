@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@laceanatomy/cardano-provider-dbsync": "workspace:*",
+    "@laceanatomy/cardano-token-registry-sdk": "workspace:*",
     "@laceanatomy/provider-core": "workspace:*",
     "@laceanatomy/types": "workspace:*",
     "@fastify/cors": "^11.2.0",

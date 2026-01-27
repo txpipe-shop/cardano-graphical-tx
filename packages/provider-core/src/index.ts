@@ -43,6 +43,8 @@ export type BlockMetadata = {
   time: number;
   /** blocksProduced since this block */
   confirmations: bigint;
+  size?: bigint;
+  epoch?: bigint;
 };
 
 // TODO: think how to handle epochs in generic chains (currently cardano focused)
@@ -81,7 +83,12 @@ export type LatestTxRes<
   Chain extends BaseChain<U, T>
 > = Chain['tx'];
 export type GetTxRes<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> = Chain['tx'];
-export type AddressFundsRes = { value: Value; txCount: bigint };
+export type AddressFundsRes = {
+  value: Value;
+  txCount: bigint;
+  firstSeen?: { blockHeight: bigint; slot: bigint; hash: Hash; title?: string };
+  lastSeen?: { blockHeight: bigint; slot: bigint; hash: Hash; title?: string };
+};
 export type AddressUTxOsRes<U extends UTxO> = PaginatedResult<U>;
 export type EpochRes = Epoch;
 

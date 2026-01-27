@@ -3,7 +3,7 @@ import { Pool } from 'pg';
 
 declare module 'fastify' {
   interface FastifyInstance {
-    pg: Pool;
+    pools: Record<string, Pool>;
     timeAgo: TimeAgo;
   }
 }

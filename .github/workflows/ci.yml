@@ -33,10 +33,10 @@ jobs:
         run: pnpm install
 
       - name: Build
-        run: pnpm build --filter cardano-graphical-tx
+        run: pnpm build
 
       - name: Lint
-        run: pnpm lint --filter cardano-graphical-tx
+        run: pnpm lint
 
       - name: Type check
-        run: pnpm check --filter cardano-graphical-tx
+        run: pnpm check

@@ -1,3 +1,4 @@
+import { cborParseBlock, downloadBlock } from '@laceanatomy/napi-pallas';
 import {
   AddressFundsReq,
   AddressFundsRes,
@@ -19,12 +20,11 @@ import {
 } from '@laceanatomy/provider-core';
 import type { Cardano } from '@laceanatomy/types';
 import { cardano, Hash, HexString, hexToBech32, isBase58, Unit } from '@laceanatomy/types';
-import type { Pool, PoolClient } from 'pg';
-import { mapTx, mapUtxo } from './mappers';
-import { SQLQuery } from './sql';
-import type * as QueryTypes from './types/queries';
-import { cborParseBlock, downloadBlock } from '@laceanatomy/napi-pallas';
 import assert from 'assert';
+import type { Pool, PoolClient } from 'pg';
+import { mapTx, mapUtxo } from './mappers.js';
+import { SQLQuery } from './sql/index.js';
+import type * as QueryTypes from './types/queries.js';
 
 export type DbSyncParams = {
   pool: Pool;
@@ -104,7 +104,21 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
       return {
         value: valueResult,
-        txCount: BigInt(row.txCount || '0')
+        txCount: BigInt(row.txCount || '0'),
+        firstSeen: row.firstSeen
+          ? {
+            blockHeight: BigInt(row.firstSeen.height),
+            slot: BigInt(row.firstSeen.slot),
+            hash: Hash(row.firstSeen.hash)
+          }
+          : undefined,
+        lastSeen: row.lastSeen
+          ? {
+            blockHeight: BigInt(row.lastSeen.height),
+            slot: BigInt(row.lastSeen.slot),
+            hash: Hash(row.lastSeen.hash)
+          }
+          : undefined
       };
     } finally {
       this.gracefulRelease(client);
@@ -211,7 +225,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         ? isBase58(query.address)
           ? query?.address
           : // TODO: set up address prefix as configurable
-            hexToBech32(HexString(query.address), 'addr')
+          hexToBech32(HexString(query.address), 'addr')
         : null;
 
       const [blockHash, blockHeight, blockSlot] = this.parseBlockFilter(query);
@@ -247,7 +261,6 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
 
     try {
       const { epoch } = query || {};
-      console.log(epoch);
       const { rows } = await client.query<QueryTypes.Block>(SQLQuery.get('blocks'), [
         (offset || 0n).toString(),
         limit,
@@ -268,7 +281,9 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
           slot: BigInt(row.slot),
           time: row.time,
           txCount: BigInt(row.txCount),
-          confirmations: BigInt(row.confirmations)
+          confirmations: BigInt(row.confirmations),
+          size: BigInt(row.size),
+          epoch: BigInt(row.epoch)
         })),
         total: total
       };
@@ -311,7 +326,9 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         slot: BigInt(row.slot),
         time: row.time,
         txCount: BigInt(row.txCount),
-        confirmations: BigInt(row.confirmations || 0)
+        confirmations: BigInt(row.confirmations || 0),
+        size: BigInt(row.size),
+        epoch: BigInt(row.epoch)
       };
     } finally {
       this.gracefulRelease(client);
@@ -381,10 +398,36 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     }
   }
 
+  async getNetworkStats(): Promise<{
+    blockHeight: bigint;
+    txCount: bigint;
+    addresses: bigint;
+    avgBlockTime: number;
+  }> {
+    const client = await this.getClient();
+    try {
+      const { rows } = await client.query<QueryTypes.NetworkStats>(SQLQuery.get('network_stats'));
+      if (rows.length === 0) {
+        throw new Error('Network stats not found');
+      }
+
+      const row = rows[0]!;
+      return {
+        blockHeight: BigInt(row.block_height),
+        txCount: BigInt(row.tx_count),
+        addresses: BigInt(row.addresses),
+        avgBlockTime: row.avg_block_time
+      };
+    } finally {
+      this.gracefulRelease(client);
+    }
+  }
+
   async close(): Promise<void> {
     await this.pool.end();
   }
 }
 
-export { SQLQuery } from './sql';
-export type * from './types/queries';
+export { SQLQuery } from './sql/index.js';
+export type * from './types/queries.js';
+

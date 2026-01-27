@@ -1,22 +1,14 @@
-import { Pool } from 'pg';
-import { TransactionsResponse } from '../types';
-import { DbSyncProvider } from '@laceanatomy/cardano-provider-dbsync';
+import { TransactionsResponse, Transaction } from '../types';
 import { mapTx } from './common';
 import { Hash } from '@laceanatomy/types';
-import { Transaction } from '../types';
-import { env } from '../env';
+import { createProvider, NetworkConfig } from '../utils';
 
 export async function listTransactions(
   limit: bigint,
   offset: bigint,
-  pool: Pool
+  config: NetworkConfig
 ): Promise<TransactionsResponse> {
-  const provider = new DbSyncProvider({
-    pool,
-    addrPrefix: 'addr',
-    magic: env.MAGIC,
-    nodeUrl: env.NODE_URL
-  });
+  const provider = createProvider(config);
 
   const txs = await provider.getTxs({ limit, offset, query: undefined });
   const transactions = txs.data.map((tx) => mapTx(tx));
@@ -32,13 +24,8 @@ export async function listTransactions(
   };
 }
 
-export async function resolveTx(hash: Hash, pool: Pool): Promise<Transaction> {
-  const provider = new DbSyncProvider({
-    pool,
-    addrPrefix: 'addr',
-    magic: env.MAGIC,
-    nodeUrl: env.NODE_URL
-  });
+export async function resolveTx(hash: Hash, config: NetworkConfig): Promise<Transaction> {
+  const provider = createProvider(config);
   const tx = await provider.getTx({ hash });
   return mapTx(tx);
 }

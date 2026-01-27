@@ -89,6 +89,7 @@ export interface Block {
   fees: string;
   confirmations: string;
   size: number;
+  epoch: number;
   slotLeader: string;
 }
 
@@ -106,6 +107,8 @@ export interface AddressFunds {
   lovelace: string;
   assets: Record<string, string>;
   txCount: string;
+  firstSeen?: { height: number; slot: number; hash: string } | null;
+  lastSeen?: { height: number; slot: number; hash: string } | null;
 }
 
 export interface AddressUTxOs {
@@ -118,4 +121,11 @@ export interface AddressUTxOs {
     datum?: { type: 'inline' | 'hash'; datumHex?: string; datumHash?: string } | null;
     referenceScript?: { hash: string; type: string; bytes: string } | null;
   }> | null;
+}
+
+export interface NetworkStats {
+  block_height: number;
+  tx_count: string;
+  addresses: string;
+  avg_block_time: number;
 }
