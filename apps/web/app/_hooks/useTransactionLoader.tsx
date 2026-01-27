@@ -45,7 +45,7 @@ export const useTransactionLoader = () => {
         y: dimensions.height || window.innerHeight,
       };
 
-      const option = configs.option;
+      const option = hashParam ? OPTIONS.HASH : configs.option;
 
       if (network === NETWORK.DEVNET) {
         await addDevnetCBORsToContext(
@@ -74,5 +74,5 @@ export const useTransactionLoader = () => {
 
     fetchTransactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [configs.query, configs.net, configs.option, configs.port, searchParams]);
+  }, []);
 };

@@ -1,5 +1,5 @@
 "use client";
-import { Card, CardBody } from "@heroui/react";
+import { Button, Card, CardBody } from "@heroui/react";
 import type { cardano, Unit } from "@laceanatomy/types";
 import Link from "next/link";
 import { ROUTES } from "~/app/_utils";
@@ -16,17 +16,6 @@ interface TxRowHeaderProps {
 }
 
 function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
-  //const router = useRouter();
-
-  // TODO: handle this kind of redirection in grapher and dissect
-  //const handleDissect = () => {
-  //  router.push(`${ROUTES.DISSECT}?tx=${tx.hash}&chain=${chain}`);
-  //};
-
-  //const handleDraw = () => {
-  //  router.push(`${ROUTES.GRAPHER}?tx=${tx.hash}&chain=${chain}`);
-  //};
-
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 bg-violet-100 p-4">
       <div className="flex items-center gap-2">
@@ -48,24 +37,28 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
         Fee: {(Number(tx.fee) / 1_000_000).toFixed(6)} ₳
       </div>
 
-      {/*   <div className="flex gap-2"> */}
-      {/*     <Button */}
-      {/*       size="sm" */}
-      {/*       variant="flat" */}
-      {/*       className="font-mono shadow-md" */}
-      {/*       onPress={handleDissect} */}
-      {/*     > */}
-      {/*       Dissect */}
-      {/*     </Button> */}
-      {/*     <Button */}
-      {/*       size="sm" */}
-      {/*       variant="flat" */}
-      {/*       className="font-mono shadow-md" */}
-      {/*       onPress={handleDraw} */}
-      {/*     > */}
-      {/*       Draw */}
-      {/*     </Button> */}
-      {/*   </div> */}
+      <div className="flex gap-2">
+        <Button
+          as={Link}
+          size="sm"
+          variant="flat"
+          className="font-mono shadow-md"
+          href={`${ROUTES.DISSECT}?hash=${tx.hash}&net=${chain}`}
+          target="_blank"
+        >
+          Dissect
+        </Button>
+        <Button
+          as={Link}
+          size="sm"
+          variant="flat"
+          className="font-mono shadow-md"
+          href={`${ROUTES.GRAPHER}?hash=${tx.hash}&net=${chain}`}
+          target="_blank"
+        >
+          Draw
+        </Button>
+      </div>
     </div>
   );
 }

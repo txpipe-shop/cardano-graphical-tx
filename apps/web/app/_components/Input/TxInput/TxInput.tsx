@@ -8,13 +8,12 @@ import {
 } from "@heroui/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-
-import { type ChangeEvent, useEffect, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { Button, Input } from "~/app/_components";
 import { useConfigs, useUI } from "~/app/_contexts";
 import {
-  isEmpty,
   HASH_URL_PARAM,
+  isEmpty,
   NET_URL_PARAM,
   OPTIONS,
   ROUTES,

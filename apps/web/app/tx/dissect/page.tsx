@@ -2,9 +2,9 @@
 
 import { DissectSection, Error, Header, TxInput } from "~/app/_components";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
+import { useTransactionLoader } from "~/app/_hooks/useTransactionLoader";
 import { isEmpty } from "~/app/_utils";
 import Loading from "~/app/loading";
-import { useTransactionLoader } from "~/app/_hooks/useTransactionLoader";
 
 export default function Index() {
   useTransactionLoader();
@@ -13,6 +13,7 @@ export default function Index() {
   const { configs } = useConfigs();
 
   if (loading) return <Loading />;
+
   return (
     <div>
       <Header />
