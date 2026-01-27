@@ -29,7 +29,8 @@ function getPool(chain: Network): pg.Pool {
 
 export function getDbSyncProvider(chain: Network): DbSyncProvider {
   assert(chain !== NETWORK.DEVNET, "Should not get Db Sync for Devnet");
-  const { addressPrefix, nodeUrl, networkMagic } = getNetworkConfigServer(chain);
+  const { addressPrefix, nodeUrl, networkMagic } =
+    getNetworkConfigServer(chain);
   const pool = getPool(chain);
 
   assert(nodeUrl, "Node URL is required");

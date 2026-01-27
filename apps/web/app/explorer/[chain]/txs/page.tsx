@@ -7,18 +7,19 @@ import {
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
 import { EXPLORER_PAGE_SIZE, ROUTES } from "~/app/_utils";
-import { isValidChain, NETWORK, type Network } from "~/app/_utils/network-config";
-import Loading from "~/app/loading";
 import {
-  getDbSyncProvider,
-} from "~/server/api/dbsync-provider";
+  isValidChain,
+  NETWORK,
+  type Network,
+} from "~/app/_utils/network-config";
+import Loading from "~/app/loading";
+import { getDbSyncProvider } from "~/server/api/dbsync-provider";
 import DevnetTransactionsList from "./DevnetTransactionsList";
 
 interface ExplorerPageProps {
   params: { chain: string };
   searchParams: { page?: string };
 }
-
 
 async function TransactionsList({
   chain,
@@ -48,7 +49,8 @@ async function TransactionsList({
     });
 
     const total = result.total ?? 0n;
-    const totalPages = total === 0n ? 1 : Number((total - 1n) / EXPLORER_PAGE_SIZE + 1n);
+    const totalPages =
+      total === 0n ? 1 : Number((total - 1n) / EXPLORER_PAGE_SIZE + 1n);
 
     return (
       <div className="space-y-4">
@@ -78,7 +80,9 @@ export default async function ExplorerTxsPage({
   searchParams,
 }: ExplorerPageProps) {
   const chainParam = params.chain || NETWORK.MAINNET;
-  const chain: Network = isValidChain(chainParam) ? chainParam : NETWORK.MAINNET;
+  const chain: Network = isValidChain(chainParam)
+    ? chainParam
+    : NETWORK.MAINNET;
   const pageParam = Number.parseInt(searchParams.page ?? "1", 10);
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 

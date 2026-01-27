@@ -5,7 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { useConfigs } from "~/app/_contexts";
-import { getU5CProviderWeb, NETWORK, resolveDevnetPort, ROUTES } from "~/app/_utils";
+import {
+  getU5CProviderWeb,
+  NETWORK,
+  resolveDevnetPort,
+  ROUTES,
+} from "~/app/_utils";
 
 interface DevnetTransactionsListProps {
   chain: string;

@@ -1,9 +1,5 @@
 import type { CborResponse } from "@laceanatomy/napi-pallas";
-import {
-  type Asset,
-  type Assets,
-  type Utxo,
-} from "@laceanatomy/napi-pallas";
+import { type Asset, type Assets, type Utxo } from "@laceanatomy/napi-pallas";
 import { type ChainProvider } from "@laceanatomy/provider-core";
 import {
   assetNameFromUnit,

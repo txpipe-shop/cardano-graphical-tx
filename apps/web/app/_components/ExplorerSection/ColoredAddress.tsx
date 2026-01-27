@@ -9,9 +9,7 @@ export interface ColoredAddressProps {
   address: Address;
 }
 
-export default function ColoredAddress({
-  address,
-}: ColoredAddressProps) {
+export default function ColoredAddress({ address }: ColoredAddressProps) {
   const { addressPrefix } = useNetwork();
   const normalizedAddress = normalizeAddress(address, addressPrefix);
   const uncoloredPrefix = isBech32(normalizedAddress)

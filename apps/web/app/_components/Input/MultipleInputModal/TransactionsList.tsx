@@ -13,7 +13,7 @@ import {
   isOutputUtxo,
   NETWORK,
   OPTIONS,
-  ROUTES
+  ROUTES,
 } from "~/app/_utils";
 import TrashRedIcon from "~/public/delete-red.svg";
 import NoContractsIcon from "~/public/no-contract.svg";

@@ -4,7 +4,13 @@ import { Hash } from "@laceanatomy/types";
 import { useEffect, useMemo, useState } from "react";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { useConfigs } from "~/app/_contexts";
-import { getTxFromDevnetCBOR, getU5CProviderWeb, NETWORK, resolveDevnetPort, type TxTab } from "~/app/_utils";
+import {
+  getTxFromDevnetCBOR,
+  getU5CProviderWeb,
+  NETWORK,
+  resolveDevnetPort,
+  type TxTab,
+} from "~/app/_utils";
 import { loadTxPageData } from "./_shared";
 
 interface DevnetTxTabsProps {
@@ -17,9 +23,9 @@ export default function DevnetTxTabs({ hash, tab }: DevnetTxTabsProps) {
   const port = resolveDevnetPort(configs.port);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<
-    Awaited<ReturnType<typeof loadTxPageData>> | null
-  >(null);
+  const [data, setData] = useState<Awaited<
+    ReturnType<typeof loadTxPageData>
+  > | null>(null);
 
   const hashValue = useMemo(() => Hash(hash), [hash]);
 
@@ -76,9 +82,11 @@ export default function DevnetTxTabs({ hash, tab }: DevnetTxTabsProps) {
   if (error || !data) {
     return (
       <div className="w-full rounded-lg border-2 border-dashed border-red-300 bg-red-50 p-8 text-center text-red-600">
-        <p className="font-semibold">Transaction not found or could not be loaded.</p>
+        <p className="font-semibold">
+          Transaction not found or could not be loaded.
+        </p>
         {error ? <p className="mt-2 text-sm">{error}</p> : null}
-      </div >
+      </div>
     );
   }
 

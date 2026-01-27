@@ -29,10 +29,8 @@ const NETWORK_CONFIGS_SERVER: Record<Network, NetworkConfig> = {
   devnet: {
     ...NETWORK_CONFIGS_BASE.devnet,
   },
-}
+};
 
-export function getNetworkConfigServer(
-  network: Network,
-): NetworkConfig {
-  return NETWORK_CONFIGS_SERVER[network]
+export function getNetworkConfigServer(network: Network): NetworkConfig {
+  return NETWORK_CONFIGS_SERVER[network];
 }
