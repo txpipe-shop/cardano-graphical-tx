@@ -20,7 +20,7 @@ interface ExplorerPageProps {
   searchParams: { page?: string };
 }
 
-const PAGE_SIZE = 1n;
+const PAGE_SIZE = 10n;
 
 async function TransactionsList({
   chain,

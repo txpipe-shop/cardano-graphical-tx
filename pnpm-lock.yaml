@@ -310,6 +310,9 @@ importers:
       '@laceanatomy/napi-pallas':
         specifier: workspace:*
         version: link:../../packages/napi-pallas
+      '@laceanatomy/provider-core':
+        specifier: workspace:*
+        version: link:../../packages/provider-core
       '@laceanatomy/types':
         specifier: workspace:*
         version: link:../../packages/types
