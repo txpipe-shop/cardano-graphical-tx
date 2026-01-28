@@ -25,6 +25,8 @@ import assert from 'assert';
 import { Buffer } from 'buffer';
 import { u5cToCardanoBlock, u5cToCardanoTx, u5cToCardanoUtxo, u5cToCardanoValue } from './mappers';
 
+const DUMP_HISTORY_MAX_ITEMS = 1000;
+
 export type Params = {
   /**
    * Pre-configured transport for the UTxORPC client.
@@ -216,51 +218,35 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     limit: number,
     offset: number
   ): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
-    const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
-    assert(tip.tip, 'Cannot read tip');
-
     const blocksAndTxs: { block: cardanoUtxoRpc.Block; txs: cardanoUtxoRpc.Tx[] }[] = [];
+    let nextSlot: bigint | undefined = 0n;
 
-    let currentBlockHash = Buffer.from(tip.tip.hash);
+    do {
+      const { block, nextToken: next } = await this.utxoRpc.sync.dumpHistory({ maxItems: DUMP_HISTORY_MAX_ITEMS, startToken: { slot: nextSlot } });
+      nextSlot = next ? next.slot : undefined;
+      block.forEach((blockItem => {
+        const { block, body } = this.validateBlock(blockItem);
+        if (body.tx.length > 0)
+          blocksAndTxs.push({ block: block, txs: body.tx.reverse() });
+      }))
+    } while (nextSlot);
+    const total = blocksAndTxs.reduce((acc, block) => acc + block.txs.length, 0);
+
     let remainingOffset = offset;
+    let index = 0;
+    blocksAndTxs.reverse();
+    while (remainingOffset > 0 && index < blocksAndTxs.length) {
+      const { txs } = blocksAndTxs[index]!;
 
-    const tipBlockRes = await this.utxoRpc.sync.fetchBlock({
-      ref: [{ hash: currentBlockHash }]
-    });
-    const { block: tipBlock, header: tipHeader, body: tipBody } = this.validateBlock(tipBlockRes);
-    remainingOffset = this.processBlockForTxs(
-      tipBlock,
-      tipBody.tx.reverse(),
-      blocksAndTxs,
-      remainingOffset
-    );
-
-    let nextBlockHeight = tipHeader.height - 1n;
-    let totalTxsCollected = blocksAndTxs.reduce((acc, block) => acc + block.txs.length, 0);
-
-    while (totalTxsCollected < limit && nextBlockHeight >= 0n) {
-      const blockRes = await this.utxoRpc.sync.fetchBlock({
-        ref: [{ height: nextBlockHeight }]
-      });
-      const { block, header, body: blockBody } = this.validateBlock(blockRes);
-
-      if (
-        header.height === 0n &&
-        header.slot === 0n &&
-        Buffer.from(header.hash).toString('hex') === ''
-      ) {
-        break;
+      if (txs.length >= remainingOffset) {
+        blocksAndTxs[index]!.txs = txs.slice(remainingOffset);
+        remainingOffset = 0;
+      } else {
+        blocksAndTxs[index]!.txs = [];
+        remainingOffset -= txs.length;
       }
 
-      remainingOffset = this.processBlockForTxs(
-        block,
-        blockBody.tx.reverse(),
-        blocksAndTxs,
-        remainingOffset
-      );
-
-      totalTxsCollected = blocksAndTxs.reduce((acc, block) => acc + block.txs.length, 0);
-      nextBlockHeight--;
+      index++;
     }
 
     const data = blocksAndTxs.flatMap(({ block, txs }) => {
@@ -286,8 +272,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
     return {
       data: data.slice(0, limit),
-      // We don't know the total number of transactions with no query param
-      total: BigInt(0)
+      total: BigInt(total)
     };
   }
 
@@ -301,14 +286,14 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     const addressHex = query.address;
     const filteredTxs = addressHex
       ? body.tx.filter((tx) => {
-          const addressMatchesInput = tx.inputs.some(
-            (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
-          );
-          const addressMatchesOutput = tx.outputs.some(
-            (output) => Buffer.from(output.address).toString('hex') === addressHex
-          );
-          return addressMatchesInput || addressMatchesOutput;
-        })
+        const addressMatchesInput = tx.inputs.some(
+          (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
+        );
+        const addressMatchesOutput = tx.outputs.some(
+          (output) => Buffer.from(output.address).toString('hex') === addressHex
+        );
+        return addressMatchesInput || addressMatchesOutput;
+      })
       : body.tx;
 
     const paginatedTxs = filteredTxs.reverse().slice(offset, offset + limit);
@@ -550,13 +535,19 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     }
   }
 
-  private validateBlock(block: sync.FetchBlockResponse): {
+  private validateBlock(block: sync.FetchBlockResponse | sync.AnyChainBlock): {
     block: cardanoUtxoRpc.Block;
     header: cardanoUtxoRpc.BlockHeader;
     body: cardanoUtxoRpc.BlockBody;
   } {
-    assert(block.block[0], 'Block not found');
-    const [thisBlock] = block.block;
+    let thisBlock: sync.AnyChainBlock;
+    if ("block" in block) {
+      assert(block.block[0], 'Block not found');
+      thisBlock = block.block[0];
+    } else {
+      thisBlock = block;
+    }
+
     assert(thisBlock.chain.case === 'cardano', 'Block is not a Cardano block');
     assert(thisBlock.chain.value.body, 'Block body is undefined');
     assert(thisBlock.chain.value.header, 'Header body is undefined');
