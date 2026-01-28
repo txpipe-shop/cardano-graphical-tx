@@ -1,6 +1,6 @@
 "use client";
 import { Select, SelectItem, type SharedSelection } from "@heroui/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import type { ChangeEvent, SyntheticEvent } from "react";
 import { useCallback } from "react";
 import { useConfigs } from "~/app/_contexts";
@@ -56,7 +56,6 @@ const PortInput = ({ port, onPortChange }: PortInputProps) => {
 
 export default function ChainSelector({ currentChain }: ChainSelectorProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { configs, updateConfigs } = useConfigs();
 
   const handlePortChange = (port: string) => {
@@ -69,15 +68,11 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
       const selectedKey = Array.from(keys)[0] as Network;
       if (!selectedKey || selectedKey === currentChain) return;
 
-      const params = new URLSearchParams(searchParams.toString());
-      const query = params.toString();
       router.push(
-        query
-          ? `${ROUTES.EXPLORER_TXS(selectedKey)}?${query}`
-          : ROUTES.EXPLORER_TXS(selectedKey),
+        ROUTES.EXPLORER_TXS(selectedKey),
       );
     },
-    [currentChain, router, searchParams],
+    [currentChain, router],
   );
 
   return (
