@@ -222,13 +222,15 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     let nextSlot: bigint | undefined = 0n;
 
     do {
-      const { block, nextToken: next } = await this.utxoRpc.sync.dumpHistory({ maxItems: DUMP_HISTORY_MAX_ITEMS, startToken: { slot: nextSlot } });
+      const { block, nextToken: next } = await this.utxoRpc.sync.dumpHistory({
+        maxItems: DUMP_HISTORY_MAX_ITEMS,
+        startToken: { slot: nextSlot }
+      });
       nextSlot = next ? next.slot : undefined;
-      block.forEach((blockItem => {
+      block.forEach((blockItem) => {
         const { block, body } = this.validateBlock(blockItem);
-        if (body.tx.length > 0)
-          blocksAndTxs.push({ block: block, txs: body.tx.reverse() });
-      }))
+        if (body.tx.length > 0) blocksAndTxs.push({ block: block, txs: body.tx.reverse() });
+      });
     } while (nextSlot);
     const total = blocksAndTxs.reduce((acc, block) => acc + block.txs.length, 0);
 
@@ -286,14 +288,14 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     const addressHex = query.address;
     const filteredTxs = addressHex
       ? body.tx.filter((tx) => {
-        const addressMatchesInput = tx.inputs.some(
-          (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
-        );
-        const addressMatchesOutput = tx.outputs.some(
-          (output) => Buffer.from(output.address).toString('hex') === addressHex
-        );
-        return addressMatchesInput || addressMatchesOutput;
-      })
+          const addressMatchesInput = tx.inputs.some(
+            (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
+          );
+          const addressMatchesOutput = tx.outputs.some(
+            (output) => Buffer.from(output.address).toString('hex') === addressHex
+          );
+          return addressMatchesInput || addressMatchesOutput;
+        })
       : body.tx;
 
     const paginatedTxs = filteredTxs.reverse().slice(offset, offset + limit);
@@ -541,7 +543,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     body: cardanoUtxoRpc.BlockBody;
   } {
     let thisBlock: sync.AnyChainBlock;
-    if ("block" in block) {
+    if ('block' in block) {
       assert(block.block[0], 'Block not found');
       thisBlock = block.block[0];
     } else {

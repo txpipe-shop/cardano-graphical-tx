@@ -92,9 +92,7 @@ export default async function ExplorerTxsPage({
 
       <main className="container mx-auto px-4 py-6">
         <div className="mb-6 flex flex-col gap-4">
-          <h1 className="text-4xl font-extrabold text-gray-800">
-            Explorer
-          </h1>
+          <h1 className="text-4xl font-extrabold text-gray-800">Explorer</h1>
           <div className="flex w-full gap-2">
             <div className="min-w-0 flex-1">
               <TxSearch chain={chain} />
