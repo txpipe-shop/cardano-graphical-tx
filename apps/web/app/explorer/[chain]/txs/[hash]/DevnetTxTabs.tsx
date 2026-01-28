@@ -96,6 +96,7 @@ export default function DevnetTxTabs({ hash, tab }: DevnetTxTabsProps) {
       cardanoTx={data.cardanoTx}
       cbor={data.cbor}
       tab={tab}
+      chain={NETWORK.DEVNET}
     />
   );
 }

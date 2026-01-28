@@ -69,7 +69,13 @@ export default async function TxPage({ params, searchParams }: Props) {
             </div>
           </div>
           <div className="flex min-h-0 flex-1">
-            <TxTabs cardanoTx={cardanoTx} cbor={cbor} tx={tx} tab={tab} />
+            <TxTabs
+              cardanoTx={cardanoTx}
+              cbor={cbor}
+              tx={tx}
+              tab={tab}
+              chain={chain}
+            />
           </div>
         </main>
       </div>

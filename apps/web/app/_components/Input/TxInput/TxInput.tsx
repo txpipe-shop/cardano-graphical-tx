@@ -8,20 +8,24 @@ import {
 } from "@heroui/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { type ChangeEvent, useEffect, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { Button, Input } from "~/app/_components";
-import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
-import { isEmpty, OPTIONS, ROUTES, USER_CONFIGS } from "~/app/_utils";
-import { NETWORK } from "~/app/_utils/network-config";
+import { useConfigs, useUI } from "~/app/_contexts";
+import {
+  HASH_URL_PARAM,
+  isEmpty,
+  NET_URL_PARAM,
+  OPTIONS,
+  ROUTES,
+  USER_CONFIGS,
+} from "~/app/_utils";
 import MultipleTxIcon from "~/public/multiple-txs.svg";
 import { MultipleInputModal } from "../MultipleInputModal/MultipleInputModal";
 import { NetSelector } from "../NetSelector";
-import { addCBORsToContext, addDevnetCBORsToContext } from "./txInput.helper";
 
 export const TxInput = () => {
-  const { transactions, setTransactionBox, dimensions } = useGraphical();
   const router = useRouter();
-  const { error, setError, setLoading } = useUI();
+  const { error, setError, triggerRefresh } = useUI();
   const { configs, updateConfigs } = useConfigs();
   const [toGo, setToGo] = useState<string>("");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -30,47 +34,28 @@ export const TxInput = () => {
     updateConfigs(USER_CONFIGS.QUERY, e.target.value);
   };
 
-  useEffect(() => {
-    updateConfigs(USER_CONFIGS.QUERY, configs.query);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!configs.query) return;
 
-    router.push(toGo);
-    setError("");
-
-    const multiplesInputs = configs.query.split(",").map((tx) => tx.trim());
-    const uniqueInputs = Array.from(new Set(multiplesInputs));
-
-    const size = { x: dimensions.width, y: dimensions.height };
-    if (configs.net === NETWORK.DEVNET) {
-      addDevnetCBORsToContext(
-        configs.option,
-        Number(configs.port),
-        uniqueInputs,
-        setError,
-        transactions,
-        setTransactionBox,
-        setLoading,
-        size,
-      );
-    } else {
-      addCBORsToContext(
-        configs.option,
-        uniqueInputs,
-        configs.net,
-        setError,
-        transactions,
-        setTransactionBox,
-        setLoading,
-        size,
-      );
+    const params = new URLSearchParams();
+    let target = toGo;
+    if (configs.option === OPTIONS.HASH) {
+      params.set(HASH_URL_PARAM, configs.query);
+      params.set(NET_URL_PARAM, configs.net);
+      target = target.concat("?", params.toString());
     }
 
+    router.push(target);
+
+    setError("");
+
     updateConfigs(USER_CONFIGS.QUERY, configs.query);
+
+    // Trigger refresh for CBOR inputs (hash inputs will trigger via URL change)
+    if (configs.option === OPTIONS.CBOR) {
+      triggerRefresh();
+    }
   }
 
   const changeSelectedOption = (e: ChangeEvent<HTMLSelectElement>) => {

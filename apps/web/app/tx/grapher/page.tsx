@@ -1,6 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import {
   Header,
   InfoPanel,
@@ -10,7 +8,8 @@ import {
   UtxoInfo,
 } from "~/app/_components";
 import { useUI } from "~/app/_contexts";
-import { ROUTES, TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
+import { useTransactionLoader } from "~/app/_hooks/useTransactionLoader";
+import { TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
 import Loading from "~/app/loading";
 
 interface GrapherProps {
@@ -21,15 +20,11 @@ interface GrapherProps {
 }
 
 export default function Index({ searchParams }: GrapherProps) {
-  const { replace } = useRouter();
+  useTransactionLoader();
+
   const { loading } = useUI();
   const { [TX_URL_PARAM]: selectedTx, [UTXO_URL_PARAM]: selectedUtxo } =
     searchParams || {};
-
-  useEffect(() => {
-    // Remove URL params when reloading the page
-    replace(ROUTES.GRAPHER);
-  }, [replace]);
 
   if (loading) return <Loading />;
 
