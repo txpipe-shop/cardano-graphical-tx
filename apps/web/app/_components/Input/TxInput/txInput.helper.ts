@@ -1,3 +1,4 @@
+import { U5CProvider } from "@laceanatomy/cardano-provider-u5c";
 import {
   Asset,
   Assets,
@@ -397,7 +398,7 @@ const cardanoUtxoToITransactionInput = (i: cardano.UTxO, assets: Assets[]): Utxo
   }
 }
 
-const buildUtxo = (inputs: cardano.UTxO[] | Input[]): ITransaction['inputs'] => {
+const buildUtxos = (inputs: (cardano.UTxO | Input)[]): ITransaction['inputs'] => {
   return inputs.map((i) => {
     if ("outRef" in i) {
       const assets: Assets[] = [];
@@ -434,6 +435,57 @@ const buildUtxo = (inputs: cardano.UTxO[] | Input[]): ITransaction['inputs'] => 
     }
   });
 };
+
+async function resolveInputsAndReferenceInputs(
+  inputs: Input[],
+  referenceInputs: Input[],
+  u5c: U5CProvider,
+): Promise<{
+  resolvedInputs: (cardano.UTxO | Input)[];
+  resolvedReferenceInputs: (cardano.UTxO | Input)[];
+}> {
+  const uniqueTxHashes = new Set<string>();
+  inputs.forEach((i) => uniqueTxHashes.add(i.txHash));
+  referenceInputs.forEach((i) => uniqueTxHashes.add(i.txHash));
+
+  const txFetchPromises = Array.from(uniqueTxHashes).map(async (hash) => {
+    try {
+      const tx = await u5c.getTx({ hash: Hash(hash) });
+      return { hash, tx, error: null };
+    } catch (error) {
+      return { hash, tx: null, error };
+    }
+  });
+
+  const txResults = await Promise.all(txFetchPromises);
+  console.dir(txResults, { depth: null });
+  const txMap = new Map<string, cardano.Tx | null>();
+  txResults.forEach(({ hash, tx }) => {
+    txMap.set(hash, tx);
+  });
+
+  const resolvedInputs = inputs.map((i) => {
+    const tx = txMap.get(i.txHash);
+    if (!tx) return i;
+
+    const input = tx.outputs.find(
+      (asOutput) => asOutput.outRef.index === BigInt(i.index),
+    );
+    return input || i;
+  });
+
+  const resolvedReferenceInputs = referenceInputs.map((i) => {
+    const tx = txMap.get(i.txHash);
+    if (!tx) return i;
+
+    const input = tx.outputs.find(
+      (asOutput) => asOutput.outRef.index === BigInt(i.index),
+    );
+    return input || i;
+  });
+
+  return { resolvedInputs, resolvedReferenceInputs };
+}
 
 export async function addDevnetCBORsToContext(
   option: OPTIONS,
@@ -502,11 +554,27 @@ export async function addDevnetCBORsToContext(
           ? cborParsed
           : (await getTxFromDevnetCBOR(cbor)).tx;
 
+        let inputs: (cardano.UTxO | Input)[];
+        let referenceInputs: (cardano.UTxO | Input)[];
+        if (!tx) {
+          const { resolvedInputs, resolvedReferenceInputs } =
+            await resolveInputsAndReferenceInputs(
+              cborParsed?.inputs || [],
+              cborParsed?.referenceInputs || [],
+              u5c,
+            );
+          inputs = resolvedInputs;
+          referenceInputs = resolvedReferenceInputs;
+        } else {
+          inputs = tx.inputs;
+          referenceInputs = tx.referenceInputs;
+        }
+
         return {
           ...txResponse,
           fee: txResponse.fee || 0,
-          inputs: buildUtxo(tx ? tx.inputs : cborParsed?.inputs || []),
-          referenceInputs: buildUtxo(tx ? tx.referenceInputs : cborParsed?.referenceInputs || []),
+          inputs: buildUtxos(inputs),
+          referenceInputs: buildUtxos(referenceInputs),
           blockHash: tx ? tx.block.hash : undefined,
           blockHeight: tx ? Number(tx.block.height) : undefined,
           blockTxIndex: tx ? Number(tx.indexInBlock) : undefined,
