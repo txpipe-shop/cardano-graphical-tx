@@ -1,8 +1,9 @@
 import { Button, Link as NextLink } from "@heroui/react";
 import Image from "next/image";
 import Link from "next/link";
-import { NETWORK, ROUTES } from "~/app/_utils";
+import { ROUTES } from "~/app/_utils";
 import TxPipeIcon from "~/public/txpipe_shop.png";
+import { ExplorerButton } from "./ExplorerButton";
 
 export const Header = () => {
   return (
@@ -43,15 +44,7 @@ export const Header = () => {
           >
             Address
           </Button>
-          <Button
-            variant="flat"
-            className="p-5 font-mono text-lg shadow-md"
-            as={NextLink}
-            // TODO: add network from local storage
-            href={ROUTES.EXPLORER_TXS(NETWORK.MAINNET)}
-          >
-            Explorer
-          </Button>
+          <ExplorerButton />
         </div>
       </div>
     </header>
