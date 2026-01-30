@@ -1,19 +1,21 @@
+import { U5CProvider } from "@laceanatomy/cardano-provider-u5c";
 import {
-  type Asset,
-  type Assets,
-  type CborResponse,
-  type Utxo,
+  Asset,
+  Assets,
+  CborResponse,
+  Input,
+  type Utxo
 } from "@laceanatomy/napi-pallas";
-import type { cardano } from "@laceanatomy/types";
 import {
   assetNameFromUnit,
+  cardano,
   DatumType,
   Hash,
   HexString,
   hexToAscii,
   hexToBech32,
   policyFromUnit,
-  Unit,
+  Unit
 } from "@laceanatomy/types";
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
@@ -44,7 +46,7 @@ import {
   TX_HEIGHT,
   TX_WIDTH,
   UTXO_LINE_GAP,
-  type Network,
+  type Network
 } from "~/app/_utils";
 
 interface IGenerateUTXO extends Utxo {
@@ -376,6 +378,114 @@ const setCBORs = async (
   }
 };
 
+const cardanoUtxoToITransactionInput = (i: cardano.UTxO, assets: Assets[]): Utxo => {
+  return {
+    txHash: i.outRef.hash.toString(),
+    index: Number(i.outRef.index),
+    bytes: "",
+    address: i.address.toString(),
+    lovelace: Number(i.coin),
+    assets,
+    datum:
+      i.datum && i.datum.type === DatumType.INLINE
+        ? {
+          bytes: i.datum.datumHex.toString(),
+          hash: "",
+          json: ""
+        }
+        : undefined,
+    scriptRef: i.referenceScript && i.referenceScript.bytes ? i.referenceScript.bytes.toString() : undefined,
+  }
+}
+
+const buildUtxos = (inputs: (cardano.UTxO | Input)[]): ITransaction['inputs'] => {
+  return inputs.map((i) => {
+    if ("outRef" in i) {
+      const assets: Assets[] = [];
+      for (const [unit, amount] of Object.entries(i.value)) {
+        const policyId = policyFromUnit(Unit(unit));
+        const assetName = assetNameFromUnit(Unit(unit));
+        const asset: Asset = {
+          assetName,
+          amount: Number(amount),
+          assetNameAscii: hexToAscii(assetName),
+        };
+
+        const multiasset = assets.find((a) => a.policyId === policyId);
+        if (multiasset) {
+          multiasset.assetsPolicy.push(asset);
+        } else {
+          assets.push({
+            policyId,
+            assetsPolicy: [asset],
+          });
+        }
+      }
+
+      return cardanoUtxoToITransactionInput(i, assets);
+    } else {
+      return {
+        txHash: i.txHash,
+        index: Number(i.index),
+        address: "",
+        assets: [],
+        lovelace: 0,
+        bytes: ""
+      }
+    }
+  });
+};
+
+async function resolveInputsAndReferenceInputs(
+  inputs: Input[],
+  referenceInputs: Input[],
+  u5c: U5CProvider,
+): Promise<{
+  resolvedInputs: (cardano.UTxO | Input)[];
+  resolvedReferenceInputs: (cardano.UTxO | Input)[];
+}> {
+  const uniqueTxHashes = new Set<string>();
+  inputs.forEach((i) => uniqueTxHashes.add(i.txHash));
+  referenceInputs.forEach((i) => uniqueTxHashes.add(i.txHash));
+
+  const txFetchPromises = Array.from(uniqueTxHashes).map(async (hash) => {
+    try {
+      const tx = await u5c.getTx({ hash: Hash(hash) });
+      return { hash, tx, error: null };
+    } catch (error) {
+      return { hash, tx: null, error };
+    }
+  });
+
+  const txResults = await Promise.all(txFetchPromises);
+  const txMap = new Map<string, cardano.Tx | null>();
+  txResults.forEach(({ hash, tx }) => {
+    txMap.set(hash, tx);
+  });
+
+  const resolvedInputs = inputs.map((i) => {
+    const tx = txMap.get(i.txHash);
+    if (!tx) return i;
+
+    const input = tx.outputs.find(
+      (asOutput) => asOutput.outRef.index === BigInt(i.index),
+    );
+    return input || i;
+  });
+
+  const resolvedReferenceInputs = referenceInputs.map((i) => {
+    const tx = txMap.get(i.txHash);
+    if (!tx) return i;
+
+    const input = tx.outputs.find(
+      (asOutput) => asOutput.outRef.index === BigInt(i.index),
+    );
+    return input || i;
+  });
+
+  return { resolvedInputs, resolvedReferenceInputs };
+}
+
 export async function addDevnetCBORsToContext(
   option: OPTIONS,
   devnetPort: number,
@@ -389,7 +499,7 @@ export async function addDevnetCBORsToContext(
   try {
     setLoading(true);
     const u5c = getU5CProviderWeb(devnetPort);
-    const existingTxs = new Map<string, { tx: any; cbor: string }>();
+    const existingTxs = new Map<string, { tx: cardano.Tx; cbor: string }>();
 
     const getTxAndCbor = async (
       hash: string,
@@ -409,7 +519,7 @@ export async function addDevnetCBORsToContext(
 
     const cborAndTx: {
       cbor: string;
-      tx: cardano.Tx;
+      tx?: cardano.Tx;
       cborParsed?: CborResponse;
     }[] = [];
     if (option === OPTIONS.CBOR) {
@@ -422,7 +532,9 @@ export async function addDevnetCBORsToContext(
 
       const completedTxs = await Promise.all(
         incompleteTxs.map(async ({ tx, cbor }) => {
-          const fullTx = await u5c.getTx({ hash: Hash(tx.txHash) });
+          const fullTx = await u5c
+            .getTx({ hash: Hash(tx.txHash) })
+            .catch(() => undefined);
           return { cbor, tx: fullTx, cborParsed: tx };
         }),
       );
@@ -441,56 +553,32 @@ export async function addDevnetCBORsToContext(
           ? cborParsed
           : (await getTxFromDevnetCBOR(cbor)).tx;
 
-        const buildUtxo = (inputs: cardano.UTxO[]) => {
-          return inputs.map((i) => {
-            const assets: Assets[] = [];
-            for (const [unit, amount] of Object.entries(i.value)) {
-              const policyId = policyFromUnit(Unit(unit));
-              const assetName = assetNameFromUnit(Unit(unit));
-              const asset: Asset = {
-                assetName,
-                amount: Number(amount),
-                assetNameAscii: hexToAscii(assetName),
-              };
-
-              const multiasset = assets.find((a) => a.policyId === policyId);
-              if (multiasset) {
-                multiasset.assetsPolicy.push(asset);
-              } else {
-                assets.push({
-                  policyId,
-                  assetsPolicy: [asset],
-                });
-              }
-            }
-
-            return {
-              txHash: i.outRef.hash,
-              index: Number(i.outRef.index),
-              bytes: "",
-              address: i.address,
-              lovelace: Number(i.coin),
-              assets,
-              datum:
-                i.datum && i.datum.type === DatumType.INLINE
-                  ? {
-                      bytes: i.datum.datumHex,
-                    }
-                  : undefined,
-              scriptRef: i.referenceScript?.bytes,
-            };
-          });
-        };
+        let inputs: (cardano.UTxO | Input)[];
+        let referenceInputs: (cardano.UTxO | Input)[];
+        if (!tx) {
+          const { resolvedInputs, resolvedReferenceInputs } =
+            await resolveInputsAndReferenceInputs(
+              cborParsed?.inputs || [],
+              cborParsed?.referenceInputs || [],
+              u5c,
+            );
+          inputs = resolvedInputs;
+          referenceInputs = resolvedReferenceInputs;
+        } else {
+          inputs = tx.inputs;
+          referenceInputs = tx.referenceInputs;
+        }
 
         return {
           ...txResponse,
-          inputs: buildUtxo(tx.inputs),
-          referenceInputs: buildUtxo(tx.referenceInputs),
-          blockHash: tx.block.hash,
-          blockHeight: Number(tx.block.height),
-          blockTxIndex: Number(tx.indexInBlock),
-          blockAbsoluteSlot: Number(tx.block.slot),
-        } as ITransaction;
+          fee: txResponse.fee || 0,
+          inputs: buildUtxos(inputs),
+          referenceInputs: buildUtxos(referenceInputs),
+          blockHash: tx ? tx.block.hash : undefined,
+          blockHeight: tx ? Number(tx.block.height) : undefined,
+          blockTxIndex: tx ? Number(tx.indexInBlock) : undefined,
+          blockAbsoluteSlot: tx ? Number(tx.block.slot) : undefined,
+        };
       }),
     );
 

@@ -68,11 +68,12 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
       const selectedKey = Array.from(keys)[0] as Network;
       if (!selectedKey || selectedKey === currentChain) return;
 
+      updateConfigs(USER_CONFIGS.NET, selectedKey);
       router.push(
         ROUTES.EXPLORER_TXS(selectedKey),
       );
     },
-    [currentChain, router],
+    [currentChain, router, updateConfigs],
   );
 
   return (
