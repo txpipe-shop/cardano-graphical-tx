@@ -24,20 +24,23 @@ export const useTransactionLoader = () => {
   const netParam = searchParams.get(NET_URL_PARAM);
 
   useEffect(() => {
+    // Sync URL params to config if they exist and are different
+    if (hashParam && hashParam !== configs.query) {
+      updateConfigs(USER_CONFIGS.QUERY, hashParam);
+    }
+    if (netParam && netParam !== configs.net) {
+      updateConfigs(USER_CONFIGS.NET, netParam as Network);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hashParam, netParam]);
+
+  useEffect(() => {
     const fetchTransactions = async () => {
       // Prioritize URL params
       const query = hashParam || configs.query;
       const network = (netParam as Network) || configs.net;
 
       if (!query) return;
-
-      // Sync URL params to config if they exist and are different
-      if (hashParam && hashParam !== configs.query) {
-        updateConfigs(USER_CONFIGS.QUERY, hashParam);
-      }
-      if (netParam && netParam !== configs.net) {
-        updateConfigs(USER_CONFIGS.NET, netParam as Network);
-      }
 
       const multiplesInputs = query.split(",").map((tx) => tx.trim());
       const uniqueInputs = Array.from(new Set(multiplesInputs));
@@ -79,7 +82,6 @@ export const useTransactionLoader = () => {
     hashParam,
     netParam,
     refreshTrigger,
-    configs.query,
     configs.net,
     configs.option,
     configs.port,
