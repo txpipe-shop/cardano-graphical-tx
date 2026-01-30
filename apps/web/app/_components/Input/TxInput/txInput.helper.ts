@@ -458,7 +458,6 @@ async function resolveInputsAndReferenceInputs(
   });
 
   const txResults = await Promise.all(txFetchPromises);
-  console.dir(txResults, { depth: null });
   const txMap = new Map<string, cardano.Tx | null>();
   txResults.forEach(({ hash, tx }) => {
     txMap.set(hash, tx);
