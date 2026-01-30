@@ -1,4 +1,5 @@
 "use client";
+import { useSearchParams } from "next/navigation";
 import {
   Header,
   InfoPanel,
@@ -12,19 +13,13 @@ import { useTransactionLoader } from "~/app/_hooks/useTransactionLoader";
 import { TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
 import Loading from "~/app/loading";
 
-interface GrapherProps {
-  searchParams?: {
-    [TX_URL_PARAM]?: string;
-    [UTXO_URL_PARAM]?: string;
-  };
-}
-
-export default function Index({ searchParams }: GrapherProps) {
+export default function Index() {
   useTransactionLoader();
 
   const { loading } = useUI();
-  const { [TX_URL_PARAM]: selectedTx, [UTXO_URL_PARAM]: selectedUtxo } =
-    searchParams || {};
+  const searchParams = useSearchParams();
+  const selectedTx = searchParams?.get(TX_URL_PARAM) || undefined;
+  const selectedUtxo = searchParams?.get(UTXO_URL_PARAM) || undefined;
 
   if (loading) return <Loading />;
 
