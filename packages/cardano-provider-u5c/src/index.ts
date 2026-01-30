@@ -25,7 +25,7 @@ import assert from 'assert';
 import { Buffer } from 'buffer';
 import { u5cToCardanoBlock, u5cToCardanoTx, u5cToCardanoUtxo, u5cToCardanoValue } from './mappers';
 
-const DUMP_HISTORY_MAX_ITEMS = 1000;
+const DUMP_HISTORY_MAX_ITEMS = 100;
 
 export type Params = {
   /**

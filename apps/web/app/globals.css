@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --color-canvas-bg: #fafafa;
+    --color-canvas-bg-image: radial-gradient(#222222 1px, transparent 0);
+    --color-background: #fafafa;
+    --color-dashed-border: #d1d5db;
+    --color-example-bg: #f3f4f6;
+    --color-text-p-main: "#6b7280";
+    --color-text-p-secondary: "#374151";
+    --color-input: "#0f0f0f";
+  }
+
+  .dark {
+    --color-canvas-bg: #fafafa;
+    --color-canvas-bg-image: radial-gradient(#222222 1px, transparent 0);
+    --color-background: #0f0f0f;
+    --color-dashed-border: #272727;
+    --color-example-bg: #18181b;
+    --color-text-p-main: "#9ca3af";
+    --color-text-p-secondary: "#d1d5db";
+    --color-input: "#fafafa";
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -19,11 +43,18 @@
 }
 
 canvas {
-  background: white !important;
-  background-image: radial-gradient(black 1px, transparent 0) !important;
+  background: var(--color-canvas-bg) !important;
+  background-image: var(--color-canvas-bg-image) !important;
   background-size: 40px 40px !important;
   background-position: -19px -19px !important;
 }
+
+/* .dark canvas {
+  background: #0f0f0f !important;
+  background-image: radial-gradient(#5b5b5b 1px, transparent 0) !important;
+  background-size: 40px 40px !important;
+  background-position: -19px -19px !important;
+} */
 
 * {
   box-sizing: border-box;
@@ -59,4 +90,8 @@ body::-webkit-scrollbar-thumb {
 
 body::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+input:focus {
+  outline: none;
 }

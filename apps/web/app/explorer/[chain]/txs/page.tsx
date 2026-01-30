@@ -87,7 +87,7 @@ export default async function ExplorerTxsPage({
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <Header />
 
       <main className="container mx-auto px-4 py-6">

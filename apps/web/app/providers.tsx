@@ -1,4 +1,5 @@
 import { HeroUIProvider } from "@heroui/react";
+import { ThemeSync } from "./_components/ThemeSync";
 import { ConfigsProvider, GraphicalProvider, UIProvider } from "./_contexts";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -6,7 +7,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ConfigsProvider>
       <GraphicalProvider>
         <UIProvider>
-          <HeroUIProvider>{children}</HeroUIProvider>
+          <HeroUIProvider>
+            <ThemeSync />
+            {children}
+          </HeroUIProvider>
         </UIProvider>
       </GraphicalProvider>
     </ConfigsProvider>

@@ -7,7 +7,18 @@ export default {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
-  theme: {},
+  theme: {
+    extend: {
+      colors: {
+        background: "var(--color-background)",
+        "dashed-border": "var(--color-dashed-border)",
+        "example-bg": "var(--color-example-bg)",
+        "p-main": "var(--color-p-main)",
+        "p-secondary": "var(--color-p-secondary)",
+        "input": "var(--color-input)",
+      }
+    }
+  },
   darkMode: "class",
   plugins: [
     heroui({
