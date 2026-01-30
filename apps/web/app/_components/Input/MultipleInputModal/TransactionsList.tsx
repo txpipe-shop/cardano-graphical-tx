@@ -40,37 +40,52 @@ export const TransactionsList = ({
   const router = useRouter();
 
   const handleRemove = (txHash: string) => () => {
-    const values = [...newTxs];
-    const toDelete = values.splice(
-      values.findIndex((input) => input.value === txHash),
-      1,
-    )[0];
-    if (!toDelete) toast.error("Transaction not found");
-    if (!toDelete!.isNew) {
-      const transactionToRemove = getTransaction(transactions)(
-        toDelete!.value,
-      )!;
-      setTransactionBox((prev) => {
-        const inputsToRemove = transactionToRemove.inputs.filter(
-          ({ txHash }) => !isOutputUtxo(transactions)(txHash),
-        );
-        const outputsToRemove = transactionToRemove.outputs.filter(
-          ({ txHash }) => !isInputUtxo(transactions)(txHash),
-        );
+    try {
+      const values = [...newTxs];
+      const findIndexToDelete = values.findIndex((input) => input.value === txHash);
+      const itemToDelete = values.splice(
+        findIndexToDelete,
+        1,
+      )[0];
+      if (!itemToDelete) {
+        toast.error("Transaction not found");
+        return;
+      }
 
-        [...inputsToRemove, ...outputsToRemove].forEach(({ txHash }) => {
-          delete prev.utxos[txHash];
-        });
-
-        return {
-          ...prev,
-          transactions: prev.transactions.filter(
-            (t) => t.txHash !== transactionToRemove.txHash,
-          ),
-        };
-      });
-    } else {
       setNewTxs(values);
+
+      if (!itemToDelete.isNew) {
+        const transactionToRemove = getTransaction(transactions)(
+          itemToDelete.value,
+        );
+        if (!transactionToRemove) {
+          toast.error("Transaction not found in context");
+          return;
+        }
+        setTransactionBox((prev) => {
+          const inputsToRemove = transactionToRemove.inputs.filter(
+            ({ txHash }) => !isOutputUtxo(transactions)(txHash),
+          );
+          const outputsToRemove = transactionToRemove.outputs.filter(
+            ({ txHash }) => !isInputUtxo(transactions)(txHash),
+          );
+
+          [...inputsToRemove, ...outputsToRemove].forEach(({ txHash }) => {
+            delete prev.utxos[txHash];
+          });
+
+          const newTransactions = prev.transactions.filter(
+            (t) => t.txHash !== transactionToRemove.txHash,
+          );
+          return {
+            ...prev,
+            transactions: newTransactions,
+          };
+        });
+      }
+    } catch (error) {
+      console.error('Error in handleRemove:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to remove transaction');
     }
   };
 
