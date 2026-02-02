@@ -64,18 +64,17 @@ export function CustomInput({
       placeholder={placeholder}
       startContent={startContent}
       size={inputSize == "small" ? "sm" : "lg"}
+      classNames={{
+        innerWrapper: "bg-surface",
+        inputWrapper: "bg-surface data-[hover=true]:bg-surface group-data-[focus=true]:bg-surface",
+      }}
       className={`
         block appearance-none rounded-lg rounded-b-xl border-2
-        border-b-8 border-input bg-input text-lg shadow shadow-input
-        ${customClassName} ${inputSize == "small" ? "mt-0.5 h-10 w-3/4" : "mt-1 w-2/3"}
+        bg-surface border-black shadow-black
+        border-b-8 shadow
+        ${inputSize == "small" ? "mt-0.5 h-10 w-3/4" : "mt-1 w-2/3"}
+        ${customClassName} 
       `}
-    // className={`
-    //   block appearance-none rounded-lg rounded-b-xl border-2
-    //   border-b-8 border-input-border bg-input-border text-lg
-    //   text-black placeholder-gray-400 shadow shadow-input-border
-    //   outline-none ${customClassName} 
-    //   ${inputSize == "small" ? "mt-0.5 h-10 w-3/4" : "mt-1 w-2/3"}
-    // `}
     />
   );
 }

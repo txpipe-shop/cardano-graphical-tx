@@ -11,24 +11,26 @@ export default {
     extend: {
       colors: {
         background: "var(--color-background)",
-        "dashed-border": "var(--color-dashed-border)",
-        "example-bg": "var(--color-example-bg)",
-        "p-main": "var(--color-p-main)",
-        "p-secondary": "var(--color-p-secondary)",
-        "input": "var(--color-input)",
+        surface: "var(--color-surface)",
+        shadow: "var(--color-shadow)",
+        "p-primary": "var(--color-text_primary)",
+        "p-secondary": "var(--color-text_secondary)",
+        "primary-action": "var(--color-primary_action)",
+        "accent-blue": "var(--color-accent_blue)",
+        "red-1": "var(--color-bg-red)",
+        "red-2": "var(--color-text-red)",
+        "red-3": "var(--color-border-red)",
+        "green-1": "var(--color-success_bg)",
+        "green-3": "var(--color-border-green)",
+        "explorer-row": "var(--color-explorer_row)",
+        border: "var(--color-border)",
       }
     }
   },
   darkMode: "class",
   plugins: [
     heroui({
-      themes: {
-        dark: {
-          colors: {
-            background: "#090909",
-          },
-        },
-      },
+      themes: {},
     }),
   ],
 } satisfies Config;

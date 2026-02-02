@@ -4,25 +4,40 @@
 
 @layer base {
   :root {
-    --color-canvas-bg: #fafafa;
+    --color-background: #FAFAFA;
+    --color-surface: #F3F4F6;
+    --color-shadow: #000000;
+    --color-text_primary: #1F2937;
+    --color-text_secondary: #6B7280;
+    --color-primary_action: #4299E1;
+    --color-accent_blue: #3B82F6;
+    --color-bg-red: #F48B8B;
+    --color-text-red: #F04D4D;
+    --color-border-red: #D93E3E;
+    --color-border-green: #86efac;
+    --color-success_bg: #D1FAE5;
+    --color-explorer_row: #F5F3FF;
+    --color-border: #E5E7EB;
     --color-canvas-bg-image: radial-gradient(#222222 1px, transparent 0);
-    --color-background: #fafafa;
-    --color-dashed-border: #d1d5db;
-    --color-example-bg: #f3f4f6;
-    --color-text-p-main: "#6b7280";
-    --color-text-p-secondary: "#374151";
-    --color-input: "#0f0f0f";
   }
 
   .dark {
-    --color-canvas-bg: #fafafa;
-    --color-canvas-bg-image: radial-gradient(#222222 1px, transparent 0);
-    --color-background: #0f0f0f;
-    --color-dashed-border: #272727;
-    --color-example-bg: #18181b;
-    --color-text-p-main: "#9ca3af";
-    --color-text-p-secondary: "#d1d5db";
-    --color-input: "#fafafa";
+    --color-background: #111827;
+    --color-surface: #1F2937;
+    --color-shadow: #374151;
+    --color-text_primary: #F9FAFB;
+    --color-text_secondary: #9CA3AF;
+    --color-primary_action: #3182CE;
+    --color-accent_blue: #60A5FA;
+    --color-bg-red: #F48B8B;
+    --color-text-red: #EF4444;
+    --color-border-red: #D93E3E;
+    --color-border-green: #86efac;
+    --color-success_bg: #064E3B;
+    --color-explorer_row: #2D3748;
+    --color-border: #374151;
+    --color-canvas-bg-image: radial-gradient(#44484f 1px, transparent 0);
+
   }
 }
 
@@ -48,13 +63,6 @@ canvas {
   background-size: 40px 40px !important;
   background-position: -19px -19px !important;
 }
-
-/* .dark canvas {
-  background: #0f0f0f !important;
-  background-image: radial-gradient(#5b5b5b 1px, transparent 0) !important;
-  background-size: 40px 40px !important;
-  background-position: -19px -19px !important;
-} */
 
 * {
   box-sizing: border-box;

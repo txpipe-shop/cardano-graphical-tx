@@ -20,11 +20,11 @@ export const JSONModal = ({
       size="5xl"
       scrollBehavior="inside"
     >
-      <ModalContent className="modal-content bg-content2 p-2">
-        <ModalHeader className="flex flex-col gap-1 bg-content2">
+      <ModalContent className="modal-content bg-surface p-2">
+        <ModalHeader className="flex flex-col gap-1 bg-surface">
           {title}
         </ModalHeader>
-        <ModalBody className="bg-content2 p-4">{children}</ModalBody>
+        <ModalBody className="bg-surface p-4">{children}</ModalBody>
       </ModalContent>
     </Modal>
   );

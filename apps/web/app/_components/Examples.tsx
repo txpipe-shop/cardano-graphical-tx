@@ -67,7 +67,7 @@ export function Examples({
             <button
               key={index}
               type="submit"
-              className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-example-bg p-4 text-left shadow"
+              className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-surface p-4 text-left shadow"
               onClick={handleClick(
                 example.title,
                 example.title.endsWith("CBOR") ? OPTIONS.CBOR : OPTIONS.HASH,
@@ -76,7 +76,7 @@ export function Examples({
             >
               <h3 className="text-xl">{example.title}</h3>
 
-              <code className="mt-4 block w-full break-words text-gray-400">
+              <code className="mt-4 block w-full break-words text-p-secondary">
                 {example.code.substring(0, 30)}...
               </code>
             </button>
@@ -86,11 +86,11 @@ export function Examples({
             <button
               key={index}
               type="submit"
-              className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-example-bg p-4 text-left shadow"
+              className="w-[24%] cursor-pointer justify-evenly rounded-lg border-2 bg-surface p-4 text-left shadow"
               onClick={() => handleAddressClick(example.address)}
             >
               <h3 className="text-xl">{example.title}</h3>
-              <code className="mt-4 block w-full break-words text-gray-400">
+              <code className="mt-4 block w-full break-words text-p-secondary">
                 {example.address.substring(0, 30)}...
               </code>
             </button>

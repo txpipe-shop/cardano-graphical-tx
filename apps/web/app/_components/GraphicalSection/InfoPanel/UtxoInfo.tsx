@@ -68,7 +68,7 @@ export const UtxoInfo = () => {
     <>
       {!address && (
         <p>
-          <b className="text-danger-500">Warning:</b> The following UTxO seems
+          <b className="text-red-2">Warning:</b> The following UTxO seems
           to be incomplete. This may have occurred because you searched for a
           CBOR on the wrong network or the transaction does not exist.
         </p>
@@ -93,7 +93,7 @@ export const UtxoInfo = () => {
             )
           }
         >
-          <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+          <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
             <p>{address ? addrTrim : "No address found"}</p>
             <Image
               src={CopyIcon}
@@ -104,15 +104,15 @@ export const UtxoInfo = () => {
           </Card>
           <Accordion selectionMode="multiple">
             <AccordionItem key="1" title="More info">
-              <Card className="m-1 flex flex-row bg-content2 px-5 py-2 shadow-none">
+              <Card className="m-1 flex flex-row bg-surface px-5 py-2 shadow-none">
                 <b>Header type:</b>&nbsp;
                 <p>{address?.headerType}</p>
               </Card>
-              <Card className="m-1 flex flex-row bg-content2 px-5 py-2 shadow-none">
+              <Card className="m-1 flex flex-row bg-surface px-5 py-2 shadow-none">
                 <b>Network type:</b>&nbsp;
                 <p>{address?.netType}</p>
               </Card>
-              <Card className="m-1 flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+              <Card className="m-1 flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
                 <div className="flex">
                   <b>Payment:</b>&nbsp;
                   <p>{trimString(address?.payment ?? "", 14)}</p>
@@ -146,7 +146,7 @@ export const UtxoInfo = () => {
         </AccordionItem>
 
         <AccordionItem key="3" title="TxHash & index">
-          <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+          <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
             <p>{txTrim}</p>
             <Image
               src={CopyIcon}
@@ -163,12 +163,12 @@ export const UtxoInfo = () => {
             onOpenChange={onOpenDatumChange}
             title="Datum"
           >
-            <pre className="font-code bg-content2">
+            <pre className="font-code bg-surface">
               {JSONBIG.stringify(datum, null, 2)}
             </pre>
           </JSONModal>
           {datum && (
-            <Card className="gap-2 overflow-x-hidden bg-content2 px-5 py-2 shadow-none">
+            <Card className="gap-2 overflow-x-hidden bg-surface px-5 py-2 shadow-none">
               <div className="absolute right-4">
                 <Image
                   src={FullScreen}
@@ -185,7 +185,7 @@ export const UtxoInfo = () => {
         </AccordionItem>
 
         <AccordionItem key="5" title="Script Reference">
-          <Card className="flex h-16 w-full flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+          <Card className="flex h-16 w-full flex-row justify-between bg-surface px-5 py-2 shadow-none">
             <p className="overflow-hidden text-ellipsis whitespace-normal break-words">
               {scriptRef || ""}
             </p>
@@ -206,7 +206,7 @@ export const UtxoInfo = () => {
                 onOpenChange={onOpenRedeemerChange}
                 title="Redeemer"
               >
-                <pre className="font-code bg-content2">
+                <pre className="font-code bg-surface">
                   {JSONBIG.stringify(
                     JSON.parse(redeemerInfo?.dataJson),
                     null,
@@ -214,7 +214,7 @@ export const UtxoInfo = () => {
                   )}
                 </pre>
               </JSONModal>
-              <Card className="gap-2 overflow-x-hidden bg-content2 px-5 py-2 shadow-none">
+              <Card className="gap-2 overflow-x-hidden bg-surface px-5 py-2 shadow-none">
                 <div className="absolute right-4">
                   <Image
                     src={FullScreen}
@@ -231,11 +231,11 @@ export const UtxoInfo = () => {
                   )}
                 </pre>
               </Card>
-              <Card className="mt-1 flex flex-row gap-2 overflow-x-hidden bg-content2 px-5 py-2 shadow-none">
+              <Card className="mt-1 flex flex-row gap-2 overflow-x-hidden bg-surface px-5 py-2 shadow-none">
                 <b>Memory:</b>
                 <p>{redeemerInfo.exUnits.mem}</p>
               </Card>
-              <Card className="mt-1 flex flex-row gap-2 overflow-x-hidden bg-content2 px-5 py-2 shadow-none">
+              <Card className="mt-1 flex flex-row gap-2 overflow-x-hidden bg-surface px-5 py-2 shadow-none">
                 <b>Steps:</b>
                 <p>{redeemerInfo.exUnits.steps}</p>
               </Card>

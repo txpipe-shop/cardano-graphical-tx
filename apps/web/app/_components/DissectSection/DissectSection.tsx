@@ -92,7 +92,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           {...accordionItemProps(
             "Transaction Inputs",
             defaultStyle(
-              "font-bold text-blue-500 underline decoration-solid underline-offset-2",
+              "font-bold text-accent-blue underline decoration-solid underline-offset-2",
             ),
             TOPICS.inputs,
           )}
@@ -104,7 +104,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                   key={i}
                   {...accordionItemProps(
                     "Input " + (i + 1).toString(),
-                    defaultStyle("text-2xl text-blue-500", "px-7"),
+                    defaultStyle("text-2xl text-accent-blue", "px-7"),
                   )}
                   startContent={
                     witnesses?.redeemers.find(
@@ -150,7 +150,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           {...accordionItemProps(
             "Transaction Outputs",
             defaultStyle(
-              "font-bold text-red-500 underline decoration-solid underline-offset-2",
+              "font-bold text-red-2 underline decoration-solid underline-offset-2",
             ),
             TOPICS.outputs,
           )}
@@ -163,7 +163,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                     key={i}
                     {...accordionItemProps(
                       "Output " + (i + 1).toString(),
-                      defaultStyle("text-2xl text-red-500", "px-7"),
+                      defaultStyle("text-2xl text-red-2", "px-7"),
                     )}
                   >
                     <PropBlock title="Tx Hash" value={txHash} />
@@ -235,7 +235,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           {...accordionItemProps(
             "Reference Inputs",
             defaultStyle(
-              "font-bold text-blue-500 underline decoration-dashed underline-offset-2",
+              "font-bold text-accent-blue underline decoration-dashed underline-offset-2",
             ),
             TOPICS.reference_inputs,
           )}
@@ -248,7 +248,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                   {...accordionItemProps(
                     "Reference Input " + (i + 1).toString(),
                     defaultStyle(
-                      "text-2xl text-blue-500 underline decoration-dashed underline-offset-2",
+                      "text-2xl text-accent-blue underline decoration-dashed underline-offset-2",
                       "px-7",
                     ),
                   )}

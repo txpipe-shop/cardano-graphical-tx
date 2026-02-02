@@ -8,9 +8,9 @@ import { ThemeButton } from "./Theme";
 
 export const Header = () => {
   return (
-    <header className="sticky top-0 z-40 box-border h-24 w-full flex-row border-b-2 border-dashed border-b-color-dashed-border bg-background px-4 pb-4 pt-6">
+    <header className="sticky top-0 z-40 box-border h-24 w-full flex-row border-b-2 border-dashed border-border bg-background px-4 pb-4 pt-6">
       <div className="relative flex items-end justify-between align-middle">
-        <h3 className="absolute flex w-full items-center justify-center text-4xl text-p-main">
+        <h3 className="absolute flex w-full items-center justify-center text-4xl text-p-primary">
           <Link href={ROUTES.HOME}>
             <span>Lace Anatomy</span>
           </Link>

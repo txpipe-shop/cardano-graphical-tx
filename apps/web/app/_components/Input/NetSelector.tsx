@@ -38,7 +38,7 @@ const PortInput = ({ port, onPortChange }: PortInputProps) => {
     e.stopPropagation();
 
   return (
-    <div className="flex-1 text-inherit font-normal pl-2 min-h-max capitalize border-l-2 border-gray-300 h-full">
+    <div className="flex-1 text-inherit font-normal pl-2 min-h-max capitalize border-l-2 border-border h-full">
       <input
         type="text"
         inputMode="numeric"
@@ -122,7 +122,7 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
           color={netStatus}
           size="lg"
           classNames={{
-            base: "py-0 flex items-center overflow-clip cursor-pointer",
+            base: "py-0 flex items-center overflow-clip cursor-pointer border-border",
             content: "px-2 min-h-max capitalize",
           }}
           endContent={

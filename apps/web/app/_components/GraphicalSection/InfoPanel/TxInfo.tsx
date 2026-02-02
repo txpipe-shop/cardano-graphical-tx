@@ -102,7 +102,7 @@ export const TxInfo = () => {
   return (
     <Accordion selectionMode="multiple" disabledKeys={disabledKeys}>
       <AccordionItem key="1" title="TxHash">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
           {txTrim}
           <Image
             src={CopyIcon}
@@ -121,16 +121,16 @@ export const TxInfo = () => {
         </div>
       </AccordionItem>
       <AccordionItem key="3" title="Block">
-        <Card className="m-1 flex flex-row bg-content2 px-5 py-2 shadow-none">
+        <Card className="m-1 flex flex-row bg-surface px-5 py-2 shadow-none">
           <b>Slot:</b>&nbsp;
           <p>{blockAbsoluteSlot ?? "Unknown"}</p>
         </Card>
-        <Card className="m-1 flex flex-row bg-content2 px-5 py-2 shadow-none">
+        <Card className="m-1 flex flex-row bg-surface px-5 py-2 shadow-none">
           <b>Height:</b>&nbsp;
           <p>{blockHeight ?? "Unknown"}</p>
         </Card>
         {blockHash && (
-          <Card className="m-1 flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+          <Card className="m-1 flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
             <div className="flex">
               <b>Hash:</b>&nbsp;
               <p>{trimString(blockHash, 14)}</p>
@@ -143,28 +143,28 @@ export const TxInfo = () => {
             />
           </Card>
         )}
-        <Card className="m-1 flex flex-row bg-content2 px-5 py-2 shadow-none">
+        <Card className="m-1 flex flex-row bg-surface px-5 py-2 shadow-none">
           <b>Index:</b>&nbsp;
           <p>{blockTxIndex ?? "Unknown"}</p>
         </Card>
       </AccordionItem>
       <AccordionItem key="4" title="Size">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
           {size ?? "Unknown"}
         </Card>
       </AccordionItem>
       <AccordionItem key="5" title="Invalid Before (Start)">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
           {validityStart ?? "Unknown"}
         </Card>
       </AccordionItem>
       <AccordionItem key="6" title="Invalid Hereafter (TTL)">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
           {ttl ?? "Unknown"}
         </Card>
       </AccordionItem>
       <AccordionItem key="7" title="Outputs Count">
-        <Card className="fl ex-row flex justify-between bg-content2 px-5 py-2 shadow-none">
+        <Card className="fl ex-row flex justify-between bg-surface px-5 py-2 shadow-none">
           {outputs.length}
         </Card>
       </AccordionItem>
@@ -177,7 +177,7 @@ export const TxInfo = () => {
         </div>
       </AccordionItem>
       <AccordionItem key="9" title="Inputs Count">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
           {inputs.length}
         </Card>
       </AccordionItem>
@@ -186,7 +186,7 @@ export const TxInfo = () => {
           {withdrawals?.map((withdrawal, index) => (
             <Card
               key={index}
-              className="flex flex-col bg-content2 px-5 py-2 shadow-none"
+              className="flex flex-col bg-surface px-5 py-2 shadow-none"
             >
               <div className="mb-2 flex items-center justify-between">
                 <b>Raw Address:</b>&nbsp;
@@ -211,7 +211,7 @@ export const TxInfo = () => {
         </div>
       </AccordionItem>
       <AccordionItem key="11" title="Metadata">
-        <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
           {msg}
         </Card>
       </AccordionItem>
@@ -221,14 +221,14 @@ export const TxInfo = () => {
           onOpenChange={onOpenCertificateChange}
           title="Certificates"
         >
-          <pre className="font-code bg-content2">
+          <pre className="font-code bg-surface">
             {JSONBIG.stringify(certificates, null, 2)
               .replace(/"json":/g, "")
               .replace(/\\/g, "")}
           </pre>
         </JSONModal>
         {certificates && (
-          <Card className="gap-2 overflow-x-hidden bg-content2 px-5 py-2 shadow-none">
+          <Card className="gap-2 overflow-x-hidden bg-surface px-5 py-2 shadow-none">
             <div className="absolute right-4">
               <Image
                 src={FullScreen}
@@ -261,7 +261,7 @@ export const TxInfo = () => {
       </AccordionItem>
       <AccordionItem key="14" title="Scripts Successful">
         <div className="flex flex-col gap-2">
-          <Card className="flex flex-row justify-between bg-content2 px-5 py-2 shadow-none">
+          <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
             {scriptsSuccessful ? "True" : "False"}
           </Card>
         </div>
