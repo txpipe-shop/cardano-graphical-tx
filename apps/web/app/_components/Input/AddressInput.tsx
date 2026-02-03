@@ -28,18 +28,32 @@ export const AddressInput = ({
   }, []);
 
   async function handleSubmit(e: React.ChangeEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError("");
-    if (!configs.query) return;
+    try {
+      e.preventDefault();
+      setError("");
+      if (!configs.query) return;
 
-    const res: SafeAddressResponse = await getAddressInfo(
-      configs.query,
-      setError,
-    );
-    if (res.address) {
-      setAddressInfo(res.address);
+      const res: SafeAddressResponse = await getAddressInfo(
+        configs.query,
+        setError,
+      );
+
+      if (res.address) {
+        setAddressInfo(res.address);
+      } else {
+        throw new Error("Error getting address info");
+      }
+
+      updateConfigs(USER_CONFIGS.QUERY, configs.query);
+    } catch (error: unknown) {
+      if (error instanceof Response) {
+        return; // already handled by getAddressInfo
+      } else if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An unknown error occurred");
+      }
     }
-    updateConfigs(USER_CONFIGS.QUERY, configs.query);
   }
 
   return (

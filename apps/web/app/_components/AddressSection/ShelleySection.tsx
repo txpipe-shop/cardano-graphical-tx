@@ -1,38 +1,25 @@
 import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
 import { EmptyBlock, PropBlock, Section } from "~/app/_components";
+import { ValidAddr } from "./ValidAddr";
 
 export function ShelleySection({ data }: { data: AddressDiagnostic }) {
   return (
     <Section title="Decoded Bech32">
-      <p className="text-xl text-gray-600">
-        Your address is a valid bech32 address value. By decoding the bech32
-        content we obtain a bytestring that can be interpreted according
-        to&nbsp;
-        <a
-          className="text-blue-700 underline hover:text-blue-500"
-          href="https://cips.cardano.org/cip/CIP-0019"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          CIP-0019
-        </a>
-        . The CIP explains that there are 3 types of possible address, each one
-        following a different encoding format: Shelley, Stake, or Byron.
-      </p>
+      <ValidAddr />
       <PropBlock
         color="green"
         title="address bytes (hex)"
         value={data?.bytes}
       />
       <Section title="Parsed Address">
-        <p className="text-xl text-gray-600">
+        <p className="text-xl text-p-secondary">
           The address entered is of type&nbsp;
           <code>Shelley</code>. Shelley addresses contain three pieces of
           information: network id, payment part, and a delegation part.
         </p>
         <PropBlock title="type" value={data?.kind} />
         <Section title="Network Id">
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-p-secondary">
             The network id is a flag to indicate to which network it belongs
             (either mainnet or a testnet).
           </p>
@@ -40,7 +27,7 @@ export function ShelleySection({ data }: { data: AddressDiagnostic }) {
         </Section>
         {!!data.paymentPart && (
           <Section title="Payment Part">
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-p-secondary">
               The payment part describes who has control of the ownership of the
               locked values. There are two options: a verification key or a
               script. The address includes a flag to differentiate the two.
@@ -58,7 +45,7 @@ export function ShelleySection({ data }: { data: AddressDiagnostic }) {
         )}
         {(!!data.delegationPart?.hash || !!data.delegationPart?.pointer) && (
           <Section title="Delegation Part">
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-p-secondary">
               The delegation part describes who has control of the staking of
               the locked values. There are two options: a verification key or a
               script. The address includes a flag to differentiate the two.
@@ -87,7 +74,7 @@ export function ShelleySection({ data }: { data: AddressDiagnostic }) {
         )}
         {!data.delegationPart?.hash && !data.delegationPart?.pointer && (
           <Section title="Delegation Part">
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-p-secondary">
               The delegation part describes who has control of the staking of
               the locked values. This address doesn&apos;t specify a delegation
               part, which means there&apos;s no way to delegate the locked

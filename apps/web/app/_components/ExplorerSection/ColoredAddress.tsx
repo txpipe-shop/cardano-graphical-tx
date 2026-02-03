@@ -21,7 +21,9 @@ export default function ColoredAddress({ address }: ColoredAddressProps) {
 
   return (
     <div className="flex items-center">
-      <span className="font-mono text-xs text-gray-600">{uncoloredPrefix}</span>
+      <span className="font-mono text-xs text-p-secondary">
+        {uncoloredPrefix}
+      </span>
       <span className="bg-gradient-to-r from-purple-500 to-orange-500 bg-clip-text font-mono text-xs font-bold text-transparent">
         {coloredSuffix}
       </span>

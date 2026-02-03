@@ -27,10 +27,10 @@ export default function TxCbor({ cbor }: { cbor: string }) {
   }, [cbor]);
 
   return (
-    <Card className="h-full min-h-0 border border-default-200 shadow-none">
+    <Card className="h-full min-h-0 border border-border bg-surface shadow-none">
       <CardBody className="grid h-full min-h-0 grid-cols-1 gap-4 p-4 md:grid-cols-2">
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <div className="font-medium text-gray-700">Decoded</div>
+          <div className="font-medium text-p-secondary">Decoded</div>
           <Textarea
             readOnly
             value={decoded}
@@ -49,7 +49,7 @@ export default function TxCbor({ cbor }: { cbor: string }) {
           />
         </div>
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <div className="font-medium text-gray-700">CBOR</div>
+          <div className="font-medium text-p-secondary">CBOR</div>
           <Textarea
             readOnly
             value={cbor}

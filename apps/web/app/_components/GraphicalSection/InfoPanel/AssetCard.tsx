@@ -29,7 +29,7 @@ export const AssetCard = ({
   const name = getAssetName(assetName);
 
   return (
-    <Card className="bg-content2 shadow-none">
+    <Card className="bg-surface shadow-none">
       <Tooltip
         content={tooltipContent}
         classNames={{ base: "text-base p-4" }}

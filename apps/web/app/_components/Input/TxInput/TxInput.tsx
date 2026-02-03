@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  Button as NextButton,
+  Button as HeroButton,
   Select,
   SelectItem,
   useDisclosure,
@@ -95,7 +95,7 @@ export const TxInput = () => {
           }
         />
         <abbr title="Add multiple transactions">
-          <NextButton
+          <HeroButton
             isIconOnly
             size="md"
             variant="flat"
@@ -103,7 +103,7 @@ export const TxInput = () => {
             onPress={onOpen}
           >
             <Image src={MultipleTxIcon} alt="Search" />
-          </NextButton>
+          </HeroButton>
         </abbr>
         <MultipleInputModal isOpen={isOpen} onOpenChange={onOpenChange} />
         <Button

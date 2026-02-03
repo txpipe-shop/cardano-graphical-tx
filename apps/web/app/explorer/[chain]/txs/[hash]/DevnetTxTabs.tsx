@@ -1,5 +1,6 @@
 "use client";
 
+import { Card, CardBody } from "@heroui/react";
 import { Hash } from "@laceanatomy/types";
 import { useEffect, useMemo, useState } from "react";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
@@ -73,15 +74,17 @@ export default function DevnetTxTabs({ hash, tab }: DevnetTxTabsProps) {
 
   if (loading) {
     return (
-      <div className="w-full rounded-lg border-2 border-dashed border-gray-200 p-8 text-center text-gray-600">
-        Loading transaction...
-      </div>
+      <Card className="w-full border-2 border-dashed border-border shadow-md bg-surface">
+        <CardBody className="py-8 text-center text-p-secondary">
+          Loading transaction...
+        </CardBody>
+      </Card>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="w-full rounded-lg border-2 border-dashed border-red-300 bg-red-50 p-8 text-center text-red-600">
+      <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
         <p className="font-semibold">
           Transaction not found or could not be loaded.
         </p>

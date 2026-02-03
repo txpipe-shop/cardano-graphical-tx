@@ -12,8 +12,8 @@ export const defaultStyle = (
   content?: string,
 ): IAccordionStyle => ({
   title: "text-3xl " + (title ?? ""),
-  subtitle: "text-xl text-gray-600",
-  content: content ? "border-dashed border-l-4 " + content : "",
+  subtitle: "text-xl text-p-secondary",
+  content: content ? "border-dashed border-border border-l-4 " + content : "",
   trigger: "py-2",
   indicator: "text-black text-2xl font-bold",
 });

@@ -15,7 +15,6 @@ export const useLocalStorage = ({ key, initialState }: IUseLocalStorage) => {
     const item = localStorage.getItem(key);
     if (item) {
       const parsedItem = JSON.parse(item);
-
       if (JSON.stringify(parsedItem) !== JSON.stringify(initialState)) {
         setState(parsedItem);
       }

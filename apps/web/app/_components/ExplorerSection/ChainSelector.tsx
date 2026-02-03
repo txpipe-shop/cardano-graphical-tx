@@ -34,7 +34,7 @@ const PortInput = ({ port, onPortChange }: PortInputProps) => {
 
   return (
     <div
-      className="flex items-center gap-2 rounded-md border border-gray-200 bg-white px-2 py-1"
+      className="flex items-center gap-2 rounded-md border border-border bg-surface px-2 py-1"
       onClick={stopPropagation}
       onMouseDown={stopPropagation}
       onPointerDown={stopPropagation}
@@ -80,6 +80,9 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
       placeholder="Select a network"
       labelPlacement="outside-left"
       selectedKeys={new Set([currentChain])}
+      classNames={{
+        trigger: "bg-default/40 shadow-md data-[hover=true]:opacity-hover",
+      }}
       onSelectionChange={handleChainChange}
       endContent={
         currentChain === NETWORK.DEVNET ? (
