@@ -1,3 +1,5 @@
+import { Card, CardBody } from "@heroui/react";
+import Link from "next/link";
 import { Suspense } from "react";
 import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
@@ -103,9 +105,30 @@ export default async function ExplorerTxsPage({
           </div>
         </div>
 
-        <Suspense fallback={<Loading />}>
-          <TransactionsList chain={chain} page={page} />
-        </Suspense>
+        {/* NOTE: Enable again when other networks are supported */}
+        {chain === NETWORK.DEVNET ? (
+          <Suspense fallback={<Loading />}>
+            <TransactionsList chain={chain} page={page} />
+          </Suspense>
+        ) : (
+          <Card className="w-full border-2 border-dashed border-border shadow-md bg-surface py-12">
+            <CardBody className="py-8 text-center text-p-secondary">
+              <p className="text-3xl font-semibold">Coming soon...</p>
+              <p className="text-lg mt-2 font-medium">
+                We`&apos;`re working on it!
+                <br />
+                In the meantime, you can explore{" "}
+                <Link
+                  className="text-blue-400 hover:underline"
+                  href={ROUTES.EXPLORER_TXS(NETWORK.DEVNET)}
+                >
+                  devnet transactions
+                </Link>
+                .
+              </p>
+            </CardBody>
+          </Card>
+        )}
       </main>
     </div>
   );

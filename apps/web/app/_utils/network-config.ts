@@ -18,35 +18,35 @@ export interface NetworkConfig {
 }
 
 export const NETWORK_CONFIGS_BASE: Record<Network, NetworkConfig> = {
-  mainnet: {
-    network: "mainnet",
-    addressPrefix: "addr",
-    displayName: "Mainnet",
-    description: "Cardano Mainnet",
-  },
-  preprod: {
-    network: "preprod",
-    addressPrefix: "addr_test",
-    displayName: "Preprod",
-    description: "Pre-production testnet",
-  },
-  preview: {
-    network: "preview",
-    addressPrefix: "addr_test",
-    displayName: "Preview",
-    description: "Preview testnet",
-  },
-  vector: {
-    network: "vector",
-    addressPrefix: "addr",
-    displayName: "Vector",
-    description: "AP3X Vector Mainnet",
-  },
   devnet: {
     network: "devnet",
     addressPrefix: "addr_test",
     displayName: "Devnet",
     description: "Local devnet (localhost)",
+  },
+  mainnet: {
+    network: "mainnet",
+    addressPrefix: "addr",
+    displayName: "Mainnet",
+    description: "Coming soon...", //"Cardano Mainnet",
+  },
+  preprod: {
+    network: "preprod",
+    addressPrefix: "addr_test",
+    displayName: "Preprod",
+    description: "Coming soon...", //"Pre-production testnet",
+  },
+  preview: {
+    network: "preview",
+    addressPrefix: "addr_test",
+    displayName: "Preview",
+    description: "Coming soon...", //"Preview testnet",
+  },
+  vector: {
+    network: "vector",
+    addressPrefix: "addr",
+    displayName: "Vector",
+    description: "Coming soon...", //"AP3X Vector Mainnet",
   },
 };
 
