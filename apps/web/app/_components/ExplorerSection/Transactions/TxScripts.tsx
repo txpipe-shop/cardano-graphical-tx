@@ -65,7 +65,7 @@ export default function TxScripts({ tx }: { tx: cardano.Tx }) {
   }
 
   return (
-    <Card className="h-full min-h-0 border border-border shadow-none">
+    <Card className="h-full min-h-0 border border-border shadow-none bg-surface">
       <CardBody className="flex h-full min-h-0 flex-col gap-6 p-6 md:flex-row">
         <div className="flex min-w-[200px] flex-col gap-2 border-r pr-4">
           <div className="text-xs font-semibold uppercase tracking-wide text-p-secondary">

@@ -61,7 +61,7 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
 
   if (!activeTab) {
     return (
-      <Card className="h-full min-h-0 border border-border shadow-none">
+      <Card className="h-full min-h-0 border border-border shadow-none bg-surface">
         <CardBody className="py-8 text-center text-sm text-p-secondary">
           No inputs or outputs with datum in this transaction.
         </CardBody>
@@ -70,7 +70,7 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
   }
 
   return (
-    <Card className="h-full min-h-0 border border-border shadow-none">
+    <Card className="h-full min-h-0 border border-border shadow-none bg-surface">
       <CardBody className="flex h-full min-h-0 flex-col gap-6 p-6 md:flex-row">
         {/* Sidebar Tabs */}
         <div className="flex min-w-[200px] flex-col gap-4 border-r pr-4">
