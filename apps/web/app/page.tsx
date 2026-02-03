@@ -8,7 +8,7 @@ export default function Index() {
       <Header />
       <div className="flex h-full w-2/3 flex-col items-start justify-start gap-3 p-10 pb-32 text-center">
         <div className="text-5xl">About Us</div>
-        <div className="mt-4 justify-center text-justify text-xl text-p-main">
+        <div className="mt-4 justify-center text-justify text-xl text-p-primary">
           Lace Anatomy renders transactions from CBOR and transaction hashes,
           providing a graphical representation of blockchain data for developers
           and analysts. It also includes a dissect functionality that breaks
