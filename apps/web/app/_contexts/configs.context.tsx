@@ -25,7 +25,7 @@ const ConfigsContext = createContext({
   updateConfigs: <T extends keyof IUserConfigs>(
     _configKey: T,
     _value: IUserConfigs[T],
-  ) => { },
+  ) => {},
 });
 
 export const useConfigs = () => {

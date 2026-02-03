@@ -26,7 +26,10 @@ export default function Index() {
               <br />
               Schedule an intro call
             </p>
-            <a className="text-blue-400 hover:underline" href="https://txpipe.shop">
+            <a
+              className="text-blue-400 hover:underline"
+              href="https://txpipe.shop"
+            >
               https://txpipe.shop
             </a>
           </div>
@@ -36,7 +39,10 @@ export default function Index() {
               Cardano infrastructure
               <br /> made simple
             </p>
-            <a className="text-blue-400 hover:underline" href="https://demeter.run">
+            <a
+              className="text-blue-400 hover:underline"
+              href="https://demeter.run"
+            >
               https://demeter.run
             </a>
           </div>
@@ -47,7 +53,10 @@ export default function Index() {
               <br />
               utility maintained by TxPipe
             </p>
-            <a className="text-blue-400 hover:underline" href="https://txpipe.io">
+            <a
+              className="text-blue-400 hover:underline"
+              href="https://txpipe.io"
+            >
               https://txpipe.io
             </a>
           </div>

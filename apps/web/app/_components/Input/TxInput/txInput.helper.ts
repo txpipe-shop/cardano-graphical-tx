@@ -15,7 +15,7 @@ import {
   hexToAscii,
   hexToBech32,
   policyFromUnit,
-  Unit
+  Unit,
 } from "@laceanatomy/types";
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
@@ -46,7 +46,7 @@ import {
   TX_HEIGHT,
   TX_WIDTH,
   UTXO_LINE_GAP,
-  type Network
+  type Network,
 } from "~/app/_utils";
 
 interface IGenerateUTXO extends Utxo {
@@ -392,10 +392,10 @@ const cardanoUtxoToITransactionInput = (
     datum:
       i.datum && i.datum.type === DatumType.INLINE
         ? {
-          bytes: i.datum.datumHex.toString(),
-          hash: "",
-          json: "",
-        }
+            bytes: i.datum.datumHex.toString(),
+            hash: "",
+            json: "",
+          }
         : undefined,
     scriptRef:
       i.referenceScript && i.referenceScript.bytes

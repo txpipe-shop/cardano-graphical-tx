@@ -33,9 +33,8 @@ export function PropBlock({
         </div>
       ) : (
         <EmptyBlock title={title} />
-      )
-      }
-    </div >
+      )}
+    </div>
   );
 }
 

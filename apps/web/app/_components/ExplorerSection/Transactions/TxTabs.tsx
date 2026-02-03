@@ -47,8 +47,8 @@ export default function TxTabs({
       [tx],
       { transactions: [], utxos: {} },
       setTransactionBox,
-      () => { },
-      () => { },
+      () => {},
+      () => {},
       { x: dimensions.width, y: dimensions.height },
     );
   }, [setTransactionBox, dimensions.width, dimensions.height, tx]);

@@ -93,18 +93,16 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
         ) : null
       }
     >
-      {
-        Object.values(NETWORK_CONFIGS_BASE).map((option) => (
-          <SelectItem
-            variant="flat"
-            key={option.network}
-            textValue={option.displayName}
-            description={option.description}
-          >
-            {option.displayName}
-          </SelectItem>
-        ))
-      }
-    </Select >
+      {Object.values(NETWORK_CONFIGS_BASE).map((option) => (
+        <SelectItem
+          variant="flat"
+          key={option.network}
+          textValue={option.displayName}
+          description={option.description}
+        >
+          {option.displayName}
+        </SelectItem>
+      ))}
+    </Select>
   );
 }

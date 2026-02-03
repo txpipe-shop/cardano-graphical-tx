@@ -26,7 +26,6 @@ export default function TxCbor({ cbor }: { cbor: string }) {
     }
   }, [cbor]);
 
-
   return (
     <Card className="h-full min-h-0 border border-border bg-surface shadow-none">
       <CardBody className="grid h-full min-h-0 grid-cols-1 gap-4 p-4 md:grid-cols-2">

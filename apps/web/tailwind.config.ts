@@ -24,8 +24,8 @@ export default {
         "green-3": "var(--color-border-green)",
         "explorer-row": "var(--color-explorer_row)",
         border: "var(--color-border)",
-      }
-    }
+      },
+    },
   },
   darkMode: "class",
   plugins: [

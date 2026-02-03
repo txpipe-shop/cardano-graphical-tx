@@ -13,7 +13,9 @@ function OverviewStats({ tx }: { tx: cardano.Tx }) {
       <CardBody className="flex flex-row flex-wrap justify-around gap-4 p-4">
         <div className="flex gap-2 items-center">
           <p className="font-bold text-p-secondary">Created:</p>
-          <span className="text-p-secondary">{formatSeconds(tx.createdAt)}</span>
+          <span className="text-p-secondary">
+            {formatSeconds(tx.createdAt)}
+          </span>
         </div>
         <div className="flex gap-2 items-center">
           <p className="font-bold text-p-secondary">Fee:</p>
@@ -89,7 +91,11 @@ function UtxoList({
                   </div>
                 </td>
                 <td className="px-4 py-3 font-mono align-top bg-surface">
-                  <Chip size="sm" variant="flat" className="bg-explorer-row text-p-secondary">
+                  <Chip
+                    size="sm"
+                    variant="flat"
+                    className="bg-explorer-row text-p-secondary"
+                  >
                     {utxo.coin ? utxo.coin.toString() : "-"}
                   </Chip>
                 </td>

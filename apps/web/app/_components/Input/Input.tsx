@@ -35,8 +35,9 @@ export function CustomInput({
         <div className="relative inline-block w-10 select-none align-top">
           <label className="cursor-pointer">
             <div
-              className={`toggle-label flex h-7 items-center overflow-hidden rounded-full rounded-b-full border-2 border-b-4 border-input-border px-6 shadow-small shadow-black transition-all duration-400 ease-in-out ${checked ? "bg-green-200" : "bg-red-200"
-                }`}
+              className={`toggle-label flex h-7 items-center overflow-hidden rounded-full rounded-b-full border-2 border-b-4 border-input-border px-6 shadow-small shadow-black transition-all duration-400 ease-in-out ${
+                checked ? "bg-green-200" : "bg-red-200"
+              }`}
             >
               <input
                 id={id}
@@ -44,8 +45,9 @@ export function CustomInput({
                 defaultChecked={checked}
                 type="checkbox"
                 onChange={onChange}
-                className={`toggle-checkbox absolute block h-3 w-3 cursor-pointer appearance-none rounded-full bg-background transition-all duration-400 ease-in-out ${checked ? "left-8" : "left-2"
-                  }`}
+                className={`toggle-checkbox absolute block h-3 w-3 cursor-pointer appearance-none rounded-full bg-background transition-all duration-400 ease-in-out ${
+                  checked ? "left-8" : "left-2"
+                }`}
               />
             </div>
           </label>
@@ -66,7 +68,8 @@ export function CustomInput({
       size={inputSize == "small" ? "sm" : "lg"}
       classNames={{
         innerWrapper: "bg-surface",
-        inputWrapper: "bg-surface data-[hover=true]:bg-surface group-data-[focus=true]:bg-surface",
+        inputWrapper:
+          "bg-surface data-[hover=true]:bg-surface group-data-[focus=true]:bg-surface",
       }}
       className={`
         block appearance-none rounded-lg rounded-b-xl border-2

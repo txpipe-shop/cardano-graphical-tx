@@ -3,7 +3,7 @@ import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
 import {
   TxSearch,
-  TxTable
+  TxTable,
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
 import { EXPLORER_PAGE_SIZE, ROUTES } from "~/app/_utils";
