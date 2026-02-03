@@ -1,6 +1,8 @@
 import { Suspense } from "react";
+import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
 import {
+  TxSearch,
   TxTable
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
@@ -89,7 +91,7 @@ export default async function ExplorerTxsPage({
       <Header />
 
       <main className="container mx-auto px-4 py-6 bg-surface">
-        {/* <div className="mb-6 flex flex-col gap-4">
+        <div className="mb-6 flex flex-col gap-4">
           <h1 className="text-4xl font-extrabold text-p-primary">Explorer</h1>
           <div className="flex w-full gap-2">
             <div className="min-w-0 flex-1">
@@ -99,7 +101,7 @@ export default async function ExplorerTxsPage({
               <ChainSelector currentChain={chain} />
             </div>
           </div>
-        </div> */}
+        </div>
 
         <Suspense fallback={<Loading />}>
           <TransactionsList chain={chain} page={page} />
