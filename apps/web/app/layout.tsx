@@ -7,6 +7,7 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 import { Providers } from "./providers";
+import { ThemeProvider } from "./theme-provider";
 
 declare global {
   interface Window {
@@ -41,11 +42,15 @@ export default function RootLayout({
           <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GA_TRACKING_ID} />
         )}
       <body className="bg-surface">
-        <NextTopLoader color="#7c3aed" showSpinner={false} />
-        <Providers>
-          <div className="bg-surface m-auto flex w-full flex-col">{children}</div>
-          <Toaster position="bottom-center" />
-        </Providers>
+        <ThemeProvider>
+          <NextTopLoader color="#7c3aed" showSpinner={false} />
+          <Providers>
+            <div className="bg-surface m-auto flex w-full flex-col">
+              {children}
+            </div>
+            <Toaster position="bottom-center" />
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );

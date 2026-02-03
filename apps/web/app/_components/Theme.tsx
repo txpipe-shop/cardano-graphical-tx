@@ -1,13 +1,16 @@
-"use client"
+"use client";
+
 import { Button } from "@heroui/react";
-import { useConfigs } from "~/app/_contexts";
+import { useTheme } from "next-themes";
 
 export const ThemeButton = () => {
-  const { configs, updateConfigs } = useConfigs();
+  const { theme, resolvedTheme, setTheme } = useTheme();
+
+  const currentTheme = resolvedTheme ?? theme ?? "light";
+  const isDark = currentTheme === "dark";
 
   const toggleTheme = () => {
-    console.log("Click")
-    updateConfigs("theme", configs.theme === "light" ? "dark" : "light");
+    setTheme(isDark ? "light" : "dark");
   };
 
   return (
@@ -17,7 +20,7 @@ export const ThemeButton = () => {
       isIconOnly
       onPress={toggleTheme}
     >
-      {configs.theme === "dark" ? "☀️" : "🌙"}
+      {isDark ? "☀️" : "🌙"}
     </Button>
   );
 };

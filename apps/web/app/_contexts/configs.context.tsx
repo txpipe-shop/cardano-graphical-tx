@@ -14,7 +14,6 @@ interface IUserConfigs {
   option: OPTIONS;
   query: string;
   port: string;
-  theme: "light" | "dark";
 }
 
 const LOCAL_STORAGE_KEYS = {
@@ -42,7 +41,6 @@ export const ConfigsProvider = ({ children }: { children: ReactNode }) => {
     option: OPTIONS.CBOR,
     query: "",
     port: DEFAULT_DEVNET_PORT,
-    theme: "light",
   };
   const [configs, setConfigs] = useLocalStorage({
     key: LOCAL_STORAGE_KEYS.USER_CONFIGS,
