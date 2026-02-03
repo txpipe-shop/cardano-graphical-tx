@@ -6,6 +6,7 @@ import {
   CardanoBlocksApi,
   CardanoEpochsApi,
   CardanoAddressesApi,
+  CardanoPoolsApi,
   Configuration
 } from '@laceanatomy/blockfrost-sdk';
 import { testEnv, TestEnv } from './setup';
@@ -33,7 +34,8 @@ describe('DbSyncProvider', () => {
         transactions: new CardanoTransactionsApi(bfConfig),
         blocks: new CardanoBlocksApi(bfConfig),
         epochs: new CardanoEpochsApi(bfConfig),
-        addresses: new CardanoAddressesApi(bfConfig)
+        addresses: new CardanoAddressesApi(bfConfig),
+        pools: new CardanoPoolsApi(bfConfig)
       };
     },
     testVectors: {

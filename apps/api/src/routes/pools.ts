@@ -2,6 +2,23 @@ import { FastifyInstance } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import * as schemas from '../schemas';
+import { getNetworkConfig } from '../utils';
+import { getPool, listPools } from '../controllers/pools';
+
+const poolsQuerySchema = z.object({
+  network: schemas.NetworkSchema,
+  limit: z.coerce.number().min(1).max(100).default(20),
+  offset: z.coerce.number().min(0).default(0),
+  search: z.string().optional()
+});
+
+const poolParamSchema = z.object({
+  id: z.string()
+});
+
+const poolQuerySchema = z.object({
+  network: schemas.NetworkSchema
+});
 
 export function poolsRoutes(app: FastifyInstance) {
   const server = app.withTypeProvider<ZodTypeProvider>();
@@ -11,27 +28,16 @@ export function poolsRoutes(app: FastifyInstance) {
     {
       schema: {
         tags: ['Pools'],
-        querystring: z.object({
-          network: schemas.NetworkSchema,
-          limit: z.coerce.number().min(1).max(100).default(20),
-          offset: z.coerce.number().min(0).default(0),
-          search: z.string().optional()
-        }),
+        querystring: poolsQuerySchema,
         response: {
           200: schemas.PoolsResponseSchema
         }
       }
     },
     async (request, _reply) => {
-      return {
-        pools: [],
-        pagination: {
-          total: 0,
-          limit: request.query.limit,
-          offset: request.query.offset,
-          hasMore: false
-        }
-      };
+      const { network, limit, offset, search } = poolsQuerySchema.parse(request.query);
+      const config = getNetworkConfig(app, network);
+      return listPools(limit, offset, search, config);
     }
   );
 
@@ -40,12 +46,8 @@ export function poolsRoutes(app: FastifyInstance) {
     {
       schema: {
         tags: ['Pools'],
-        params: z.object({
-          id: z.string()
-        }),
-        querystring: z.object({
-          network: schemas.NetworkSchema
-        }),
+        params: poolParamSchema,
+        querystring: poolQuerySchema,
         response: {
           200: z.object({
             pool: schemas.PoolSchema
@@ -54,12 +56,10 @@ export function poolsRoutes(app: FastifyInstance) {
       }
     },
     async (request, _reply) => {
-      return {
-        pool: {
-          poolId: request.params.id,
-          hex: request.params.id
-        }
-      };
+      const { id } = poolParamSchema.parse(request.params);
+      const { network } = poolQuerySchema.parse(request.query);
+      const config = getNetworkConfig(app, network);
+      return getPool(id, config);
     }
   );
 }

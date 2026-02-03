@@ -62,6 +62,45 @@ export type Epoch = {
   txCount: bigint;
 };
 
+export type Pool = {
+  poolId: string;
+  hex: string;
+  ticker?: string | null;
+  name?: string | null;
+  description?: string | null;
+  homepage?: string | null;
+  logo?: string | null;
+  meta?: {
+    name?: string | null;
+    ticker?: string | null;
+    description?: string | null;
+    homepage?: string | null;
+    logo?: string | null;
+  } | null;
+  stake?: string | null;
+  delegators?: number | null;
+  margin?: number | null;
+  fixed_cost?: string | null;
+  cost?: string | null;
+  pledge?: string | null;
+};
+
+export type PoolsQuery = {
+  search?: string;
+};
+
+export type PoolsReq = PaginatedRequest<PoolsQuery | undefined>;
+export type PoolReq = { id: string };
+
+export type PoolsRes = PaginatedResult<Pool> & {
+  totals?: {
+    total_pools?: number;
+    total_stake?: string;
+    total_delegators?: number;
+  };
+};
+export type PoolRes = Pool;
+
 export type TxsReq = PaginatedRequest<TxQuery | undefined>;
 export type BlocksReq = PaginatedRequest<BlocksQuery | undefined>;
 export type EpochsReq = PaginatedRequest<undefined>;
@@ -104,4 +143,6 @@ export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends Ba
   getEpoch(params: EpochReq): Promise<EpochRes>;
   getEpochs(params: EpochsReq): Promise<EpochsRes>;
   readTip(): Promise<TipRes>;
+  getPools?(params: PoolsReq): Promise<PoolsRes>;
+  getPool?(params: PoolReq): Promise<PoolRes>;
 }

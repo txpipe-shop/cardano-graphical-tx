@@ -4,7 +4,7 @@ import {
   Assets,
   CborResponse,
   Input,
-  type Utxo
+  type Utxo,
 } from "@laceanatomy/napi-pallas";
 import {
   assetNameFromUnit,
@@ -378,7 +378,10 @@ const setCBORs = async (
   }
 };
 
-const cardanoUtxoToITransactionInput = (i: cardano.UTxO, assets: Assets[]): Utxo => {
+const cardanoUtxoToITransactionInput = (
+  i: cardano.UTxO,
+  assets: Assets[],
+): Utxo => {
   return {
     txHash: i.outRef.hash.toString(),
     index: Number(i.outRef.index),
@@ -391,14 +394,19 @@ const cardanoUtxoToITransactionInput = (i: cardano.UTxO, assets: Assets[]): Utxo
         ? {
           bytes: i.datum.datumHex.toString(),
           hash: "",
-          json: ""
+          json: "",
         }
         : undefined,
-    scriptRef: i.referenceScript && i.referenceScript.bytes ? i.referenceScript.bytes.toString() : undefined,
-  }
-}
+    scriptRef:
+      i.referenceScript && i.referenceScript.bytes
+        ? i.referenceScript.bytes.toString()
+        : undefined,
+  };
+};
 
-const buildUtxos = (inputs: (cardano.UTxO | Input)[]): ITransaction['inputs'] => {
+const buildUtxos = (
+  inputs: (cardano.UTxO | Input)[],
+): ITransaction["inputs"] => {
   return inputs.map((i) => {
     if ("outRef" in i) {
       const assets: Assets[] = [];
@@ -430,8 +438,8 @@ const buildUtxos = (inputs: (cardano.UTxO | Input)[]): ITransaction['inputs'] =>
         address: "",
         assets: [],
         lovelace: 0,
-        bytes: ""
-      }
+        bytes: "",
+      };
     }
   });
 };
@@ -458,7 +466,6 @@ async function resolveInputsAndReferenceInputs(
   });
 
   const txResults = await Promise.all(txFetchPromises);
-  console.dir(txResults, { depth: null });
   const txMap = new Map<string, cardano.Tx | null>();
   txResults.forEach(({ hash, tx }) => {
     txMap.set(hash, tx);

@@ -69,9 +69,7 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
       if (!selectedKey || selectedKey === currentChain) return;
 
       updateConfigs(USER_CONFIGS.NET, selectedKey);
-      router.push(
-        ROUTES.EXPLORER_TXS(selectedKey),
-      );
+      router.push(ROUTES.EXPLORER_TXS(selectedKey));
     },
     [currentChain, router, updateConfigs],
   );
