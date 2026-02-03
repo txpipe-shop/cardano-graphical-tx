@@ -115,7 +115,7 @@ export default async function ExplorerTxsPage({
             <CardBody className="py-8 text-center text-p-secondary">
               <p className="text-3xl font-semibold">Coming soon...</p>
               <p className="text-lg mt-2 font-medium">
-                We`&apos;`re working on it!
+                We&apos;re working on it!
                 <br />
                 In the meantime, you can explore{" "}
                 <Link
