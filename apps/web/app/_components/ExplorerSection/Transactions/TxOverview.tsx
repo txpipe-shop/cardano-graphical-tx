@@ -9,31 +9,31 @@ import TokenPill from "../TokenPill";
 
 function OverviewStats({ tx }: { tx: cardano.Tx }) {
   return (
-    <Card className="shadow-none border border-default-200">
+    <Card className="shadow-none border border-border bg-surface">
       <CardBody className="flex flex-row flex-wrap justify-around gap-4 p-4">
         <div className="flex gap-2 items-center">
-          <p className="font-bold text-gray-700">Created:</p>
-          <span className="text-gray-600">{formatSeconds(tx.createdAt)}</span>
+          <p className="font-bold text-p-secondary">Created:</p>
+          <span className="text-p-secondary">{formatSeconds(tx.createdAt)}</span>
         </div>
         <div className="flex gap-2 items-center">
-          <p className="font-bold text-gray-700">Fee:</p>
-          <span className="text-gray-600">{Number(tx.fee)}</span>
+          <p className="font-bold text-p-secondary">Fee:</p>
+          <span className="text-p-secondary">{Number(tx.fee)}</span>
         </div>
         <div className="flex gap-2 items-center">
-          <p className="font-bold text-gray-700">Block Height:</p>
-          <span className="text-gray-600">{tx.block?.height ?? "-"}</span>
+          <p className="font-bold text-p-secondary">Block Height:</p>
+          <span className="text-p-secondary">{tx.block?.height ?? "-"}</span>
         </div>
         {tx.validityInterval && (
           <>
             <div className="flex gap-2 items-center">
-              <p className="font-bold text-gray-700">Invalid Before:</p>
-              <span className="text-gray-600">
+              <p className="font-bold text-p-secondary">Invalid Before:</p>
+              <span className="text-p-secondary">
                 {tx.validityInterval.invalidBefore ?? "-"}
               </span>
             </div>
             <div className="flex gap-2 items-center">
-              <p className="font-bold text-gray-700">Invalid Hereafter:</p>
-              <span className="text-gray-600">
+              <p className="font-bold text-p-secondary">Invalid Hereafter:</p>
+              <span className="text-p-secondary">
                 {tx.validityInterval.invalidHereafter ?? "-"}
               </span>
             </div>
@@ -56,12 +56,12 @@ function UtxoList({
   if (list.length === 0) return null;
   return (
     <Card className="shadow-none border border-default-200">
-      <div className="border-b px-4 py-2 bg-gray-50 font-semibold text-lg text-gray-700">
+      <div className="border-b px-4 py-2 bg-explorer-row font-semibold text-lg text-p-secondary">
         {title} ({list.length})
       </div>
       <CardBody className="p-0 overflow-x-auto">
         <table className="w-full min-w-[800px] text-left text-sm">
-          <thead className="text-gray-500 font-medium border-b bg-gray-50/50">
+          <thead className="text-p-secondary font-medium border-b bg-explorer-row">
             <tr>
               <th className="px-4 py-3">TxOut Ref</th>
               <th className="px-4 py-3">Address</th>
@@ -70,10 +70,10 @@ function UtxoList({
               <th className="px-4 py-3">Tokens</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border">
             {list.map((utxo) => (
               <tr key={`${utxo.outRef.hash}#${utxo.outRef.index}`}>
-                <td className="px-4 py-3 font-mono align-top text-gray-600">
+                <td className="px-4 py-3 font-mono align-top text-p-secondary bg-surface">
                   <div className="flex items-center gap-1">
                     {utxo.outRef.hash.slice(0, 15)}...#
                     {utxo.outRef.index.toString()}
@@ -83,18 +83,17 @@ function UtxoList({
                     />
                   </div>
                 </td>
-                <td className="px-4 py-3 font-mono align-top">
+                <td className="px-4 py-3 font-mono align-top bg-surface">
                   <div className="flex items-center gap-2">
                     <ColoredAddress address={utxo.address} />
-                    <CopyButton text={utxo.address} size={12} />
                   </div>
                 </td>
-                <td className="px-4 py-3 font-mono align-top">
-                  <Chip size="sm" variant="flat" className="bg-gray-100">
+                <td className="px-4 py-3 font-mono align-top bg-surface">
+                  <Chip size="sm" variant="flat" className="bg-explorer-row text-p-secondary">
                     {utxo.coin ? utxo.coin.toString() : "-"}
                   </Chip>
                 </td>
-                <td className="px-4 py-3 align-top">
+                <td className="px-4 py-3 align-top bg-surface">
                   {utxo.datum ? (
                     <Chip size="sm" variant="dot" color="success">
                       Yes
@@ -105,7 +104,7 @@ function UtxoList({
                     </Chip>
                   )}
                 </td>
-                <td className="px-4 py-3 align-top">
+                <td className="px-4 py-3 align-top bg-surface">
                   {Object.keys(utxo.value).length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {Object.entries(utxo.value).map(([unit, amount]) => (
@@ -118,7 +117,7 @@ function UtxoList({
                       ))}
                     </div>
                   ) : (
-                    <span className="text-gray-400">-</span>
+                    <span className="text-p-secondary">-</span>
                   )}
                 </td>
               </tr>
@@ -133,8 +132,8 @@ function UtxoList({
 function MintList({ list }: { list: Value }) {
   if (Object.keys(list).length === 0) {
     return (
-      <Card className="shadow-none border border-default-200">
-        <CardBody className="text-center text-gray-400 text-sm py-8">
+      <Card className="shadow-none border border-border bg-surface">
+        <CardBody className="text-center text-p-secondary text-sm py-8">
           No minted assets in this transaction.
         </CardBody>
       </Card>
@@ -142,8 +141,8 @@ function MintList({ list }: { list: Value }) {
   }
 
   return (
-    <Card className="shadow-none border border-default-200">
-      <div className="border-b px-4 py-2 bg-gray-50 font-semibold text-lg text-gray-700">
+    <Card className="shadow-none border border-border bg-surface">
+      <div className="border-b px-4 py-2 bg-background font-semibold text-lg text-p-primary">
         Minted Assets
       </div>
       <CardBody className="p-4">
@@ -178,8 +177,8 @@ export default function TxOverview({ tx }: TxOverviewProps) {
           mint={tx.mint}
         />
       ) : (
-        <Card className="shadow-none border border-default-200">
-          <CardBody className="text-center text-gray-400 text-sm py-2">
+        <Card className="shadow-none border border-border bg-surface">
+          <CardBody className="text-center text-p-secondary text-sm py-2">
             No reference inputs in this transaction.
           </CardBody>
         </Card>

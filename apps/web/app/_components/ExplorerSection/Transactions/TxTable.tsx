@@ -12,8 +12,8 @@ interface TxTableProps {
 export function TxTable({ transactions, chain }: TxTableProps) {
   if (transactions.length === 0) {
     return (
-      <Card className="border-2 border-dashed border-gray-200 shadow-md">
-        <CardBody className="py-8 text-center text-gray-500">
+      <Card className="border-2 border-dashed border-border shadow-md bg-surface">
+        <CardBody className="py-8 text-center text-p-secondary">
           No transactions found for this network.
         </CardBody>
       </Card>

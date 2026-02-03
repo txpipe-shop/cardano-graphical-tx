@@ -1,9 +1,7 @@
 import { Suspense } from "react";
-import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
 import {
-  TxSearch,
-  TxTable,
+  TxTable
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
 import { EXPLORER_PAGE_SIZE, ROUTES } from "~/app/_utils";
@@ -65,7 +63,7 @@ async function TransactionsList({
   } catch (error) {
     console.error("Failed to fetch transactions:", error);
     return (
-      <div className="rounded-lg border-2 border-dashed border-red-300 bg-red-50 p-8 text-center text-red-600">
+      <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
         <p className="font-semibold">Failed to load transactions</p>
         <p className="mt-2 text-sm">
           {error instanceof Error ? error.message : "Unknown error occurred"}
@@ -87,12 +85,12 @@ export default async function ExplorerTxsPage({
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-surface">
       <Header />
 
-      <main className="container mx-auto px-4 py-6">
-        <div className="mb-6 flex flex-col gap-4">
-          <h1 className="text-4xl font-extrabold text-gray-800">Explorer</h1>
+      <main className="container mx-auto px-4 py-6 bg-surface">
+        {/* <div className="mb-6 flex flex-col gap-4">
+          <h1 className="text-4xl font-extrabold text-p-primary">Explorer</h1>
           <div className="flex w-full gap-2">
             <div className="min-w-0 flex-1">
               <TxSearch chain={chain} />
@@ -101,7 +99,7 @@ export default async function ExplorerTxsPage({
               <ChainSelector currentChain={chain} />
             </div>
           </div>
-        </div>
+        </div> */}
 
         <Suspense fallback={<Loading />}>
           <TransactionsList chain={chain} page={page} />

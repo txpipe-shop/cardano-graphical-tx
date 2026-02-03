@@ -1,5 +1,6 @@
 "use client";
 
+import { Card, CardBody } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
 import { useEffect, useMemo, useState } from "react";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
@@ -84,15 +85,17 @@ export default function DevnetTransactionsList({
 
   if (loading) {
     return (
-      <div className="rounded-lg border-2 border-dashed border-gray-200 p-8 text-center text-gray-600">
-        Loading devnet transactions...
-      </div>
+      <Card className="border-2 border-dashed border-border shadow-md bg-surface">
+        <CardBody className="py-8 text-center text-p-secondary">
+          Loading devnet transactions...
+        </CardBody>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-lg border-2 border-dashed border-red-300 bg-red-50 p-8 text-center text-red-600">
+      <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
         <p className="font-semibold">Failed to load devnet transactions</p>
         <p className="mt-2 text-sm">{error}</p>
       </div>

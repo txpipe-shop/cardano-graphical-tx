@@ -48,8 +48,8 @@ export default function Pagination({
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-between rounded-lg border-2 border-dashed border-gray-200 p-3 shadow-md">
-      <div className="text-sm text-gray-600">
+    <div className="flex flex-wrap items-center justify-between rounded-lg border-2 border-dashed border-border p-3 shadow-md bg-surface">
+      <div className="text-sm text-p-secondary">
         Page {currentPage} of {totalPages}
       </div>
 
@@ -57,7 +57,7 @@ export default function Pagination({
         <Button
           size="sm"
           variant="flat"
-          className="bg-violet-100 text-gray-600 shadow-sm"
+          className="bg-explorer-row text-p-secondary shadow-sm"
           isDisabled={!canGoPrev}
           onPress={navigateTo(currentPage - 1)}
         >
@@ -72,8 +72,8 @@ export default function Pagination({
               variant={page === currentPage ? "solid" : "light"}
               className={
                 page === currentPage
-                  ? "bg-violet-100 font-mono text-gray-600 shadow-sm"
-                  : "font-mono text-gray-600"
+                  ? "bg-explorer-row font-mono text-p-secondary shadow-sm"
+                  : "font-mono text-p-secondary"
               }
               onPress={navigateTo(page)}
             >
@@ -85,7 +85,7 @@ export default function Pagination({
         <Button
           size="sm"
           variant="flat"
-          className="bg-violet-100 text-gray-600 shadow-sm"
+          className="bg-explorer-row text-p-secondary shadow-sm"
           isDisabled={!canGoNext}
           onPress={navigateTo(currentPage + 1)}
         >

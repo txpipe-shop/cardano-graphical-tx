@@ -18,7 +18,7 @@ export default function Index() {
           transactions effectively.
         </div>
         <div className="mt-6 text-3xl">See more about us</div>
-        <div className="mx-auto mt-6 grid w-full items-center justify-between gap-6 rounded-xl bg-backgound p-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto mt-6 grid w-full items-center justify-between gap-6 rounded-xl bg-background p-6 md:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col items-center text-center">
             <p className="text-lg font-extrabold">Building a dApp?</p>
             <p className="text-p-secondary">

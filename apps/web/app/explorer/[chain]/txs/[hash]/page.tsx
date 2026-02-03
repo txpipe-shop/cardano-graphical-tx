@@ -36,11 +36,11 @@ export default async function TxPage({ params, searchParams }: Props) {
 
   if (chain === NETWORK.DEVNET) {
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="flex min-h-screen flex-col bg-background">
         <Header />
         <main className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
           <div className="mb-4 flex flex-shrink-0 items-center justify-between">
-            <h1 className="text-3xl font-extrabold">{hash}</h1>
+            <h1 className="text-3xl font-extrabold text-p-primary">{hash}</h1>
             <div className="flex items-center gap-2">
               <CopyButton text={hash} size={16} />
             </div>
@@ -59,7 +59,7 @@ export default async function TxPage({ params, searchParams }: Props) {
       hash: Hash(hash),
     });
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="flex min-h-screen flex-col bg-background">
         <Header />
         <main className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
           <div className="mb-4 flex flex-shrink-0 items-center justify-between">
@@ -83,10 +83,10 @@ export default async function TxPage({ params, searchParams }: Props) {
   } catch (err) {
     console.error(err);
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="flex min-h-screen flex-col bg-background">
         <Header />
         <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-          <div className="rounded-lg border-2 border-dashed border-gray-200 p-8 text-center text-gray-600">
+          <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
             Transaction not found or could not be loaded.
           </div>
         </main>

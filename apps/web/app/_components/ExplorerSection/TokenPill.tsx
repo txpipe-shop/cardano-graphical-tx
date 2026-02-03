@@ -45,7 +45,7 @@ export default function TokenPill({ unit, amount, mint }: TokenPillProps) {
         <span className="font-mono text-[11px] opacity-90">
           {String(amount)}
         </span>
-        <div className="flex items-center gap-1 text-[10px] text-gray-500">
+        <div className="flex items-center gap-1 text-[10px] text-p-secondary">
           <Popover
             placement="bottom-end"
             isOpen={menuOpen}
@@ -55,7 +55,7 @@ export default function TokenPill({ unit, amount, mint }: TokenPillProps) {
               <button
                 type="button"
                 aria-label="Copy options"
-                className="ml-1 rounded-full p-1 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+                className="ml-1 rounded-full p-1 text-p-secondary transition hover:bg-explorer-row hover:text-p-primary"
               >
                 <DotsIcon />
               </button>

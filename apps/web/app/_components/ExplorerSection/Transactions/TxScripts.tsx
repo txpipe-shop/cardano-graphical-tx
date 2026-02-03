@@ -22,10 +22,10 @@ function formatPurpose(purpose?: cardano.RdmrPurpose) {
 function DetailItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+      <div className="text-xs font-semibold uppercase tracking-wide text-p-secondary">
         {label}
       </div>
-      <Code className="block w-full whitespace-pre-wrap break-all bg-gray-50 p-3">
+      <Code className="block w-full whitespace-pre-wrap break-all bg-surface p-3">
         {value}
       </Code>
     </div>
@@ -56,8 +56,8 @@ export default function TxScripts({ tx }: { tx: cardano.Tx }) {
 
   if (!activeRedeemer) {
     return (
-      <Card className="h-full min-h-0 border border-default-200 shadow-none">
-        <CardBody className="py-8 text-center text-sm text-gray-400">
+      <Card className="h-full min-h-0 border border-border shadow-none">
+        <CardBody className="py-8 text-center text-sm text-p-secondary">
           No scripts on this transaction.
         </CardBody>
       </Card>
@@ -65,10 +65,10 @@ export default function TxScripts({ tx }: { tx: cardano.Tx }) {
   }
 
   return (
-    <Card className="h-full min-h-0 border border-default-200 shadow-none">
+    <Card className="h-full min-h-0 border border-border shadow-none">
       <CardBody className="flex h-full min-h-0 flex-col gap-6 p-6 md:flex-row">
         <div className="flex min-w-[200px] flex-col gap-2 border-r pr-4">
-          <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <div className="text-xs font-semibold uppercase tracking-wide text-p-secondary">
             Redeemers
           </div>
           {redeemers.map((redeemer) => {

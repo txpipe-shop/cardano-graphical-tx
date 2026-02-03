@@ -36,7 +36,7 @@ export function TxSearch({ chain }: TxSearchProps) {
         onKeyDown={handleKeyDown}
         variant="bordered"
         classNames={{
-          inputWrapper: "border-2 border-dashed border-gray-300 shadow-md ",
+          inputWrapper: "border-2 border-dashed border-border shadow-md ",
         }}
       />
       <Button

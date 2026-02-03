@@ -17,18 +17,18 @@ interface TxRowHeaderProps {
 
 function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 bg-violet-100 p-4">
+    <div className="flex flex-wrap items-center justify-between gap-4 bg-explorer-row p-4">
       <div className="flex items-center gap-2">
         <Link
           href={ROUTES.EXPLORER_TX(chain as Network, tx.hash)}
-          className="font-mono text-sm text-blue-600 hover:underline"
+          className="font-mono text-sm text-accent-blue hover:underline"
         >
           {tx.hash}
         </Link>
         <CopyButton text={tx.hash} size={14} />
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-gray-600">
+      <div className="flex items-center gap-2 text-sm text-p-secondary">
         <ClockIcon size={14} />
         {formatSeconds(tx.createdAt)}
       </div>
@@ -78,14 +78,14 @@ function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
 
   return (
     <div>
-      <h4 className="semibold mb-2 text-sm text-gray-500">{title}</h4>
+      <h4 className="semibold mb-2 text-sm text-p-secondary">{title}</h4>
       <div className="space-y-2">
         {utxos.map((utxo, i) => (
-          <div className="rounded-lg bg-gray-100 p-2" key={i}>
+          <div className="rounded-lg bg-explorer-row p-2" key={i}>
             <div className="flex flex-wrap items-center gap-2 justify-between">
               {(Number(utxo.coin) / 1_000_000).toFixed(6)} ₳
               <ColoredAddress address={utxo.address} />
-              <div className="font-mono text-xs text-gray-600 flex items-center gap-1">
+              <div className="font-mono text-xs text-p-secondary flex items-center gap-1">
                 {utxo.outRef.hash.slice(0, 7)}...{utxo.outRef.hash.slice(-7)}#
                 {utxo.outRef.index.toString()}
                 <CopyButton
@@ -115,7 +115,7 @@ function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
 
 export function TxRow({ tx, chain }: { tx: cardano.Tx; chain: string }) {
   return (
-    <Card className="mb-4 border-2 border-dashed border-gray-200 shadow-md">
+    <Card className="mb-4 border-2 border-dashed border-border shadow-md bg-background">
       <CardBody className="p-0">
         <TxRowHeader tx={tx} chain={chain} />
         <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
