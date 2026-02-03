@@ -42,11 +42,10 @@ export const TransactionsList = ({
   const handleRemove = (txHash: string) => () => {
     try {
       const values = [...newTxs];
-      const findIndexToDelete = values.findIndex((input) => input.value === txHash);
-      const itemToDelete = values.splice(
-        findIndexToDelete,
-        1,
-      )[0];
+      const findIndexToDelete = values.findIndex(
+        (input) => input.value === txHash,
+      );
+      const itemToDelete = values.splice(findIndexToDelete, 1)[0];
       if (!itemToDelete) {
         toast.error("Transaction not found");
         return;
@@ -84,8 +83,10 @@ export const TransactionsList = ({
         });
       }
     } catch (error) {
-      console.error('Error in handleRemove:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to remove transaction');
+      console.error("Error in handleRemove:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to remove transaction",
+      );
     }
   };
 

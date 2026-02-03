@@ -129,3 +129,28 @@ export interface NetworkStats {
   addresses: string;
   avg_block_time: number;
 }
+
+export interface PoolModel {
+  pool_id: string;
+  hex: string;
+  ticker: string | null;
+  name: string | null;
+  description: string | null;
+  homepage: string | null;
+  logo: string | null;
+  pledge: string;
+  margin: number;
+  fixed_cost: string;
+  stake: string;
+  delegators: number;
+}
+
+export interface PoolsModel {
+  result: PoolModel;
+}
+
+export interface TotalPoolsModel {
+  total_pools: string;
+  total_stake: string;
+  total_delegators: string;
+}

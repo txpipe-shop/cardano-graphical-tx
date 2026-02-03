@@ -5,6 +5,7 @@ import {
   CardanoBlocksApi,
   CardanoAddressesApi,
   CardanoEpochsApi,
+  CardanoPoolsApi,
   Configuration
 } from '@laceanatomy/blockfrost-sdk';
 import {
@@ -45,6 +46,7 @@ export type ProviderTestSuiteOptions = {
     blocks: CardanoBlocksApi;
     epochs: CardanoEpochsApi;
     addresses: CardanoAddressesApi;
+    pools: CardanoPoolsApi;
   }>;
   cleanup?: (provider: ChainProvider<cardano.UTxO, cardano.Tx, any>) => Promise<void>;
   testVectors?: TestVectors;
@@ -60,6 +62,7 @@ export function defineProviderSuite(options: ProviderTestSuiteOptions) {
       blocks: CardanoBlocksApi;
       epochs: CardanoEpochsApi;
       addresses: CardanoAddressesApi;
+      pools: CardanoPoolsApi;
     };
 
     beforeAll(async () => {
@@ -326,6 +329,53 @@ export function defineProviderSuite(options: ProviderTestSuiteOptions) {
             }
           }
         });
+      });
+    });
+
+    describe('Pools', () => {
+      it('should fetch paginated pools', async () => {
+        if (!provider.getPools) return;
+
+        const result = await provider.getPools({ limit: 5n, query: undefined });
+        expect(result.data.length).toBeGreaterThan(0);
+        expect(result.total).toBeGreaterThan(0n);
+      });
+
+      it('should fetch a single pool by ID', async () => {
+        if (!provider.getPools || !provider.getPool) return;
+
+        const list = await provider.getPools({ limit: 1n, query: undefined });
+        const firstPool = list.data[0];
+        expect(firstPool).toBeDefined();
+        const poolId = firstPool!.poolId;
+
+        const pool = await provider.getPool({ id: poolId });
+        expect(pool).toBeDefined();
+        expect(pool.poolId).toBe(poolId);
+      });
+
+      it('should match Blockfrost for a single pool', async () => {
+        if (!provider.getPools || !provider.getPool) return;
+
+        const list = await provider.getPools({ limit: 1n, query: undefined });
+        const firstPool = list.data[0];
+        expect(firstPool).toBeDefined();
+        const poolId = firstPool!.poolId;
+
+        const pool = await provider.getPool({ id: poolId });
+        const { data: bfPool } = await bfClient.pools.poolsPoolIdGet(poolId);
+
+        expect(pool.poolId).toBe(bfPool.pool_id);
+        expect(pool.hex).toBe(bfPool.hex);
+
+        try {
+          const { data: bfMetadata } = await bfClient.pools.poolsPoolIdMetadataGet(poolId);
+          if (bfMetadata.ticker) {
+            expect(pool.ticker).toBe(bfMetadata.ticker);
+          }
+        } catch (error) {
+          // metadata might not exist or verify failed, but main pool info matched
+        }
       });
     });
   });

@@ -22,9 +22,10 @@ import type { Cardano } from '@laceanatomy/types';
 import { cardano, Hash, HexString, hexToBech32, isBase58, Unit } from '@laceanatomy/types';
 import assert from 'assert';
 import type { Pool, PoolClient } from 'pg';
-import { mapTx, mapUtxo } from './mappers.js';
+import { mapTx, mapUtxo, mapPool } from './mappers.js';
 import { SQLQuery } from './sql/index.js';
 import type * as QueryTypes from './types/queries.js';
+import type { PoolsReq, PoolsRes, PoolReq, PoolRes } from '@laceanatomy/provider-core';
 
 export type DbSyncParams = {
   pool: Pool;
@@ -393,6 +394,57 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         startHeight: 0n,
         endHeight: 0n
       };
+    } finally {
+      this.gracefulRelease(client);
+    }
+  }
+
+  async getPools({ offset, limit, query }: PoolsReq): Promise<PoolsRes> {
+    const client = await this.getClient();
+    try {
+      const search = query?.search || null;
+
+      const { rows } = await client.query<QueryTypes.PoolModel>(SQLQuery.get('pools'), [
+        (offset || 0n).toString(),
+        limit,
+        search
+      ]);
+
+      const { rows: countRows } = await client.query<QueryTypes.TotalPoolsModel>(
+        SQLQuery.get('pools_count'),
+        [search]
+      );
+
+      const totalPools = BigInt(countRows[0]?.total_pools || 0);
+      const totalStake = countRows[0]?.total_stake || '0';
+      const totalDelegators = Number(countRows[0]?.total_delegators || 0);
+
+      const items = rows.map((row) => mapPool(row));
+
+      return {
+        data: items,
+        total: totalPools,
+        totals: {
+          total_pools: Number(totalPools),
+          total_stake: totalStake,
+          total_delegators: totalDelegators
+        }
+      };
+    } finally {
+      this.gracefulRelease(client);
+    }
+  }
+
+  async getPool({ id }: PoolReq): Promise<PoolRes> {
+    const client = await this.getClient();
+    try {
+      const { rows } = await client.query<QueryTypes.PoolModel>(SQLQuery.get('pool'), [id]);
+
+      if (rows.length === 0) {
+        throw new Error('Pool not found');
+      }
+
+      return mapPool(rows[0]!);
     } finally {
       this.gracefulRelease(client);
     }

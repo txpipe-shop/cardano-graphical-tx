@@ -171,3 +171,28 @@ function mapRedeemerPurpose(purpose: string): cardano.RdmrPurpose {
       return cardano.RdmrPurpose.Spend;
   }
 }
+
+export function mapPool(pool: QueryTypes.PoolModel): import('@laceanatomy/provider-core').Pool {
+  return {
+    poolId: pool.pool_id,
+    hex: pool.hex,
+    ticker: pool.ticker,
+    name: pool.name,
+    description: pool.description,
+    homepage: pool.homepage,
+    logo: pool.logo,
+    meta: {
+      name: pool.name,
+      ticker: pool.ticker,
+      description: pool.description,
+      homepage: pool.homepage,
+      logo: pool.logo
+    },
+    stake: pool.stake,
+    delegators: pool.delegators,
+    margin: pool.margin,
+    fixed_cost: pool.fixed_cost,
+    pledge: pool.pledge,
+    cost: pool.fixed_cost
+  };
+}
