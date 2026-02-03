@@ -37,7 +37,6 @@ export const AddressInput = ({
         configs.query,
         setError,
       );
-      console.log(res);
 
       if (res.address) {
         setAddressInfo(res.address);
@@ -50,7 +49,6 @@ export const AddressInput = ({
       if (error instanceof Response) {
         return; // already handled by getAddressInfo
       } else if (error instanceof Error) {
-        console.error("Error");
         setError(error.message);
       } else {
         setError("An unknown error occurred");
