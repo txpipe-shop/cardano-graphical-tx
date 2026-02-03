@@ -35,6 +35,11 @@ export const useTransactionLoader = () => {
   }, [hashParam, netParam]);
 
   useEffect(() => {
+    updateConfigs(USER_CONFIGS.QUERY, "");
+    setTransactionBox({ transactions: [], utxos: {} });
+  }, [configs.net])
+
+  useEffect(() => {
     const fetchTransactions = async () => {
       // Prioritize URL params
       const query = hashParam || configs.query;
@@ -82,7 +87,6 @@ export const useTransactionLoader = () => {
     hashParam,
     netParam,
     refreshTrigger,
-    configs.net,
     configs.option,
     configs.port,
   ]);
