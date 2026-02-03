@@ -37,7 +37,7 @@ export const useTransactionLoader = () => {
   useEffect(() => {
     updateConfigs(USER_CONFIGS.QUERY, "");
     setTransactionBox({ transactions: [], utxos: {} });
-  }, [configs.net])
+  }, [configs.net]);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -83,11 +83,5 @@ export const useTransactionLoader = () => {
 
     fetchTransactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    hashParam,
-    netParam,
-    refreshTrigger,
-    configs.option,
-    configs.port,
-  ]);
+  }, [hashParam, netParam, refreshTrigger, configs.option, configs.port]);
 };
