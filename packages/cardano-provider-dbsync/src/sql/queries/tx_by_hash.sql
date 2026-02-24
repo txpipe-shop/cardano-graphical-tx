@@ -46,7 +46,7 @@ WITH
                 SELECT tx_out.id
                 FROM tx_out
                     JOIN target_txs ON target_txs.id = tx_out.consumed_by_tx_id
-                UNION
+                UNION ALL
                 SELECT tx_out.id
                 FROM reference_tx_in
                     JOIN target_txs ON target_txs.id = reference_tx_in.tx_in_id
@@ -171,13 +171,9 @@ WITH
                                 output_assets.tx_out_id = tx_out.id
                         ), '{}'::json
                     ), 'consumedBy', (
-                        SELECT encode(stx.hash, 'hex')
-                        FROM tx_in si
-                            JOIN tx stx ON stx.id = si.tx_in_id
-                        WHERE
-                            si.tx_out_id = tx_out.tx_id
-                            AND si.tx_out_index = tx_out.index
-                        LIMIT 1
+                        SELECT encode(hash, 'hex')
+                        FROM tx
+                        WHERE id = tx_out.consumed_by_tx_id
                     ), 'datum', (
                         CASE
                             WHEN tx_out.inline_datum_id IS NOT NULL THEN (

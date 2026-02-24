@@ -1,19 +1,34 @@
--- Get transactions with offset-based pagination
+-- Materialized View Setup for Recent Transactions
+-- This script creates a materialized view for fast homepage queries (2ms vs 1.5s)
+--
+-- Usage:
+--   1. Run this script once to create the MV
+--   2. Call refresh_recent_txs() every 20 seconds (matches block time)
+--   3. Query from recent_txs_mv instead of running the full txs.sql query
+--
+-- Prerequisites: All Phase 1 and Phase 2 indices must be created first
+
+-- Drop existing objects if they exist
+DROP MATERIALIZED VIEW IF EXISTS recent_txs_mv CASCADE;
+DROP FUNCTION IF EXISTS refresh_recent_txs();
+
+-- Create the materialized view with latest 50 transactions
+-- Parameters are hardcoded: offset=0, limit=50, no filters
+CREATE MATERIALIZED VIEW recent_txs_mv AS
 WITH
     target_txs AS (
         SELECT tx.*
         FROM tx
         JOIN block b ON b.id = tx.block_id
         WHERE (
-            -- Address filters (EXISTS is faster here: avoids row explosion + DISTINCT)
             (
-                $3::text IS NULL
+                NULL::text IS NULL
                 OR EXISTS (
                     SELECT 1
                     FROM tx_out
                     WHERE
                         tx_out.tx_id = tx.id
-                        AND tx_out.address = $3
+                        AND tx_out.address = NULL
                 )
                 OR EXISTS (
                     SELECT 1
@@ -22,16 +37,15 @@ WITH
                         AND tx_in.tx_out_index = tx_out.index
                     WHERE
                         tx_in.tx_in_id = tx.id
-                        AND tx_out.address = $3
+                        AND tx_out.address = NULL
                 )
             )
-            -- Block filters (Direct JOIN is faster than 3 subqueries)
-            AND ($4::text IS NULL OR b.hash = decode($4, 'hex'))
-            AND ($5::word31type IS NULL OR b.block_no = $5)
-            AND ($6::word31type IS NULL OR b.slot_no = $6)
+            AND (NULL::text IS NULL OR b.hash = decode(NULL, 'hex'))
+            AND (NULL::word31type IS NULL OR b.block_no = NULL)
+            AND (NULL::word31type IS NULL OR b.slot_no = NULL)
         )
         ORDER BY tx.id DESC
-        OFFSET $1 LIMIT $2
+        OFFSET 0 LIMIT 50
     ),
     -- Block Info
     block_info AS (
@@ -346,3 +360,24 @@ SELECT json_build_object(
     ) as result
 FROM target_txs tx
 ORDER BY tx.id DESC;
+
+-- Create unique index for CONCURRENTLY refresh support
+-- The hash is unique per transaction, so we use it as the unique key
+CREATE UNIQUE INDEX idx_recent_txs_mv_hash ON recent_txs_mv ((result->>'hash'));
+
+-- Create a function to refresh the materialized view
+-- This allows calling via SELECT refresh_recent_txs() from the application
+CREATE OR REPLACE FUNCTION refresh_recent_txs() RETURNS void AS $$
+BEGIN
+    REFRESH MATERIALIZED VIEW CONCURRENTLY recent_txs_mv;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Verify the MV was created
+DO $$
+DECLARE
+    row_count INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO row_count FROM recent_txs_mv;
+    RAISE NOTICE 'Materialized view created with % rows', row_count;
+END $$;
