@@ -27,16 +27,18 @@ WITH
             MIN(t.tx_id) as first_tx_id,
             MAX(t.tx_id) as last_tx_id
         FROM (
+                -- Outputs sent TO this address
                 SELECT tx_id
                 FROM tx_out
                 WHERE
                     address = $1
                 UNION
-                SELECT tx_in.tx_in_id
-                FROM tx_in
-                    JOIN tx_out ON tx_in.tx_out_id = tx_out.id
+                -- Transactions that SPENT from this address (using consumed_by_tx_id)
+                SELECT consumed_by_tx_id as tx_id
+                FROM tx_out
                 WHERE
-                    tx_out.address = $1
+                    address = $1
+                    AND consumed_by_tx_id IS NOT NULL
             ) t
     ),
     block_info_first AS (
@@ -60,7 +62,13 @@ WITH
             )
     )
 SELECT
-    COALESCE(SUM(u.coin), 0)::text as lovelace,
+    COALESCE(
+        (
+            SELECT SUM(u.coin)
+            FROM unspent_outputs u
+        ),
+        0
+    )::text as lovelace,
     COALESCE(
         (
             SELECT json_object_agg(unit, quantity)
@@ -82,5 +90,4 @@ SELECT
     (
         SELECT row_to_json(b)
         FROM block_info_last b
-    ) as "lastSeen"
-FROM unspent_outputs u;
+    ) as "lastSeen";

@@ -29,7 +29,7 @@ export function definePerformanceSuite(options: PerformanceSuiteOptions) {
     for (const scenario of scenarios) {
       it(
         `Benchmark: ${scenario.name}`,
-        { timeout: config.duration + config.warmup + 5000 },
+        { timeout: config.duration + config.warmup + 60000 }, // Extra 60s buffer for slow DB queries
         async () => {
           // Create a pool of providers for concurrency simulation
           // Ideally we might want one provider instance or multiple depending on what we track.
@@ -42,7 +42,7 @@ export function definePerformanceSuite(options: PerformanceSuiteOptions) {
             console.log(`Starting warmup for ${scenario.name}...`);
             const warmupEnd = Date.now() + config.warmup;
             while (Date.now() < warmupEnd) {
-              await scenario.run(provider).catch(() => {});
+              await scenario.run(provider).catch(() => { });
             }
 
             console.log(

@@ -32,6 +32,8 @@ export type DbSyncParams = {
   addrPrefix: string;
   nodeUrl: string;
   magic: number;
+  /** Enable materialized view for homepage queries (2ms vs 1.5s). Requires running create_materialized_view.sql first. */
+  useMaterializedView?: boolean;
 };
 
 export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano> {
@@ -39,12 +41,14 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   private nodeUrl: string;
   private magic: number;
   private addrPrefix: string;
+  private useMaterializedView: boolean;
 
-  constructor({ pool, addrPrefix, nodeUrl, magic }: DbSyncParams) {
+  constructor({ pool, addrPrefix, nodeUrl, magic, useMaterializedView }: DbSyncParams) {
     this.pool = pool;
     this.addrPrefix = addrPrefix;
     this.nodeUrl = nodeUrl;
     this.magic = magic;
+    this.useMaterializedView = useMaterializedView ?? false;
   }
 
   private async getClient(): Promise<PoolClient> {
@@ -108,17 +112,17 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         txCount: BigInt(row.txCount || '0'),
         firstSeen: row.firstSeen
           ? {
-              blockHeight: BigInt(row.firstSeen.height),
-              slot: BigInt(row.firstSeen.slot),
-              hash: Hash(row.firstSeen.hash)
-            }
+            blockHeight: BigInt(row.firstSeen.height ?? 0),
+            slot: BigInt(row.firstSeen.slot ?? 0),
+            hash: Hash(row.firstSeen.hash)
+          }
           : undefined,
         lastSeen: row.lastSeen
           ? {
-              blockHeight: BigInt(row.lastSeen.height),
-              slot: BigInt(row.lastSeen.slot),
-              hash: Hash(row.lastSeen.hash)
-            }
+            blockHeight: BigInt(row.lastSeen.height ?? 0),
+            slot: BigInt(row.lastSeen.slot ?? 0),
+            hash: Hash(row.lastSeen.hash)
+          }
           : undefined
       };
     } finally {
@@ -219,6 +223,18 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     limit,
     query
   }: TxsReq): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
+    // Check if this is a homepage query (no filters, first page)
+    // Route to materialized view for 2ms response time
+    const isHomepageQuery =
+      this.useMaterializedView &&
+      !query?.address &&
+      !query?.block &&
+      (!offset || offset === 0n);
+
+    if (isHomepageQuery) {
+      return await this.getTxsFromMV(limit);
+    }
+
     const client = await this.getClient();
     try {
       // if address is provided, convert it to bech32 if it's in hex format otherwise use it as it is (Byron)
@@ -226,10 +242,19 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         ? isBase58(query.address)
           ? query?.address
           : // TODO: set up address prefix as configurable
-            hexToBech32(HexString(query.address), 'addr')
+          hexToBech32(HexString(query.address), 'addr')
         : null;
 
       const [blockHash, blockHeight, blockSlot] = this.parseBlockFilter(query);
+
+      // Disable JIT for transaction queries
+      // Reason: JIT compilation overhead (1.4s) far exceeds execution time
+      // This reduces total query time from ~1,600ms to ~200ms
+      // See: jit-analysis.md and phase2-results.md for benchmarks
+      await client.query('SET LOCAL jit = off');
+      // Prevent parallel workers from using shared memory segments in low /dev/shm environments
+      // Avoids: "could not resize shared memory segment" during txs_count
+      await client.query('SET LOCAL max_parallel_workers_per_gather = 0');
 
       const { rows: countRows } = await client.query<QueryTypes.TotalTxs>(
         SQLQuery.get('txs_count'),
@@ -252,6 +277,50 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         total: total,
         data: items
       };
+    } finally {
+      this.gracefulRelease(client);
+    }
+  }
+
+  /**
+   * Query recent transactions from the materialized view.
+   * This is ~750x faster than the regular query (2ms vs 1.5s).
+   * 
+   * The MV contains the latest 50 pre-computed transactions.
+   * Must be refreshed periodically (every ~20s) to stay current.
+   */
+  private async getTxsFromMV(limit: bigint): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
+    const client = await this.getClient();
+    try {
+      const { rows } = await client.query<QueryTypes.Txs>(
+        'SELECT result FROM recent_txs_mv LIMIT $1',
+        [Number(limit)]
+      );
+
+      const items = rows.map((row) => mapTx(row.result));
+
+      return {
+        // Note: For MV queries, we return the number of items as total
+        // since we don't have the full count without running the count query
+        total: BigInt(items.length),
+        data: items
+      };
+    } finally {
+      this.gracefulRelease(client);
+    }
+  }
+
+  /**
+   * Refresh the recent transactions materialized view.
+   * Call this every ~20 seconds (matching Cardano block time) to keep data current.
+   * 
+   * Uses REFRESH CONCURRENTLY which allows reads during refresh.
+   * Refresh time: ~1.7s
+   */
+  async refreshMaterializedView(): Promise<void> {
+    const client = await this.getClient();
+    try {
+      await client.query('SELECT refresh_recent_txs()');
     } finally {
       this.gracefulRelease(client);
     }
