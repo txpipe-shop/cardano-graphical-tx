@@ -42,7 +42,7 @@ export function definePerformanceSuite(options: PerformanceSuiteOptions) {
             console.log(`Starting warmup for ${scenario.name}...`);
             const warmupEnd = Date.now() + config.warmup;
             while (Date.now() < warmupEnd) {
-              await scenario.run(provider).catch(() => { });
+              await scenario.run(provider).catch(() => {});
             }
 
             console.log(

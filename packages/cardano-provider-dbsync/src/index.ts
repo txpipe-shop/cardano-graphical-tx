@@ -112,17 +112,17 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         txCount: BigInt(row.txCount || '0'),
         firstSeen: row.firstSeen
           ? {
-            blockHeight: BigInt(row.firstSeen.height ?? 0),
-            slot: BigInt(row.firstSeen.slot ?? 0),
-            hash: Hash(row.firstSeen.hash)
-          }
+              blockHeight: BigInt(row.firstSeen.height ?? 0),
+              slot: BigInt(row.firstSeen.slot ?? 0),
+              hash: Hash(row.firstSeen.hash)
+            }
           : undefined,
         lastSeen: row.lastSeen
           ? {
-            blockHeight: BigInt(row.lastSeen.height ?? 0),
-            slot: BigInt(row.lastSeen.slot ?? 0),
-            hash: Hash(row.lastSeen.hash)
-          }
+              blockHeight: BigInt(row.lastSeen.height ?? 0),
+              slot: BigInt(row.lastSeen.slot ?? 0),
+              hash: Hash(row.lastSeen.hash)
+            }
           : undefined
       };
     } finally {
@@ -226,10 +226,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     // Check if this is a homepage query (no filters, first page)
     // Route to materialized view for 2ms response time
     const isHomepageQuery =
-      this.useMaterializedView &&
-      !query?.address &&
-      !query?.block &&
-      (!offset || offset === 0n);
+      this.useMaterializedView && !query?.address && !query?.block && (!offset || offset === 0n);
 
     if (isHomepageQuery) {
       return await this.getTxsFromMV(limit);
@@ -242,7 +239,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         ? isBase58(query.address)
           ? query?.address
           : // TODO: set up address prefix as configurable
-          hexToBech32(HexString(query.address), 'addr')
+            hexToBech32(HexString(query.address), 'addr')
         : null;
 
       const [blockHash, blockHeight, blockSlot] = this.parseBlockFilter(query);
@@ -285,7 +282,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   /**
    * Query recent transactions from the materialized view.
    * This is ~750x faster than the regular query (2ms vs 1.5s).
-   * 
+   *
    * The MV contains the latest 50 pre-computed transactions.
    * Must be refreshed periodically (every ~20s) to stay current.
    */
@@ -313,7 +310,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
   /**
    * Refresh the recent transactions materialized view.
    * Call this every ~20 seconds (matching Cardano block time) to keep data current.
-   * 
+   *
    * Uses REFRESH CONCURRENTLY which allows reads during refresh.
    * Refresh time: ~1.7s
    */

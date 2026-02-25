@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 All commands use **pnpm** as the package manager. Run from the repo root unless specified.
 
 ### Root (Turbo-orchestrated)
+
 ```bash
 pnpm run build       # Build all packages and apps
 pnpm run dev         # Start all dev servers concurrently
@@ -21,6 +22,7 @@ pnpm run clean       # Remove node_modules, dist, build, .next, .turbo, .vite, t
 ```
 
 ### apps/web (Next.js 14)
+
 ```bash
 pnpm --filter cardano-graphical-tx dev     # Start Next.js dev server
 pnpm --filter cardano-graphical-tx build   # Build Next.js app
@@ -29,6 +31,7 @@ pnpm --filter cardano-graphical-tx check   # tsc --noEmit
 ```
 
 ### apps/api (Fastify)
+
 ```bash
 pnpm --filter api dev    # tsx --watch src/server.ts
 pnpm --filter api build  # tsc (outputs to dist/)
@@ -36,6 +39,7 @@ pnpm --filter api start  # node dist/server.js
 ```
 
 ### apps/svelte-app (SvelteKit)
+
 ```bash
 pnpm --filter @laceanatomy/web dev     # vite dev
 pnpm --filter @laceanatomy/web build   # vite build
@@ -43,6 +47,7 @@ pnpm --filter @laceanatomy/web check   # svelte-check
 ```
 
 ### packages/napi-pallas (Rust NAPI module — must be built before other packages)
+
 ```bash
 cd packages/napi-pallas
 pnpm run build        # napi build --platform --release (requires Rust/Cargo)
@@ -52,6 +57,7 @@ pnpm run lint         # oxlint
 ```
 
 ### packages/cardano-provider-dbsync
+
 ```bash
 pnpm --filter @laceanatomy/cardano-provider-dbsync test          # vitest run
 pnpm --filter @laceanatomy/cardano-provider-dbsync test:perf     # vitest run test/perf.test.ts
@@ -63,12 +69,14 @@ Note: The `cardano-provider-dbsync` build copies SQL files to `dist/sql/queries/
 ## Architecture
 
 ### Monorepo Structure
+
 - **`apps/web`** — Primary Next.js 14 frontend with App Router, tRPC, canvas-based tx visualization
 - **`apps/api`** — Fastify REST API with Swagger docs, uses DBSync and token registry
 - **`apps/svelte-app`** — Alternative SvelteKit frontend with identical visualization capabilities
 - **`packages/`** — Shared libraries (see Provider System below)
 
 ### Provider System
+
 The core architectural pattern is a pluggable provider abstraction for Cardano data:
 
 - **`packages/provider-core`** — Base provider interface/abstractions
@@ -83,9 +91,11 @@ The core architectural pattern is a pluggable provider abstraction for Cardano d
 In `apps/web`, providers are instantiated server-side in `server/api/` (`dbsync-provider.ts`, `u5c-provider.ts`) and the active network/provider is configured via environment variables.
 
 ### napi-pallas (Rust Native Module)
+
 `packages/napi-pallas` is a Rust crate using napi-rs to expose Pallas (Cardano Rust library) functionality to Node.js. It **must be built before** the web app and other packages that depend on it. The Next.js config externalizes it from webpack bundling (handled via `serverComponentsExternalPackages` and `.node` file loader).
 
 ### Next.js App Structure (`apps/web`)
+
 - `app/` — App Router pages: `/tx` (transaction visualizer), `/address`, `/explorer/[chain]`
 - `app/_components/` — Shared React components including `GraphicalSection`, `DissectSection`, `AddressSection`, `ExplorerSection`
 - `app/_contexts/` — React context providers
@@ -94,11 +104,13 @@ In `apps/web`, providers are instantiated server-side in `server/api/` (`dbsync-
 - `server/api/` — Server-side provider instantiation (not route handlers)
 
 ### Visualization
+
 Both apps use **Konva.js** for canvas-based transaction rendering (react-konva in Next.js, svelte-konva in SvelteKit). Transactions are parsed from CBOR via the napi-pallas native module and rendered as interactive node graphs.
 
 ## Environment Setup
 
 Copy `apps/web/.env.example` to `apps/web/.env` and configure:
+
 - `DATABASE_URL` / `DIRECT_URL` — PostgreSQL connection for DB Sync provider
 - `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` — GitHub OAuth (NextAuth)
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — Google OAuth (NextAuth)

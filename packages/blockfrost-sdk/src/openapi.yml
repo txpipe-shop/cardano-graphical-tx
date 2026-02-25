@@ -1975,6 +1975,87 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
+  /txs:
+    get:
+      tags:
+        - Cardano » Transactions
+      summary: Transactions
+      description: |
+        Return a paginated list of transactions across all blocks. Results are ordered by
+        block position (oldest first by default). Deep pagination is capped at
+        `page * count ≤ 3000`; requests that exceed this limit return HTTP 400.
+      parameters:
+        - in: query
+          name: count
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 100
+          description: The number of results displayed on one page.
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 21474836
+            default: 1
+          description: The page number for listing the results.
+        - in: query
+          name: order
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: asc
+          description: |
+            The ordering of items from the point of view of the blockchain,
+            not the page listing itself. By default, we return oldest first, newest last.
+      responses:
+        '200':
+          description: Return the list of transactions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    tx_hash:
+                      type: string
+                      description: Hex-encoded transaction hash.
+                      example: 6e5f825c42c1c6d6b77f2a14092f3b78c8f1b66db6f4cf8caec1555b6f967b3b
+                    tx_index:
+                      type: integer
+                      description: Position of the transaction within its block.
+                      example: 0
+                    block_height:
+                      type: integer
+                      description: Block number that contains the transaction.
+                      example: 1234567
+                    block_time:
+                      type: integer
+                      description: Block time as a Unix timestamp (seconds).
+                      example: 1690000000
+                  required:
+                    - tx_hash
+                    - tx_index
+                    - block_height
+                    - block_time
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '418':
+          $ref: '#/components/responses/418'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
   /txs/{hash}:
     get:
       tags:

@@ -27,7 +27,8 @@ import {
   setSearchParams,
   serializeDataIfNeeded,
   toPathString,
-  createRequestFunction
+  createRequestFunction,
+  replaceWithSerializableTypeIfNeeded
 } from './common';
 import type { RequestArgs } from './base';
 // @ts-ignore
@@ -35,250 +36,143 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 
 /**
  * The sum of all assets of all addresses associated with a given account
- * @export
- * @interface AccountAddressesAssetsInner
  */
 export interface AccountAddressesAssetsInner {
   /**
    * The unit of the value
-   * @type {string}
-   * @memberof AccountAddressesAssetsInner
    */
   unit: string;
   /**
    * The quantity of the unit
-   * @type {string}
-   * @memberof AccountAddressesAssetsInner
    */
   quantity: string;
 }
-/**
- *
- * @export
- * @interface AccountAddressesContentInner
- */
 export interface AccountAddressesContentInner {
   /**
    * Address associated with the stake key
-   * @type {string}
-   * @memberof AccountAddressesContentInner
    */
   address: string;
 }
-/**
- *
- * @export
- * @interface AccountAddressesTotal
- */
 export interface AccountAddressesTotal {
   /**
    * Bech32 encoded stake address
-   * @type {string}
-   * @memberof AccountAddressesTotal
    */
   stake_address: string;
-  /**
-   *
-   * @type {Array<AccountAddressesTotalReceivedSumInner>}
-   * @memberof AccountAddressesTotal
-   */
   received_sum: Array<AccountAddressesTotalReceivedSumInner>;
-  /**
-   *
-   * @type {Array<AccountAddressesTotalReceivedSumInner>}
-   * @memberof AccountAddressesTotal
-   */
   sent_sum: Array<AccountAddressesTotalReceivedSumInner>;
   /**
    * Count of all transactions for all addresses associated with the account
-   * @type {number}
-   * @memberof AccountAddressesTotal
    */
   tx_count: number;
 }
 /**
  * The sum of all the UTXO per asset for all addresses associated with the account
- * @export
- * @interface AccountAddressesTotalReceivedSumInner
  */
 export interface AccountAddressesTotalReceivedSumInner {
   /**
    * The unit of the value
-   * @type {string}
-   * @memberof AccountAddressesTotalReceivedSumInner
    */
   unit: string;
   /**
    * The quantity of the unit
-   * @type {string}
-   * @memberof AccountAddressesTotalReceivedSumInner
    */
   quantity: string;
 }
-/**
- *
- * @export
- * @interface AccountContent
- */
 export interface AccountContent {
   /**
    * Bech32 stake address
-   * @type {string}
-   * @memberof AccountContent
    */
   stake_address: string;
   /**
    * Registration state of an account
-   * @type {boolean}
-   * @memberof AccountContent
    */
   active: boolean;
   /**
    * Epoch of the most recent action - registration or deregistration
-   * @type {number}
-   * @memberof AccountContent
    */
   active_epoch: number | null;
   /**
    * Balance of the account in Lovelaces
-   * @type {string}
-   * @memberof AccountContent
    */
   controlled_amount: string;
   /**
    * Sum of all rewards for the account in the Lovelaces
-   * @type {string}
-   * @memberof AccountContent
    */
   rewards_sum: string;
   /**
    * Sum of all the withdrawals for the account in Lovelaces
-   * @type {string}
-   * @memberof AccountContent
    */
   withdrawals_sum: string;
   /**
    * Sum of all  funds from reserves for the account in the Lovelaces
-   * @type {string}
-   * @memberof AccountContent
    */
   reserves_sum: string;
   /**
    * Sum of all funds from treasury for the account in the Lovelaces
-   * @type {string}
-   * @memberof AccountContent
    */
   treasury_sum: string;
   /**
    * Sum of available rewards that haven\'t been withdrawn yet for the account in the Lovelaces
-   * @type {string}
-   * @memberof AccountContent
    */
   withdrawable_amount: string;
   /**
    * Bech32 pool ID to which this account is delegated
-   * @type {string}
-   * @memberof AccountContent
    */
   pool_id: string | null;
   /**
    * Bech32 drep ID to which this account is delegated
-   * @type {string}
-   * @memberof AccountContent
    */
   drep_id: string | null;
 }
-/**
- *
- * @export
- * @interface AccountDelegationContentInner
- */
 export interface AccountDelegationContentInner {
   /**
    * Epoch in which the delegation becomes active
-   * @type {number}
-   * @memberof AccountDelegationContentInner
    */
   active_epoch: number;
   /**
    * Hash of the transaction containing the delegation
-   * @type {string}
-   * @memberof AccountDelegationContentInner
    */
   tx_hash: string;
   /**
    * Rewards for given epoch in Lovelaces
-   * @type {string}
-   * @memberof AccountDelegationContentInner
    */
   amount: string;
   /**
    * Bech32 ID of pool being delegated to
-   * @type {string}
-   * @memberof AccountDelegationContentInner
    */
   pool_id: string;
 }
-/**
- *
- * @export
- * @interface AccountHistoryContentInner
- */
 export interface AccountHistoryContentInner {
   /**
    * Epoch in which the stake was active
-   * @type {number}
-   * @memberof AccountHistoryContentInner
    */
   active_epoch: number;
   /**
    * Stake amount in Lovelaces
-   * @type {string}
-   * @memberof AccountHistoryContentInner
    */
   amount: string;
   /**
    * Bech32 ID of pool being delegated to
-   * @type {string}
-   * @memberof AccountHistoryContentInner
    */
   pool_id: string;
 }
-/**
- *
- * @export
- * @interface AccountMirContentInner
- */
 export interface AccountMirContentInner {
   /**
    * Hash of the transaction containing the MIR
-   * @type {string}
-   * @memberof AccountMirContentInner
    */
   tx_hash: string;
   /**
    * MIR amount in Lovelaces
-   * @type {string}
-   * @memberof AccountMirContentInner
    */
   amount: string;
 }
-/**
- *
- * @export
- * @interface AccountRegistrationContentInner
- */
 export interface AccountRegistrationContentInner {
   /**
    * Hash of the transaction containing the (de)registration certificate
-   * @type {string}
-   * @memberof AccountRegistrationContentInner
    */
   tx_hash: string;
   /**
    * Action in the certificate
-   * @type {string}
-   * @memberof AccountRegistrationContentInner
    */
   action: AccountRegistrationContentInnerActionEnum;
 }
@@ -291,34 +185,21 @@ export const AccountRegistrationContentInnerActionEnum = {
 export type AccountRegistrationContentInnerActionEnum =
   (typeof AccountRegistrationContentInnerActionEnum)[keyof typeof AccountRegistrationContentInnerActionEnum];
 
-/**
- *
- * @export
- * @interface AccountRewardContentInner
- */
 export interface AccountRewardContentInner {
   /**
    * Epoch of the associated reward
-   * @type {number}
-   * @memberof AccountRewardContentInner
    */
   epoch: number;
   /**
    * Rewards for given epoch in Lovelaces
-   * @type {string}
-   * @memberof AccountRewardContentInner
    */
   amount: string;
   /**
    * Bech32 pool ID being delegated to
-   * @type {string}
-   * @memberof AccountRewardContentInner
    */
   pool_id: string;
   /**
    * Type of the reward
-   * @type {string}
-   * @memberof AccountRewardContentInner
    */
   type: AccountRewardContentInnerTypeEnum;
 }
@@ -332,121 +213,68 @@ export const AccountRewardContentInnerTypeEnum = {
 export type AccountRewardContentInnerTypeEnum =
   (typeof AccountRewardContentInnerTypeEnum)[keyof typeof AccountRewardContentInnerTypeEnum];
 
-/**
- *
- * @export
- * @interface AccountUtxoContentInner
- */
 export interface AccountUtxoContentInner {
   /**
    * Bech32 encoded addresses
-   * @type {string}
-   * @memberof AccountUtxoContentInner
    */
   address: string;
   /**
    * Transaction hash of the UTXO
-   * @type {string}
-   * @memberof AccountUtxoContentInner
    */
   tx_hash: string;
   /**
    * UTXO index in the transaction
-   * @type {number}
-   * @memberof AccountUtxoContentInner
    * @deprecated
    */
   tx_index: number;
   /**
    * UTXO index in the transaction
-   * @type {number}
-   * @memberof AccountUtxoContentInner
    */
   output_index: number;
-  /**
-   *
-   * @type {Array<TxContentOutputAmountInner>}
-   * @memberof AccountUtxoContentInner
-   */
   amount: Array<TxContentOutputAmountInner>;
   /**
    * Block hash of the UTXO
-   * @type {string}
-   * @memberof AccountUtxoContentInner
    */
   block: string;
   /**
    * The hash of the transaction output datum
-   * @type {string}
-   * @memberof AccountUtxoContentInner
    */
   data_hash: string | null;
   /**
    * CBOR encoded inline datum
-   * @type {string}
-   * @memberof AccountUtxoContentInner
    */
   inline_datum: string | null;
   /**
    * The hash of the reference script of the output
-   * @type {string}
-   * @memberof AccountUtxoContentInner
    */
   reference_script_hash: string | null;
 }
-/**
- *
- * @export
- * @interface AccountWithdrawalContentInner
- */
 export interface AccountWithdrawalContentInner {
   /**
    * Hash of the transaction containing the withdrawal
-   * @type {string}
-   * @memberof AccountWithdrawalContentInner
    */
   tx_hash: string;
   /**
    * Withdrawal amount in Lovelaces
-   * @type {string}
-   * @memberof AccountWithdrawalContentInner
    */
   amount: string;
 }
-/**
- *
- * @export
- * @interface AddressContent
- */
 export interface AddressContent {
   /**
    * Bech32 encoded addresses
-   * @type {string}
-   * @memberof AddressContent
    */
   address: string;
-  /**
-   *
-   * @type {Array<TxContentOutputAmountInner>}
-   * @memberof AddressContent
-   */
   amount: Array<TxContentOutputAmountInner>;
   /**
    * Stake address that controls the key
-   * @type {string}
-   * @memberof AddressContent
    */
   stake_address: string | null;
   /**
    * Address era
-   * @type {string}
-   * @memberof AddressContent
    */
   type: AddressContentTypeEnum;
   /**
    * True if this is a script address
-   * @type {boolean}
-   * @memberof AddressContent
    */
   script: boolean;
 }
@@ -459,40 +287,22 @@ export const AddressContentTypeEnum = {
 export type AddressContentTypeEnum =
   (typeof AddressContentTypeEnum)[keyof typeof AddressContentTypeEnum];
 
-/**
- *
- * @export
- * @interface AddressContentExtended
- */
 export interface AddressContentExtended {
   /**
    * Bech32 encoded addresses
-   * @type {string}
-   * @memberof AddressContentExtended
    */
   address: string;
-  /**
-   *
-   * @type {Array<AddressContentExtendedAmountInner>}
-   * @memberof AddressContentExtended
-   */
   amount: Array<AddressContentExtendedAmountInner>;
   /**
    * Stake address that controls the key
-   * @type {string}
-   * @memberof AddressContentExtended
    */
   stake_address: string | null;
   /**
    * Address era
-   * @type {string}
-   * @memberof AddressContentExtended
    */
   type: AddressContentExtendedTypeEnum;
   /**
    * True if this is a script address
-   * @type {boolean}
-   * @memberof AddressContentExtended
    */
   script: boolean;
 }
@@ -507,230 +317,132 @@ export type AddressContentExtendedTypeEnum =
 
 /**
  * The sum of all the UTXO per asset
- * @export
- * @interface AddressContentExtendedAmountInner
  */
 export interface AddressContentExtendedAmountInner {
   /**
    * The unit of the value
-   * @type {string}
-   * @memberof AddressContentExtendedAmountInner
    */
   unit: string;
   /**
    * The quantity of the unit
-   * @type {string}
-   * @memberof AddressContentExtendedAmountInner
    */
   quantity: string;
   /**
    * Number of decimal places of the asset unit. Primary data source is CIP68 reference NFT with a fallback to off-chain metadata.
-   * @type {number}
-   * @memberof AddressContentExtendedAmountInner
    */
   decimals: number | null;
   /**
    * True if the latest minting transaction includes metadata (best-effort)
-   * @type {boolean}
-   * @memberof AddressContentExtendedAmountInner
    */
   has_nft_onchain_metadata: boolean;
 }
-/**
- *
- * @export
- * @interface AddressContentTotal
- */
 export interface AddressContentTotal {
   /**
    * Bech32 encoded address
-   * @type {string}
-   * @memberof AddressContentTotal
    */
   address: string;
-  /**
-   *
-   * @type {Array<TxContentOutputAmountInner>}
-   * @memberof AddressContentTotal
-   */
   received_sum: Array<TxContentOutputAmountInner>;
-  /**
-   *
-   * @type {Array<TxContentOutputAmountInner>}
-   * @memberof AddressContentTotal
-   */
   sent_sum: Array<TxContentOutputAmountInner>;
   /**
    * Count of all transactions on the address
-   * @type {number}
-   * @memberof AddressContentTotal
    */
   tx_count: number;
 }
-/**
- *
- * @export
- * @interface AddressTransactionsContentInner
- */
 export interface AddressTransactionsContentInner {
   /**
    * Hash of the transaction
-   * @type {string}
-   * @memberof AddressTransactionsContentInner
    */
   tx_hash: string;
   /**
    * Transaction index within the block
-   * @type {number}
-   * @memberof AddressTransactionsContentInner
    */
   tx_index: number;
   /**
    * Block height
-   * @type {number}
-   * @memberof AddressTransactionsContentInner
    */
   block_height: number;
   /**
    * Block creation time in UNIX time
-   * @type {number}
-   * @memberof AddressTransactionsContentInner
    */
   block_time: number;
 }
-/**
- *
- * @export
- * @interface AddressUtxoContentInner
- */
 export interface AddressUtxoContentInner {
   /**
    * Bech32 encoded addresses - useful when querying by payment_cred
-   * @type {string}
-   * @memberof AddressUtxoContentInner
    */
   address: string;
   /**
    * Transaction hash of the UTXO
-   * @type {string}
-   * @memberof AddressUtxoContentInner
    */
   tx_hash: string;
   /**
    * UTXO index in the transaction
-   * @type {number}
-   * @memberof AddressUtxoContentInner
    * @deprecated
    */
   tx_index: number;
   /**
    * UTXO index in the transaction
-   * @type {number}
-   * @memberof AddressUtxoContentInner
    */
   output_index: number;
-  /**
-   *
-   * @type {Array<TxContentOutputAmountInner>}
-   * @memberof AddressUtxoContentInner
-   */
   amount: Array<TxContentOutputAmountInner>;
   /**
    * Block hash of the UTXO
-   * @type {string}
-   * @memberof AddressUtxoContentInner
    */
   block: string;
   /**
    * The hash of the transaction output datum
-   * @type {string}
-   * @memberof AddressUtxoContentInner
    */
   data_hash: string | null;
   /**
    * CBOR encoded inline datum
-   * @type {string}
-   * @memberof AddressUtxoContentInner
    */
   inline_datum: string | null;
   /**
    * The hash of the reference script of the output
-   * @type {string}
-   * @memberof AddressUtxoContentInner
    */
   reference_script_hash: string | null;
 }
-/**
- *
- * @export
- * @interface Asset
- */
 export interface Asset {
   /**
    * Hex-encoded asset full name
-   * @type {string}
-   * @memberof Asset
    */
   asset: string;
   /**
    * Policy ID of the asset
-   * @type {string}
-   * @memberof Asset
    */
   policy_id: string;
   /**
    * Hex-encoded asset name of the asset
-   * @type {string}
-   * @memberof Asset
    */
   asset_name: string | null;
   /**
    * CIP14 based user-facing fingerprint
-   * @type {string}
-   * @memberof Asset
    */
   fingerprint: string;
   /**
    * Current asset quantity
-   * @type {string}
-   * @memberof Asset
    */
   quantity: string;
   /**
    * ID of the initial minting transaction
-   * @type {string}
-   * @memberof Asset
    */
   initial_mint_tx_hash: string;
   /**
    * Count of mint and burn transactions
-   * @type {number}
-   * @memberof Asset
    */
   mint_or_burn_count: number;
   /**
    * On-chain metadata which SHOULD adhere to the valid standards, based on which we perform the look up and display the asset (best effort)
-   * @type {{ [key: string]: any; }}
-   * @memberof Asset
    */
   onchain_metadata: { [key: string]: any } | null;
   /**
    * If on-chain metadata passes validation, we display the standard under which it is valid
-   * @type {string}
-   * @memberof Asset
    */
   onchain_metadata_standard?: AssetOnchainMetadataStandardEnum | null;
   /**
    * Arbitrary plutus data (CIP68).
-   * @type {string}
-   * @memberof Asset
    */
   onchain_metadata_extra?: string | null;
-  /**
-   *
-   * @type {AssetMetadata}
-   * @memberof Asset
-   */
   metadata: AssetMetadata | null;
 }
 
@@ -745,47 +457,27 @@ export const AssetOnchainMetadataStandardEnum = {
 export type AssetOnchainMetadataStandardEnum =
   (typeof AssetOnchainMetadataStandardEnum)[keyof typeof AssetOnchainMetadataStandardEnum];
 
-/**
- *
- * @export
- * @interface AssetAddressesInner
- */
 export interface AssetAddressesInner {
   /**
    * Address containing the specific asset
-   * @type {string}
-   * @memberof AssetAddressesInner
    */
   address: string;
   /**
    * Asset quantity on the specific address
-   * @type {string}
-   * @memberof AssetAddressesInner
    */
   quantity: string;
 }
-/**
- *
- * @export
- * @interface AssetHistoryInner
- */
 export interface AssetHistoryInner {
   /**
    * Hash of the transaction containing the asset action
-   * @type {string}
-   * @memberof AssetHistoryInner
    */
   tx_hash: string;
   /**
    * Action executed upon the asset policy
-   * @type {string}
-   * @memberof AssetHistoryInner
    */
   action: AssetHistoryInnerActionEnum;
   /**
    * Asset amount of the specific action
-   * @type {string}
-   * @memberof AssetHistoryInner
    */
   amount: string;
 }
@@ -800,633 +492,381 @@ export type AssetHistoryInnerActionEnum =
 
 /**
  * Off-chain metadata fetched from GitHub based on network. Mainnet: https://github.com/cardano-foundation/cardano-token-registry/ Testnet: https://github.com/input-output-hk/metadata-registry-testnet/
- * @export
- * @interface AssetMetadata
  */
 export interface AssetMetadata {
   /**
    * Asset name
-   * @type {string}
-   * @memberof AssetMetadata
    */
   name: string;
   /**
    * Asset description
-   * @type {string}
-   * @memberof AssetMetadata
    */
   description: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AssetMetadata
-   */
   ticker: string | null;
   /**
    * Asset website
-   * @type {string}
-   * @memberof AssetMetadata
    */
   url: string | null;
   /**
    * Base64 encoded logo of the asset
-   * @type {string}
-   * @memberof AssetMetadata
    */
   logo: string | null;
   /**
    * Number of decimal places of the asset unit
-   * @type {number}
-   * @memberof AssetMetadata
    */
   decimals: number | null;
 }
 /**
  * On-chain metadata stored in the minting transaction under label 721, which adheres to https://cips.cardano.org/cips/cip25/
- * @export
- * @interface AssetOnchainMetadataCip25
  */
 export interface AssetOnchainMetadataCip25 {
   [key: string]: any;
 
   /**
    * Name of the asset
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip25
    */
   name: string;
-  /**
-   *
-   * @type {AssetOnchainMetadataCip25Image}
-   * @memberof AssetOnchainMetadataCip25
-   */
   image: AssetOnchainMetadataCip25Image;
-  /**
-   *
-   * @type {AssetOnchainMetadataCip25Description}
-   * @memberof AssetOnchainMetadataCip25
-   */
   description?: AssetOnchainMetadataCip25Description;
   /**
    * Mime sub-type of image
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip25
    */
   mediaType?: string;
-  /**
-   *
-   * @type {Array<AssetOnchainMetadataCip25FilesInner>}
-   * @memberof AssetOnchainMetadataCip25
-   */
   files?: Array<AssetOnchainMetadataCip25FilesInner>;
 }
 /**
  * @type AssetOnchainMetadataCip25Description
  * Additional description
- * @export
  */
 export type AssetOnchainMetadataCip25Description = Array<string> | string;
 
-/**
- *
- * @export
- * @interface AssetOnchainMetadataCip25FilesInner
- */
 export interface AssetOnchainMetadataCip25FilesInner {
   [key: string]: any;
 
   /**
    * Name of the file
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip25FilesInner
    */
   name?: string;
   /**
    * Mime sub-type of image
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip25FilesInner
    */
   mediaType: string;
-  /**
-   *
-   * @type {AssetOnchainMetadataCip25FilesInnerSrc}
-   * @memberof AssetOnchainMetadataCip25FilesInner
-   */
   src: AssetOnchainMetadataCip25FilesInnerSrc;
 }
 /**
  * @type AssetOnchainMetadataCip25FilesInnerSrc
  * URI pointing to a resource of this mime type
- * @export
  */
 export type AssetOnchainMetadataCip25FilesInnerSrc = Array<string> | string;
 
 /**
  * @type AssetOnchainMetadataCip25Image
  * URI(s) of the associated asset
- * @export
  */
 export type AssetOnchainMetadataCip25Image = Array<string> | string;
 
 /**
  * On-chain metadata stored in the datum of the reference NFT output which adheres to 333 FT Standard https://cips.cardano.org/cips/cip68/
- * @export
- * @interface AssetOnchainMetadataCip68Ft333
  */
 export interface AssetOnchainMetadataCip68Ft333 {
   [key: string]: any;
 
   /**
    * Name of the asset
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Ft333
    */
   name: string;
   /**
    * Additional description
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Ft333
    */
   description: string;
   /**
    * URI(s) of the associated asset
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Ft333
    */
   logo?: string;
   /**
    * Ticker
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Ft333
    */
   ticker?: string;
   /**
    * Number of decimals
-   * @type {number}
-   * @memberof AssetOnchainMetadataCip68Ft333
    */
   decimals?: number;
 }
 /**
  * On-chain metadata stored in the datum of the reference NFT output which adheres to 222 NFT Standard https://cips.cardano.org/cips/cip68/
- * @export
- * @interface AssetOnchainMetadataCip68Nft222
  */
 export interface AssetOnchainMetadataCip68Nft222 {
   [key: string]: any;
 
   /**
    * Name of the asset
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Nft222
    */
   name: string;
   /**
    * URI(s) of the associated asset
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Nft222
    */
   image: string;
   /**
    * Additional description
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Nft222
    */
   description?: string;
   /**
    * Mime sub-type of image
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Nft222
    */
   mediaType?: string;
-  /**
-   *
-   * @type {Array<AssetOnchainMetadataCip25FilesInner>}
-   * @memberof AssetOnchainMetadataCip68Nft222
-   */
   files?: Array<AssetOnchainMetadataCip25FilesInner>;
 }
 /**
  * On-chain metadata stored in the datum of the reference NFT output which adheres to 222 NFT Standard https://cips.cardano.org/cips/cip68/
- * @export
- * @interface AssetOnchainMetadataCip68Rft444
  */
 export interface AssetOnchainMetadataCip68Rft444 {
   [key: string]: any;
 
   /**
    * Name of the asset
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Rft444
    */
   name: string;
   /**
    * URI(s) of the associated asset
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Rft444
    */
   image: string;
   /**
    * Additional description
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Rft444
    */
   description?: string;
   /**
    * Mime sub-type of image
-   * @type {string}
-   * @memberof AssetOnchainMetadataCip68Rft444
    */
   mediaType?: string;
   /**
    * Number of decimals
-   * @type {number}
-   * @memberof AssetOnchainMetadataCip68Rft444
    */
   decimals?: number;
-  /**
-   *
-   * @type {Array<AssetOnchainMetadataCip25FilesInner>}
-   * @memberof AssetOnchainMetadataCip68Rft444
-   */
   files?: Array<AssetOnchainMetadataCip25FilesInner>;
 }
-/**
- *
- * @export
- * @interface AssetPolicyInner
- */
 export interface AssetPolicyInner {
   /**
    * Concatenation of the policy_id and hex-encoded asset_name
-   * @type {string}
-   * @memberof AssetPolicyInner
    */
   asset: string;
   /**
    * Current asset quantity
-   * @type {string}
-   * @memberof AssetPolicyInner
    */
   quantity: string;
 }
-/**
- *
- * @export
- * @interface AssetTransactionsInner
- */
 export interface AssetTransactionsInner {
   /**
    * Hash of the transaction
-   * @type {string}
-   * @memberof AssetTransactionsInner
    */
   tx_hash: string;
   /**
    * Transaction index within the block
-   * @type {number}
-   * @memberof AssetTransactionsInner
    */
   tx_index: number;
   /**
    * Block height
-   * @type {number}
-   * @memberof AssetTransactionsInner
    */
   block_height: number;
   /**
    * Block creation time in UNIX time
-   * @type {number}
-   * @memberof AssetTransactionsInner
    */
   block_time: number;
 }
-/**
- *
- * @export
- * @interface AssetsInner
- */
 export interface AssetsInner {
   /**
    * Asset identifier
-   * @type {string}
-   * @memberof AssetsInner
    */
   asset: string;
   /**
    * Current asset quantity
-   * @type {string}
-   * @memberof AssetsInner
    */
   quantity: string;
 }
-/**
- *
- * @export
- * @interface BlockContent
- */
 export interface BlockContent {
   /**
    * Block creation time in UNIX time
-   * @type {number}
-   * @memberof BlockContent
    */
   time: number;
   /**
    * Block number
-   * @type {number}
-   * @memberof BlockContent
    */
   height: number | null;
   /**
    * Hash of the block
-   * @type {string}
-   * @memberof BlockContent
    */
   hash: string;
   /**
    * Slot number
-   * @type {number}
-   * @memberof BlockContent
    */
   slot: number | null;
   /**
    * Epoch number
-   * @type {number}
-   * @memberof BlockContent
    */
   epoch: number | null;
   /**
    * Slot within the epoch
-   * @type {number}
-   * @memberof BlockContent
    */
   epoch_slot: number | null;
   /**
    * Bech32 ID of the slot leader or specific block description in case there is no slot leader
-   * @type {string}
-   * @memberof BlockContent
    */
   slot_leader: string;
   /**
    * Block size in Bytes
-   * @type {number}
-   * @memberof BlockContent
    */
   size: number;
   /**
    * Number of transactions in the block
-   * @type {number}
-   * @memberof BlockContent
    */
   tx_count: number;
   /**
    * Total output within the block in Lovelaces
-   * @type {string}
-   * @memberof BlockContent
    */
   output: string | null;
   /**
    * Total fees within the block in Lovelaces
-   * @type {string}
-   * @memberof BlockContent
    */
   fees: string | null;
   /**
    * VRF key of the block
-   * @type {string}
-   * @memberof BlockContent
    */
   block_vrf: string | null;
   /**
    * The hash of the operational certificate of the block producer
-   * @type {string}
-   * @memberof BlockContent
    */
   op_cert: string | null;
   /**
    * The value of the counter used to produce the operational certificate
-   * @type {string}
-   * @memberof BlockContent
    */
   op_cert_counter: string | null;
   /**
    * Hash of the previous block
-   * @type {string}
-   * @memberof BlockContent
    */
   previous_block: string | null;
   /**
    * Hash of the next block
-   * @type {string}
-   * @memberof BlockContent
    */
   next_block: string | null;
   /**
    * Number of block confirmations
-   * @type {number}
-   * @memberof BlockContent
    */
   confirmations: number;
 }
-/**
- *
- * @export
- * @interface BlockContentAddressesInner
- */
 export interface BlockContentAddressesInner {
   /**
    * Address that was affected in the specified block
-   * @type {string}
-   * @memberof BlockContentAddressesInner
    */
   address: string;
   /**
    * List of transactions containing the address either in their inputs or outputs. Sorted by transaction index within a block, ascending.
-   * @type {Array<BlockContentAddressesInnerTransactionsInner>}
-   * @memberof BlockContentAddressesInner
    */
   transactions: Array<BlockContentAddressesInnerTransactionsInner>;
 }
-/**
- *
- * @export
- * @interface BlockContentAddressesInnerTransactionsInner
- */
 export interface BlockContentAddressesInnerTransactionsInner {
-  /**
-   *
-   * @type {string}
-   * @memberof BlockContentAddressesInnerTransactionsInner
-   */
   tx_hash: string;
 }
-/**
- *
- * @export
- * @interface BlockContentTxsCborInner
- */
 export interface BlockContentTxsCborInner {
   /**
    * Hash of the transaction
-   * @type {string}
-   * @memberof BlockContentTxsCborInner
    */
   tx_hash: string;
   /**
    * CBOR representation of the transaction data
-   * @type {string}
-   * @memberof BlockContentTxsCborInner
    */
   cbor: string;
 }
-/**
- *
- * @export
- * @interface Drep
- */
+export interface BlocksLatestGet404Response {
+  status_code: number;
+  error: string;
+  message: string;
+}
 export interface Drep {
   /**
    * Bech32 encoded DRep address
-   * @type {string}
-   * @memberof Drep
    */
   drep_id: string;
   /**
    * The raw bytes of the DRep
-   * @type {string}
-   * @memberof Drep
    */
   hex: string;
   /**
    * The total amount of voting power this DRep is delegated.
-   * @type {string}
-   * @memberof Drep
    */
   amount: string;
   /**
    * Registration state of the DRep
-   * @type {boolean}
-   * @memberof Drep
    * @deprecated
    */
   active: boolean;
   /**
    * Epoch of the most recent registration
-   * @type {number}
-   * @memberof Drep
    * @deprecated
    */
   active_epoch: number | null;
   /**
    * Flag which shows if this DRep credentials are a script hash
-   * @type {boolean}
-   * @memberof Drep
    */
   has_script: boolean;
   /**
    * Registration state of the DRep. Set to `true` if the DRep has been deregistered; otherwise, `false`.
-   * @type {boolean}
-   * @memberof Drep
    */
   retired: boolean;
   /**
    * Whether the DRep has been inactive for a consecutive number of epochs (determined by a epoch parameter `drep_activity`)
-   * @type {boolean}
-   * @memberof Drep
    */
   expired: boolean;
   /**
    * Epoch of the most recent action - registration, update, deregistration or voting
-   * @type {number}
-   * @memberof Drep
    */
   last_active_epoch: number | null;
 }
-/**
- *
- * @export
- * @interface DrepDelegatorsInner
- */
 export interface DrepDelegatorsInner {
   /**
    * Bech32 encoded stake addresses
-   * @type {string}
-   * @memberof DrepDelegatorsInner
    */
   address: string;
   /**
    * Currently delegated amount
-   * @type {string}
-   * @memberof DrepDelegatorsInner
    */
   amount: string;
 }
-/**
- *
- * @export
- * @interface DrepMetadata
- */
 export interface DrepMetadata {
   /**
    * Bech32 encoded addresses
-   * @type {string}
-   * @memberof DrepMetadata
    */
   drep_id: string;
   /**
    * The raw bytes of the DRep
-   * @type {string}
-   * @memberof DrepMetadata
    */
   hex: string;
   /**
    * URL to the drep metadata
-   * @type {string}
-   * @memberof DrepMetadata
    */
   url: string;
   /**
    * Hash of the metadata file
-   * @type {string}
-   * @memberof DrepMetadata
    */
   hash: string;
   /**
    * Content of the JSON metadata (validated CIP-119)
-   * @type {any}
-   * @memberof DrepMetadata
    */
   json_metadata: any | null;
   /**
    * Content of the metadata (raw)
-   * @type {string}
-   * @memberof DrepMetadata
    */
   bytes: string;
 }
-/**
- *
- * @export
- * @interface DrepUpdatesInner
- */
 export interface DrepUpdatesInner {
   /**
    * Transaction ID
-   * @type {string}
-   * @memberof DrepUpdatesInner
    */
   tx_hash: string;
   /**
    * Index of the certificate within the update transaction.
-   * @type {number}
-   * @memberof DrepUpdatesInner
    */
   cert_index: number;
   /**
    * Action in the certificate
-   * @type {string}
-   * @memberof DrepUpdatesInner
    */
   action: DrepUpdatesInnerActionEnum;
 }
@@ -1440,28 +880,17 @@ export const DrepUpdatesInnerActionEnum = {
 export type DrepUpdatesInnerActionEnum =
   (typeof DrepUpdatesInnerActionEnum)[keyof typeof DrepUpdatesInnerActionEnum];
 
-/**
- *
- * @export
- * @interface DrepVotesInner
- */
 export interface DrepVotesInner {
   /**
    * Hash of the proposal transaction.
-   * @type {string}
-   * @memberof DrepVotesInner
    */
   tx_hash: string;
   /**
    * Index of the certificate within the proposal transaction.
-   * @type {number}
-   * @memberof DrepVotesInner
    */
   cert_index: number;
   /**
    * The Vote. Can be one of yes, no, abstain.
-   * @type {string}
-   * @memberof DrepVotesInner
    */
   vote: DrepVotesInnerVoteEnum;
 }
@@ -1475,841 +904,410 @@ export const DrepVotesInnerVoteEnum = {
 export type DrepVotesInnerVoteEnum =
   (typeof DrepVotesInnerVoteEnum)[keyof typeof DrepVotesInnerVoteEnum];
 
-/**
- *
- * @export
- * @interface DrepsInner
- */
 export interface DrepsInner {
   /**
    * The Bech32 encoded DRep address
-   * @type {string}
-   * @memberof DrepsInner
    */
   drep_id: string;
   /**
    * The raw bytes of the DRep
-   * @type {string}
-   * @memberof DrepsInner
    */
   hex: string;
 }
-/**
- *
- * @export
- * @interface EpochContent
- */
 export interface EpochContent {
   /**
    * Epoch number
-   * @type {number}
-   * @memberof EpochContent
    */
   epoch: number;
   /**
    * Unix time of the start of the epoch
-   * @type {number}
-   * @memberof EpochContent
    */
   start_time: number;
   /**
    * Unix time of the end of the epoch
-   * @type {number}
-   * @memberof EpochContent
    */
   end_time: number;
   /**
    * Unix time of the first block of the epoch
-   * @type {number}
-   * @memberof EpochContent
    */
   first_block_time: number;
   /**
    * Unix time of the last block of the epoch
-   * @type {number}
-   * @memberof EpochContent
    */
   last_block_time: number;
   /**
    * Number of blocks within the epoch
-   * @type {number}
-   * @memberof EpochContent
    */
   block_count: number;
   /**
    * Number of transactions within the epoch
-   * @type {number}
-   * @memberof EpochContent
    */
   tx_count: number;
   /**
    * Sum of all the transactions within the epoch in Lovelaces
-   * @type {string}
-   * @memberof EpochContent
    */
   output: string;
   /**
    * Sum of all the fees within the epoch in Lovelaces
-   * @type {string}
-   * @memberof EpochContent
    */
   fees: string;
   /**
    * Sum of all the active stakes within the epoch in Lovelaces
-   * @type {string}
-   * @memberof EpochContent
    */
   active_stake: string | null;
 }
-/**
- *
- * @export
- * @interface EpochParamContent
- */
 export interface EpochParamContent {
   /**
    * Epoch number
-   * @type {number}
-   * @memberof EpochParamContent
    */
   epoch: number;
   /**
    * The linear factor for the minimum fee calculation for given epoch
-   * @type {number}
-   * @memberof EpochParamContent
    */
   min_fee_a: number;
   /**
    * The constant factor for the minimum fee calculation
-   * @type {number}
-   * @memberof EpochParamContent
    */
   min_fee_b: number;
   /**
    * Maximum block body size in Bytes
-   * @type {number}
-   * @memberof EpochParamContent
    */
   max_block_size: number;
   /**
    * Maximum transaction size
-   * @type {number}
-   * @memberof EpochParamContent
    */
   max_tx_size: number;
   /**
    * Maximum block header size
-   * @type {number}
-   * @memberof EpochParamContent
    */
   max_block_header_size: number;
   /**
    * The amount of a key registration deposit in Lovelaces
-   * @type {string}
-   * @memberof EpochParamContent
    */
   key_deposit: string;
   /**
    * The amount of a pool registration deposit in Lovelaces
-   * @type {string}
-   * @memberof EpochParamContent
    */
   pool_deposit: string;
   /**
    * Epoch bound on pool retirement
-   * @type {number}
-   * @memberof EpochParamContent
    */
   e_max: number;
   /**
    * Desired number of pools
-   * @type {number}
-   * @memberof EpochParamContent
    */
   n_opt: number;
   /**
    * Pool pledge influence
-   * @type {number}
-   * @memberof EpochParamContent
    */
   a0: number;
   /**
    * Monetary expansion
-   * @type {number}
-   * @memberof EpochParamContent
    */
   rho: number;
   /**
    * Treasury expansion
-   * @type {number}
-   * @memberof EpochParamContent
    */
   tau: number;
   /**
    * Percentage of blocks produced by federated nodes
-   * @type {number}
-   * @memberof EpochParamContent
    */
   decentralisation_param: number;
   /**
    * Seed for extra entropy
-   * @type {string}
-   * @memberof EpochParamContent
    */
   extra_entropy: string | null;
   /**
    * Accepted protocol major version
-   * @type {number}
-   * @memberof EpochParamContent
    */
   protocol_major_ver: number;
   /**
    * Accepted protocol minor version
-   * @type {number}
-   * @memberof EpochParamContent
    */
   protocol_minor_ver: number;
   /**
    * Minimum UTXO value. Use `coins_per_utxo_size` for Alonzo and later eras
-   * @type {string}
-   * @memberof EpochParamContent
    * @deprecated
    */
   min_utxo: string;
   /**
    * Minimum stake cost forced on the pool
-   * @type {string}
-   * @memberof EpochParamContent
    */
   min_pool_cost: string;
   /**
    * Epoch number only used once
-   * @type {string}
-   * @memberof EpochParamContent
    */
   nonce: string;
   /**
    * Cost models parameters for Plutus Core scripts
-   * @type {{ [key: string]: any; }}
-   * @memberof EpochParamContent
    */
   cost_models: { [key: string]: any } | null;
   /**
    * Cost models parameters for Plutus Core scripts in raw list form
-   * @type {{ [key: string]: any; }}
-   * @memberof EpochParamContent
    */
   cost_models_raw?: { [key: string]: any } | null;
   /**
    * The per word cost of script memory usage
-   * @type {number}
-   * @memberof EpochParamContent
    */
   price_mem: number | null;
   /**
    * The cost of script execution step usage
-   * @type {number}
-   * @memberof EpochParamContent
    */
   price_step: number | null;
   /**
    * The maximum number of execution memory allowed to be used in a single transaction
-   * @type {string}
-   * @memberof EpochParamContent
    */
   max_tx_ex_mem: string | null;
   /**
    * The maximum number of execution steps allowed to be used in a single transaction
-   * @type {string}
-   * @memberof EpochParamContent
    */
   max_tx_ex_steps: string | null;
   /**
    * The maximum number of execution memory allowed to be used in a single block
-   * @type {string}
-   * @memberof EpochParamContent
    */
   max_block_ex_mem: string | null;
   /**
    * The maximum number of execution steps allowed to be used in a single block
-   * @type {string}
-   * @memberof EpochParamContent
    */
   max_block_ex_steps: string | null;
   /**
    * The maximum Val size
-   * @type {string}
-   * @memberof EpochParamContent
    */
   max_val_size: string | null;
   /**
    * The percentage of the transactions fee which must be provided as collateral when including non-native scripts
-   * @type {number}
-   * @memberof EpochParamContent
    */
   collateral_percent: number | null;
   /**
    * The maximum number of collateral inputs allowed in a transaction
-   * @type {number}
-   * @memberof EpochParamContent
    */
   max_collateral_inputs: number | null;
   /**
    * Cost per UTxO word for Alonzo. Cost per UTxO byte for Babbage and later.
-   * @type {string}
-   * @memberof EpochParamContent
    */
   coins_per_utxo_size: string | null;
   /**
    * Cost per UTxO word for Alonzo. Cost per UTxO byte for Babbage and later.
-   * @type {string}
-   * @memberof EpochParamContent
    * @deprecated
    */
   coins_per_utxo_word: string | null;
   /**
    * Pool Voting threshold for motion of no-confidence.
-   * @type {number}
-   * @memberof EpochParamContent
    */
   pvt_motion_no_confidence: number | null;
   /**
    * Pool Voting threshold for new committee/threshold (normal state).
-   * @type {number}
-   * @memberof EpochParamContent
    */
   pvt_committee_normal: number | null;
   /**
    * Pool Voting threshold for new committee/threshold (state of no-confidence).
-   * @type {number}
-   * @memberof EpochParamContent
    */
   pvt_committee_no_confidence: number | null;
   /**
    * Pool Voting threshold for hard-fork initiation.
-   * @type {number}
-   * @memberof EpochParamContent
    */
   pvt_hard_fork_initiation: number | null;
   /**
    * DRep Vote threshold for motion of no-confidence.
-   * @type {number}
-   * @memberof EpochParamContent
    */
   dvt_motion_no_confidence: number | null;
   /**
    * DRep Vote threshold for new committee/threshold (normal state).
-   * @type {number}
-   * @memberof EpochParamContent
    */
   dvt_committee_normal: number | null;
   /**
    * DRep Vote threshold for new committee/threshold (state of no-confidence).
-   * @type {number}
-   * @memberof EpochParamContent
    */
   dvt_committee_no_confidence: number | null;
   /**
    * DRep Vote threshold for update to the Constitution.
-   * @type {number}
-   * @memberof EpochParamContent
    */
   dvt_update_to_constitution: number | null;
   /**
    * DRep Vote threshold for hard-fork initiation.
-   * @type {number}
-   * @memberof EpochParamContent
    */
   dvt_hard_fork_initiation: number | null;
   /**
    * DRep Vote threshold for protocol parameter changes, network group.
-   * @type {number}
-   * @memberof EpochParamContent
    */
   dvt_p_p_network_group: number | null;
   /**
    * DRep Vote threshold for protocol parameter changes, economic group.
-   * @type {number}
-   * @memberof EpochParamContent
    */
   dvt_p_p_economic_group: number | null;
   /**
    * DRep Vote threshold for protocol parameter changes, technical group.
-   * @type {number}
-   * @memberof EpochParamContent
    */
   dvt_p_p_technical_group: number | null;
   /**
    * DRep Vote threshold for protocol parameter changes, governance group.
-   * @type {number}
-   * @memberof EpochParamContent
    */
   dvt_p_p_gov_group: number | null;
   /**
    * DRep Vote threshold for treasury withdrawal.
-   * @type {number}
-   * @memberof EpochParamContent
    */
   dvt_treasury_withdrawal: number | null;
   /**
    * Minimal constitutional committee size.
-   * @type {string}
-   * @memberof EpochParamContent
    */
   committee_min_size: string | null;
   /**
    * Constitutional committee term limits.
-   * @type {string}
-   * @memberof EpochParamContent
    */
   committee_max_term_length: string | null;
   /**
    * Governance action expiration.
-   * @type {string}
-   * @memberof EpochParamContent
    */
   gov_action_lifetime: string | null;
   /**
    * Governance action deposit.
-   * @type {string}
-   * @memberof EpochParamContent
    */
   gov_action_deposit: string | null;
   /**
    * DRep deposit amount.
-   * @type {string}
-   * @memberof EpochParamContent
    */
   drep_deposit: string | null;
   /**
    * DRep activity period.
-   * @type {string}
-   * @memberof EpochParamContent
    */
   drep_activity: string | null;
   /**
    * Pool Voting threshold for security-relevant protocol parameters changes. Renamed to pvt_p_p_security_group.
-   * @type {number}
-   * @memberof EpochParamContent
    * @deprecated
    */
   pvtpp_security_group: number | null;
   /**
    * Pool Voting threshold for security-relevant protocol parameters changes.
-   * @type {number}
-   * @memberof EpochParamContent
    */
   pvt_p_p_security_group: number | null;
-  /**
-   *
-   * @type {number}
-   * @memberof EpochParamContent
-   */
   min_fee_ref_script_cost_per_byte: number | null;
 }
-/**
- *
- * @export
- * @interface EpochStakeContentInner
- */
 export interface EpochStakeContentInner {
   /**
    * Stake address
-   * @type {string}
-   * @memberof EpochStakeContentInner
    */
   stake_address: string;
   /**
    * Bech32 prefix of the pool delegated to
-   * @type {string}
-   * @memberof EpochStakeContentInner
    */
   pool_id: string;
   /**
    * Amount of active delegated stake in Lovelaces
-   * @type {string}
-   * @memberof EpochStakeContentInner
    */
   amount: string;
 }
-/**
- *
- * @export
- * @interface EpochStakePoolContentInner
- */
 export interface EpochStakePoolContentInner {
   /**
    * Stake address
-   * @type {string}
-   * @memberof EpochStakePoolContentInner
    */
   stake_address: string;
   /**
    * Amount of active delegated stake in Lovelaces
-   * @type {string}
-   * @memberof EpochStakePoolContentInner
    */
   amount: string;
 }
-/**
- *
- * @export
- * @interface GenesisContent
- */
 export interface GenesisContent {
   /**
    * The proportion of slots in which blocks should be issued
-   * @type {number}
-   * @memberof GenesisContent
    */
   active_slots_coefficient: number;
   /**
    * Determines the quorum needed for votes on the protocol parameter updates
-   * @type {number}
-   * @memberof GenesisContent
    */
   update_quorum: number;
   /**
    * The total number of lovelace in the system
-   * @type {string}
-   * @memberof GenesisContent
    */
   max_lovelace_supply: string;
   /**
    * Network identifier
-   * @type {number}
-   * @memberof GenesisContent
    */
   network_magic: number;
   /**
    * Number of slots in an epoch
-   * @type {number}
-   * @memberof GenesisContent
    */
   epoch_length: number;
   /**
    * Time of slot 0 in UNIX time
-   * @type {number}
-   * @memberof GenesisContent
    */
   system_start: number;
   /**
    * Number of slots in an KES period
-   * @type {number}
-   * @memberof GenesisContent
    */
   slots_per_kes_period: number;
   /**
    * Duration of one slot in seconds
-   * @type {number}
-   * @memberof GenesisContent
    */
   slot_length: number;
   /**
    * The maximum number of time a KES key can be evolved before a pool operator must create a new operational certificate
-   * @type {number}
-   * @memberof GenesisContent
    */
   max_kes_evolutions: number;
   /**
    * Security parameter k
-   * @type {number}
-   * @memberof GenesisContent
    */
   security_param: number;
 }
-/**
- *
- * @export
- * @interface Get200Response
- */
 export interface Get200Response {
-  /**
-   *
-   * @type {string}
-   * @memberof Get200Response
-   */
   url: string;
-  /**
-   *
-   * @type {string}
-   * @memberof Get200Response
-   */
   version: string;
 }
-/**
- *
- * @export
- * @interface HealthClockGet200Response
- */
+export interface Get400Response {
+  status_code: number;
+  error: string;
+  message: string;
+}
+export interface Get403Response {
+  status_code: number;
+  error: string;
+  message: string;
+}
+export interface Get418Response {
+  status_code: number;
+  error: string;
+  message: string;
+}
+export interface Get429Response {
+  status_code: number;
+  error: string;
+  message: string;
+}
+export interface Get500Response {
+  status_code: number;
+  error: string;
+  message: string;
+}
 export interface HealthClockGet200Response {
-  /**
-   *
-   * @type {number}
-   * @memberof HealthClockGet200Response
-   */
   server_time: number;
 }
-/**
- *
- * @export
- * @interface HealthGet200Response
- */
 export interface HealthGet200Response {
-  /**
-   *
-   * @type {boolean}
-   * @memberof HealthGet200Response
-   */
   is_healthy: boolean;
 }
-/**
- *
- * @export
- * @interface InlineObject
- */
-export interface InlineObject {
-  /**
-   *
-   * @type {number}
-   * @memberof InlineObject
-   */
-  status_code: number;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject
-   */
-  error: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject
-   */
-  message: string;
-}
-/**
- *
- * @export
- * @interface InlineObject1
- */
-export interface InlineObject1 {
-  /**
-   *
-   * @type {number}
-   * @memberof InlineObject1
-   */
-  status_code: number;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject1
-   */
-  error: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject1
-   */
-  message: string;
-}
-/**
- *
- * @export
- * @interface InlineObject2
- */
-export interface InlineObject2 {
-  /**
-   *
-   * @type {number}
-   * @memberof InlineObject2
-   */
-  status_code: number;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject2
-   */
-  error: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject2
-   */
-  message: string;
-}
-/**
- *
- * @export
- * @interface InlineObject3
- */
-export interface InlineObject3 {
-  /**
-   *
-   * @type {number}
-   * @memberof InlineObject3
-   */
-  status_code: number;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject3
-   */
-  error: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject3
-   */
-  message: string;
-}
-/**
- *
- * @export
- * @interface InlineObject4
- */
-export interface InlineObject4 {
-  /**
-   *
-   * @type {number}
-   * @memberof InlineObject4
-   */
-  status_code: number;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject4
-   */
-  error: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject4
-   */
-  message: string;
-}
-/**
- *
- * @export
- * @interface InlineObject5
- */
-export interface InlineObject5 {
-  /**
-   *
-   * @type {number}
-   * @memberof InlineObject5
-   */
-  status_code: number;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject5
-   */
-  error: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject5
-   */
-  message: string;
-}
-/**
- *
- * @export
- * @interface InlineObject6
- */
-export interface InlineObject6 {
-  /**
-   *
-   * @type {number}
-   * @memberof InlineObject6
-   */
-  status_code: number;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject6
-   */
-  error: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject6
-   */
-  message: string;
-}
-/**
- *
- * @export
- * @interface InlineObject7
- */
-export interface InlineObject7 {
-  /**
-   *
-   * @type {number}
-   * @memberof InlineObject7
-   */
-  status_code: number;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject7
-   */
-  error: string;
-  /**
-   *
-   * @type {string}
-   * @memberof InlineObject7
-   */
-  message: string;
-}
-/**
- *
- * @export
- * @interface IpfsAdd200Response
- */
 export interface IpfsAdd200Response {
   /**
    * Name of the file
-   * @type {string}
-   * @memberof IpfsAdd200Response
    */
   name: string;
   /**
    * IPFS hash of the file
-   * @type {string}
-   * @memberof IpfsAdd200Response
    */
   ipfs_hash: string;
   /**
    * IPFS node size in Bytes
-   * @type {string}
-   * @memberof IpfsAdd200Response
    */
   size: string;
 }
-/**
- *
- * @export
- * @interface IpfsPinAddIPFSPathPost200Response
- */
 export interface IpfsPinAddIPFSPathPost200Response {
   /**
    * IPFS hash of the pinned object
-   * @type {string}
-   * @memberof IpfsPinAddIPFSPathPost200Response
    */
   ipfs_hash: string;
   /**
    * State of the pin action
-   * @type {string}
-   * @memberof IpfsPinAddIPFSPathPost200Response
    */
   state: IpfsPinAddIPFSPathPost200ResponseStateEnum;
   /**
    * Whether filecoin was used to pin the resource.
-   * @type {boolean}
-   * @memberof IpfsPinAddIPFSPathPost200Response
    */
   filecoin: boolean;
 }
@@ -2325,46 +1323,34 @@ export const IpfsPinAddIPFSPathPost200ResponseStateEnum = {
 export type IpfsPinAddIPFSPathPost200ResponseStateEnum =
   (typeof IpfsPinAddIPFSPathPost200ResponseStateEnum)[keyof typeof IpfsPinAddIPFSPathPost200ResponseStateEnum];
 
-/**
- *
- * @export
- * @interface IpfsPinListGet200ResponseInner
- */
+export interface IpfsPinAddIPFSPathPost425Response {
+  status_code: number;
+  error: string;
+  message: string;
+}
 export interface IpfsPinListGet200ResponseInner {
   /**
    * Creation time of the IPFS object on our backends
-   * @type {number}
-   * @memberof IpfsPinListGet200ResponseInner
    */
   time_created: number;
   /**
    * Pin time of the IPFS object on our backends
-   * @type {number}
-   * @memberof IpfsPinListGet200ResponseInner
    */
   time_pinned: number;
   /**
    * IPFS hash of the pinned object
-   * @type {string}
-   * @memberof IpfsPinListGet200ResponseInner
    */
   ipfs_hash: string;
   /**
    * Size of the object in Bytes
-   * @type {string}
-   * @memberof IpfsPinListGet200ResponseInner
    */
   size: string;
   /**
    * State of the pinned object, which is `queued` when we are retriving object. If this is successful the state is changed to `pinned` or `failed` if not. The state `gc` means the pinned item has been garbage collected due to account being over storage quota or after it has been moved to `unpinned` state by removing the object pin.
-   * @type {string}
-   * @memberof IpfsPinListGet200ResponseInner
    */
   state: IpfsPinListGet200ResponseInnerStateEnum;
   /**
    * Whether filecoin was used to pin the resource.
-   * @type {boolean}
-   * @memberof IpfsPinListGet200ResponseInner
    */
   filecoin: boolean;
 }
@@ -2380,46 +1366,29 @@ export const IpfsPinListGet200ResponseInnerStateEnum = {
 export type IpfsPinListGet200ResponseInnerStateEnum =
   (typeof IpfsPinListGet200ResponseInnerStateEnum)[keyof typeof IpfsPinListGet200ResponseInnerStateEnum];
 
-/**
- *
- * @export
- * @interface IpfsPinListIPFSPathGet200Response
- */
 export interface IpfsPinListIPFSPathGet200Response {
   /**
    * Time of the creation of the IPFS object on our backends
-   * @type {number}
-   * @memberof IpfsPinListIPFSPathGet200Response
    */
   time_created: number;
   /**
    * Time of the pin of the IPFS object on our backends
-   * @type {number}
-   * @memberof IpfsPinListIPFSPathGet200Response
    */
   time_pinned: number;
   /**
    * IPFS hash of the pinned object
-   * @type {string}
-   * @memberof IpfsPinListIPFSPathGet200Response
    */
   ipfs_hash: string;
   /**
    * Size of the object in Bytes
-   * @type {string}
-   * @memberof IpfsPinListIPFSPathGet200Response
    */
   size: string;
   /**
    * State of the pinned object. We define 5 states: `queued`, `pinned`, `unpinned`, `failed`, `gc`. When the object is pending retrieval (i.e. after `/ipfs/pin/add/{IPFS_path}`), the state is `queued`. If the object is already successfully retrieved, state is changed to `pinned` or `failed` otherwise. When object is unpinned (i.e. after `/ipfs/pin/remove/{IPFS_path}`) it is marked for garbage collection. State `gc` means that a previously `unpinned` item has been garbage collected due to account being over storage quota.
-   * @type {string}
-   * @memberof IpfsPinListIPFSPathGet200Response
    */
   state: IpfsPinListIPFSPathGet200ResponseStateEnum;
   /**
    * Whether filecoin was used to pin the resource.
-   * @type {boolean}
-   * @memberof IpfsPinListIPFSPathGet200Response
    */
   filecoin: boolean;
 }
@@ -2435,22 +1404,13 @@ export const IpfsPinListIPFSPathGet200ResponseStateEnum = {
 export type IpfsPinListIPFSPathGet200ResponseStateEnum =
   (typeof IpfsPinListIPFSPathGet200ResponseStateEnum)[keyof typeof IpfsPinListIPFSPathGet200ResponseStateEnum];
 
-/**
- *
- * @export
- * @interface IpfsPinRemoveIPFSPathPost200Response
- */
 export interface IpfsPinRemoveIPFSPathPost200Response {
   /**
    * IPFS hash of the pinned object
-   * @type {string}
-   * @memberof IpfsPinRemoveIPFSPathPost200Response
    */
   ipfs_hash: string;
   /**
    * State of the pin action
-   * @type {string}
-   * @memberof IpfsPinRemoveIPFSPathPost200Response
    */
   state: IpfsPinRemoveIPFSPathPost200ResponseStateEnum;
 }
@@ -2466,164 +1426,82 @@ export const IpfsPinRemoveIPFSPathPost200ResponseStateEnum = {
 export type IpfsPinRemoveIPFSPathPost200ResponseStateEnum =
   (typeof IpfsPinRemoveIPFSPathPost200ResponseStateEnum)[keyof typeof IpfsPinRemoveIPFSPathPost200ResponseStateEnum];
 
-/**
- *
- * @export
- * @interface MempoolContentInner
- */
 export interface MempoolContentInner {
   /**
    * Hash of the transaction
-   * @type {string}
-   * @memberof MempoolContentInner
    */
   tx_hash: string;
 }
-/**
- *
- * @export
- * @interface MempoolTxContent
- */
 export interface MempoolTxContent {
-  /**
-   *
-   * @type {MempoolTxContentTx}
-   * @memberof MempoolTxContent
-   */
   tx: MempoolTxContentTx;
-  /**
-   *
-   * @type {Array<MempoolTxContentInputsInner>}
-   * @memberof MempoolTxContent
-   */
   inputs: Array<MempoolTxContentInputsInner>;
-  /**
-   *
-   * @type {Array<MempoolTxContentOutputsInner>}
-   * @memberof MempoolTxContent
-   */
   outputs: Array<MempoolTxContentOutputsInner>;
-  /**
-   *
-   * @type {Array<MempoolTxContentRedeemersInner>}
-   * @memberof MempoolTxContent
-   */
   redeemers?: Array<MempoolTxContentRedeemersInner>;
 }
-/**
- *
- * @export
- * @interface MempoolTxContentInputsInner
- */
 export interface MempoolTxContentInputsInner {
   /**
    * Input address
-   * @type {string}
-   * @memberof MempoolTxContentInputsInner
    */
   address?: string;
   /**
    * Hash of the UTXO transaction
-   * @type {string}
-   * @memberof MempoolTxContentInputsInner
    */
   tx_hash: string;
   /**
    * UTXO index in the transaction
-   * @type {number}
-   * @memberof MempoolTxContentInputsInner
    */
   output_index: number;
   /**
    * Whether the input is a collateral consumed on script validation failure
-   * @type {boolean}
-   * @memberof MempoolTxContentInputsInner
    */
   collateral: boolean;
   /**
    * Whether the input is a reference transaction input
-   * @type {boolean}
-   * @memberof MempoolTxContentInputsInner
    */
   reference?: boolean;
 }
-/**
- *
- * @export
- * @interface MempoolTxContentOutputsInner
- */
 export interface MempoolTxContentOutputsInner {
   /**
    * Output address
-   * @type {string}
-   * @memberof MempoolTxContentOutputsInner
    */
   address: string;
-  /**
-   *
-   * @type {Array<TxContentOutputAmountInner>}
-   * @memberof MempoolTxContentOutputsInner
-   */
   amount: Array<TxContentOutputAmountInner>;
   /**
    * UTXO index in the transaction
-   * @type {number}
-   * @memberof MempoolTxContentOutputsInner
    */
   output_index: number;
   /**
    * The hash of the transaction output datum
-   * @type {string}
-   * @memberof MempoolTxContentOutputsInner
    */
   data_hash: string | null;
   /**
    * CBOR encoded inline datum
-   * @type {string}
-   * @memberof MempoolTxContentOutputsInner
    */
   inline_datum: string | null;
   /**
    * Whether the output is a collateral output
-   * @type {boolean}
-   * @memberof MempoolTxContentOutputsInner
    */
   collateral: boolean;
   /**
    * The hash of the reference script of the output
-   * @type {string}
-   * @memberof MempoolTxContentOutputsInner
    */
   reference_script_hash: string | null;
 }
-/**
- *
- * @export
- * @interface MempoolTxContentRedeemersInner
- */
 export interface MempoolTxContentRedeemersInner {
   /**
    * Index of the redeemer within the transaction
-   * @type {number}
-   * @memberof MempoolTxContentRedeemersInner
    */
   tx_index: number;
   /**
    * Validation purpose
-   * @type {string}
-   * @memberof MempoolTxContentRedeemersInner
    */
   purpose: MempoolTxContentRedeemersInnerPurposeEnum;
   /**
    * The budget in Memory to run a script
-   * @type {string}
-   * @memberof MempoolTxContentRedeemersInner
    */
   unit_mem: string;
   /**
    * The budget in CPU steps to run a script
-   * @type {string}
-   * @memberof MempoolTxContentRedeemersInner
    */
   unit_steps: string;
 }
@@ -2638,871 +1516,481 @@ export const MempoolTxContentRedeemersInnerPurposeEnum = {
 export type MempoolTxContentRedeemersInnerPurposeEnum =
   (typeof MempoolTxContentRedeemersInnerPurposeEnum)[keyof typeof MempoolTxContentRedeemersInnerPurposeEnum];
 
-/**
- *
- * @export
- * @interface MempoolTxContentTx
- */
 export interface MempoolTxContentTx {
   /**
    * Transaction hash
-   * @type {string}
-   * @memberof MempoolTxContentTx
    */
   hash: string;
-  /**
-   *
-   * @type {Array<TxContentOutputAmountInner>}
-   * @memberof MempoolTxContentTx
-   */
   output_amount: Array<TxContentOutputAmountInner>;
   /**
    * Fees of the transaction in Lovelaces
-   * @type {string}
-   * @memberof MempoolTxContentTx
    */
   fees: string;
   /**
    * Deposit within the transaction in Lovelaces
-   * @type {string}
-   * @memberof MempoolTxContentTx
    */
   deposit: string;
   /**
    * Size of the transaction in Bytes
-   * @type {number}
-   * @memberof MempoolTxContentTx
    */
   size: number;
   /**
    * Left (included) endpoint of the timelock validity intervals
-   * @type {string}
-   * @memberof MempoolTxContentTx
    */
   invalid_before: string | null;
   /**
    * Right (excluded) endpoint of the timelock validity intervals
-   * @type {string}
-   * @memberof MempoolTxContentTx
    */
   invalid_hereafter: string | null;
   /**
    * Count of UTXOs within the transaction
-   * @type {number}
-   * @memberof MempoolTxContentTx
    */
   utxo_count: number;
   /**
    * Count of the withdrawals within the transaction
-   * @type {number}
-   * @memberof MempoolTxContentTx
    */
   withdrawal_count: number;
   /**
    * Count of the MIR certificates within the transaction
-   * @type {number}
-   * @memberof MempoolTxContentTx
    */
   mir_cert_count: number;
   /**
    * Count of the delegations within the transaction
-   * @type {number}
-   * @memberof MempoolTxContentTx
    */
   delegation_count: number;
   /**
    * Count of the stake keys (de)registration within the transaction
-   * @type {number}
-   * @memberof MempoolTxContentTx
    */
   stake_cert_count: number;
   /**
    * Count of the stake pool registration and update certificates within the transaction
-   * @type {number}
-   * @memberof MempoolTxContentTx
    */
   pool_update_count: number;
   /**
    * Count of the stake pool retirement certificates within the transaction
-   * @type {number}
-   * @memberof MempoolTxContentTx
    */
   pool_retire_count: number;
   /**
    * Count of asset mints and burns within the transaction
-   * @type {number}
-   * @memberof MempoolTxContentTx
    */
   asset_mint_or_burn_count: number;
   /**
    * Count of redeemers within the transaction
-   * @type {number}
-   * @memberof MempoolTxContentTx
    */
   redeemer_count: number;
   /**
    * True if contract script passed validation
-   * @type {boolean}
-   * @memberof MempoolTxContentTx
    */
   valid_contract: boolean;
 }
-/**
- *
- * @export
- * @interface MetricsEndpointsInner
- */
 export interface MetricsEndpointsInner {
   /**
    * Starting time of the call count interval (ends midnight UTC) in UNIX time
-   * @type {number}
-   * @memberof MetricsEndpointsInner
    */
   time: number;
   /**
    * Sum of all calls for a particular day and endpoint
-   * @type {number}
-   * @memberof MetricsEndpointsInner
    */
   calls: number;
   /**
    * Endpoint parent name
-   * @type {string}
-   * @memberof MetricsEndpointsInner
    */
   endpoint: string;
 }
-/**
- *
- * @export
- * @interface MetricsInner
- */
 export interface MetricsInner {
   /**
    * Starting time of the call count interval (ends midnight UTC) in UNIX time
-   * @type {number}
-   * @memberof MetricsInner
    */
   time: number;
   /**
    * Sum of all calls for a particular day
-   * @type {number}
-   * @memberof MetricsInner
    */
   calls: number;
 }
-/**
- *
- * @export
- * @interface Network
- */
 export interface Network {
-  /**
-   *
-   * @type {NetworkSupply}
-   * @memberof Network
-   */
   supply: NetworkSupply;
-  /**
-   *
-   * @type {NetworkStake}
-   * @memberof Network
-   */
   stake: NetworkStake;
 }
-/**
- *
- * @export
- * @interface NetworkErasInner
- */
 export interface NetworkErasInner {
-  /**
-   *
-   * @type {NetworkErasInnerStart}
-   * @memberof NetworkErasInner
-   */
   start: NetworkErasInnerStart;
-  /**
-   *
-   * @type {NetworkErasInnerEnd}
-   * @memberof NetworkErasInner
-   */
   end: NetworkErasInnerEnd;
-  /**
-   *
-   * @type {NetworkErasInnerParameters}
-   * @memberof NetworkErasInner
-   */
   parameters: NetworkErasInnerParameters;
 }
 /**
  * End of the blockchain era, relative to the start of the network
- * @export
- * @interface NetworkErasInnerEnd
  */
 export interface NetworkErasInnerEnd {
   /**
    * Time in seconds relative to the start time of the network
-   * @type {number}
-   * @memberof NetworkErasInnerEnd
    */
   time: number;
   /**
    * Absolute slot number
-   * @type {number}
-   * @memberof NetworkErasInnerEnd
    */
   slot: number;
   /**
    * Epoch number
-   * @type {number}
-   * @memberof NetworkErasInnerEnd
    */
   epoch: number;
 }
 /**
  * Era parameters
- * @export
- * @interface NetworkErasInnerParameters
  */
 export interface NetworkErasInnerParameters {
   /**
    * Epoch length in number of slots
-   * @type {number}
-   * @memberof NetworkErasInnerParameters
    */
   epoch_length: number;
   /**
    * Slot length in seconds
-   * @type {number}
-   * @memberof NetworkErasInnerParameters
    */
   slot_length: number;
   /**
    * Zone in which it is guaranteed that no hard fork can take place
-   * @type {number}
-   * @memberof NetworkErasInnerParameters
    */
   safe_zone: number;
 }
 /**
  * Start of the blockchain era, relative to the start of the network
- * @export
- * @interface NetworkErasInnerStart
  */
 export interface NetworkErasInnerStart {
   /**
    * Time in seconds relative to the start time of the network
-   * @type {number}
-   * @memberof NetworkErasInnerStart
    */
   time: number;
   /**
    * Absolute slot number
-   * @type {number}
-   * @memberof NetworkErasInnerStart
    */
   slot: number;
   /**
    * Epoch number
-   * @type {number}
-   * @memberof NetworkErasInnerStart
    */
   epoch: number;
 }
-/**
- *
- * @export
- * @interface NetworkStake
- */
 export interface NetworkStake {
   /**
    * Current live stake in Lovelaces
-   * @type {string}
-   * @memberof NetworkStake
    */
   live: string;
   /**
    * Current active stake in Lovelaces
-   * @type {string}
-   * @memberof NetworkStake
    */
   active: string;
 }
-/**
- *
- * @export
- * @interface NetworkSupply
- */
 export interface NetworkSupply {
   /**
    * Maximum supply in Lovelaces
-   * @type {string}
-   * @memberof NetworkSupply
    */
   max: string;
   /**
    * Current total (max supply - reserves) supply in Lovelaces
-   * @type {string}
-   * @memberof NetworkSupply
    */
   total: string;
   /**
    * Current circulating (UTXOs + withdrawables) supply in Lovelaces
-   * @type {string}
-   * @memberof NetworkSupply
    */
   circulating: string;
   /**
    * Current supply locked by scripts in Lovelaces
-   * @type {string}
-   * @memberof NetworkSupply
    */
   locked: string;
   /**
    * Current supply locked in treasury
-   * @type {string}
-   * @memberof NetworkSupply
    */
   treasury: string;
   /**
    * Current supply locked in reserves
-   * @type {string}
-   * @memberof NetworkSupply
    */
   reserves: string;
 }
-/**
- *
- * @export
- * @interface NutlinkAddress
- */
 export interface NutlinkAddress {
   /**
    * Bech32 encoded address
-   * @type {string}
-   * @memberof NutlinkAddress
    */
   address: string;
   /**
    * URL of the specific metadata file
-   * @type {string}
-   * @memberof NutlinkAddress
    */
   metadata_url: string;
   /**
    * Hash of the metadata file
-   * @type {string}
-   * @memberof NutlinkAddress
    */
   metadata_hash: string;
   /**
    * The cached metadata of the `metadata_url` file.
-   * @type {{ [key: string]: any; }}
-   * @memberof NutlinkAddress
    */
   metadata: { [key: string]: any } | null;
 }
-/**
- *
- * @export
- * @interface NutlinkAddressTickerInner
- */
 export interface NutlinkAddressTickerInner {
   /**
    * Hash of the transaction
-   * @type {string}
-   * @memberof NutlinkAddressTickerInner
    */
   tx_hash: string;
   /**
    * Block height of the record
-   * @type {number}
-   * @memberof NutlinkAddressTickerInner
    */
   block_height: number;
   /**
    * Transaction index within the block
-   * @type {number}
-   * @memberof NutlinkAddressTickerInner
    */
   tx_index: number;
   /**
    * Content of the ticker
-   * @type {any}
-   * @memberof NutlinkAddressTickerInner
    */
   payload: any;
 }
-/**
- *
- * @export
- * @interface NutlinkAddressTickersInner
- */
 export interface NutlinkAddressTickersInner {
   /**
    * Name of the ticker
-   * @type {string}
-   * @memberof NutlinkAddressTickersInner
    */
   name: string;
   /**
    * Number of ticker records
-   * @type {number}
-   * @memberof NutlinkAddressTickersInner
    */
   count: number;
   /**
    * Block height of the latest record
-   * @type {number}
-   * @memberof NutlinkAddressTickersInner
    */
   latest_block: number;
 }
-/**
- *
- * @export
- * @interface NutlinkTickersTickerInner
- */
 export interface NutlinkTickersTickerInner {
   /**
    * Address of a metadata oracle
-   * @type {string}
-   * @memberof NutlinkTickersTickerInner
    */
   address: string;
   /**
    * Hash of the transaction
-   * @type {string}
-   * @memberof NutlinkTickersTickerInner
    */
   tx_hash: string;
   /**
    * Block height of the record
-   * @type {number}
-   * @memberof NutlinkTickersTickerInner
    */
   block_height: number;
   /**
    * Transaction index within the block
-   * @type {number}
-   * @memberof NutlinkTickersTickerInner
    */
   tx_index: number;
   /**
    * Content of the ticker
-   * @type {any}
-   * @memberof NutlinkTickersTickerInner
    */
   payload: any;
 }
-/**
- *
- * @export
- * @interface Pool
- */
 export interface Pool {
   /**
    * Bech32 pool ID
-   * @type {string}
-   * @memberof Pool
    */
   pool_id: string;
   /**
    * Hexadecimal pool ID.
-   * @type {string}
-   * @memberof Pool
    */
   hex: string;
   /**
    * VRF key hash
-   * @type {string}
-   * @memberof Pool
    */
   vrf_key: string;
   /**
    * Total minted blocks
-   * @type {number}
-   * @memberof Pool
    */
   blocks_minted: number;
   /**
    * Number of blocks minted in the current epoch
-   * @type {number}
-   * @memberof Pool
    */
   blocks_epoch: number;
-  /**
-   *
-   * @type {string}
-   * @memberof Pool
-   */
   live_stake: string;
-  /**
-   *
-   * @type {number}
-   * @memberof Pool
-   */
   live_size: number;
-  /**
-   *
-   * @type {number}
-   * @memberof Pool
-   */
   live_saturation: number;
-  /**
-   *
-   * @type {number}
-   * @memberof Pool
-   */
   live_delegators: number;
-  /**
-   *
-   * @type {string}
-   * @memberof Pool
-   */
   active_stake: string;
-  /**
-   *
-   * @type {number}
-   * @memberof Pool
-   */
   active_size: number;
   /**
    * Stake pool certificate pledge
-   * @type {string}
-   * @memberof Pool
    */
   declared_pledge: string;
   /**
    * Stake pool current pledge
-   * @type {string}
-   * @memberof Pool
    */
   live_pledge: string;
   /**
    * Margin tax cost of the stake pool
-   * @type {number}
-   * @memberof Pool
    */
   margin_cost: number;
   /**
    * Fixed tax cost of the stake pool
-   * @type {string}
-   * @memberof Pool
    */
   fixed_cost: string;
   /**
    * Bech32 reward account of the stake pool
-   * @type {string}
-   * @memberof Pool
    */
   reward_account: string;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof Pool
-   */
   owners: Array<string>;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof Pool
-   */
   registration: Array<string>;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof Pool
-   */
   retirement: Array<string>;
-  /**
-   *
-   * @type {PoolCalidusKey}
-   * @memberof Pool
-   */
   calidus_key: PoolCalidusKey | null;
 }
 /**
  * Last valid Calidus key for the pool
- * @export
- * @interface PoolCalidusKey
  */
 export interface PoolCalidusKey {
   /**
    * A Bech32-encoded identifier derived from the calidus public key
-   * @type {string}
-   * @memberof PoolCalidusKey
    */
   id: string;
   /**
    * The raw hexadecimal-encoded calidus public key used for verification purposes
-   * @type {string}
-   * @memberof PoolCalidusKey
    */
   pub_key: string;
   /**
    * A unique number used once to prevent replay attacks and ensure the uniqueness of the key registration
-   * @type {number}
-   * @memberof PoolCalidusKey
    */
   nonce: number;
   /**
    * The transaction hash that submitted the Calidus key registration
-   * @type {string}
-   * @memberof PoolCalidusKey
    */
   tx_hash: string;
   /**
    * The block height at which this key registration was recorded
-   * @type {number}
-   * @memberof PoolCalidusKey
    */
   block_height: number;
   /**
    * Block time of the key registration
-   * @type {number}
-   * @memberof PoolCalidusKey
    */
   block_time: number;
   /**
    * Epoch number of the key registration
-   * @type {number}
-   * @memberof PoolCalidusKey
    */
   epoch: number;
 }
-/**
- *
- * @export
- * @interface PoolDelegatorsInner
- */
 export interface PoolDelegatorsInner {
   /**
    * Bech32 encoded stake addresses
-   * @type {string}
-   * @memberof PoolDelegatorsInner
    */
   address: string;
   /**
    * Currently delegated amount
-   * @type {string}
-   * @memberof PoolDelegatorsInner
    */
   live_stake: string;
 }
-/**
- *
- * @export
- * @interface PoolHistoryInner
- */
 export interface PoolHistoryInner {
   /**
    * Epoch number
-   * @type {number}
-   * @memberof PoolHistoryInner
    */
   epoch: number;
   /**
    * Number of blocks created by pool
-   * @type {number}
-   * @memberof PoolHistoryInner
    */
   blocks: number;
   /**
    * Active (Snapshot of live stake 2 epochs ago) stake in Lovelaces
-   * @type {string}
-   * @memberof PoolHistoryInner
    */
   active_stake: string;
   /**
    * Pool size (percentage) of overall active stake at that epoch
-   * @type {number}
-   * @memberof PoolHistoryInner
    */
   active_size: number;
   /**
    * Number of delegators for epoch
-   * @type {number}
-   * @memberof PoolHistoryInner
    */
   delegators_count: number;
   /**
    * Total rewards received before distribution to delegators
-   * @type {string}
-   * @memberof PoolHistoryInner
    */
   rewards: string;
   /**
    * Pool operator rewards
-   * @type {string}
-   * @memberof PoolHistoryInner
    */
   fees: string;
 }
-/**
- *
- * @export
- * @interface PoolListExtendedInner
- */
 export interface PoolListExtendedInner {
   /**
    * Bech32 encoded pool ID
-   * @type {string}
-   * @memberof PoolListExtendedInner
    */
   pool_id: string;
   /**
    * Hexadecimal pool ID.
-   * @type {string}
-   * @memberof PoolListExtendedInner
    */
   hex: string;
   /**
    * Active delegated amount
-   * @type {string}
-   * @memberof PoolListExtendedInner
    */
   active_stake: string;
   /**
    * Currently delegated amount
-   * @type {string}
-   * @memberof PoolListExtendedInner
    */
   live_stake: string;
-  /**
-   *
-   * @type {number}
-   * @memberof PoolListExtendedInner
-   */
   live_saturation: number;
   /**
    * Total minted blocks
-   * @type {number}
-   * @memberof PoolListExtendedInner
    */
   blocks_minted: number;
   /**
    * Stake pool certificate pledge
-   * @type {string}
-   * @memberof PoolListExtendedInner
    */
   declared_pledge: string;
   /**
    * Margin tax cost of the stake pool
-   * @type {number}
-   * @memberof PoolListExtendedInner
    */
   margin_cost: number;
   /**
    * Fixed tax cost of the stake pool
-   * @type {string}
-   * @memberof PoolListExtendedInner
    */
   fixed_cost: string;
-  /**
-   *
-   * @type {TxContentPoolCertsInnerMetadata}
-   * @memberof PoolListExtendedInner
-   */
   metadata: TxContentPoolCertsInnerMetadata | null;
 }
-/**
- *
- * @export
- * @interface PoolListRetireInner
- */
 export interface PoolListRetireInner {
   /**
    * Bech32 encoded pool ID
-   * @type {string}
-   * @memberof PoolListRetireInner
    */
   pool_id: string;
   /**
    * Retirement epoch number
-   * @type {number}
-   * @memberof PoolListRetireInner
    */
   epoch: number;
 }
-/**
- *
- * @export
- * @interface PoolMetadata
- */
 export interface PoolMetadata {
   /**
    * Bech32 pool ID
-   * @type {string}
-   * @memberof PoolMetadata
    */
   pool_id: string;
   /**
    * Hexadecimal pool ID
-   * @type {string}
-   * @memberof PoolMetadata
    */
   hex: string;
   /**
    * URL to the stake pool metadata
-   * @type {string}
-   * @memberof PoolMetadata
    */
   url: string | null;
   /**
    * Hash of the metadata file
-   * @type {string}
-   * @memberof PoolMetadata
    */
   hash: string | null;
   /**
    * Ticker of the stake pool
-   * @type {string}
-   * @memberof PoolMetadata
    */
   ticker: string | null;
   /**
    * Name of the stake pool
-   * @type {string}
-   * @memberof PoolMetadata
    */
   name: string | null;
   /**
    * Description of the stake pool
-   * @type {string}
-   * @memberof PoolMetadata
    */
   description: string | null;
   /**
    * Home page of the stake pool
-   * @type {string}
-   * @memberof PoolMetadata
    */
   homepage: string | null;
 }
-/**
- *
- * @export
- * @interface PoolUpdatesInner
- */
 export interface PoolUpdatesInner {
   /**
    * Transaction ID
-   * @type {string}
-   * @memberof PoolUpdatesInner
    */
   tx_hash: string;
   /**
    * Certificate within the transaction
-   * @type {number}
-   * @memberof PoolUpdatesInner
    */
   cert_index: number;
   /**
    * Action in the certificate
-   * @type {string}
-   * @memberof PoolUpdatesInner
    */
   action: PoolUpdatesInnerActionEnum;
 }
@@ -3515,131 +2003,83 @@ export const PoolUpdatesInnerActionEnum = {
 export type PoolUpdatesInnerActionEnum =
   (typeof PoolUpdatesInnerActionEnum)[keyof typeof PoolUpdatesInnerActionEnum];
 
-/**
- *
- * @export
- * @interface PoolsPoolIdMetadataGet200Response
- */
 export interface PoolsPoolIdMetadataGet200Response {
   /**
    * Bech32 pool ID
-   * @type {string}
-   * @memberof PoolsPoolIdMetadataGet200Response
    */
   pool_id: string;
   /**
    * Hexadecimal pool ID
-   * @type {string}
-   * @memberof PoolsPoolIdMetadataGet200Response
    */
   hex: string;
   /**
    * URL to the stake pool metadata
-   * @type {string}
-   * @memberof PoolsPoolIdMetadataGet200Response
    */
   url: string | null;
   /**
    * Hash of the metadata file
-   * @type {string}
-   * @memberof PoolsPoolIdMetadataGet200Response
    */
   hash: string | null;
   /**
    * Ticker of the stake pool
-   * @type {string}
-   * @memberof PoolsPoolIdMetadataGet200Response
    */
   ticker: string | null;
   /**
    * Name of the stake pool
-   * @type {string}
-   * @memberof PoolsPoolIdMetadataGet200Response
    */
   name: string | null;
   /**
    * Description of the stake pool
-   * @type {string}
-   * @memberof PoolsPoolIdMetadataGet200Response
    */
   description: string | null;
   /**
    * Home page of the stake pool
-   * @type {string}
-   * @memberof PoolsPoolIdMetadataGet200Response
    */
   homepage: string | null;
 }
-/**
- *
- * @export
- * @interface Proposal
- */
 export interface Proposal {
   /**
    * Hash of the proposal transaction.
-   * @type {string}
-   * @memberof Proposal
    */
   tx_hash: string;
   /**
    * Index of the certificate within the proposal transaction.
-   * @type {number}
-   * @memberof Proposal
    */
   cert_index: number;
   /**
    * Type of proposal.
-   * @type {string}
-   * @memberof Proposal
    */
   governance_type: ProposalGovernanceTypeEnum;
   /**
    * An object describing the content of this GovActionProposal in a readable way.
-   * @type {{ [key: string]: any; }}
-   * @memberof Proposal
    */
   governance_description: { [key: string]: any } | null;
   /**
    * The deposit amount paid for this proposal.
-   * @type {string}
-   * @memberof Proposal
    */
   deposit: string;
   /**
    * Bech32 stake address of the reward address to receive the deposit when it is repaid.
-   * @type {string}
-   * @memberof Proposal
    */
   return_address: string;
   /**
    * The epoch at which the proposal was ratified. Null if the proposal has not been ratified.
-   * @type {number}
-   * @memberof Proposal
    */
   ratified_epoch: number | null;
   /**
    * The epoch at which the proposal was enacted. Null if the proposal has not been enacted.
-   * @type {number}
-   * @memberof Proposal
    */
   enacted_epoch: number | null;
   /**
    * The epoch at which the proposal was dropped. A proposal is dropped if it expires or if any of its dependencies expire.
-   * @type {number}
-   * @memberof Proposal
    */
   dropped_epoch: number | null;
   /**
    * The epoch at which the proposal expired. Null if the proposal has not expired.
-   * @type {number}
-   * @memberof Proposal
    */
   expired_epoch: number | null;
   /**
    * The epoch at which this governance action will expire.
-   * @type {number}
-   * @memberof Proposal
    */
   expiration: number;
 }
@@ -3657,441 +2097,279 @@ export const ProposalGovernanceTypeEnum = {
 export type ProposalGovernanceTypeEnum =
   (typeof ProposalGovernanceTypeEnum)[keyof typeof ProposalGovernanceTypeEnum];
 
-/**
- *
- * @export
- * @interface ProposalMetadata
- */
 export interface ProposalMetadata {
   /**
    * Off-chain metadata of a proposal with a specific transaction hash
-   * @type {string}
-   * @memberof ProposalMetadata
    */
   tx_hash: string;
   /**
    * Off-chain metadata of a proposal with a specific transaction cert_index
-   * @type {number}
-   * @memberof ProposalMetadata
    */
   cert_index: number;
   /**
    * URL to the proposal metadata
-   * @type {string}
-   * @memberof ProposalMetadata
    */
   url: string;
   /**
    * Hash of the metadata file
-   * @type {string}
-   * @memberof ProposalMetadata
    */
   hash: string;
   /**
    * Content of the JSON metadata (validated CIP-108)
-   * @type {any}
-   * @memberof ProposalMetadata
    */
   json_metadata: any | null;
   /**
    * Content of the metadata (raw)
-   * @type {string}
-   * @memberof ProposalMetadata
    */
   bytes: string;
 }
-/**
- *
- * @export
- * @interface ProposalParameters
- */
 export interface ProposalParameters {
   /**
    * Off-chain metadata of a proposal with a specific transaction hash
-   * @type {string}
-   * @memberof ProposalParameters
    */
   tx_hash: string;
   /**
    * Off-chain metadata of a proposal with a specific transaction cert_index
-   * @type {number}
-   * @memberof ProposalParameters
    */
   cert_index: number;
-  /**
-   *
-   * @type {ProposalParametersParameters}
-   * @memberof ProposalParameters
-   */
   parameters: ProposalParametersParameters;
 }
-/**
- *
- * @export
- * @interface ProposalParametersParameters
- */
 export interface ProposalParametersParameters {
   /**
    * Epoch number
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   epoch?: number | null;
   /**
    * The linear factor for the minimum fee calculation for given epoch
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   min_fee_a: number | null;
   /**
    * The constant factor for the minimum fee calculation
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   min_fee_b: number | null;
   /**
    * Maximum block body size in Bytes
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   max_block_size: number | null;
   /**
    * Maximum transaction size
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   max_tx_size: number | null;
   /**
    * Maximum block header size
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   max_block_header_size: number | null;
   /**
    * The amount of a key registration deposit in Lovelaces
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   key_deposit: string | null;
   /**
    * The amount of a pool registration deposit in Lovelaces
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   pool_deposit: string | null;
   /**
    * Epoch bound on pool retirement
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   e_max: number | null;
   /**
    * Desired number of pools
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   n_opt: number | null;
   /**
    * Pool pledge influence
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   a0: number | null;
   /**
    * Monetary expansion
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   rho: number | null;
   /**
    * Treasury expansion
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   tau: number | null;
   /**
    * Percentage of blocks produced by federated nodes
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   decentralisation_param: number | null;
   /**
    * Seed for extra entropy
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   extra_entropy: string | null;
   /**
    * Accepted protocol major version
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   protocol_major_ver: number | null;
   /**
    * Accepted protocol minor version
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   protocol_minor_ver: number | null;
   /**
    * Minimum UTXO value
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   min_utxo: string | null;
   /**
    * Minimum stake cost forced on the pool
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   min_pool_cost: string | null;
   /**
    * Cost models parameters for Plutus Core scripts in raw list form
-   * @type {{ [key: string]: any; }}
-   * @memberof ProposalParametersParameters
    */
   cost_models: { [key: string]: any } | null;
   /**
    * The per word cost of script memory usage
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   price_mem: number | null;
   /**
    * The cost of script execution step usage
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   price_step: number | null;
   /**
    * The maximum number of execution memory allowed to be used in a single transaction
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   max_tx_ex_mem: string | null;
   /**
    * The maximum number of execution steps allowed to be used in a single transaction
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   max_tx_ex_steps: string | null;
   /**
    * The maximum number of execution memory allowed to be used in a single block
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   max_block_ex_mem: string | null;
   /**
    * The maximum number of execution steps allowed to be used in a single block
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   max_block_ex_steps: string | null;
   /**
    * The maximum Val size
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   max_val_size: string | null;
   /**
    * The percentage of the transactions fee which must be provided as collateral when including non-native scripts
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   collateral_percent: number | null;
   /**
    * The maximum number of collateral inputs allowed in a transaction
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   max_collateral_inputs: number | null;
   /**
    * Cost per UTxO word for Alonzo. Cost per UTxO byte for Babbage and later.
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   coins_per_utxo_size: string | null;
   /**
    * Cost per UTxO word for Alonzo. Cost per UTxO byte for Babbage and later.
-   * @type {string}
-   * @memberof ProposalParametersParameters
    * @deprecated
    */
   coins_per_utxo_word: string | null;
   /**
    * Pool Voting threshold for motion of no-confidence. New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   pvt_motion_no_confidence: number | null;
   /**
    * Pool Voting threshold for new committee/threshold (normal state). New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   pvt_committee_normal: number | null;
   /**
    * Pool Voting threshold for new committee/threshold (state of no-confidence). New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   pvt_committee_no_confidence: number | null;
   /**
    * Pool Voting threshold for hard-fork initiation. New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   pvt_hard_fork_initiation: number | null;
   /**
    * DRep Vote threshold for motion of no-confidence. New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   dvt_motion_no_confidence: number | null;
   /**
    * DRep Vote threshold for new committee/threshold (normal state). New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   dvt_committee_normal: number | null;
   /**
    * DRep Vote threshold for new committee/threshold (state of no-confidence). New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   dvt_committee_no_confidence: number | null;
   /**
    * DRep Vote threshold for update to the Constitution. New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   dvt_update_to_constitution: number | null;
   /**
    * DRep Vote threshold for hard-fork initiation. New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   dvt_hard_fork_initiation: number | null;
   /**
    * DRep Vote threshold for protocol parameter changes, network group. New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   dvt_p_p_network_group: number | null;
   /**
    * DRep Vote threshold for protocol parameter changes, economic group. New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   dvt_p_p_economic_group: number | null;
   /**
    * DRep Vote threshold for protocol parameter changes, technical group. New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   dvt_p_p_technical_group: number | null;
   /**
    * DRep Vote threshold for protocol parameter changes, governance group. New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   dvt_p_p_gov_group: number | null;
   /**
    * DRep Vote threshold for treasury withdrawal. New in 13.2-Conway.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   dvt_treasury_withdrawal: number | null;
   /**
    * Minimal constitutional committee size. New in 13.2-Conway.
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   committee_min_size: string | null;
   /**
    * Constitutional committee term limits. New in 13.2-Conway.
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   committee_max_term_length: string | null;
   /**
    * Governance action expiration. New in 13.2-Conway.
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   gov_action_lifetime: string | null;
   /**
    * Governance action deposit. New in 13.2-Conway.
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   gov_action_deposit: string | null;
   /**
    * DRep deposit amount. New in 13.2-Conway.
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   drep_deposit: string | null;
   /**
    * DRep activity period. New in 13.2-Conway.
-   * @type {string}
-   * @memberof ProposalParametersParameters
    */
   drep_activity: string | null;
   /**
    * Pool Voting threshold for security-relevant protocol parameters changes. Renamed to pvt_p_p_security_group.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    * @deprecated
    */
   pvtpp_security_group: number | null;
   /**
    * Pool Voting threshold for security-relevant protocol parameters changes.
-   * @type {number}
-   * @memberof ProposalParametersParameters
    */
   pvt_p_p_security_group: number | null;
-  /**
-   *
-   * @type {number}
-   * @memberof ProposalParametersParameters
-   */
   min_fee_ref_script_cost_per_byte: number | null;
 }
-/**
- *
- * @export
- * @interface ProposalVotesInner
- */
 export interface ProposalVotesInner {
   /**
    * Hash of the voting transaction.
-   * @type {string}
-   * @memberof ProposalVotesInner
    */
   tx_hash: string;
   /**
    * Index of the certificate within the voting transaction.
-   * @type {number}
-   * @memberof ProposalVotesInner
    */
   cert_index: number;
   /**
    * The role of the voter. Can be one of constitutional_committee, drep, spo.
-   * @type {string}
-   * @memberof ProposalVotesInner
    */
   voter_role: ProposalVotesInnerVoterRoleEnum;
   /**
    * The actual voter.
-   * @type {string}
-   * @memberof ProposalVotesInner
    */
   voter: string;
   /**
    * The Vote. Can be one of yes, no, abstain.
-   * @type {string}
-   * @memberof ProposalVotesInner
    */
   vote: ProposalVotesInnerVoteEnum;
 }
@@ -4113,47 +2391,27 @@ export const ProposalVotesInnerVoteEnum = {
 export type ProposalVotesInnerVoteEnum =
   (typeof ProposalVotesInnerVoteEnum)[keyof typeof ProposalVotesInnerVoteEnum];
 
-/**
- *
- * @export
- * @interface ProposalWithdrawalsInner
- */
 export interface ProposalWithdrawalsInner {
   /**
    * Bech32 stake address
-   * @type {string}
-   * @memberof ProposalWithdrawalsInner
    */
   stake_address: string;
   /**
    * Withdrawal amount in Lovelaces
-   * @type {string}
-   * @memberof ProposalWithdrawalsInner
    */
   amount: string;
 }
-/**
- *
- * @export
- * @interface ProposalsInner
- */
 export interface ProposalsInner {
   /**
    * Hash of the proposal transaction.
-   * @type {string}
-   * @memberof ProposalsInner
    */
   tx_hash: string;
   /**
    * Index of the certificate within the proposal transaction.
-   * @type {number}
-   * @memberof ProposalsInner
    */
   cert_index: number;
   /**
    * Type of proposal.
-   * @type {string}
-   * @memberof ProposalsInner
    */
   governance_type: ProposalsInnerGovernanceTypeEnum;
 }
@@ -4171,28 +2429,17 @@ export const ProposalsInnerGovernanceTypeEnum = {
 export type ProposalsInnerGovernanceTypeEnum =
   (typeof ProposalsInnerGovernanceTypeEnum)[keyof typeof ProposalsInnerGovernanceTypeEnum];
 
-/**
- *
- * @export
- * @interface Script
- */
 export interface Script {
   /**
    * Script hash
-   * @type {string}
-   * @memberof Script
    */
   script_hash: string;
   /**
    * Type of the script language
-   * @type {string}
-   * @memberof Script
    */
   type: ScriptTypeEnum;
   /**
    * The size of the CBOR serialised script, if a Plutus script
-   * @type {number}
-   * @memberof Script
    */
   serialised_size: number | null;
 }
@@ -4205,111 +2452,62 @@ export const ScriptTypeEnum = {
 
 export type ScriptTypeEnum = (typeof ScriptTypeEnum)[keyof typeof ScriptTypeEnum];
 
-/**
- *
- * @export
- * @interface ScriptCbor
- */
 export interface ScriptCbor {
   /**
    * CBOR contents of the `plutus` script, null for `timelocks`
-   * @type {string}
-   * @memberof ScriptCbor
    */
   cbor: string | null;
 }
-/**
- *
- * @export
- * @interface ScriptDatum
- */
 export interface ScriptDatum {
   /**
    * JSON content of the datum
-   * @type {{ [key: string]: any; }}
-   * @memberof ScriptDatum
    */
   json_value: { [key: string]: any };
 }
-/**
- *
- * @export
- * @interface ScriptDatumCbor
- */
 export interface ScriptDatumCbor {
   /**
    * CBOR serialized datum
-   * @type {string}
-   * @memberof ScriptDatumCbor
    */
   cbor: string;
 }
-/**
- *
- * @export
- * @interface ScriptJson
- */
 export interface ScriptJson {
   /**
    * JSON contents of the `timelock` script, null for `plutus` scripts
-   * @type {any}
-   * @memberof ScriptJson
    */
   json: any | null;
 }
-/**
- *
- * @export
- * @interface ScriptRedeemersInner
- */
 export interface ScriptRedeemersInner {
   /**
    * Hash of the transaction
-   * @type {string}
-   * @memberof ScriptRedeemersInner
    */
   tx_hash: string;
   /**
    * The index of the redeemer pointer in the transaction
-   * @type {number}
-   * @memberof ScriptRedeemersInner
    */
   tx_index: number;
   /**
    * Validation purpose
-   * @type {string}
-   * @memberof ScriptRedeemersInner
    */
   purpose: ScriptRedeemersInnerPurposeEnum;
   /**
    * Datum hash of the redeemer
-   * @type {string}
-   * @memberof ScriptRedeemersInner
    */
   redeemer_data_hash: string;
   /**
    * Datum hash
-   * @type {string}
-   * @memberof ScriptRedeemersInner
    * @deprecated
    */
   datum_hash: string;
   /**
    * The budget in Memory to run a script
-   * @type {string}
-   * @memberof ScriptRedeemersInner
    */
   unit_mem: string;
   /**
    * The budget in CPU steps to run a script
-   * @type {string}
-   * @memberof ScriptRedeemersInner
    */
   unit_steps: string;
   /**
    * The fee consumed to run the script
-   * @type {string}
-   * @memberof ScriptRedeemersInner
    */
   fee: string;
 }
@@ -4324,289 +2522,171 @@ export const ScriptRedeemersInnerPurposeEnum = {
 export type ScriptRedeemersInnerPurposeEnum =
   (typeof ScriptRedeemersInnerPurposeEnum)[keyof typeof ScriptRedeemersInnerPurposeEnum];
 
-/**
- *
- * @export
- * @interface ScriptsInner
- */
 export interface ScriptsInner {
   /**
    * Script hash
-   * @type {string}
-   * @memberof ScriptsInner
    */
   script_hash: string;
 }
-/**
- *
- * @export
- * @interface TxContent
- */
 export interface TxContent {
   /**
    * Transaction hash
-   * @type {string}
-   * @memberof TxContent
    */
   hash: string;
   /**
    * Block hash
-   * @type {string}
-   * @memberof TxContent
    */
   block: string;
   /**
    * Block number
-   * @type {number}
-   * @memberof TxContent
    */
   block_height: number;
   /**
    * Block creation time in UNIX time
-   * @type {number}
-   * @memberof TxContent
    */
   block_time: number;
   /**
    * Slot number
-   * @type {number}
-   * @memberof TxContent
    */
   slot: number;
   /**
    * Transaction index within the block
-   * @type {number}
-   * @memberof TxContent
    */
   index: number;
-  /**
-   *
-   * @type {Array<TxContentOutputAmountInner>}
-   * @memberof TxContent
-   */
   output_amount: Array<TxContentOutputAmountInner>;
   /**
    * Fees of the transaction in Lovelaces
-   * @type {string}
-   * @memberof TxContent
    */
   fees: string;
   /**
    * Deposit within the transaction in Lovelaces
-   * @type {string}
-   * @memberof TxContent
    */
   deposit: string;
   /**
    * Size of the transaction in Bytes
-   * @type {number}
-   * @memberof TxContent
    */
   size: number;
   /**
    * Left (included) endpoint of the timelock validity intervals
-   * @type {string}
-   * @memberof TxContent
    */
   invalid_before: string | null;
   /**
    * Right (excluded) endpoint of the timelock validity intervals
-   * @type {string}
-   * @memberof TxContent
    */
   invalid_hereafter: string | null;
   /**
    * Count of UTXOs within the transaction
-   * @type {number}
-   * @memberof TxContent
    */
   utxo_count: number;
   /**
    * Count of the withdrawals within the transaction
-   * @type {number}
-   * @memberof TxContent
    */
   withdrawal_count: number;
   /**
    * Count of the MIR certificates within the transaction
-   * @type {number}
-   * @memberof TxContent
    */
   mir_cert_count: number;
   /**
    * Count of the delegations within the transaction
-   * @type {number}
-   * @memberof TxContent
    */
   delegation_count: number;
   /**
    * Count of the stake keys (de)registration within the transaction
-   * @type {number}
-   * @memberof TxContent
    */
   stake_cert_count: number;
   /**
    * Count of the stake pool registration and update certificates within the transaction
-   * @type {number}
-   * @memberof TxContent
    */
   pool_update_count: number;
   /**
    * Count of the stake pool retirement certificates within the transaction
-   * @type {number}
-   * @memberof TxContent
    */
   pool_retire_count: number;
   /**
    * Count of asset mints and burns within the transaction
-   * @type {number}
-   * @memberof TxContent
    */
   asset_mint_or_burn_count: number;
   /**
    * Count of redeemers within the transaction
-   * @type {number}
-   * @memberof TxContent
    */
   redeemer_count: number;
   /**
    * True if contract script passed validation
-   * @type {boolean}
-   * @memberof TxContent
    */
   valid_contract: boolean;
 }
-/**
- *
- * @export
- * @interface TxContentCbor
- */
 export interface TxContentCbor {
   /**
    * CBOR serialized transaction
-   * @type {string}
-   * @memberof TxContentCbor
    */
   cbor: string;
 }
-/**
- *
- * @export
- * @interface TxContentDelegationsInner
- */
 export interface TxContentDelegationsInner {
   /**
    * Index of the certificate within the transaction
-   * @type {number}
-   * @memberof TxContentDelegationsInner
    * @deprecated
    */
   index: number;
   /**
    * Index of the certificate within the transaction
-   * @type {number}
-   * @memberof TxContentDelegationsInner
    */
   cert_index: number;
   /**
    * Bech32 delegation stake address
-   * @type {string}
-   * @memberof TxContentDelegationsInner
    */
   address: string;
   /**
    * Bech32 ID of delegated stake pool
-   * @type {string}
-   * @memberof TxContentDelegationsInner
    */
   pool_id: string;
   /**
    * Epoch in which the delegation becomes active
-   * @type {number}
-   * @memberof TxContentDelegationsInner
    */
   active_epoch: number;
 }
-/**
- *
- * @export
- * @interface TxContentMetadataCborInner
- */
 export interface TxContentMetadataCborInner {
   /**
    * Metadata label
-   * @type {string}
-   * @memberof TxContentMetadataCborInner
    */
   label: string;
   /**
    * Content of the CBOR metadata
-   * @type {string}
-   * @memberof TxContentMetadataCborInner
    * @deprecated
    */
   cbor_metadata: string | null;
   /**
    * Content of the CBOR metadata in hex
-   * @type {string}
-   * @memberof TxContentMetadataCborInner
    */
   metadata: string | null;
 }
-/**
- *
- * @export
- * @interface TxContentMetadataInner
- */
 export interface TxContentMetadataInner {
   /**
    * Metadata label
-   * @type {string}
-   * @memberof TxContentMetadataInner
    */
   label: string;
-  /**
-   *
-   * @type {TxContentMetadataInnerJsonMetadata}
-   * @memberof TxContentMetadataInner
-   */
   json_metadata: TxContentMetadataInnerJsonMetadata;
 }
 /**
  * @type TxContentMetadataInnerJsonMetadata
  * Content of the metadata
- * @export
  */
 export type TxContentMetadataInnerJsonMetadata = string | { [key: string]: any };
 
-/**
- *
- * @export
- * @interface TxContentMirsInner
- */
 export interface TxContentMirsInner {
   /**
    * Source of MIR funds
-   * @type {string}
-   * @memberof TxContentMirsInner
    */
   pot: TxContentMirsInnerPotEnum;
   /**
    * Index of the certificate within the transaction
-   * @type {number}
-   * @memberof TxContentMirsInner
    */
   cert_index: number;
   /**
    * Bech32 stake address
-   * @type {string}
-   * @memberof TxContentMirsInner
    */
   address: string;
   /**
    * MIR amount in Lovelaces
-   * @type {string}
-   * @memberof TxContentMirsInner
    */
   amount: string;
 }
@@ -4621,254 +2701,148 @@ export type TxContentMirsInnerPotEnum =
 
 /**
  * The sum of all the UTXO per asset
- * @export
- * @interface TxContentOutputAmountInner
  */
 export interface TxContentOutputAmountInner {
   /**
    * The unit of the value
-   * @type {string}
-   * @memberof TxContentOutputAmountInner
    */
   unit: string;
   /**
    * The quantity of the unit
-   * @type {string}
-   * @memberof TxContentOutputAmountInner
    */
   quantity: string;
 }
-/**
- *
- * @export
- * @interface TxContentPoolCertsInner
- */
 export interface TxContentPoolCertsInner {
   /**
    * Index of the certificate within the transaction
-   * @type {number}
-   * @memberof TxContentPoolCertsInner
    */
   cert_index: number;
   /**
    * Bech32 encoded pool ID
-   * @type {string}
-   * @memberof TxContentPoolCertsInner
    */
   pool_id: string;
   /**
    * VRF key hash
-   * @type {string}
-   * @memberof TxContentPoolCertsInner
    */
   vrf_key: string;
   /**
    * Stake pool certificate pledge in Lovelaces
-   * @type {string}
-   * @memberof TxContentPoolCertsInner
    */
   pledge: string;
   /**
    * Margin tax cost of the stake pool
-   * @type {number}
-   * @memberof TxContentPoolCertsInner
    */
   margin_cost: number;
   /**
    * Fixed tax cost of the stake pool in Lovelaces
-   * @type {string}
-   * @memberof TxContentPoolCertsInner
    */
   fixed_cost: string;
   /**
    * Bech32 reward account of the stake pool
-   * @type {string}
-   * @memberof TxContentPoolCertsInner
    */
   reward_account: string;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof TxContentPoolCertsInner
-   */
   owners: Array<string>;
-  /**
-   *
-   * @type {TxContentPoolCertsInnerMetadata}
-   * @memberof TxContentPoolCertsInner
-   */
   metadata: TxContentPoolCertsInnerMetadata | null;
-  /**
-   *
-   * @type {Array<TxContentPoolCertsInnerRelaysInner>}
-   * @memberof TxContentPoolCertsInner
-   */
   relays: Array<TxContentPoolCertsInnerRelaysInner>;
   /**
    * Epoch in which the update becomes active
-   * @type {number}
-   * @memberof TxContentPoolCertsInner
    */
   active_epoch: number;
 }
-/**
- *
- * @export
- * @interface TxContentPoolCertsInnerMetadata
- */
 export interface TxContentPoolCertsInnerMetadata {
   /**
    * URL to the stake pool metadata
-   * @type {string}
-   * @memberof TxContentPoolCertsInnerMetadata
    */
   url: string | null;
   /**
    * Hash of the metadata file
-   * @type {string}
-   * @memberof TxContentPoolCertsInnerMetadata
    */
   hash: string | null;
   /**
    * Ticker of the stake pool
-   * @type {string}
-   * @memberof TxContentPoolCertsInnerMetadata
    */
   ticker: string | null;
   /**
    * Name of the stake pool
-   * @type {string}
-   * @memberof TxContentPoolCertsInnerMetadata
    */
   name: string | null;
   /**
    * Description of the stake pool
-   * @type {string}
-   * @memberof TxContentPoolCertsInnerMetadata
    */
   description: string | null;
   /**
    * Home page of the stake pool
-   * @type {string}
-   * @memberof TxContentPoolCertsInnerMetadata
    */
   homepage: string | null;
 }
-/**
- *
- * @export
- * @interface TxContentPoolCertsInnerRelaysInner
- */
 export interface TxContentPoolCertsInnerRelaysInner {
   /**
    * IPv4 address of the relay
-   * @type {string}
-   * @memberof TxContentPoolCertsInnerRelaysInner
    */
   ipv4: string | null;
   /**
    * IPv6 address of the relay
-   * @type {string}
-   * @memberof TxContentPoolCertsInnerRelaysInner
    */
   ipv6: string | null;
   /**
    * DNS name of the relay
-   * @type {string}
-   * @memberof TxContentPoolCertsInnerRelaysInner
    */
   dns: string | null;
   /**
    * DNS SRV entry of the relay
-   * @type {string}
-   * @memberof TxContentPoolCertsInnerRelaysInner
    */
   dns_srv: string | null;
   /**
    * Network port of the relay
-   * @type {number}
-   * @memberof TxContentPoolCertsInnerRelaysInner
    */
   port: number;
 }
-/**
- *
- * @export
- * @interface TxContentPoolRetiresInner
- */
 export interface TxContentPoolRetiresInner {
   /**
    * Index of the certificate within the transaction
-   * @type {number}
-   * @memberof TxContentPoolRetiresInner
    */
   cert_index: number;
   /**
    * Bech32 stake pool ID
-   * @type {string}
-   * @memberof TxContentPoolRetiresInner
    */
   pool_id: string;
   /**
    * Epoch in which the pool becomes retired
-   * @type {number}
-   * @memberof TxContentPoolRetiresInner
    */
   retiring_epoch: number;
 }
-/**
- *
- * @export
- * @interface TxContentRedeemersInner
- */
 export interface TxContentRedeemersInner {
   /**
    * Index of the redeemer within the transaction
-   * @type {number}
-   * @memberof TxContentRedeemersInner
    */
   tx_index: number;
   /**
    * Validation purpose
-   * @type {string}
-   * @memberof TxContentRedeemersInner
    */
   purpose: TxContentRedeemersInnerPurposeEnum;
   /**
    * Script hash
-   * @type {string}
-   * @memberof TxContentRedeemersInner
    */
   script_hash: string;
   /**
    * Redeemer data hash
-   * @type {string}
-   * @memberof TxContentRedeemersInner
    */
   redeemer_data_hash: string;
   /**
    * Datum hash
-   * @type {string}
-   * @memberof TxContentRedeemersInner
    * @deprecated
    */
   datum_hash: string;
   /**
    * The budget in Memory to run a script
-   * @type {string}
-   * @memberof TxContentRedeemersInner
    */
   unit_mem: string;
   /**
    * The budget in CPU steps to run a script
-   * @type {string}
-   * @memberof TxContentRedeemersInner
    */
   unit_steps: string;
   /**
    * The fee consumed to run the script
-   * @type {string}
-   * @memberof TxContentRedeemersInner
    */
   fee: string;
 }
@@ -4883,452 +2857,257 @@ export const TxContentRedeemersInnerPurposeEnum = {
 export type TxContentRedeemersInnerPurposeEnum =
   (typeof TxContentRedeemersInnerPurposeEnum)[keyof typeof TxContentRedeemersInnerPurposeEnum];
 
-/**
- *
- * @export
- * @interface TxContentRequiredSignersInner
- */
 export interface TxContentRequiredSignersInner {
   /**
    * Hash of the witness
-   * @type {string}
-   * @memberof TxContentRequiredSignersInner
    */
   witness_hash: string;
 }
-/**
- *
- * @export
- * @interface TxContentStakeAddrInner
- */
 export interface TxContentStakeAddrInner {
   /**
    * Index of the certificate within the transaction
-   * @type {number}
-   * @memberof TxContentStakeAddrInner
    */
   cert_index: number;
   /**
    * Delegation stake address
-   * @type {string}
-   * @memberof TxContentStakeAddrInner
    */
   address: string;
   /**
    * Registration boolean, false if deregistration
-   * @type {boolean}
-   * @memberof TxContentStakeAddrInner
    */
   registration: boolean;
 }
-/**
- *
- * @export
- * @interface TxContentUtxo
- */
 export interface TxContentUtxo {
   /**
    * Transaction hash
-   * @type {string}
-   * @memberof TxContentUtxo
    */
   hash: string;
-  /**
-   *
-   * @type {Array<TxContentUtxoInputsInner>}
-   * @memberof TxContentUtxo
-   */
   inputs: Array<TxContentUtxoInputsInner>;
-  /**
-   *
-   * @type {Array<TxContentUtxoOutputsInner>}
-   * @memberof TxContentUtxo
-   */
   outputs: Array<TxContentUtxoOutputsInner>;
 }
-/**
- *
- * @export
- * @interface TxContentUtxoInputsInner
- */
 export interface TxContentUtxoInputsInner {
   /**
    * Input address
-   * @type {string}
-   * @memberof TxContentUtxoInputsInner
    */
   address: string;
-  /**
-   *
-   * @type {Array<TxContentOutputAmountInner>}
-   * @memberof TxContentUtxoInputsInner
-   */
   amount: Array<TxContentOutputAmountInner>;
   /**
    * Hash of the UTXO transaction
-   * @type {string}
-   * @memberof TxContentUtxoInputsInner
    */
   tx_hash: string;
   /**
    * UTXO index in the transaction
-   * @type {number}
-   * @memberof TxContentUtxoInputsInner
    */
   output_index: number;
   /**
    * The hash of the transaction output datum
-   * @type {string}
-   * @memberof TxContentUtxoInputsInner
    */
   data_hash: string | null;
   /**
    * CBOR encoded inline datum
-   * @type {string}
-   * @memberof TxContentUtxoInputsInner
    */
   inline_datum: string | null;
   /**
    * The hash of the reference script of the input
-   * @type {string}
-   * @memberof TxContentUtxoInputsInner
    */
   reference_script_hash: string | null;
   /**
    * Whether the input is a collateral consumed on script validation failure
-   * @type {boolean}
-   * @memberof TxContentUtxoInputsInner
    */
   collateral: boolean;
   /**
    * Whether the input is a reference transaction input
-   * @type {boolean}
-   * @memberof TxContentUtxoInputsInner
    */
   reference?: boolean;
 }
-/**
- *
- * @export
- * @interface TxContentUtxoOutputsInner
- */
 export interface TxContentUtxoOutputsInner {
   /**
    * Output address
-   * @type {string}
-   * @memberof TxContentUtxoOutputsInner
    */
   address: string;
-  /**
-   *
-   * @type {Array<TxContentOutputAmountInner>}
-   * @memberof TxContentUtxoOutputsInner
-   */
   amount: Array<TxContentOutputAmountInner>;
   /**
    * UTXO index in the transaction
-   * @type {number}
-   * @memberof TxContentUtxoOutputsInner
    */
   output_index: number;
   /**
    * The hash of the transaction output datum
-   * @type {string}
-   * @memberof TxContentUtxoOutputsInner
    */
   data_hash: string | null;
   /**
    * CBOR encoded inline datum
-   * @type {string}
-   * @memberof TxContentUtxoOutputsInner
    */
   inline_datum: string | null;
   /**
    * Whether the output is a collateral output
-   * @type {boolean}
-   * @memberof TxContentUtxoOutputsInner
    */
   collateral: boolean;
   /**
    * The hash of the reference script of the output
-   * @type {string}
-   * @memberof TxContentUtxoOutputsInner
    */
   reference_script_hash: string | null;
   /**
    * Transaction hash that consumed the UTXO or null for unconsumed UTXOs. Always null for collateral outputs.
-   * @type {string}
-   * @memberof TxContentUtxoOutputsInner
    */
   consumed_by_tx?: string | null;
 }
-/**
- *
- * @export
- * @interface TxContentWithdrawalsInner
- */
 export interface TxContentWithdrawalsInner {
   /**
    * Bech32 withdrawal address
-   * @type {string}
-   * @memberof TxContentWithdrawalsInner
    */
   address: string;
   /**
    * Withdrawal amount in Lovelaces
-   * @type {string}
-   * @memberof TxContentWithdrawalsInner
    */
   amount: string;
 }
-/**
- *
- * @export
- * @interface TxMetadataLabelCborInner
- */
 export interface TxMetadataLabelCborInner {
   /**
    * Transaction hash that contains the specific metadata
-   * @type {string}
-   * @memberof TxMetadataLabelCborInner
    */
   tx_hash: string;
   /**
    * Content of the CBOR metadata
-   * @type {string}
-   * @memberof TxMetadataLabelCborInner
    * @deprecated
    */
   cbor_metadata: string | null;
   /**
    * Content of the CBOR metadata in hex
-   * @type {string}
-   * @memberof TxMetadataLabelCborInner
    */
   metadata: string | null;
 }
-/**
- *
- * @export
- * @interface TxMetadataLabelJsonInner
- */
 export interface TxMetadataLabelJsonInner {
   /**
    * Transaction hash that contains the specific metadata
-   * @type {string}
-   * @memberof TxMetadataLabelJsonInner
    */
   tx_hash: string;
   /**
    * Content of the JSON metadata
-   * @type {any}
-   * @memberof TxMetadataLabelJsonInner
    */
   json_metadata: any | null;
 }
-/**
- *
- * @export
- * @interface TxMetadataLabelsInner
- */
 export interface TxMetadataLabelsInner {
   /**
    * Metadata label
-   * @type {string}
-   * @memberof TxMetadataLabelsInner
    */
   label: string;
   /**
    * CIP10 defined description
-   * @type {string}
-   * @memberof TxMetadataLabelsInner
    */
   cip10: string | null;
   /**
    * The count of metadata entries with a specific label
-   * @type {string}
-   * @memberof TxMetadataLabelsInner
    */
   count: string;
 }
-/**
- *
- * @export
- * @interface UtilsAddressesXpub
- */
+export interface TxSubmitPost425Response {
+  status_code: number;
+  error: string;
+  message: string;
+}
+export interface TxsGet200ResponseInner {
+  /**
+   * Hex-encoded transaction hash.
+   */
+  tx_hash: string;
+  /**
+   * Position of the transaction within its block.
+   */
+  tx_index: number;
+  /**
+   * Block number that contains the transaction.
+   */
+  block_height: number;
+  /**
+   * Block time as a Unix timestamp (seconds).
+   */
+  block_time: number;
+}
 export interface UtilsAddressesXpub {
   /**
    * Script hash
-   * @type {string}
-   * @memberof UtilsAddressesXpub
    */
   xpub: string;
   /**
    * Account role
-   * @type {number}
-   * @memberof UtilsAddressesXpub
    */
   role: number;
   /**
    * Address index
-   * @type {number}
-   * @memberof UtilsAddressesXpub
    */
   index: number;
   /**
    * Derived address
-   * @type {string}
-   * @memberof UtilsAddressesXpub
    */
   address: string;
 }
-/**
- *
- * @export
- * @interface UtilsTxsEvaluateUtxosPostRequest
- */
 export interface UtilsTxsEvaluateUtxosPostRequest {
   /**
    * Transaction CBOR (encoded using base64 or base16).
-   * @type {string}
-   * @memberof UtilsTxsEvaluateUtxosPostRequest
    */
   cbor: string;
   /**
    * Additional UTXO as an array of tuples [TxIn, TxOut]. See https://ogmios.dev/mini-protocols/local-tx-submission/#additional-utxo-set.
-   * @type {Array<Array<UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInner>>}
-   * @memberof UtilsTxsEvaluateUtxosPostRequest
    */
   additionalUtxoSet?: Array<Array<UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInner>>;
 }
-/**
- *
- * @export
- * @interface UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInner
- */
 export interface UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInner {
   /**
    * Transaction hash for the input
-   * @type {string}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInner
    */
   txId?: string;
   /**
    * Index of the output within the transaction
-   * @type {number}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInner
    */
   index?: number;
   /**
    * Output address
-   * @type {string}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInner
    */
   address: string;
-  /**
-   *
-   * @type {UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1Value}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInner
-   */
   value: UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1Value;
-  /**
-   *
-   * @type {string}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInner
-   */
   datum_hash?: string;
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInner
-   */
   datum?: { [key: string]: any };
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInner
-   */
   script?: { [key: string]: any };
 }
 /**
  * TxIn
- * @export
- * @interface UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf
  */
 export interface UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf {
   /**
    * Transaction hash for the input
-   * @type {string}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf
    */
   txId?: string;
   /**
    * Index of the output within the transaction
-   * @type {number}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf
    */
   index?: number;
 }
 /**
  * TxOut
- * @export
- * @interface UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1
  */
 export interface UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1 {
   /**
    * Output address
-   * @type {string}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1
    */
   address: string;
-  /**
-   *
-   * @type {UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1Value}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1
-   */
   value: UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1Value;
-  /**
-   *
-   * @type {string}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1
-   */
   datum_hash?: string;
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1
-   */
   datum?: { [key: string]: any };
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1
-   */
   script?: { [key: string]: any };
 }
-/**
- *
- * @export
- * @interface UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1Value
- */
 export interface UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1Value {
   /**
    * Lovelace amount
-   * @type {number}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1Value
    */
   coins: number;
   /**
    * Assets amount
-   * @type {{ [key: string]: number; }}
-   * @memberof UtilsTxsEvaluateUtxosPostRequestAdditionalUtxoSetInnerInnerAnyOf1Value
    */
   assets?: { [key: string]: number };
 }
 
 /**
  * CardanoAccountsApi - axios parameter creator
- * @export
  */
 export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -5380,6 +3159,8 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -5443,6 +3224,8 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -5486,6 +3269,8 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -5549,6 +3334,8 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -5592,6 +3379,8 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -5655,6 +3444,8 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -5716,6 +3507,8 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -5779,6 +3572,8 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -5840,6 +3635,8 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -5903,6 +3700,8 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -5965,6 +3764,8 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -5983,7 +3784,6 @@ export const CardanoAccountsApiAxiosParamCreator = function (configuration?: Con
 
 /**
  * CardanoAccountsApi - functional programming interface
- * @export
  */
 export const CardanoAccountsApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoAccountsApiAxiosParamCreator(configuration);
@@ -6415,7 +4215,6 @@ export const CardanoAccountsApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoAccountsApi - factory interface
- * @export
  */
 export const CardanoAccountsApiFactory = function (
   configuration?: Configuration,
@@ -6648,9 +4447,6 @@ export const CardanoAccountsApiFactory = function (
 
 /**
  * CardanoAccountsApi - object-oriented interface
- * @export
- * @class CardanoAccountsApi
- * @extends {BaseAPI}
  */
 export class CardanoAccountsApi extends BaseAPI {
   /**
@@ -6662,7 +4458,6 @@ export class CardanoAccountsApi extends BaseAPI {
    * @param {AccountsStakeAddressAddressesAssetsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAccountsApi
    */
   public accountsStakeAddressAddressesAssetsGet(
     stakeAddress: string,
@@ -6685,7 +4480,6 @@ export class CardanoAccountsApi extends BaseAPI {
    * @param {AccountsStakeAddressAddressesGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAccountsApi
    */
   public accountsStakeAddressAddressesGet(
     stakeAddress: string,
@@ -6705,7 +4499,6 @@ export class CardanoAccountsApi extends BaseAPI {
    * @param {string} stakeAddress Bech32 address.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAccountsApi
    */
   public accountsStakeAddressAddressesTotalGet(
     stakeAddress: string,
@@ -6725,7 +4518,6 @@ export class CardanoAccountsApi extends BaseAPI {
    * @param {AccountsStakeAddressDelegationsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAccountsApi
    */
   public accountsStakeAddressDelegationsGet(
     stakeAddress: string,
@@ -6745,7 +4537,6 @@ export class CardanoAccountsApi extends BaseAPI {
    * @param {string} stakeAddress Bech32 stake address.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAccountsApi
    */
   public accountsStakeAddressGet(stakeAddress: string, options?: RawAxiosRequestConfig) {
     return CardanoAccountsApiFp(this.configuration)
@@ -6762,7 +4553,6 @@ export class CardanoAccountsApi extends BaseAPI {
    * @param {AccountsStakeAddressHistoryGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAccountsApi
    */
   public accountsStakeAddressHistoryGet(
     stakeAddress: string,
@@ -6785,7 +4575,6 @@ export class CardanoAccountsApi extends BaseAPI {
    * @param {AccountsStakeAddressMirsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAccountsApi
    */
   public accountsStakeAddressMirsGet(
     stakeAddress: string,
@@ -6808,7 +4597,6 @@ export class CardanoAccountsApi extends BaseAPI {
    * @param {AccountsStakeAddressRegistrationsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAccountsApi
    */
   public accountsStakeAddressRegistrationsGet(
     stakeAddress: string,
@@ -6831,7 +4619,6 @@ export class CardanoAccountsApi extends BaseAPI {
    * @param {AccountsStakeAddressRewardsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAccountsApi
    */
   public accountsStakeAddressRewardsGet(
     stakeAddress: string,
@@ -6854,7 +4641,6 @@ export class CardanoAccountsApi extends BaseAPI {
    * @param {AccountsStakeAddressUtxosGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAccountsApi
    */
   public accountsStakeAddressUtxosGet(
     stakeAddress: string,
@@ -6877,7 +4663,6 @@ export class CardanoAccountsApi extends BaseAPI {
    * @param {AccountsStakeAddressWithdrawalsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAccountsApi
    */
   public accountsStakeAddressWithdrawalsGet(
     stakeAddress: string,
@@ -6892,81 +4677,54 @@ export class CardanoAccountsApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const AccountsStakeAddressAddressesAssetsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AccountsStakeAddressAddressesAssetsGetOrderEnum =
   (typeof AccountsStakeAddressAddressesAssetsGetOrderEnum)[keyof typeof AccountsStakeAddressAddressesAssetsGetOrderEnum];
-/**
- * @export
- */
 export const AccountsStakeAddressAddressesGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AccountsStakeAddressAddressesGetOrderEnum =
   (typeof AccountsStakeAddressAddressesGetOrderEnum)[keyof typeof AccountsStakeAddressAddressesGetOrderEnum];
-/**
- * @export
- */
 export const AccountsStakeAddressDelegationsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AccountsStakeAddressDelegationsGetOrderEnum =
   (typeof AccountsStakeAddressDelegationsGetOrderEnum)[keyof typeof AccountsStakeAddressDelegationsGetOrderEnum];
-/**
- * @export
- */
 export const AccountsStakeAddressHistoryGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AccountsStakeAddressHistoryGetOrderEnum =
   (typeof AccountsStakeAddressHistoryGetOrderEnum)[keyof typeof AccountsStakeAddressHistoryGetOrderEnum];
-/**
- * @export
- */
 export const AccountsStakeAddressMirsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AccountsStakeAddressMirsGetOrderEnum =
   (typeof AccountsStakeAddressMirsGetOrderEnum)[keyof typeof AccountsStakeAddressMirsGetOrderEnum];
-/**
- * @export
- */
 export const AccountsStakeAddressRegistrationsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AccountsStakeAddressRegistrationsGetOrderEnum =
   (typeof AccountsStakeAddressRegistrationsGetOrderEnum)[keyof typeof AccountsStakeAddressRegistrationsGetOrderEnum];
-/**
- * @export
- */
 export const AccountsStakeAddressRewardsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AccountsStakeAddressRewardsGetOrderEnum =
   (typeof AccountsStakeAddressRewardsGetOrderEnum)[keyof typeof AccountsStakeAddressRewardsGetOrderEnum];
-/**
- * @export
- */
 export const AccountsStakeAddressUtxosGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AccountsStakeAddressUtxosGetOrderEnum =
   (typeof AccountsStakeAddressUtxosGetOrderEnum)[keyof typeof AccountsStakeAddressUtxosGetOrderEnum];
-/**
- * @export
- */
 export const AccountsStakeAddressWithdrawalsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
@@ -6976,7 +4734,6 @@ export type AccountsStakeAddressWithdrawalsGetOrderEnum =
 
 /**
  * CardanoAddressesApi - axios parameter creator
- * @export
  */
 export const CardanoAddressesApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -7010,6 +4767,8 @@ export const CardanoAddressesApiAxiosParamCreator = function (configuration?: Co
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -7055,6 +4814,8 @@ export const CardanoAddressesApiAxiosParamCreator = function (configuration?: Co
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -7098,6 +4859,8 @@ export const CardanoAddressesApiAxiosParamCreator = function (configuration?: Co
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -7173,6 +4936,8 @@ export const CardanoAddressesApiAxiosParamCreator = function (configuration?: Co
         localVarQueryParameter['to'] = to;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -7235,6 +5000,8 @@ export const CardanoAddressesApiAxiosParamCreator = function (configuration?: Co
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -7301,6 +5068,8 @@ export const CardanoAddressesApiAxiosParamCreator = function (configuration?: Co
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -7363,6 +5132,8 @@ export const CardanoAddressesApiAxiosParamCreator = function (configuration?: Co
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -7381,7 +5152,6 @@ export const CardanoAddressesApiAxiosParamCreator = function (configuration?: Co
 
 /**
  * CardanoAddressesApi - functional programming interface
- * @export
  */
 export const CardanoAddressesApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoAddressesApiAxiosParamCreator(configuration);
@@ -7642,7 +5412,6 @@ export const CardanoAddressesApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoAddressesApi - factory interface
- * @export
  */
 export const CardanoAddressesApiFactory = function (
   configuration?: Configuration,
@@ -7792,9 +5561,6 @@ export const CardanoAddressesApiFactory = function (
 
 /**
  * CardanoAddressesApi - object-oriented interface
- * @export
- * @class CardanoAddressesApi
- * @extends {BaseAPI}
  */
 export class CardanoAddressesApi extends BaseAPI {
   /**
@@ -7803,7 +5569,6 @@ export class CardanoAddressesApi extends BaseAPI {
    * @param {string} address Bech32 address.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAddressesApi
    */
   public addressesAddressExtendedGet(address: string, options?: RawAxiosRequestConfig) {
     return CardanoAddressesApiFp(this.configuration)
@@ -7817,7 +5582,6 @@ export class CardanoAddressesApi extends BaseAPI {
    * @param {string} address Bech32 address.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAddressesApi
    */
   public addressesAddressGet(address: string, options?: RawAxiosRequestConfig) {
     return CardanoAddressesApiFp(this.configuration)
@@ -7831,7 +5595,6 @@ export class CardanoAddressesApi extends BaseAPI {
    * @param {string} address Bech32 address.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAddressesApi
    */
   public addressesAddressTotalGet(address: string, options?: RawAxiosRequestConfig) {
     return CardanoAddressesApiFp(this.configuration)
@@ -7850,7 +5613,6 @@ export class CardanoAddressesApi extends BaseAPI {
    * @param {string} [to] The block number and optionally also index where (inclusive) to end the search for results, concatenated using colon. Has to be higher than or equal to &#x60;from&#x60; parameter.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAddressesApi
    */
   public addressesAddressTransactionsGet(
     address: string,
@@ -7876,7 +5638,6 @@ export class CardanoAddressesApi extends BaseAPI {
    * @param {*} [options] Override http request option.
    * @deprecated
    * @throws {RequiredError}
-   * @memberof CardanoAddressesApi
    */
   public addressesAddressTxsGet(
     address: string,
@@ -7900,7 +5661,6 @@ export class CardanoAddressesApi extends BaseAPI {
    * @param {AddressesAddressUtxosAssetGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAddressesApi
    */
   public addressesAddressUtxosAssetGet(
     address: string,
@@ -7924,7 +5684,6 @@ export class CardanoAddressesApi extends BaseAPI {
    * @param {AddressesAddressUtxosGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAddressesApi
    */
   public addressesAddressUtxosGet(
     address: string,
@@ -7939,36 +5698,24 @@ export class CardanoAddressesApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const AddressesAddressTransactionsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AddressesAddressTransactionsGetOrderEnum =
   (typeof AddressesAddressTransactionsGetOrderEnum)[keyof typeof AddressesAddressTransactionsGetOrderEnum];
-/**
- * @export
- */
 export const AddressesAddressTxsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AddressesAddressTxsGetOrderEnum =
   (typeof AddressesAddressTxsGetOrderEnum)[keyof typeof AddressesAddressTxsGetOrderEnum];
-/**
- * @export
- */
 export const AddressesAddressUtxosAssetGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AddressesAddressUtxosAssetGetOrderEnum =
   (typeof AddressesAddressUtxosAssetGetOrderEnum)[keyof typeof AddressesAddressUtxosAssetGetOrderEnum];
-/**
- * @export
- */
 export const AddressesAddressUtxosGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
@@ -7978,7 +5725,6 @@ export type AddressesAddressUtxosGetOrderEnum =
 
 /**
  * CardanoAssetsApi - axios parameter creator
- * @export
  */
 export const CardanoAssetsApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -8031,6 +5777,8 @@ export const CardanoAssetsApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -8074,6 +5822,8 @@ export const CardanoAssetsApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -8137,6 +5887,8 @@ export const CardanoAssetsApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -8198,6 +5950,8 @@ export const CardanoAssetsApiAxiosParamCreator = function (configuration?: Confi
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -8262,6 +6016,8 @@ export const CardanoAssetsApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -8316,6 +6072,8 @@ export const CardanoAssetsApiAxiosParamCreator = function (configuration?: Confi
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -8379,6 +6137,8 @@ export const CardanoAssetsApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -8397,7 +6157,6 @@ export const CardanoAssetsApiAxiosParamCreator = function (configuration?: Confi
 
 /**
  * CardanoAssetsApi - functional programming interface
- * @export
  */
 export const CardanoAssetsApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoAssetsApiAxiosParamCreator(configuration);
@@ -8654,7 +6413,6 @@ export const CardanoAssetsApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoAssetsApi - factory interface
- * @export
  */
 export const CardanoAssetsApiFactory = function (
   configuration?: Configuration,
@@ -8803,9 +6561,6 @@ export const CardanoAssetsApiFactory = function (
 
 /**
  * CardanoAssetsApi - object-oriented interface
- * @export
- * @class CardanoAssetsApi
- * @extends {BaseAPI}
  */
 export class CardanoAssetsApi extends BaseAPI {
   /**
@@ -8817,7 +6572,6 @@ export class CardanoAssetsApi extends BaseAPI {
    * @param {AssetsAssetAddressesGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAssetsApi
    */
   public assetsAssetAddressesGet(
     asset: string,
@@ -8837,7 +6591,6 @@ export class CardanoAssetsApi extends BaseAPI {
    * @param {string} asset Concatenation of the policy_id and hex-encoded asset_name
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAssetsApi
    */
   public assetsAssetGet(asset: string, options?: RawAxiosRequestConfig) {
     return CardanoAssetsApiFp(this.configuration)
@@ -8854,7 +6607,6 @@ export class CardanoAssetsApi extends BaseAPI {
    * @param {AssetsAssetHistoryGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAssetsApi
    */
   public assetsAssetHistoryGet(
     asset: string,
@@ -8877,7 +6629,6 @@ export class CardanoAssetsApi extends BaseAPI {
    * @param {AssetsAssetTransactionsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAssetsApi
    */
   public assetsAssetTransactionsGet(
     asset: string,
@@ -8901,7 +6652,6 @@ export class CardanoAssetsApi extends BaseAPI {
    * @param {*} [options] Override http request option.
    * @deprecated
    * @throws {RequiredError}
-   * @memberof CardanoAssetsApi
    */
   public assetsAssetTxsGet(
     asset: string,
@@ -8923,7 +6673,6 @@ export class CardanoAssetsApi extends BaseAPI {
    * @param {AssetsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last. Ordering in this case is based on the time of the first mint transaction.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAssetsApi
    */
   public assetsGet(
     count?: number,
@@ -8945,7 +6694,6 @@ export class CardanoAssetsApi extends BaseAPI {
    * @param {AssetsPolicyPolicyIdGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoAssetsApi
    */
   public assetsPolicyPolicyIdGet(
     policyId: string,
@@ -8960,53 +6708,35 @@ export class CardanoAssetsApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const AssetsAssetAddressesGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AssetsAssetAddressesGetOrderEnum =
   (typeof AssetsAssetAddressesGetOrderEnum)[keyof typeof AssetsAssetAddressesGetOrderEnum];
-/**
- * @export
- */
 export const AssetsAssetHistoryGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AssetsAssetHistoryGetOrderEnum =
   (typeof AssetsAssetHistoryGetOrderEnum)[keyof typeof AssetsAssetHistoryGetOrderEnum];
-/**
- * @export
- */
 export const AssetsAssetTransactionsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AssetsAssetTransactionsGetOrderEnum =
   (typeof AssetsAssetTransactionsGetOrderEnum)[keyof typeof AssetsAssetTransactionsGetOrderEnum];
-/**
- * @export
- */
 export const AssetsAssetTxsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AssetsAssetTxsGetOrderEnum =
   (typeof AssetsAssetTxsGetOrderEnum)[keyof typeof AssetsAssetTxsGetOrderEnum];
-/**
- * @export
- */
 export const AssetsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type AssetsGetOrderEnum = (typeof AssetsGetOrderEnum)[keyof typeof AssetsGetOrderEnum];
-/**
- * @export
- */
 export const AssetsPolicyPolicyIdGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
@@ -9016,7 +6746,6 @@ export type AssetsPolicyPolicyIdGetOrderEnum =
 
 /**
  * CardanoBlocksApi - axios parameter creator
- * @export
  */
 export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -9053,6 +6782,8 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -9110,6 +6841,8 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['page'] = page;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -9153,6 +6886,8 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -9210,6 +6945,8 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['page'] = page;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -9265,6 +7002,8 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
       if (page !== undefined) {
         localVarQueryParameter['page'] = page;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -9328,6 +7067,8 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -9390,6 +7131,8 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -9424,6 +7167,8 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -9480,6 +7225,8 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -9535,6 +7282,8 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -9579,6 +7328,8 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -9597,7 +7348,6 @@ export const CardanoBlocksApiAxiosParamCreator = function (configuration?: Confi
 
 /**
  * CardanoBlocksApi - functional programming interface
- * @export
  */
 export const CardanoBlocksApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoBlocksApiAxiosParamCreator(configuration);
@@ -9964,7 +7714,6 @@ export const CardanoBlocksApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoBlocksApi - factory interface
- * @export
  */
 export const CardanoBlocksApiFactory = function (
   configuration?: Configuration,
@@ -10171,9 +7920,6 @@ export const CardanoBlocksApiFactory = function (
 
 /**
  * CardanoBlocksApi - object-oriented interface
- * @export
- * @class CardanoBlocksApi
- * @extends {BaseAPI}
  */
 export class CardanoBlocksApi extends BaseAPI {
   /**
@@ -10183,7 +7929,6 @@ export class CardanoBlocksApi extends BaseAPI {
    * @param {number} slotNumber Slot position for requested block.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoBlocksApi
    */
   public blocksEpochEpochNumberSlotSlotNumberGet(
     epochNumber: number,
@@ -10203,7 +7948,6 @@ export class CardanoBlocksApi extends BaseAPI {
    * @param {number} [page] The page number for listing the results.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoBlocksApi
    */
   public blocksHashOrNumberAddressesGet(
     hashOrNumber: string,
@@ -10222,7 +7966,6 @@ export class CardanoBlocksApi extends BaseAPI {
    * @param {string} hashOrNumber Hash or number of the requested block.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoBlocksApi
    */
   public blocksHashOrNumberGet(hashOrNumber: string, options?: RawAxiosRequestConfig) {
     return CardanoBlocksApiFp(this.configuration)
@@ -10238,7 +7981,6 @@ export class CardanoBlocksApi extends BaseAPI {
    * @param {number} [page] The page number for listing the results.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoBlocksApi
    */
   public blocksHashOrNumberNextGet(
     hashOrNumber: string,
@@ -10259,7 +8001,6 @@ export class CardanoBlocksApi extends BaseAPI {
    * @param {number} [page] The page number for listing the results.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoBlocksApi
    */
   public blocksHashOrNumberPreviousGet(
     hashOrNumber: string,
@@ -10281,7 +8022,6 @@ export class CardanoBlocksApi extends BaseAPI {
    * @param {BlocksHashOrNumberTxsCborGetOrderEnum} [order] Ordered by tx index in the block. The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoBlocksApi
    */
   public blocksHashOrNumberTxsCborGet(
     hashOrNumber: string,
@@ -10304,7 +8044,6 @@ export class CardanoBlocksApi extends BaseAPI {
    * @param {BlocksHashOrNumberTxsGetOrderEnum} [order] Ordered by tx index in the block. The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoBlocksApi
    */
   public blocksHashOrNumberTxsGet(
     hashOrNumber: string,
@@ -10323,7 +8062,6 @@ export class CardanoBlocksApi extends BaseAPI {
    * @summary Latest block
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoBlocksApi
    */
   public blocksLatestGet(options?: RawAxiosRequestConfig) {
     return CardanoBlocksApiFp(this.configuration)
@@ -10339,7 +8077,6 @@ export class CardanoBlocksApi extends BaseAPI {
    * @param {BlocksLatestTxsCborGetOrderEnum} [order] Ordered by tx index in the block. The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoBlocksApi
    */
   public blocksLatestTxsCborGet(
     count?: number,
@@ -10360,7 +8097,6 @@ export class CardanoBlocksApi extends BaseAPI {
    * @param {BlocksLatestTxsGetOrderEnum} [order] Ordered by tx index in the block. The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoBlocksApi
    */
   public blocksLatestTxsGet(
     count?: number,
@@ -10379,7 +8115,6 @@ export class CardanoBlocksApi extends BaseAPI {
    * @param {number} slotNumber Slot position for requested block.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoBlocksApi
    */
   public blocksSlotSlotNumberGet(slotNumber: number, options?: RawAxiosRequestConfig) {
     return CardanoBlocksApiFp(this.configuration)
@@ -10388,36 +8123,24 @@ export class CardanoBlocksApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const BlocksHashOrNumberTxsCborGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type BlocksHashOrNumberTxsCborGetOrderEnum =
   (typeof BlocksHashOrNumberTxsCborGetOrderEnum)[keyof typeof BlocksHashOrNumberTxsCborGetOrderEnum];
-/**
- * @export
- */
 export const BlocksHashOrNumberTxsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type BlocksHashOrNumberTxsGetOrderEnum =
   (typeof BlocksHashOrNumberTxsGetOrderEnum)[keyof typeof BlocksHashOrNumberTxsGetOrderEnum];
-/**
- * @export
- */
 export const BlocksLatestTxsCborGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type BlocksLatestTxsCborGetOrderEnum =
   (typeof BlocksLatestTxsCborGetOrderEnum)[keyof typeof BlocksLatestTxsCborGetOrderEnum];
-/**
- * @export
- */
 export const BlocksLatestTxsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
@@ -10427,7 +8150,6 @@ export type BlocksLatestTxsGetOrderEnum =
 
 /**
  * CardanoEpochsApi - axios parameter creator
- * @export
  */
 export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -10452,6 +8174,8 @@ export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -10489,6 +8213,8 @@ export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -10551,6 +8277,8 @@ export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Confi
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -10617,6 +8345,8 @@ export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -10660,6 +8390,8 @@ export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -10717,6 +8449,8 @@ export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['page'] = page;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -10760,6 +8494,8 @@ export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Confi
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -10817,6 +8553,8 @@ export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['page'] = page;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -10872,6 +8610,8 @@ export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Confi
       if (page !== undefined) {
         localVarQueryParameter['page'] = page;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -10932,6 +8672,8 @@ export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Confi
         localVarQueryParameter['page'] = page;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -10950,7 +8692,6 @@ export const CardanoEpochsApiAxiosParamCreator = function (configuration?: Confi
 
 /**
  * CardanoEpochsApi - functional programming interface
- * @export
  */
 export const CardanoEpochsApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoEpochsApiAxiosParamCreator(configuration);
@@ -11272,7 +9013,6 @@ export const CardanoEpochsApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoEpochsApi - factory interface
- * @export
  */
 export const CardanoEpochsApiFactory = function (
   configuration?: Configuration,
@@ -11455,9 +9195,6 @@ export const CardanoEpochsApiFactory = function (
 
 /**
  * CardanoEpochsApi - object-oriented interface
- * @export
- * @class CardanoEpochsApi
- * @extends {BaseAPI}
  */
 export class CardanoEpochsApi extends BaseAPI {
   /**
@@ -11465,7 +9202,6 @@ export class CardanoEpochsApi extends BaseAPI {
    * @summary Latest epoch
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoEpochsApi
    */
   public epochsLatestGet(options?: RawAxiosRequestConfig) {
     return CardanoEpochsApiFp(this.configuration)
@@ -11478,7 +9214,6 @@ export class CardanoEpochsApi extends BaseAPI {
    * @summary Latest epoch protocol parameters
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoEpochsApi
    */
   public epochsLatestParametersGet(options?: RawAxiosRequestConfig) {
     return CardanoEpochsApiFp(this.configuration)
@@ -11495,7 +9230,6 @@ export class CardanoEpochsApi extends BaseAPI {
    * @param {EpochsNumberBlocksGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoEpochsApi
    */
   public epochsNumberBlocksGet(
     number: number,
@@ -11519,7 +9253,6 @@ export class CardanoEpochsApi extends BaseAPI {
    * @param {EpochsNumberBlocksPoolIdGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoEpochsApi
    */
   public epochsNumberBlocksPoolIdGet(
     number: number,
@@ -11540,7 +9273,6 @@ export class CardanoEpochsApi extends BaseAPI {
    * @param {number} number Number of the epoch
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoEpochsApi
    */
   public epochsNumberGet(number: number, options?: RawAxiosRequestConfig) {
     return CardanoEpochsApiFp(this.configuration)
@@ -11556,7 +9288,6 @@ export class CardanoEpochsApi extends BaseAPI {
    * @param {number} [page] The page number for listing the results.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoEpochsApi
    */
   public epochsNumberNextGet(
     number: number,
@@ -11575,7 +9306,6 @@ export class CardanoEpochsApi extends BaseAPI {
    * @param {number} number Number of the epoch
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoEpochsApi
    */
   public epochsNumberParametersGet(number: number, options?: RawAxiosRequestConfig) {
     return CardanoEpochsApiFp(this.configuration)
@@ -11591,7 +9321,6 @@ export class CardanoEpochsApi extends BaseAPI {
    * @param {number} [page] The page number for listing the results
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoEpochsApi
    */
   public epochsNumberPreviousGet(
     number: number,
@@ -11612,7 +9341,6 @@ export class CardanoEpochsApi extends BaseAPI {
    * @param {number} [page] The page number for listing the results.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoEpochsApi
    */
   public epochsNumberStakesGet(
     number: number,
@@ -11634,7 +9362,6 @@ export class CardanoEpochsApi extends BaseAPI {
    * @param {number} [page] The page number for listing the results.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoEpochsApi
    */
   public epochsNumberStakesPoolIdGet(
     number: number,
@@ -11649,18 +9376,12 @@ export class CardanoEpochsApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const EpochsNumberBlocksGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type EpochsNumberBlocksGetOrderEnum =
   (typeof EpochsNumberBlocksGetOrderEnum)[keyof typeof EpochsNumberBlocksGetOrderEnum];
-/**
- * @export
- */
 export const EpochsNumberBlocksPoolIdGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
@@ -11670,7 +9391,6 @@ export type EpochsNumberBlocksPoolIdGetOrderEnum =
 
 /**
  * CardanoGovernanceApi - axios parameter creator
- * @export
  */
 export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -11723,6 +9443,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -11767,6 +9489,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -11810,6 +9534,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -11873,6 +9599,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -11935,6 +9663,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -11989,6 +9719,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -12045,6 +9777,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -12091,6 +9825,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -12139,6 +9875,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -12185,6 +9923,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -12251,6 +9991,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -12298,6 +10040,8 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -12316,7 +10060,6 @@ export const CardanoGovernanceApiAxiosParamCreator = function (configuration?: C
 
 /**
  * CardanoGovernanceApi - functional programming interface
- * @export
  */
 export const CardanoGovernanceApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoGovernanceApiAxiosParamCreator(configuration);
@@ -12738,7 +10481,6 @@ export const CardanoGovernanceApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoGovernanceApi - factory interface
- * @export
  */
 export const CardanoGovernanceApiFactory = function (
   configuration?: Configuration,
@@ -12971,9 +10713,6 @@ export const CardanoGovernanceApiFactory = function (
 
 /**
  * CardanoGovernanceApi - object-oriented interface
- * @export
- * @class CardanoGovernanceApi
- * @extends {BaseAPI}
  */
 export class CardanoGovernanceApi extends BaseAPI {
   /**
@@ -12985,7 +10724,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {GovernanceDrepsDrepIdDelegatorsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceDrepsDrepIdDelegatorsGet(
     drepId: string,
@@ -13005,7 +10743,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {string} drepId Bech32 or hexadecimal DRep ID.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceDrepsDrepIdGet(drepId: string, options?: RawAxiosRequestConfig) {
     return CardanoGovernanceApiFp(this.configuration)
@@ -13019,7 +10756,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {string} drepId Bech32 or hexadecimal DRep ID.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceDrepsDrepIdMetadataGet(drepId: string, options?: RawAxiosRequestConfig) {
     return CardanoGovernanceApiFp(this.configuration)
@@ -13036,7 +10772,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {GovernanceDrepsDrepIdUpdatesGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceDrepsDrepIdUpdatesGet(
     drepId: string,
@@ -13059,7 +10794,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {GovernanceDrepsDrepIdVotesGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceDrepsDrepIdVotesGet(
     drepId: string,
@@ -13081,7 +10815,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {GovernanceDrepsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last. Ordering in this case is based on the time of the first mint transaction.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceDrepsGet(
     count?: number,
@@ -13102,7 +10835,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {GovernanceProposalsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last. Ordering in this case is based on the time of the first mint transaction.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceProposalsGet(
     count?: number,
@@ -13122,7 +10854,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {number} certIndex Index of the certificate within the proposal transaction.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceProposalsTxHashCertIndexGet(
     txHash: string,
@@ -13141,7 +10872,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {number} certIndex Index of the certificate within the proposal transaction.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceProposalsTxHashCertIndexMetadataGet(
     txHash: string,
@@ -13160,7 +10890,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {number} certIndex Index of the certificate within the proposal transaction.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceProposalsTxHashCertIndexParametersGet(
     txHash: string,
@@ -13182,7 +10911,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {GovernanceProposalsTxHashCertIndexVotesGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceProposalsTxHashCertIndexVotesGet(
     txHash: string,
@@ -13204,7 +10932,6 @@ export class CardanoGovernanceApi extends BaseAPI {
    * @param {number} certIndex Index of the certificate within the proposal transaction.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoGovernanceApi
    */
   public governanceProposalsTxHashCertIndexWithdrawalsGet(
     txHash: string,
@@ -13217,54 +10944,36 @@ export class CardanoGovernanceApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const GovernanceDrepsDrepIdDelegatorsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type GovernanceDrepsDrepIdDelegatorsGetOrderEnum =
   (typeof GovernanceDrepsDrepIdDelegatorsGetOrderEnum)[keyof typeof GovernanceDrepsDrepIdDelegatorsGetOrderEnum];
-/**
- * @export
- */
 export const GovernanceDrepsDrepIdUpdatesGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type GovernanceDrepsDrepIdUpdatesGetOrderEnum =
   (typeof GovernanceDrepsDrepIdUpdatesGetOrderEnum)[keyof typeof GovernanceDrepsDrepIdUpdatesGetOrderEnum];
-/**
- * @export
- */
 export const GovernanceDrepsDrepIdVotesGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type GovernanceDrepsDrepIdVotesGetOrderEnum =
   (typeof GovernanceDrepsDrepIdVotesGetOrderEnum)[keyof typeof GovernanceDrepsDrepIdVotesGetOrderEnum];
-/**
- * @export
- */
 export const GovernanceDrepsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type GovernanceDrepsGetOrderEnum =
   (typeof GovernanceDrepsGetOrderEnum)[keyof typeof GovernanceDrepsGetOrderEnum];
-/**
- * @export
- */
 export const GovernanceProposalsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type GovernanceProposalsGetOrderEnum =
   (typeof GovernanceProposalsGetOrderEnum)[keyof typeof GovernanceProposalsGetOrderEnum];
-/**
- * @export
- */
 export const GovernanceProposalsTxHashCertIndexVotesGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
@@ -13274,7 +10983,6 @@ export type GovernanceProposalsTxHashCertIndexVotesGetOrderEnum =
 
 /**
  * CardanoLedgerApi - axios parameter creator
- * @export
  */
 export const CardanoLedgerApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -13300,6 +11008,8 @@ export const CardanoLedgerApiAxiosParamCreator = function (configuration?: Confi
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -13318,7 +11028,6 @@ export const CardanoLedgerApiAxiosParamCreator = function (configuration?: Confi
 
 /**
  * CardanoLedgerApi - functional programming interface
- * @export
  */
 export const CardanoLedgerApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoLedgerApiAxiosParamCreator(configuration);
@@ -13349,7 +11058,6 @@ export const CardanoLedgerApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoLedgerApi - factory interface
- * @export
  */
 export const CardanoLedgerApiFactory = function (
   configuration?: Configuration,
@@ -13372,9 +11080,6 @@ export const CardanoLedgerApiFactory = function (
 
 /**
  * CardanoLedgerApi - object-oriented interface
- * @export
- * @class CardanoLedgerApi
- * @extends {BaseAPI}
  */
 export class CardanoLedgerApi extends BaseAPI {
   /**
@@ -13382,7 +11087,6 @@ export class CardanoLedgerApi extends BaseAPI {
    * @summary Blockchain genesis
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoLedgerApi
    */
   public genesisGet(options?: RawAxiosRequestConfig) {
     return CardanoLedgerApiFp(this.configuration)
@@ -13393,7 +11097,6 @@ export class CardanoLedgerApi extends BaseAPI {
 
 /**
  * CardanoMempoolApi - axios parameter creator
- * @export
  */
 export const CardanoMempoolApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -13445,6 +11148,8 @@ export const CardanoMempoolApiAxiosParamCreator = function (configuration?: Conf
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -13501,6 +11206,8 @@ export const CardanoMempoolApiAxiosParamCreator = function (configuration?: Conf
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -13545,6 +11252,8 @@ export const CardanoMempoolApiAxiosParamCreator = function (configuration?: Conf
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -13563,7 +11272,6 @@ export const CardanoMempoolApiAxiosParamCreator = function (configuration?: Conf
 
 /**
  * CardanoMempoolApi - functional programming interface
- * @export
  */
 export const CardanoMempoolApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoMempoolApiAxiosParamCreator(configuration);
@@ -13669,7 +11377,6 @@ export const CardanoMempoolApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoMempoolApi - factory interface
- * @export
  */
 export const CardanoMempoolApiFactory = function (
   configuration?: Configuration,
@@ -13733,9 +11440,6 @@ export const CardanoMempoolApiFactory = function (
 
 /**
  * CardanoMempoolApi - object-oriented interface
- * @export
- * @class CardanoMempoolApi
- * @extends {BaseAPI}
  */
 export class CardanoMempoolApi extends BaseAPI {
   /**
@@ -13747,7 +11451,6 @@ export class CardanoMempoolApi extends BaseAPI {
    * @param {MempoolAddressesAddressGetOrderEnum} [order] Ordered by the time of transaction submission. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoMempoolApi
    */
   public mempoolAddressesAddressGet(
     address: string,
@@ -13769,7 +11472,6 @@ export class CardanoMempoolApi extends BaseAPI {
    * @param {MempoolGetOrderEnum} [order] Ordered by the time of transaction submission. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoMempoolApi
    */
   public mempoolGet(
     count?: number,
@@ -13788,7 +11490,6 @@ export class CardanoMempoolApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoMempoolApi
    */
   public mempoolHashGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoMempoolApiFp(this.configuration)
@@ -13797,18 +11498,12 @@ export class CardanoMempoolApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const MempoolAddressesAddressGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type MempoolAddressesAddressGetOrderEnum =
   (typeof MempoolAddressesAddressGetOrderEnum)[keyof typeof MempoolAddressesAddressGetOrderEnum];
-/**
- * @export
- */
 export const MempoolGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
@@ -13817,7 +11512,6 @@ export type MempoolGetOrderEnum = (typeof MempoolGetOrderEnum)[keyof typeof Memp
 
 /**
  * CardanoMetadataApi - axios parameter creator
- * @export
  */
 export const CardanoMetadataApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -13862,6 +11556,8 @@ export const CardanoMetadataApiAxiosParamCreator = function (configuration?: Con
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -13925,6 +11621,8 @@ export const CardanoMetadataApiAxiosParamCreator = function (configuration?: Con
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -13987,6 +11685,8 @@ export const CardanoMetadataApiAxiosParamCreator = function (configuration?: Con
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -14005,7 +11705,6 @@ export const CardanoMetadataApiAxiosParamCreator = function (configuration?: Con
 
 /**
  * CardanoMetadataApi - functional programming interface
- * @export
  */
 export const CardanoMetadataApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoMetadataApiAxiosParamCreator(configuration);
@@ -14129,7 +11828,6 @@ export const CardanoMetadataApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoMetadataApi - factory interface
- * @export
  */
 export const CardanoMetadataApiFactory = function (
   configuration?: Configuration,
@@ -14204,9 +11902,6 @@ export const CardanoMetadataApiFactory = function (
 
 /**
  * CardanoMetadataApi - object-oriented interface
- * @export
- * @class CardanoMetadataApi
- * @extends {BaseAPI}
  */
 export class CardanoMetadataApi extends BaseAPI {
   /**
@@ -14217,7 +11912,6 @@ export class CardanoMetadataApi extends BaseAPI {
    * @param {MetadataTxsLabelsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoMetadataApi
    */
   public metadataTxsLabelsGet(
     count?: number,
@@ -14239,7 +11933,6 @@ export class CardanoMetadataApi extends BaseAPI {
    * @param {MetadataTxsLabelsLabelCborGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoMetadataApi
    */
   public metadataTxsLabelsLabelCborGet(
     label: string,
@@ -14262,7 +11955,6 @@ export class CardanoMetadataApi extends BaseAPI {
    * @param {MetadataTxsLabelsLabelGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoMetadataApi
    */
   public metadataTxsLabelsLabelGet(
     label: string,
@@ -14277,27 +11969,18 @@ export class CardanoMetadataApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const MetadataTxsLabelsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type MetadataTxsLabelsGetOrderEnum =
   (typeof MetadataTxsLabelsGetOrderEnum)[keyof typeof MetadataTxsLabelsGetOrderEnum];
-/**
- * @export
- */
 export const MetadataTxsLabelsLabelCborGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type MetadataTxsLabelsLabelCborGetOrderEnum =
   (typeof MetadataTxsLabelsLabelCborGetOrderEnum)[keyof typeof MetadataTxsLabelsLabelCborGetOrderEnum];
-/**
- * @export
- */
 export const MetadataTxsLabelsLabelGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
@@ -14307,7 +11990,6 @@ export type MetadataTxsLabelsLabelGetOrderEnum =
 
 /**
  * CardanoNetworkApi - axios parameter creator
- * @export
  */
 export const CardanoNetworkApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -14332,6 +12014,8 @@ export const CardanoNetworkApiAxiosParamCreator = function (configuration?: Conf
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -14368,6 +12052,8 @@ export const CardanoNetworkApiAxiosParamCreator = function (configuration?: Conf
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -14386,7 +12072,6 @@ export const CardanoNetworkApiAxiosParamCreator = function (configuration?: Conf
 
 /**
  * CardanoNetworkApi - functional programming interface
- * @export
  */
 export const CardanoNetworkApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoNetworkApiAxiosParamCreator(configuration);
@@ -14440,7 +12125,6 @@ export const CardanoNetworkApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoNetworkApi - factory interface
- * @export
  */
 export const CardanoNetworkApiFactory = function (
   configuration?: Configuration,
@@ -14472,9 +12156,6 @@ export const CardanoNetworkApiFactory = function (
 
 /**
  * CardanoNetworkApi - object-oriented interface
- * @export
- * @class CardanoNetworkApi
- * @extends {BaseAPI}
  */
 export class CardanoNetworkApi extends BaseAPI {
   /**
@@ -14482,7 +12163,6 @@ export class CardanoNetworkApi extends BaseAPI {
    * @summary Query summary of blockchain eras
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoNetworkApi
    */
   public networkErasGet(options?: RawAxiosRequestConfig) {
     return CardanoNetworkApiFp(this.configuration)
@@ -14495,7 +12175,6 @@ export class CardanoNetworkApi extends BaseAPI {
    * @summary Network information
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoNetworkApi
    */
   public networkGet(options?: RawAxiosRequestConfig) {
     return CardanoNetworkApiFp(this.configuration)
@@ -14506,7 +12185,6 @@ export class CardanoNetworkApi extends BaseAPI {
 
 /**
  * CardanoPoolsApi - axios parameter creator
- * @export
  */
 export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -14551,6 +12229,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -14606,6 +12286,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -14669,6 +12351,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -14731,6 +12415,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -14774,6 +12460,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -14837,6 +12525,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -14881,6 +12571,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -14924,6 +12616,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -14987,6 +12681,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -15049,6 +12745,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -15103,6 +12801,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -15159,6 +12859,8 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -15177,7 +12879,6 @@ export const CardanoPoolsApiAxiosParamCreator = function (configuration?: Config
 
 /**
  * CardanoPoolsApi - functional programming interface
- * @export
  */
 export const CardanoPoolsApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoPoolsApiAxiosParamCreator(configuration);
@@ -15592,7 +13293,6 @@ export const CardanoPoolsApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoPoolsApi - factory interface
- * @export
  */
 export const CardanoPoolsApiFactory = function (
   configuration?: Configuration,
@@ -15827,9 +13527,6 @@ export const CardanoPoolsApiFactory = function (
 
 /**
  * CardanoPoolsApi - object-oriented interface
- * @export
- * @class CardanoPoolsApi
- * @extends {BaseAPI}
  */
 export class CardanoPoolsApi extends BaseAPI {
   /**
@@ -15840,7 +13537,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {PoolsExtendedGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsExtendedGet(
     count?: number,
@@ -15861,7 +13557,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {PoolsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsGet(
     count?: number,
@@ -15883,7 +13578,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {PoolsPoolIdBlocksGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsPoolIdBlocksGet(
     poolId: string,
@@ -15906,7 +13600,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {PoolsPoolIdDelegatorsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsPoolIdDelegatorsGet(
     poolId: string,
@@ -15926,7 +13619,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {string} poolId Bech32 or hexadecimal pool ID.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsPoolIdGet(poolId: string, options?: RawAxiosRequestConfig) {
     return CardanoPoolsApiFp(this.configuration)
@@ -15943,7 +13635,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {PoolsPoolIdHistoryGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsPoolIdHistoryGet(
     poolId: string,
@@ -15963,7 +13654,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {string} poolId Bech32 or hexadecimal pool ID.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsPoolIdMetadataGet(poolId: string, options?: RawAxiosRequestConfig) {
     return CardanoPoolsApiFp(this.configuration)
@@ -15977,7 +13667,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {string} poolId Bech32 or hexadecimal pool ID.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsPoolIdRelaysGet(poolId: string, options?: RawAxiosRequestConfig) {
     return CardanoPoolsApiFp(this.configuration)
@@ -15994,7 +13683,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {PoolsPoolIdUpdatesGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsPoolIdUpdatesGet(
     poolId: string,
@@ -16017,7 +13705,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {PoolsPoolIdVotesGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsPoolIdVotesGet(
     poolId: string,
@@ -16039,7 +13726,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {PoolsRetiredGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsRetiredGet(
     count?: number,
@@ -16060,7 +13746,6 @@ export class CardanoPoolsApi extends BaseAPI {
    * @param {PoolsRetiringGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoPoolsApi
    */
   public poolsRetiringGet(
     count?: number,
@@ -16074,80 +13759,53 @@ export class CardanoPoolsApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const PoolsExtendedGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type PoolsExtendedGetOrderEnum =
   (typeof PoolsExtendedGetOrderEnum)[keyof typeof PoolsExtendedGetOrderEnum];
-/**
- * @export
- */
 export const PoolsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type PoolsGetOrderEnum = (typeof PoolsGetOrderEnum)[keyof typeof PoolsGetOrderEnum];
-/**
- * @export
- */
 export const PoolsPoolIdBlocksGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type PoolsPoolIdBlocksGetOrderEnum =
   (typeof PoolsPoolIdBlocksGetOrderEnum)[keyof typeof PoolsPoolIdBlocksGetOrderEnum];
-/**
- * @export
- */
 export const PoolsPoolIdDelegatorsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type PoolsPoolIdDelegatorsGetOrderEnum =
   (typeof PoolsPoolIdDelegatorsGetOrderEnum)[keyof typeof PoolsPoolIdDelegatorsGetOrderEnum];
-/**
- * @export
- */
 export const PoolsPoolIdHistoryGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type PoolsPoolIdHistoryGetOrderEnum =
   (typeof PoolsPoolIdHistoryGetOrderEnum)[keyof typeof PoolsPoolIdHistoryGetOrderEnum];
-/**
- * @export
- */
 export const PoolsPoolIdUpdatesGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type PoolsPoolIdUpdatesGetOrderEnum =
   (typeof PoolsPoolIdUpdatesGetOrderEnum)[keyof typeof PoolsPoolIdUpdatesGetOrderEnum];
-/**
- * @export
- */
 export const PoolsPoolIdVotesGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type PoolsPoolIdVotesGetOrderEnum =
   (typeof PoolsPoolIdVotesGetOrderEnum)[keyof typeof PoolsPoolIdVotesGetOrderEnum];
-/**
- * @export
- */
 export const PoolsRetiredGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type PoolsRetiredGetOrderEnum =
   (typeof PoolsRetiredGetOrderEnum)[keyof typeof PoolsRetiredGetOrderEnum];
-/**
- * @export
- */
 export const PoolsRetiringGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
@@ -16157,7 +13815,6 @@ export type PoolsRetiringGetOrderEnum =
 
 /**
  * CardanoScriptsApi - axios parameter creator
- * @export
  */
 export const CardanoScriptsApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -16191,6 +13848,8 @@ export const CardanoScriptsApiAxiosParamCreator = function (configuration?: Conf
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -16235,6 +13894,8 @@ export const CardanoScriptsApiAxiosParamCreator = function (configuration?: Conf
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -16291,6 +13952,8 @@ export const CardanoScriptsApiAxiosParamCreator = function (configuration?: Conf
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -16334,6 +13997,8 @@ export const CardanoScriptsApiAxiosParamCreator = function (configuration?: Conf
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -16379,6 +14044,8 @@ export const CardanoScriptsApiAxiosParamCreator = function (configuration?: Conf
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -16422,6 +14089,8 @@ export const CardanoScriptsApiAxiosParamCreator = function (configuration?: Conf
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -16485,6 +14154,8 @@ export const CardanoScriptsApiAxiosParamCreator = function (configuration?: Conf
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -16503,7 +14174,6 @@ export const CardanoScriptsApiAxiosParamCreator = function (configuration?: Conf
 
 /**
  * CardanoScriptsApi - functional programming interface
- * @export
  */
 export const CardanoScriptsApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoScriptsApiAxiosParamCreator(configuration);
@@ -16723,7 +14393,6 @@ export const CardanoScriptsApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoScriptsApi - factory interface
- * @export
  */
 export const CardanoScriptsApiFactory = function (
   configuration?: Configuration,
@@ -16852,9 +14521,6 @@ export const CardanoScriptsApiFactory = function (
 
 /**
  * CardanoScriptsApi - object-oriented interface
- * @export
- * @class CardanoScriptsApi
- * @extends {BaseAPI}
  */
 export class CardanoScriptsApi extends BaseAPI {
   /**
@@ -16863,7 +14529,6 @@ export class CardanoScriptsApi extends BaseAPI {
    * @param {string} datumHash Hash of the datum
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoScriptsApi
    */
   public scriptsDatumDatumHashCborGet(datumHash: string, options?: RawAxiosRequestConfig) {
     return CardanoScriptsApiFp(this.configuration)
@@ -16877,7 +14542,6 @@ export class CardanoScriptsApi extends BaseAPI {
    * @param {string} datumHash Hash of the datum
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoScriptsApi
    */
   public scriptsDatumDatumHashGet(datumHash: string, options?: RawAxiosRequestConfig) {
     return CardanoScriptsApiFp(this.configuration)
@@ -16893,7 +14557,6 @@ export class CardanoScriptsApi extends BaseAPI {
    * @param {ScriptsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoScriptsApi
    */
   public scriptsGet(
     count?: number,
@@ -16912,7 +14575,6 @@ export class CardanoScriptsApi extends BaseAPI {
    * @param {string} scriptHash Hash of the script
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoScriptsApi
    */
   public scriptsScriptHashCborGet(scriptHash: string, options?: RawAxiosRequestConfig) {
     return CardanoScriptsApiFp(this.configuration)
@@ -16926,7 +14588,6 @@ export class CardanoScriptsApi extends BaseAPI {
    * @param {string} scriptHash Hash of the script
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoScriptsApi
    */
   public scriptsScriptHashGet(scriptHash: string, options?: RawAxiosRequestConfig) {
     return CardanoScriptsApiFp(this.configuration)
@@ -16940,7 +14601,6 @@ export class CardanoScriptsApi extends BaseAPI {
    * @param {string} scriptHash Hash of the script
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoScriptsApi
    */
   public scriptsScriptHashJsonGet(scriptHash: string, options?: RawAxiosRequestConfig) {
     return CardanoScriptsApiFp(this.configuration)
@@ -16957,7 +14617,6 @@ export class CardanoScriptsApi extends BaseAPI {
    * @param {ScriptsScriptHashRedeemersGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoScriptsApi
    */
   public scriptsScriptHashRedeemersGet(
     scriptHash: string,
@@ -16972,17 +14631,11 @@ export class CardanoScriptsApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const ScriptsGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type ScriptsGetOrderEnum = (typeof ScriptsGetOrderEnum)[keyof typeof ScriptsGetOrderEnum];
-/**
- * @export
- */
 export const ScriptsScriptHashRedeemersGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
@@ -16992,7 +14645,6 @@ export type ScriptsScriptHashRedeemersGetOrderEnum =
 
 /**
  * CardanoTransactionsApi - axios parameter creator
- * @export
  */
 export const CardanoTransactionsApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -17025,6 +14677,7 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
       localVarHeaderParameter['Content-Type'] = 'application/cbor';
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -17038,6 +14691,63 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
         localVarRequestOptions,
         configuration
       );
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions
+      };
+    },
+    /**
+     * Return a paginated list of transactions across all blocks. Results are ordered by block position (oldest first by default). Deep pagination is capped at `page * count ≤ 3000`; requests that exceed this limit return HTTP 400.
+     * @summary Transactions
+     * @param {number} [count] The number of results displayed on one page.
+     * @param {number} [page] The page number for listing the results.
+     * @param {TxsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    txsGet: async (
+      count?: number,
+      page?: number,
+      order?: TxsGetOrderEnum,
+      options: RawAxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/txs`;
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication project_id required
+      await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      if (count !== undefined) {
+        localVarQueryParameter['count'] = count;
+      }
+
+      if (page !== undefined) {
+        localVarQueryParameter['page'] = page;
+      }
+
+      if (order !== undefined) {
+        localVarQueryParameter['order'] = order;
+      }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers
+      };
 
       return {
         url: toPathString(localVarUrlObj),
@@ -17074,6 +14784,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -17119,6 +14831,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -17156,6 +14870,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -17201,6 +14917,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -17244,6 +14962,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -17289,6 +15009,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -17332,6 +15054,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -17377,6 +15101,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -17420,6 +15146,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -17465,6 +15193,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -17508,6 +15238,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -17553,6 +15285,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -17597,6 +15331,8 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -17615,7 +15351,6 @@ export const CardanoTransactionsApiAxiosParamCreator = function (configuration?:
 
 /**
  * CardanoTransactionsApi - functional programming interface
- * @export
  */
 export const CardanoTransactionsApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoTransactionsApiAxiosParamCreator(configuration);
@@ -17636,6 +15371,35 @@ export const CardanoTransactionsApiFp = function (configuration?: Configuration)
       const localVarOperationServerBasePath =
         operationServerMap['CardanoTransactionsApi.txSubmitPost']?.[localVarOperationServerIndex]
           ?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
+     * Return a paginated list of transactions across all blocks. Results are ordered by block position (oldest first by default). Deep pagination is capped at `page * count ≤ 3000`; requests that exceed this limit return HTTP 400.
+     * @summary Transactions
+     * @param {number} [count] The number of results displayed on one page.
+     * @param {number} [page] The page number for listing the results.
+     * @param {TxsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async txsGet(
+      count?: number,
+      page?: number,
+      order?: TxsGetOrderEnum,
+      options?: RawAxiosRequestConfig
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TxsGet200ResponseInner>>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.txsGet(count, page, order, options);
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap['CardanoTransactionsApi.txsGet']?.[localVarOperationServerIndex]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -18011,7 +15775,6 @@ export const CardanoTransactionsApiFp = function (configuration?: Configuration)
 
 /**
  * CardanoTransactionsApi - factory interface
- * @export
  */
 export const CardanoTransactionsApiFactory = function (
   configuration?: Configuration,
@@ -18029,6 +15792,25 @@ export const CardanoTransactionsApiFactory = function (
      */
     txSubmitPost(body: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
       return localVarFp.txSubmitPost(body, options).then((request) => request(axios, basePath));
+    },
+    /**
+     * Return a paginated list of transactions across all blocks. Results are ordered by block position (oldest first by default). Deep pagination is capped at `page * count ≤ 3000`; requests that exceed this limit return HTTP 400.
+     * @summary Transactions
+     * @param {number} [count] The number of results displayed on one page.
+     * @param {number} [page] The page number for listing the results.
+     * @param {TxsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    txsGet(
+      count?: number,
+      page?: number,
+      order?: TxsGetOrderEnum,
+      options?: RawAxiosRequestConfig
+    ): AxiosPromise<Array<TxsGet200ResponseInner>> {
+      return localVarFp
+        .txsGet(count, page, order, options)
+        .then((request) => request(axios, basePath));
     },
     /**
      * Obtain the CBOR serialized transaction
@@ -18211,9 +15993,6 @@ export const CardanoTransactionsApiFactory = function (
 
 /**
  * CardanoTransactionsApi - object-oriented interface
- * @export
- * @class CardanoTransactionsApi
- * @extends {BaseAPI}
  */
 export class CardanoTransactionsApi extends BaseAPI {
   /**
@@ -18222,11 +16001,30 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} body The transaction to submit, serialized in CBOR.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txSubmitPost(body: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
       .txSubmitPost(body, options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   * Return a paginated list of transactions across all blocks. Results are ordered by block position (oldest first by default). Deep pagination is capped at `page * count ≤ 3000`; requests that exceed this limit return HTTP 400.
+   * @summary Transactions
+   * @param {number} [count] The number of results displayed on one page.
+   * @param {number} [page] The page number for listing the results.
+   * @param {TxsGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   */
+  public txsGet(
+    count?: number,
+    page?: number,
+    order?: TxsGetOrderEnum,
+    options?: RawAxiosRequestConfig
+  ) {
+    return CardanoTransactionsApiFp(this.configuration)
+      .txsGet(count, page, order, options)
       .then((request) => request(this.axios, this.basePath));
   }
 
@@ -18236,7 +16034,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the transaction
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashCborGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18250,7 +16047,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashDelegationsGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18264,7 +16060,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18278,7 +16073,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashMetadataCborGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18292,7 +16086,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashMetadataGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18306,7 +16099,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashMirsGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18320,7 +16112,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashPoolRetiresGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18334,7 +16125,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashPoolUpdatesGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18348,7 +16138,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashRedeemersGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18362,7 +16151,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the transaction
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashRequiredSignersGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18376,7 +16164,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashStakesGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18390,7 +16177,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashUtxosGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18404,7 +16190,6 @@ export class CardanoTransactionsApi extends BaseAPI {
    * @param {string} hash Hash of the requested transaction.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoTransactionsApi
    */
   public txsHashWithdrawalsGet(hash: string, options?: RawAxiosRequestConfig) {
     return CardanoTransactionsApiFp(this.configuration)
@@ -18413,9 +16198,14 @@ export class CardanoTransactionsApi extends BaseAPI {
   }
 }
 
+export const TxsGetOrderEnum = {
+  Asc: 'asc',
+  Desc: 'desc'
+} as const;
+export type TxsGetOrderEnum = (typeof TxsGetOrderEnum)[keyof typeof TxsGetOrderEnum];
+
 /**
  * CardanoUtilitiesApi - axios parameter creator
- * @export
  */
 export const CardanoUtilitiesApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -18457,6 +16247,8 @@ export const CardanoUtilitiesApiAxiosParamCreator = function (configuration?: Co
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -18510,6 +16302,7 @@ export const CardanoUtilitiesApiAxiosParamCreator = function (configuration?: Co
       }
 
       localVarHeaderParameter['Content-Type'] = 'application/cbor';
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       if (contentType != null) {
         localVarHeaderParameter['Content-Type'] = String(contentType);
@@ -18575,6 +16368,7 @@ export const CardanoUtilitiesApiAxiosParamCreator = function (configuration?: Co
       }
 
       localVarHeaderParameter['Content-Type'] = 'application/json';
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       if (contentType != null) {
         localVarHeaderParameter['Content-Type'] = String(contentType);
@@ -18602,7 +16396,6 @@ export const CardanoUtilitiesApiAxiosParamCreator = function (configuration?: Co
 
 /**
  * CardanoUtilitiesApi - functional programming interface
- * @export
  */
 export const CardanoUtilitiesApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = CardanoUtilitiesApiAxiosParamCreator(configuration);
@@ -18714,7 +16507,6 @@ export const CardanoUtilitiesApiFp = function (configuration?: Configuration) {
 
 /**
  * CardanoUtilitiesApi - factory interface
- * @export
  */
 export const CardanoUtilitiesApiFactory = function (
   configuration?: Configuration,
@@ -18785,9 +16577,6 @@ export const CardanoUtilitiesApiFactory = function (
 
 /**
  * CardanoUtilitiesApi - object-oriented interface
- * @export
- * @class CardanoUtilitiesApi
- * @extends {BaseAPI}
  */
 export class CardanoUtilitiesApi extends BaseAPI {
   /**
@@ -18798,7 +16587,6 @@ export class CardanoUtilitiesApi extends BaseAPI {
    * @param {number} index Address index
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoUtilitiesApi
    */
   public utilsAddressesXpubXpubRoleIndexGet(
     xpub: string,
@@ -18819,7 +16607,6 @@ export class CardanoUtilitiesApi extends BaseAPI {
    * @param {number} [version] Optional parameter to specify the version of the Ogmios service to use. Default is &#x60;5&#x60;. Set to &#x60;6&#x60; to use Ogmios version 6.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoUtilitiesApi
    */
   public utilsTxsEvaluatePost(
     contentType: UtilsTxsEvaluatePostContentTypeEnum,
@@ -18840,7 +16627,6 @@ export class CardanoUtilitiesApi extends BaseAPI {
    * @param {number} [version] Optional parameter to specify the version of the Ogmios service to use. Default is &#x60;5&#x60;. Set to &#x60;6&#x60; to use Ogmios version 6.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof CardanoUtilitiesApi
    */
   public utilsTxsEvaluateUtxosPost(
     contentType: UtilsTxsEvaluateUtxosPostContentTypeEnum,
@@ -18854,17 +16640,11 @@ export class CardanoUtilitiesApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const UtilsTxsEvaluatePostContentTypeEnum = {
   ApplicationCbor: 'application/cbor'
 } as const;
 export type UtilsTxsEvaluatePostContentTypeEnum =
   (typeof UtilsTxsEvaluatePostContentTypeEnum)[keyof typeof UtilsTxsEvaluatePostContentTypeEnum];
-/**
- * @export
- */
 export const UtilsTxsEvaluateUtxosPostContentTypeEnum = {
   ApplicationJson: 'application/json'
 } as const;
@@ -18873,7 +16653,6 @@ export type UtilsTxsEvaluateUtxosPostContentTypeEnum =
 
 /**
  * HealthApi - axios parameter creator
- * @export
  */
 export const HealthApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -18898,6 +16677,8 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -18930,6 +16711,8 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
       const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
       const localVarHeaderParameter = {} as any;
       const localVarQueryParameter = {} as any;
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -18966,6 +16749,8 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -18984,7 +16769,6 @@ export const HealthApiAxiosParamCreator = function (configuration?: Configuratio
 
 /**
  * HealthApi - functional programming interface
- * @export
  */
 export const HealthApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = HealthApiAxiosParamCreator(configuration);
@@ -19059,7 +16843,6 @@ export const HealthApiFp = function (configuration?: Configuration) {
 
 /**
  * HealthApi - factory interface
- * @export
  */
 export const HealthApiFactory = function (
   configuration?: Configuration,
@@ -19100,9 +16883,6 @@ export const HealthApiFactory = function (
 
 /**
  * HealthApi - object-oriented interface
- * @export
- * @class HealthApi
- * @extends {BaseAPI}
  */
 export class HealthApi extends BaseAPI {
   /**
@@ -19110,7 +16890,6 @@ export class HealthApi extends BaseAPI {
    * @summary Current backend time
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof HealthApi
    */
   public healthClockGet(options?: RawAxiosRequestConfig) {
     return HealthApiFp(this.configuration)
@@ -19123,7 +16902,6 @@ export class HealthApi extends BaseAPI {
    * @summary Backend health status
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof HealthApi
    */
   public healthGet(options?: RawAxiosRequestConfig) {
     return HealthApiFp(this.configuration)
@@ -19136,7 +16914,6 @@ export class HealthApi extends BaseAPI {
    * @summary Root endpoint
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof HealthApi
    */
   public rootGet(options?: RawAxiosRequestConfig) {
     return HealthApiFp(this.configuration)
@@ -19147,7 +16924,6 @@ export class HealthApi extends BaseAPI {
 
 /**
  * IPFSAddApi - axios parameter creator
- * @export
  */
 export const IPFSAddApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -19178,8 +16954,8 @@ export const IPFSAddApiAxiosParamCreator = function (configuration?: Configurati
       if (file !== undefined) {
         localVarFormParams.append('file', file as any);
       }
-
       localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -19200,7 +16976,6 @@ export const IPFSAddApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * IPFSAddApi - functional programming interface
- * @export
  */
 export const IPFSAddApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = IPFSAddApiAxiosParamCreator(configuration);
@@ -19233,7 +17008,6 @@ export const IPFSAddApiFp = function (configuration?: Configuration) {
 
 /**
  * IPFSAddApi - factory interface
- * @export
  */
 export const IPFSAddApiFactory = function (
   configuration?: Configuration,
@@ -19257,9 +17031,6 @@ export const IPFSAddApiFactory = function (
 
 /**
  * IPFSAddApi - object-oriented interface
- * @export
- * @class IPFSAddApi
- * @extends {BaseAPI}
  */
 export class IPFSAddApi extends BaseAPI {
   /**
@@ -19268,7 +17039,6 @@ export class IPFSAddApi extends BaseAPI {
    * @param {File} [file]
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof IPFSAddApi
    */
   public ipfsAdd(file?: File, options?: RawAxiosRequestConfig) {
     return IPFSAddApiFp(this.configuration)
@@ -19279,7 +17049,6 @@ export class IPFSAddApi extends BaseAPI {
 
 /**
  * IPFSGatewayApi - axios parameter creator
- * @export
  */
 export const IPFSGatewayApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -19314,6 +17083,8 @@ export const IPFSGatewayApiAxiosParamCreator = function (configuration?: Configu
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/octet-stream,application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -19332,7 +17103,6 @@ export const IPFSGatewayApiAxiosParamCreator = function (configuration?: Configu
 
 /**
  * IPFSGatewayApi - functional programming interface
- * @export
  */
 export const IPFSGatewayApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = IPFSGatewayApiAxiosParamCreator(configuration);
@@ -19369,7 +17139,6 @@ export const IPFSGatewayApiFp = function (configuration?: Configuration) {
 
 /**
  * IPFSGatewayApi - factory interface
- * @export
  */
 export const IPFSGatewayApiFactory = function (
   configuration?: Configuration,
@@ -19395,9 +17164,6 @@ export const IPFSGatewayApiFactory = function (
 
 /**
  * IPFSGatewayApi - object-oriented interface
- * @export
- * @class IPFSGatewayApi
- * @extends {BaseAPI}
  */
 export class IPFSGatewayApi extends BaseAPI {
   /**
@@ -19406,7 +17172,6 @@ export class IPFSGatewayApi extends BaseAPI {
    * @param {string} iPFSPath
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof IPFSGatewayApi
    */
   public ipfsGatewayIPFSPathGet(iPFSPath: string, options?: RawAxiosRequestConfig) {
     return IPFSGatewayApiFp(this.configuration)
@@ -19417,7 +17182,6 @@ export class IPFSGatewayApi extends BaseAPI {
 
 /**
  * IPFSPinsApi - axios parameter creator
- * @export
  */
 export const IPFSPinsApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -19457,6 +17221,8 @@ export const IPFSPinsApiAxiosParamCreator = function (configuration?: Configurat
       if (filecoin !== undefined) {
         localVarQueryParameter['filecoin'] = filecoin;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -19513,6 +17279,8 @@ export const IPFSPinsApiAxiosParamCreator = function (configuration?: Configurat
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -19556,6 +17324,8 @@ export const IPFSPinsApiAxiosParamCreator = function (configuration?: Configurat
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -19601,6 +17371,8 @@ export const IPFSPinsApiAxiosParamCreator = function (configuration?: Configurat
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -19619,7 +17391,6 @@ export const IPFSPinsApiAxiosParamCreator = function (configuration?: Configurat
 
 /**
  * IPFSPinsApi - functional programming interface
- * @export
  */
 export const IPFSPinsApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = IPFSPinsApiAxiosParamCreator(configuration);
@@ -19759,7 +17530,6 @@ export const IPFSPinsApiFp = function (configuration?: Configuration) {
 
 /**
  * IPFSPinsApi - factory interface
- * @export
  */
 export const IPFSPinsApiFactory = function (
   configuration?: Configuration,
@@ -19839,9 +17609,6 @@ export const IPFSPinsApiFactory = function (
 
 /**
  * IPFSPinsApi - object-oriented interface
- * @export
- * @class IPFSPinsApi
- * @extends {BaseAPI}
  */
 export class IPFSPinsApi extends BaseAPI {
   /**
@@ -19851,7 +17618,6 @@ export class IPFSPinsApi extends BaseAPI {
    * @param {boolean} [filecoin] If set to true, the object will be pinned to Filecoin as well. If not specified, the object will only be pinned to IPFS. Objects pinned to Filecoin cannot be unpinned due to its long-term storage guarantees.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof IPFSPinsApi
    */
   public ipfsPinAddIPFSPathPost(
     iPFSPath: string,
@@ -19871,7 +17637,6 @@ export class IPFSPinsApi extends BaseAPI {
    * @param {IpfsPinListGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof IPFSPinsApi
    */
   public ipfsPinListGet(
     count?: number,
@@ -19890,7 +17655,6 @@ export class IPFSPinsApi extends BaseAPI {
    * @param {string} iPFSPath
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof IPFSPinsApi
    */
   public ipfsPinListIPFSPathGet(iPFSPath: string, options?: RawAxiosRequestConfig) {
     return IPFSPinsApiFp(this.configuration)
@@ -19904,7 +17668,6 @@ export class IPFSPinsApi extends BaseAPI {
    * @param {string} iPFSPath
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof IPFSPinsApi
    */
   public ipfsPinRemoveIPFSPathPost(iPFSPath: string, options?: RawAxiosRequestConfig) {
     return IPFSPinsApiFp(this.configuration)
@@ -19913,9 +17676,6 @@ export class IPFSPinsApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const IpfsPinListGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
@@ -19925,7 +17685,6 @@ export type IpfsPinListGetOrderEnum =
 
 /**
  * MetricsApi - axios parameter creator
- * @export
  */
 export const MetricsApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -19950,6 +17709,8 @@ export const MetricsApiAxiosParamCreator = function (configuration?: Configurati
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -19986,6 +17747,8 @@ export const MetricsApiAxiosParamCreator = function (configuration?: Configurati
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -20004,7 +17767,6 @@ export const MetricsApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * MetricsApi - functional programming interface
- * @export
  */
 export const MetricsApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = MetricsApiAxiosParamCreator(configuration);
@@ -20058,7 +17820,6 @@ export const MetricsApiFp = function (configuration?: Configuration) {
 
 /**
  * MetricsApi - factory interface
- * @export
  */
 export const MetricsApiFactory = function (
   configuration?: Configuration,
@@ -20092,9 +17853,6 @@ export const MetricsApiFactory = function (
 
 /**
  * MetricsApi - object-oriented interface
- * @export
- * @class MetricsApi
- * @extends {BaseAPI}
  */
 export class MetricsApi extends BaseAPI {
   /**
@@ -20102,7 +17860,6 @@ export class MetricsApi extends BaseAPI {
    * @summary Blockfrost endpoint usage metrics
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof MetricsApi
    */
   public metricsEndpointsGet(options?: RawAxiosRequestConfig) {
     return MetricsApiFp(this.configuration)
@@ -20115,7 +17872,6 @@ export class MetricsApi extends BaseAPI {
    * @summary Blockfrost usage metrics
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof MetricsApi
    */
   public metricsGet(options?: RawAxiosRequestConfig) {
     return MetricsApiFp(this.configuration)
@@ -20126,7 +17882,6 @@ export class MetricsApi extends BaseAPI {
 
 /**
  * NutLinkApi - axios parameter creator
- * @export
  */
 export const NutLinkApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
@@ -20160,6 +17915,8 @@ export const NutLinkApiAxiosParamCreator = function (configuration?: Configurati
 
       // authentication project_id required
       await setApiKeyToObject(localVarHeaderParameter, 'project_id', configuration);
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -20222,6 +17979,8 @@ export const NutLinkApiAxiosParamCreator = function (configuration?: Configurati
       if (order !== undefined) {
         localVarQueryParameter['order'] = order;
       }
+
+      localVarHeaderParameter['Accept'] = 'application/json';
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -20288,6 +18047,8 @@ export const NutLinkApiAxiosParamCreator = function (configuration?: Configurati
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -20350,6 +18111,8 @@ export const NutLinkApiAxiosParamCreator = function (configuration?: Configurati
         localVarQueryParameter['order'] = order;
       }
 
+      localVarHeaderParameter['Accept'] = 'application/json';
+
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
       localVarRequestOptions.headers = {
@@ -20368,7 +18131,6 @@ export const NutLinkApiAxiosParamCreator = function (configuration?: Configurati
 
 /**
  * NutLinkApi - functional programming interface
- * @export
  */
 export const NutLinkApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = NutLinkApiAxiosParamCreator(configuration);
@@ -20519,7 +18281,6 @@ export const NutLinkApiFp = function (configuration?: Configuration) {
 
 /**
  * NutLinkApi - factory interface
- * @export
  */
 export const NutLinkApiFactory = function (
   configuration?: Configuration,
@@ -20613,9 +18374,6 @@ export const NutLinkApiFactory = function (
 
 /**
  * NutLinkApi - object-oriented interface
- * @export
- * @class NutLinkApi
- * @extends {BaseAPI}
  */
 export class NutLinkApi extends BaseAPI {
   /**
@@ -20624,7 +18382,6 @@ export class NutLinkApi extends BaseAPI {
    * @param {string} address
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof NutLinkApi
    */
   public nutlinkAddressGet(address: string, options?: RawAxiosRequestConfig) {
     return NutLinkApiFp(this.configuration)
@@ -20641,7 +18398,6 @@ export class NutLinkApi extends BaseAPI {
    * @param {NutlinkAddressTickersGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof NutLinkApi
    */
   public nutlinkAddressTickersGet(
     address: string,
@@ -20665,7 +18421,6 @@ export class NutLinkApi extends BaseAPI {
    * @param {NutlinkAddressTickersTickerGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof NutLinkApi
    */
   public nutlinkAddressTickersTickerGet(
     address: string,
@@ -20689,7 +18444,6 @@ export class NutLinkApi extends BaseAPI {
    * @param {NutlinkTickersTickerGetOrderEnum} [order] The ordering of items from the point of view of the blockchain, not the page listing itself. By default, we return oldest first, newest last.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof NutLinkApi
    */
   public nutlinkTickersTickerGet(
     ticker: string,
@@ -20704,27 +18458,18 @@ export class NutLinkApi extends BaseAPI {
   }
 }
 
-/**
- * @export
- */
 export const NutlinkAddressTickersGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type NutlinkAddressTickersGetOrderEnum =
   (typeof NutlinkAddressTickersGetOrderEnum)[keyof typeof NutlinkAddressTickersGetOrderEnum];
-/**
- * @export
- */
 export const NutlinkAddressTickersTickerGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
 } as const;
 export type NutlinkAddressTickersTickerGetOrderEnum =
   (typeof NutlinkAddressTickersTickerGetOrderEnum)[keyof typeof NutlinkAddressTickersTickerGetOrderEnum];
-/**
- * @export
- */
 export const NutlinkTickersTickerGetOrderEnum = {
   Asc: 'asc',
   Desc: 'desc'
