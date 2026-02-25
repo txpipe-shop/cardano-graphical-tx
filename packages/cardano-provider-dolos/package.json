@@ -1,0 +1,52 @@
+{
+  "name": "@laceanatomy/cardano-provider-dolos",
+  "version": "0.0.1",
+  "private": false,
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@connectrpc/connect": "1.4",
+    "@laceanatomy/blockfrost-sdk": "workspace:*",
+    "@laceanatomy/cardano-provider-u5c": "workspace:*",
+    "@laceanatomy/provider-core": "workspace:*",
+    "@laceanatomy/types": "workspace:*",
+    "@laceanatomy/utxorpc-sdk": "workspace:*",
+    "@utxorpc/spec": "^0.18.1",
+    "assert": "^2.1.0",
+    "buffer": "^6.0.3"
+  },
+  "devDependencies": {
+    "@connectrpc/connect-node": "1.4",
+    "@laceanatomy/provider-tests": "workspace:*",
+    "@laceanatomy/typescript-config": "workspace:*",
+    "@types/node": "^24.1.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "dotenv": "^17.2.3",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.16",
+    "zod": "^4.0.14"
+  }
+}
