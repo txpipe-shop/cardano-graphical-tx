@@ -6,13 +6,19 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import InfiniteScrollTrigger from "~/app/_components/ExplorerSection/Pagination";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { useConfigs } from "~/app/_contexts";
-import { EXPLORER_PAGE_SIZE, getU5CProviderWeb, resolveDevnetPort } from "~/app/_utils";
+import {
+  EXPLORER_PAGE_SIZE,
+  getU5CProviderWeb,
+  resolveDevnetPort,
+} from "~/app/_utils";
 
 interface DevnetTransactionsListProps {
   chain: string;
 }
 
-export default function DevnetTransactionsList({ chain }: DevnetTransactionsListProps) {
+export default function DevnetTransactionsList({
+  chain,
+}: DevnetTransactionsListProps) {
   const { configs } = useConfigs();
   const [transactions, setTransactions] = useState<cardano.Tx[]>([]);
   const [hasMore, setHasMore] = useState(false);
@@ -101,7 +107,11 @@ export default function DevnetTransactionsList({ chain }: DevnetTransactionsList
   return (
     <div className="space-y-4">
       <TxTable transactions={transactions} chain={chain} />
-      <InfiniteScrollTrigger onLoadMore={loadMore} hasMore={hasMore} isLoading={loadingMore} />
+      <InfiniteScrollTrigger
+        onLoadMore={loadMore}
+        hasMore={hasMore}
+        isLoading={loadingMore}
+      />
     </div>
   );
 }

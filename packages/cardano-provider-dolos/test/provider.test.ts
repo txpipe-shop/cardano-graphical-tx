@@ -23,7 +23,11 @@ describe('DolosProvider', () => {
         baseUrl: config.UTXORPC_URL,
         httpVersion: '2'
       });
-      return new DolosProvider({ transport, minibfUrl: config.MINIBF_URL, addressPrefix: 'addr_test' });
+      return new DolosProvider({
+        transport,
+        minibfUrl: config.MINIBF_URL,
+        addressPrefix: 'addr_test'
+      });
     },
     createBlockfrost: async () => {
       config = testEnv.parse(process.env);

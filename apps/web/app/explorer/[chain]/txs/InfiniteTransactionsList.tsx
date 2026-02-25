@@ -4,7 +4,7 @@ import { type cardano } from "@laceanatomy/types";
 import { useCallback, useRef, useState } from "react";
 import InfiniteScrollTrigger from "~/app/_components/ExplorerSection/Pagination";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
-import { EXPLORER_PAGE_SIZE, JSONBIG } from "~/app/_utils";
+import { JSONBIG } from "~/app/_utils";
 import { type Network } from "~/app/_utils/network-config";
 
 interface InfiniteTransactionsListProps {
@@ -44,7 +44,11 @@ export default function InfiniteTransactionsList({
   return (
     <div className="space-y-4">
       <TxTable transactions={transactions} chain={chain} />
-      <InfiniteScrollTrigger onLoadMore={loadMore} hasMore={hasMore} isLoading={isLoading} />
+      <InfiniteScrollTrigger
+        onLoadMore={loadMore}
+        hasMore={hasMore}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

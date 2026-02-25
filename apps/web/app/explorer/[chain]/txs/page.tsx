@@ -54,7 +54,9 @@ async function TransactionsList({ chain }: { chain: Network }) {
 
 export default async function ExplorerTxsPage({ params }: ExplorerPageProps) {
   const chainParam = params.chain || NETWORK.MAINNET;
-  const chain: Network = isValidChain(chainParam) ? chainParam : NETWORK.MAINNET;
+  const chain: Network = isValidChain(chainParam)
+    ? chainParam
+    : NETWORK.MAINNET;
 
   return (
     <div className="min-h-screen bg-surface">

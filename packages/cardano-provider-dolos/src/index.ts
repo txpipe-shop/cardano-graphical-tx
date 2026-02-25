@@ -4,7 +4,7 @@ import {
   CardanoBlocksApi,
   CardanoTransactionsApi,
   Configuration,
-  TxsGetOrderEnum,
+  TxsGetOrderEnum
 } from '@laceanatomy/blockfrost-sdk';
 import { TxsRes } from '@laceanatomy/provider-core';
 import type { Cardano, cardano } from '@laceanatomy/types';
@@ -54,14 +54,7 @@ export class DolosProvider extends UtxoRpcProvider {
     const { tx, block } = this.validateTx(txResponse);
 
     const blockHash = Hash(Buffer.from(block.hash).toString('hex'));
-    return u5cToCardanoTx(
-      tx,
-      BigInt(block_time),
-      blockHash,
-      block.height,
-      block.slot,
-      tx_index
-    );
+    return u5cToCardanoTx(tx, BigInt(block_time), blockHash, block.height, block.slot, tx_index);
   }
 
   protected async getLatestTxs(
@@ -80,7 +73,14 @@ export class DolosProvider extends UtxoRpcProvider {
         });
         const { tx, block } = this.validateTx(txResponse);
         const blockHash = Hash(Buffer.from(block.hash).toString('hex'));
-        return u5cToCardanoTx(tx, BigInt(block_time), blockHash, block.height, block.slot, tx_index);
+        return u5cToCardanoTx(
+          tx,
+          BigInt(block_time),
+          blockHash,
+          block.height,
+          block.slot,
+          tx_index
+        );
       })
     );
 
@@ -118,11 +118,12 @@ export class DolosProvider extends UtxoRpcProvider {
     if (pageHashes.length === 0) return { data: [], total };
 
     // Fetch the block once to get timestamp/header info
-    const blockRef = 'hash' in blockQuery.block
-      ? { hash: Hash(hashOrNumber) }
-      : 'height' in blockQuery.block
-        ? { height: blockQuery.block.height }
-        : { hash: Hash(hashOrNumber) };
+    const blockRef =
+      'hash' in blockQuery.block
+        ? { hash: Hash(hashOrNumber) }
+        : 'height' in blockQuery.block
+          ? { height: blockQuery.block.height }
+          : { hash: Hash(hashOrNumber) };
 
     const { block, header } = await this.fetchBlockByQuery(blockRef);
     const blockHash = Hash(Buffer.from(header.hash).toString('hex'));
@@ -180,7 +181,14 @@ export class DolosProvider extends UtxoRpcProvider {
         });
         const { tx, block } = this.validateTx(txResponse);
         const blockHash = Hash(Buffer.from(block.hash).toString('hex'));
-        return u5cToCardanoTx(tx, BigInt(block_time), blockHash, block.height, block.slot, tx_index);
+        return u5cToCardanoTx(
+          tx,
+          BigInt(block_time),
+          blockHash,
+          block.height,
+          block.slot,
+          tx_index
+        );
       })
     );
 

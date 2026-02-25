@@ -83,7 +83,8 @@ export abstract class UtxoRpcProvider implements ChainProvider<cardano.UTxO, car
         offsetValue
       );
 
-    if (query.address) return this.getTxsByAddress(query.address.toString(), limitValue, offsetValue);
+    if (query.address)
+      return this.getTxsByAddress(query.address.toString(), limitValue, offsetValue);
 
     throw new Error('Invalid query');
   }
@@ -226,9 +227,7 @@ export abstract class UtxoRpcProvider implements ChainProvider<cardano.UTxO, car
     };
   }
 
-  protected async fetchBlockByQuery(
-    query: { hash: Hash } | { height: bigint } | { slot: bigint }
-  ) {
+  protected async fetchBlockByQuery(query: { hash: Hash } | { height: bigint } | { slot: bigint }) {
     let blockResponse: sync.FetchBlockResponse | undefined;
     if ('hash' in query) {
       blockResponse = await this.utxoRpc.sync.fetchBlock({
