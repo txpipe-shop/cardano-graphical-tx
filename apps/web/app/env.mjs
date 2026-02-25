@@ -29,6 +29,12 @@ export const env = createEnv({
     PREPROD_NODE_URL: z.string(),
     PREVIEW_NODE_URL: z.string(),
     VECTOR_MAINNET_NODE_URL: z.string(),
+    MAINNET_DOLOS_UTXORPC_URL: z.string().optional(),
+    PREPROD_DOLOS_UTXORPC_URL: z.string().optional(),
+    PREVIEW_DOLOS_UTXORPC_URL: z.string().optional(),
+    MAINNET_DOLOS_MINIBF_URL: z.string().optional(),
+    PREPROD_DOLOS_MINIBF_URL: z.string().optional(),
+    PREVIEW_DOLOS_MINIBF_URL: z.string().optional(),
   },
   /*
    * Environment variables available on the client (and server).
@@ -70,6 +76,12 @@ export const env = createEnv({
     PREPROD_NODE_URL: process.env.PREPROD_NODE_URL,
     PREVIEW_NODE_URL: process.env.PREVIEW_NODE_URL,
     VECTOR_MAINNET_NODE_URL: process.env.VECTOR_MAINNET_NODE_URL,
+    MAINNET_DOLOS_UTXORPC_URL: process.env.MAINNET_DOLOS_UTXORPC_URL,
+    PREPROD_DOLOS_UTXORPC_URL: process.env.PREPROD_DOLOS_UTXORPC_URL,
+    PREVIEW_DOLOS_UTXORPC_URL: process.env.PREVIEW_DOLOS_UTXORPC_URL,
+    MAINNET_DOLOS_MINIBF_URL: process.env.MAINNET_DOLOS_MINIBF_URL,
+    PREPROD_DOLOS_MINIBF_URL: process.env.PREPROD_DOLOS_MINIBF_URL,
+    PREVIEW_DOLOS_MINIBF_URL: process.env.PREVIEW_DOLOS_MINIBF_URL,
   },
   emptyStringAsUndefined: true,
   skipValidation:

@@ -15,7 +15,7 @@ import {
   type Network,
 } from "~/app/_utils/network-config";
 import Loading from "~/app/loading";
-import { getDbSyncProvider } from "~/server/api/dbsync-provider";
+import { getDolosProvider } from "~/server/api/dolos-provider";
 import DevnetTransactionsList from "./DevnetTransactionsList";
 
 interface ExplorerPageProps {
@@ -41,7 +41,7 @@ async function TransactionsList({
   }
 
   try {
-    const provider = getDbSyncProvider(chain);
+    const provider = getDolosProvider(chain);
     const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
     const offset = BigInt(currentPage - 1) * EXPLORER_PAGE_SIZE;
     const result = await provider.getTxs({
@@ -105,12 +105,7 @@ export default async function ExplorerTxsPage({
           </div>
         </div>
 
-        {/* NOTE: Enable again when other networks are supported */}
-        {chain === NETWORK.DEVNET ? (
-          <Suspense fallback={<Loading />}>
-            <TransactionsList chain={chain} page={page} />
-          </Suspense>
-        ) : (
+        {chain === NETWORK.VECTOR ? (
           <Card className="w-full border-2 border-dashed border-border shadow-md bg-surface py-12">
             <CardBody className="py-8 text-center text-p-secondary">
               <p className="text-3xl font-semibold">Coming soon...</p>
@@ -128,6 +123,10 @@ export default async function ExplorerTxsPage({
               </p>
             </CardBody>
           </Card>
+        ) : (
+          <Suspense fallback={<Loading />}>
+            <TransactionsList chain={chain} page={page} />
+          </Suspense>
         )}
       </main>
     </div>
