@@ -11,7 +11,8 @@ export function loadProviderServer(config: ProviderConfig) {
         transport: createNodeTransport(
           config.utxoRpcUrl,
           config.utxoRpcApiKey ? { 'dmtr-api-key': config.utxoRpcApiKey } : undefined
-        )
+        ),
+        addressPrefix: ['mainnet', 'afvm', 'afpm'].includes(config.network) ? 'addr' : 'addr_test'
       });
     }
     case 'dbsync': {

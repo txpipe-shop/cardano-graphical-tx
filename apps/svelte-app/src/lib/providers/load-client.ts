@@ -9,7 +9,8 @@ export function loadProviderClient(config: ProviderConfig) {
         transport: createBrowserTransport(
           config.utxoRpcUrl,
           config.utxoRpcApiKey ? { 'dmtr-api-key': config.utxoRpcApiKey } : undefined
-        )
+        ),
+        addressPrefix: ['mainnet', 'afvm', 'afpm'].includes(config.network) ? 'addr' : 'addr_test'
       });
     }
     case 'dbsync': {
