@@ -53,6 +53,19 @@ export default async function TxPage({ params, searchParams }: Props) {
     );
   }
 
+  if (chain === NETWORK.VECTOR) {
+    return (
+      <div className="flex min-h-screen flex-col bg-background">
+        <Header />
+        <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
+          <div className="rounded-lg border-2 border-dashed border-border p-8 text-center text-p-secondary">
+            Coming soon...
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   try {
     const { cardanoTx, cbor, tx } = await loadPageData({
       chain,

@@ -76,10 +76,7 @@ export default function ChainSelector({ currentChain }: ChainSelectorProps) {
 
   return (
     <Select
-      // NOTE: Enable again when other networks are supported
-      disabledKeys={Object.values(NETWORK_CONFIGS_BASE)
-        .filter((c) => c.network !== NETWORK.DEVNET)
-        .map((config) => config.network)}
+      disabledKeys={[NETWORK.VECTOR]}
       aria-label="Select a network"
       placeholder="Select a network"
       labelPlacement="outside-left"
