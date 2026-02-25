@@ -24,6 +24,7 @@
     "@heroui/tabs": "2.2.26",
     "@heroui/theme": "2.4.25",
     "@laceanatomy/cardano-provider-dbsync": "workspace:*",
+    "@laceanatomy/cardano-provider-dolos": "workspace:*",
     "@laceanatomy/cardano-provider-u5c": "workspace:*",
     "@laceanatomy/provider-core": "workspace:*",
     "@laceanatomy/napi-pallas": "workspace:*",
