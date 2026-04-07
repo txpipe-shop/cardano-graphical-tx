@@ -2,90 +2,88 @@
 
 import { Card, CardBody } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
-import { useCallback, useEffect, useRef, useState } from "react";
-import InfiniteScrollTrigger from "~/app/_components/ExplorerSection/Pagination";
+import { useEffect, useMemo, useState } from "react";
+import Pagination from "~/app/_components/ExplorerSection/Pagination";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { useConfigs } from "~/app/_contexts";
 import {
-  EXPLORER_PAGE_SIZE,
   getU5CProviderWeb,
+  NETWORK,
   resolveDevnetPort,
+  ROUTES,
 } from "~/app/_utils";
 
 interface DevnetTransactionsListProps {
   chain: string;
+  page: number;
+  pageSize: number;
 }
 
 export default function DevnetTransactionsList({
   chain,
+  page,
+  pageSize,
 }: DevnetTransactionsListProps) {
   const { configs } = useConfigs();
   const [transactions, setTransactions] = useState<cardano.Tx[]>([]);
-  const [hasMore, setHasMore] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [total, setTotal] = useState<bigint | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const offsetRef = useRef(0);
+
+  const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
   const port = resolveDevnetPort(configs.port);
 
   useEffect(() => {
     let isActive = true;
 
-    const loadInitial = async () => {
+    const load = async () => {
       try {
-        setInitialLoading(true);
+        setLoading(true);
         setError(null);
-        setTransactions([]);
-        offsetRef.current = 0;
 
         const provider = getU5CProviderWeb(port);
+        const limit = BigInt(pageSize);
+        const offset = BigInt(currentPage - 1) * BigInt(pageSize);
+
         const result = await provider.getTxs({
-          limit: EXPLORER_PAGE_SIZE,
-          offset: 0n,
+          limit,
+          offset,
           query: undefined,
         });
 
         if (!isActive) return;
 
         setTransactions(result.data);
-        setHasMore(result.data.length === Number(EXPLORER_PAGE_SIZE));
-        offsetRef.current = result.data.length;
+        setTotal(result.total ?? 0n);
       } catch (err) {
         if (!isActive) return;
+        console.error("Failed to fetch devnet transactions:", err);
         setError(err instanceof Error ? err.message : "Unknown error occurred");
       } finally {
-        if (isActive) setInitialLoading(false);
+        if (isActive) setLoading(false);
       }
     };
 
-    loadInitial();
+    load();
 
     return () => {
       isActive = false;
     };
-  }, [port]);
+  }, [currentPage, pageSize, port]);
 
-  const loadMore = useCallback(async () => {
-    setLoadingMore(true);
-    try {
-      const provider = getU5CProviderWeb(port);
-      const result = await provider.getTxs({
-        limit: EXPLORER_PAGE_SIZE,
-        offset: BigInt(offsetRef.current),
-        query: undefined,
-      });
-
-      setTransactions((prev) => [...prev, ...result.data]);
-      setHasMore(result.data.length === Number(EXPLORER_PAGE_SIZE));
-      offsetRef.current += result.data.length;
-    } catch (err) {
-      console.error("Failed to load more devnet transactions:", err);
-    } finally {
-      setLoadingMore(false);
+  const totalPages = useMemo(() => {
+    if (total && total > 0n) {
+      return Number((total - 1n) / BigInt(pageSize) + 1n);
     }
-  }, [port]);
 
-  if (initialLoading) {
+    if (transactions.length === pageSize) {
+      return currentPage + 1;
+    }
+
+    return Math.max(currentPage, 1);
+  }, [currentPage, pageSize, total, transactions.length]);
+
+  if (loading) {
     return (
       <Card className="border-2 border-dashed border-border shadow-md bg-surface">
         <CardBody className="py-8 text-center text-p-secondary">
@@ -107,10 +105,10 @@ export default function DevnetTransactionsList({
   return (
     <div className="space-y-4">
       <TxTable transactions={transactions} chain={chain} />
-      <InfiniteScrollTrigger
-        onLoadMore={loadMore}
-        hasMore={hasMore}
-        isLoading={loadingMore}
+      <Pagination
+        basePath={ROUTES.EXPLORER_TXS(NETWORK.DEVNET)}
+        currentPage={currentPage}
+        totalPages={Math.max(totalPages, 1)}
       />
     </div>
   );

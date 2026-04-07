@@ -24,6 +24,5 @@ function createTransportNode(
 export function getU5CProviderNode(port: number): U5CProvider {
   return new U5CProvider({
     transport: createTransportNode(`http://localhost:${port}`),
-    addressPrefix: "addr_test",
   });
 }

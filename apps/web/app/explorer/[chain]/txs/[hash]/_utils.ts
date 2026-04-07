@@ -1,7 +1,7 @@
 import { type Hash } from "@laceanatomy/types";
 import { headers } from "next/headers";
 import { type Network } from "~/app/_utils/network-config";
-import { getDolosProvider } from "~/server/api/dolos-provider";
+import { getDbSyncProvider } from "~/server/api/dbsync-provider";
 import { loadTxPageData } from "./_shared";
 
 type PageData = {
@@ -10,7 +10,7 @@ type PageData = {
 };
 
 export async function loadPageData({ chain, hash }: PageData) {
-  const provider = getDolosProvider(chain);
+  const provider = getDbSyncProvider(chain);
   const parseCborViaApi = async (cbor: string) => {
     const formData = new FormData();
     formData.append("tx", cbor);

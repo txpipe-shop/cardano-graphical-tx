@@ -2,7 +2,11 @@ import { Card, CardBody } from "@heroui/react";
 import Link from "next/link";
 import { Suspense } from "react";
 import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
-import { TxSearch } from "~/app/_components/ExplorerSection/Transactions";
+import Pagination from "~/app/_components/ExplorerSection/Pagination";
+import {
+  TxSearch,
+  TxTable,
+} from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
 import { EXPLORER_PAGE_SIZE, ROUTES } from "~/app/_utils";
 import {
@@ -11,33 +15,54 @@ import {
   type Network,
 } from "~/app/_utils/network-config";
 import Loading from "~/app/loading";
-import { getDolosProvider } from "~/server/api/dolos-provider";
+import { getDbSyncProvider } from "~/server/api/dbsync-provider";
 import DevnetTransactionsList from "./DevnetTransactionsList";
-import InfiniteTransactionsList from "./InfiniteTransactionsList";
 
 interface ExplorerPageProps {
   params: { chain: string };
+  searchParams: { page?: string };
 }
 
-async function TransactionsList({ chain }: { chain: Network }) {
+async function TransactionsList({
+  chain,
+  page,
+}: {
+  chain: Network;
+  page: number;
+}) {
   if (chain === NETWORK.DEVNET) {
-    return <DevnetTransactionsList chain={chain} />;
+    return (
+      <DevnetTransactionsList
+        chain={chain}
+        page={page}
+        pageSize={Number(EXPLORER_PAGE_SIZE)}
+      />
+    );
   }
 
   try {
-    const provider = getDolosProvider(chain);
+    const provider = getDbSyncProvider(chain);
+    const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
+    const offset = BigInt(currentPage - 1) * EXPLORER_PAGE_SIZE;
     const result = await provider.getTxs({
       limit: EXPLORER_PAGE_SIZE,
-      offset: 0n,
+      offset,
       query: undefined,
     });
 
+    const total = result.total ?? 0n;
+    const totalPages =
+      total === 0n ? 1 : Number((total - 1n) / EXPLORER_PAGE_SIZE + 1n);
+
     return (
-      <InfiniteTransactionsList
-        chain={chain}
-        initialTxs={result.data}
-        initialHasMore={result.data.length === Number(EXPLORER_PAGE_SIZE)}
-      />
+      <div className="space-y-4">
+        <TxTable transactions={result.data} chain={chain} />
+        <Pagination
+          basePath={ROUTES.EXPLORER_TXS(chain)}
+          currentPage={currentPage}
+          totalPages={Math.max(totalPages, 1)}
+        />
+      </div>
     );
   } catch (error) {
     console.error("Failed to fetch transactions:", error);
@@ -52,11 +77,16 @@ async function TransactionsList({ chain }: { chain: Network }) {
   }
 }
 
-export default async function ExplorerTxsPage({ params }: ExplorerPageProps) {
+export default async function ExplorerTxsPage({
+  params,
+  searchParams,
+}: ExplorerPageProps) {
   const chainParam = params.chain || NETWORK.MAINNET;
   const chain: Network = isValidChain(chainParam)
     ? chainParam
     : NETWORK.MAINNET;
+  const pageParam = Number.parseInt(searchParams.page ?? "1", 10);
+  const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
   return (
     <div className="min-h-screen bg-surface">
@@ -75,7 +105,12 @@ export default async function ExplorerTxsPage({ params }: ExplorerPageProps) {
           </div>
         </div>
 
-        {chain === NETWORK.VECTOR ? (
+        {/* NOTE: Enable again when other networks are supported */}
+        {chain === NETWORK.DEVNET ? (
+          <Suspense fallback={<Loading />}>
+            <TransactionsList chain={chain} page={page} />
+          </Suspense>
+        ) : (
           <Card className="w-full border-2 border-dashed border-border shadow-md bg-surface py-12">
             <CardBody className="py-8 text-center text-p-secondary">
               <p className="text-3xl font-semibold">Coming soon...</p>
@@ -93,10 +128,6 @@ export default async function ExplorerTxsPage({ params }: ExplorerPageProps) {
               </p>
             </CardBody>
           </Card>
-        ) : (
-          <Suspense fallback={<Loading />}>
-            <TransactionsList chain={chain} />
-          </Suspense>
         )}
       </main>
     </div>

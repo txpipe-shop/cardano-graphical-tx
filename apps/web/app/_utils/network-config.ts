@@ -13,8 +13,6 @@ export interface NetworkConfig {
   networkMagic?: number;
   nodeUrl?: string;
   dbSyncConnectionString?: string;
-  dolosUtxorpcUrl?: string;
-  dolosMinibfUrl?: string;
   displayName: string;
   description: string;
 }
@@ -30,19 +28,19 @@ export const NETWORK_CONFIGS_BASE: Record<Network, NetworkConfig> = {
     network: "mainnet",
     addressPrefix: "addr",
     displayName: "Mainnet",
-    description: "Cardano Mainnet",
+    description: "Coming soon...", //"Cardano Mainnet",
   },
   preprod: {
     network: "preprod",
     addressPrefix: "addr_test",
     displayName: "Preprod",
-    description: "Pre-production testnet",
+    description: "Coming soon...", //"Pre-production testnet",
   },
   preview: {
     network: "preview",
     addressPrefix: "addr_test",
     displayName: "Preview",
-    description: "Preview testnet",
+    description: "Coming soon...", //"Preview testnet",
   },
   vector: {
     network: "vector",
