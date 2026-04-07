@@ -1,5 +1,3 @@
-import { Card, CardBody } from "@heroui/react";
-import Link from "next/link";
 import { Suspense } from "react";
 import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
@@ -9,11 +7,7 @@ import {
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
 import { EXPLORER_PAGE_SIZE, ROUTES } from "~/app/_utils";
-import {
-  isValidChain,
-  NETWORK,
-  type Network,
-} from "~/app/_utils/network-config";
+import { isValidChain, NETWORK, type Network } from "~/app/_utils/network-config";
 import Loading from "~/app/loading";
 import { getDbSyncProvider } from "~/server/api/dbsync-provider";
 import DevnetTransactionsList from "./DevnetTransactionsList";
@@ -105,30 +99,9 @@ export default async function ExplorerTxsPage({
           </div>
         </div>
 
-        {/* NOTE: Enable again when other networks are supported */}
-        {chain === NETWORK.DEVNET ? (
-          <Suspense fallback={<Loading />}>
-            <TransactionsList chain={chain} page={page} />
-          </Suspense>
-        ) : (
-          <Card className="w-full border-2 border-dashed border-border shadow-md bg-surface py-12">
-            <CardBody className="py-8 text-center text-p-secondary">
-              <p className="text-3xl font-semibold">Coming soon...</p>
-              <p className="text-lg mt-2 font-medium">
-                We&apos;re working on it!
-                <br />
-                In the meantime, you can explore{" "}
-                <Link
-                  className="text-blue-400 hover:underline"
-                  href={ROUTES.EXPLORER_TXS(NETWORK.DEVNET)}
-                >
-                  devnet transactions
-                </Link>
-                .
-              </p>
-            </CardBody>
-          </Card>
-        )}
+        <Suspense fallback={<Loading />}>
+          <TransactionsList chain={chain} page={page} />
+        </Suspense>
       </main>
     </div>
   );

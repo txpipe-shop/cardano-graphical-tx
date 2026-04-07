@@ -19,6 +19,8 @@ export const getApiKey = (network: Network): string => {
       return env.PREVIEW_BLOCKFROST_KEY;
     case NETWORK.DEVNET:
       return "";
+    case NETWORK.VECTOR:
+      throw new Error("Blockfrost is not supported for the Vector network");
     default:
       throw new Error("Invalid network provided");
   }
@@ -45,7 +47,6 @@ const parseQuery = (
   });
   return url;
 };
-
 export const getTxFromDevnetCBOR = async (
   tx: string,
 ): Promise<{ tx: CborResponse }> => {
@@ -57,7 +58,6 @@ export const getTxFromDevnetCBOR = async (
       method: "POST",
       body: formData,
     });
-
     if (res.status !== StatusCodes.OK) throw res;
     const data = await res.json();
     return data;

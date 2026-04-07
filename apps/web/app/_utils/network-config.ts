@@ -28,25 +28,25 @@ export const NETWORK_CONFIGS_BASE: Record<Network, NetworkConfig> = {
     network: "mainnet",
     addressPrefix: "addr",
     displayName: "Mainnet",
-    description: "Coming soon...", //"Cardano Mainnet",
+    description: "Cardano Mainnet",
   },
   preprod: {
     network: "preprod",
     addressPrefix: "addr_test",
     displayName: "Preprod",
-    description: "Coming soon...", //"Pre-production testnet",
+    description: "Pre-production testnet",
   },
   preview: {
     network: "preview",
     addressPrefix: "addr_test",
     displayName: "Preview",
-    description: "Coming soon...", //"Preview testnet",
+    description: "Preview testnet",
   },
   vector: {
     network: "vector",
     addressPrefix: "addr",
     displayName: "Vector",
-    description: "Coming soon...", //"AP3X Vector Mainnet",
+    description: "AP3X Vector Mainnet",
   },
 };
 
