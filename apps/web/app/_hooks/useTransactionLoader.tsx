@@ -37,6 +37,7 @@ export const useTransactionLoader = () => {
   useEffect(() => {
     updateConfigs(USER_CONFIGS.QUERY, "");
     setTransactionBox({ transactions: [], utxos: {} });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configs.net]);
 
   useEffect(() => {

@@ -1,14 +1,13 @@
-import { U5CProvider } from "@laceanatomy/cardano-provider-u5c";
-import {
+import type { U5CProvider } from "@laceanatomy/cardano-provider-u5c";
+import type {
   Asset,
   Assets,
   CborResponse,
   Input,
-  type Utxo,
+  Utxo,
 } from "@laceanatomy/napi-pallas";
 import {
   assetNameFromUnit,
-  type cardano,
   DatumType,
   Hash,
   HexString,
@@ -16,6 +15,7 @@ import {
   hexToBech32,
   policyFromUnit,
   Unit,
+  type cardano,
 } from "@laceanatomy/types";
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
@@ -392,10 +392,10 @@ const cardanoUtxoToITransactionInput = (
     datum:
       i.datum && i.datum.type === DatumType.INLINE
         ? {
-          bytes: i.datum.datumHex.toString(),
-          hash: "",
-          json: "",
-        }
+            bytes: i.datum.datumHex.toString(),
+            hash: "",
+            json: "",
+          }
         : undefined,
     scriptRef:
       i.referenceScript && i.referenceScript.bytes

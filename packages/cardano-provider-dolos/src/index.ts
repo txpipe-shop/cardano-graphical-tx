@@ -16,22 +16,20 @@ import {
   type TipRes,
   type TxReq,
   type TxsReq,
-  type TxsRes,
+  type TxsRes
 } from '@laceanatomy/provider-core';
-import {
-  type Cardano,
-  Hash,
-  HexString,
-  hexToBech32,
-  type cardano,
-} from '@laceanatomy/types';
+import { type Cardano, Hash, HexString, hexToBech32, type cardano } from '@laceanatomy/types';
 import {
   CardanoAddressesApi,
   CardanoBlocksApi,
   CardanoTransactionsApi,
-  Configuration,
+  Configuration
 } from '@laceanatomy/blockfrost-sdk';
-import { toBigInt, u5cToCardanoBlock, u5cToCardanoTx } from '@laceanatomy/cardano-provider-u5c/mappers';
+import {
+  toBigInt,
+  u5cToCardanoBlock,
+  u5cToCardanoTx
+} from '@laceanatomy/cardano-provider-u5c/mappers';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
@@ -42,7 +40,7 @@ import {
   blockfrostBlockToBlockRes,
   blockfrostTxInputToCardanoUtxo,
   blockfrostTxOutputToCardanoUtxo,
-  blockfrostUtxoToCardanoUtxo,
+  blockfrostUtxoToCardanoUtxo
 } from './mappers.js';
 
 export type DolosProviderParams = {
@@ -69,7 +67,7 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
 
     const config = new Configuration({
       apiKey: blockfrostApiKey,
-      basePath: blockfrostUrl,
+      basePath: blockfrostUrl
     });
     this.txApi = new CardanoTransactionsApi(config);
     this.blockApi = new CardanoBlocksApi(config);
@@ -95,9 +93,7 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
     throw new Error('Invalid query');
   }
 
-  private async getLatestTxs(
-    count: number
-  ): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
+  private async getLatestTxs(count: number): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
     const latestResp = await this.blockApi.blocksLatestGet();
     const tipHeight = latestResp.data.height ?? 0;
 
@@ -154,7 +150,7 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
     } else {
       // Slot: use UTxORPC to find the block hash
       const blockResp = await this.utxoRpc.sync.fetchBlock({
-        ref: [{ slot: blockQuery.slot }],
+        ref: [{ slot: blockQuery.slot }]
       });
       const { header } = this.validateBlock(blockResp);
       blockId = Buffer.from(header.hash).toString('hex');
@@ -162,7 +158,15 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
 
     const [hashesResp, blockResp] = await Promise.all([
       this.blockApi.blocksHashOrNumberTxsGet(blockId, count, page, 'desc'),
-      this.utxoRpc.sync.fetchBlock({ ref: [{ ...(blockId.length === 64 ? { hash: Buffer.from(blockId, 'hex') } : { height: BigInt(blockId) }) }] }),
+      this.utxoRpc.sync.fetchBlock({
+        ref: [
+          {
+            ...(blockId.length === 64
+              ? { hash: Buffer.from(blockId, 'hex') }
+              : { height: BigInt(blockId) })
+          }
+        ]
+      })
     ]);
 
     const txHashSet = new Set(hashesResp.data);
@@ -196,7 +200,14 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
   ): Promise<cardano.Tx[]> {
     const uniqueHeights = [...new Set(txRefs.map((t) => t.blockHeight))];
 
-    const blocksByHeight = new Map<number, { block: cardanoUtxoRpc.Block; header: cardanoUtxoRpc.BlockHeader; body: cardanoUtxoRpc.BlockBody }>();
+    const blocksByHeight = new Map<
+      number,
+      {
+        block: cardanoUtxoRpc.Block;
+        header: cardanoUtxoRpc.BlockHeader;
+        body: cardanoUtxoRpc.BlockBody;
+      }
+    >();
     await Promise.all(
       uniqueHeights.map(async (h) => {
         const resp = await this.utxoRpc.sync.fetchBlock({ ref: [{ height: BigInt(h) }] });
@@ -212,7 +223,14 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
         const txHash = Buffer.from(tx.hash).toString('hex');
         txsByHash.set(
           txHash,
-          u5cToCardanoTx(tx, block.timestamp, blockHash, header.height, header.slot, this.findTxIndexInBlock(body, tx))
+          u5cToCardanoTx(
+            tx,
+            block.timestamp,
+            blockHash,
+            header.height,
+            header.slot,
+            this.findTxIndexInBlock(body, tx)
+          )
         );
       }
     }
@@ -234,13 +252,15 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
       this.txApi.txsHashGet(hash),
       this.txApi.txsHashUtxosGet(hash),
       this.txApi.txsHashRedeemersGet(hash),
-      this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') }),
+      this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') })
     ]);
 
     const tx = txResp.data;
 
     const bfInputs = utxoResp.data.inputs;
-    const inputs = bfInputs.filter((i) => !i.collateral && !i.reference).map(blockfrostTxInputToCardanoUtxo);
+    const inputs = bfInputs
+      .filter((i) => !i.collateral && !i.reference)
+      .map(blockfrostTxInputToCardanoUtxo);
     const referenceInputs = bfInputs.filter((i) => i.reference).map(blockfrostTxInputToCardanoUtxo);
     const outputs = utxoResp.data.outputs
       .filter((o) => !o.collateral)
@@ -253,7 +273,7 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
       redeemerDataHash: HexString(r.redeemer_data_hash),
       unitMem: BigInt(r.unit_mem),
       unitSteps: BigInt(r.unit_steps),
-      fee: BigInt(r.fee),
+      fee: BigInt(r.fee)
     }));
 
     const mint: Record<string, bigint> = {};
@@ -281,10 +301,10 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
         hash: Hash(tx.block),
         height: BigInt(tx.block_height),
         epochNo: 0n,
-        slot: BigInt(tx.slot),
+        slot: BigInt(tx.slot)
       },
       treasuryDonation: 0n,
-      indexInBlock: BigInt(tx.index),
+      indexInBlock: BigInt(tx.index)
     };
   }
 
@@ -314,7 +334,7 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
       // Blockfrost doesn't have a /blocks/slot endpoint — use UTxORPC
       const [blockResp, latestResp] = await Promise.all([
         this.utxoRpc.sync.fetchBlock({ ref: [{ slot: params.slot }] }),
-        this.blockApi.blocksLatestGet(),
+        this.blockApi.blocksLatestGet()
       ]);
       const { block } = this.validateBlock(blockResp);
       const tipHeight = BigInt(latestResp.data.height ?? 0);
@@ -341,7 +361,7 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
 
     return {
       data: blocks.map((b) => blockfrostBlockToBlockRes(b.data)),
-      total: 0n,
+      total: 0n
     };
   }
 
@@ -349,7 +369,7 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
     const resp = await this.blockApi.blocksLatestGet();
     return {
       hash: Hash(resp.data.hash),
-      slot: BigInt(resp.data.slot ?? 0),
+      slot: BigInt(resp.data.slot ?? 0)
     };
   }
 
@@ -361,18 +381,18 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
     const bech32 = hexToBech32(HexString(address), this.addressPrefix);
     const [contentResp, totalResp] = await Promise.all([
       this.addrApi.addressesAddressGet(bech32),
-      this.addrApi.addressesAddressTotalGet(bech32),
+      this.addrApi.addressesAddressTotalGet(bech32)
     ]);
     return {
       value: blockfrostAmountToValue(contentResp.data.amount),
-      txCount: BigInt(totalResp.data.tx_count),
+      txCount: BigInt(totalResp.data.tx_count)
     };
   }
 
   async getAddressUTxOs({
     limit,
     offset,
-    query: q,
+    query: q
   }: AddressUTxOsReq): Promise<AddressUTxOsRes<cardano.UTxO>> {
     const count = Number(limit);
     const page = Math.floor(Number(offset ?? 0n) / count) + 1;
@@ -412,7 +432,7 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
     return {
       block: thisBlock.chain.value,
       header: thisBlock.chain.value.header,
-      body: thisBlock.chain.value.body,
+      body: thisBlock.chain.value.body
     };
   }
 

@@ -6,7 +6,11 @@ import {
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
 import { EXPLORER_PAGE_SIZE } from "~/app/_utils";
-import { isValidChain, NETWORK, type Network } from "~/app/_utils/network-config";
+import {
+  isValidChain,
+  NETWORK,
+  type Network,
+} from "~/app/_utils/network-config";
 import Loading from "~/app/loading";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import DevnetTransactionsList from "./DevnetTransactionsList";

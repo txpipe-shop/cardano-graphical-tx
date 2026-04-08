@@ -6,14 +6,14 @@ import {
   HexString,
   Unit,
   type Value,
-  type cardano,
+  type cardano
 } from '@laceanatomy/types';
 import type {
   AddressUtxoContentInner,
   BlockContent,
   TxContentOutputAmountInner,
   TxContentUtxoInputsInner,
-  TxContentUtxoOutputsInner,
+  TxContentUtxoOutputsInner
 } from '@laceanatomy/blockfrost-sdk';
 
 export function blockfrostAmountToValue(amounts: TxContentOutputAmountInner[]): Value {
@@ -34,11 +34,14 @@ export function blockfrostBlockToBlockRes(block: BlockContent): BlockRes {
     time: block.time * 1000,
     confirmations: BigInt(block.confirmations),
     size: BigInt(block.size),
-    epoch: block.epoch !== null ? BigInt(block.epoch) : undefined,
+    epoch: block.epoch !== null ? BigInt(block.epoch) : undefined
   };
 }
 
-function amountToValueAndCoin(amounts: TxContentOutputAmountInner[]): { coin: bigint; value: Value } {
+function amountToValueAndCoin(amounts: TxContentOutputAmountInner[]): {
+  coin: bigint;
+  value: Value;
+} {
   const coin = BigInt(amounts.find((a) => a.unit === 'lovelace')?.quantity ?? '0');
   const value: Value = {};
   for (const { unit, quantity } of amounts) {
@@ -61,7 +64,7 @@ export function blockfrostTxInputToCardanoUtxo(input: TxContentUtxoInputsInner):
         : undefined,
     referenceScript: input.reference_script_hash
       ? { hash: HexString(input.reference_script_hash) }
-      : undefined,
+      : undefined
   };
 }
 
@@ -82,7 +85,7 @@ export function blockfrostTxOutputToCardanoUtxo(
         : undefined,
     referenceScript: output.reference_script_hash
       ? { hash: HexString(output.reference_script_hash) }
-      : undefined,
+      : undefined
   };
 }
 
@@ -100,7 +103,7 @@ export function blockfrostUtxoToCardanoUtxo(utxo: AddressUtxoContentInner): card
   return {
     outRef: {
       hash: Hash(utxo.tx_hash),
-      index: BigInt(utxo.output_index),
+      index: BigInt(utxo.output_index)
     },
     address: Address(utxo.address),
     coin,
@@ -112,6 +115,6 @@ export function blockfrostUtxoToCardanoUtxo(utxo: AddressUtxoContentInner): card
         : undefined,
     referenceScript: utxo.reference_script_hash
       ? { hash: HexString(utxo.reference_script_hash) }
-      : undefined,
+      : undefined
   };
 }
