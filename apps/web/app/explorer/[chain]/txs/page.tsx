@@ -1,3 +1,5 @@
+export const revalidate = 10;
+
 import { Suspense } from "react";
 import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
 import {
