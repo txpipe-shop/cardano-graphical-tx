@@ -8,7 +8,7 @@ import {
 } from "@laceanatomy/napi-pallas";
 import {
   assetNameFromUnit,
-  cardano,
+  type cardano,
   DatumType,
   Hash,
   HexString,
@@ -392,10 +392,10 @@ const cardanoUtxoToITransactionInput = (
     datum:
       i.datum && i.datum.type === DatumType.INLINE
         ? {
-            bytes: i.datum.datumHex.toString(),
-            hash: "",
-            json: "",
-          }
+          bytes: i.datum.datumHex.toString(),
+          hash: "",
+          json: "",
+        }
         : undefined,
     scriptRef:
       i.referenceScript && i.referenceScript.bytes

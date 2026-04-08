@@ -10,9 +10,10 @@ export type Network = (typeof NETWORK)[keyof typeof NETWORK];
 export interface NetworkConfig {
   network: Network;
   addressPrefix: string;
-  networkMagic?: number;
-  nodeUrl?: string;
-  dbSyncConnectionString?: string;
+  dolosBlockfrostUrl?: string;
+  dolosBlockfrostApiKey?: string;
+  dolosUtxorpcUrl?: string;
+  dolosUtxorpcApiKey?: string;
   displayName: string;
   description: string;
 }

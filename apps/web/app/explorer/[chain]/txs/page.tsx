@@ -1,63 +1,40 @@
 import { Suspense } from "react";
 import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
-import Pagination from "~/app/_components/ExplorerSection/Pagination";
 import {
   TxSearch,
   TxTable,
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
-import { EXPLORER_PAGE_SIZE, ROUTES } from "~/app/_utils";
+import { EXPLORER_PAGE_SIZE } from "~/app/_utils";
 import { isValidChain, NETWORK, type Network } from "~/app/_utils/network-config";
 import Loading from "~/app/loading";
-import { getDbSyncProvider } from "~/server/api/dbsync-provider";
+import { getDolosProvider } from "~/server/api/dolos-provider";
 import DevnetTransactionsList from "./DevnetTransactionsList";
 
 interface ExplorerPageProps {
   params: { chain: string };
-  searchParams: { page?: string };
 }
 
-async function TransactionsList({
-  chain,
-  page,
-}: {
-  chain: Network;
-  page: number;
-}) {
+async function TransactionsList({ chain }: { chain: Network }) {
   if (chain === NETWORK.DEVNET) {
     return (
       <DevnetTransactionsList
         chain={chain}
-        page={page}
+        page={1}
         pageSize={Number(EXPLORER_PAGE_SIZE)}
       />
     );
   }
 
   try {
-    const provider = getDbSyncProvider(chain);
-    const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
-    const offset = BigInt(currentPage - 1) * EXPLORER_PAGE_SIZE;
+    const provider = getDolosProvider(chain);
     const result = await provider.getTxs({
       limit: EXPLORER_PAGE_SIZE,
-      offset,
+      offset: 0n,
       query: undefined,
     });
 
-    const total = result.total ?? 0n;
-    const totalPages =
-      total === 0n ? 1 : Number((total - 1n) / EXPLORER_PAGE_SIZE + 1n);
-
-    return (
-      <div className="space-y-4">
-        <TxTable transactions={result.data} chain={chain} />
-        <Pagination
-          basePath={ROUTES.EXPLORER_TXS(chain)}
-          currentPage={currentPage}
-          totalPages={Math.max(totalPages, 1)}
-        />
-      </div>
-    );
+    return <TxTable transactions={result.data} chain={chain} />;
   } catch (error) {
     console.error("Failed to fetch transactions:", error);
     return (
@@ -71,16 +48,11 @@ async function TransactionsList({
   }
 }
 
-export default async function ExplorerTxsPage({
-  params,
-  searchParams,
-}: ExplorerPageProps) {
+export default async function ExplorerTxsPage({ params }: ExplorerPageProps) {
   const chainParam = params.chain || NETWORK.MAINNET;
   const chain: Network = isValidChain(chainParam)
     ? chainParam
     : NETWORK.MAINNET;
-  const pageParam = Number.parseInt(searchParams.page ?? "1", 10);
-  const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
   return (
     <div className="min-h-screen bg-surface">
@@ -100,7 +72,7 @@ export default async function ExplorerTxsPage({
         </div>
 
         <Suspense fallback={<Loading />}>
-          <TransactionsList chain={chain} page={page} />
+          <TransactionsList chain={chain} />
         </Suspense>
       </main>
     </div>
