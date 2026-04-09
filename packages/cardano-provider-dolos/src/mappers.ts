@@ -11,9 +11,7 @@ import {
 import type {
   AddressUtxoContentInner,
   BlockContent,
-  TxContentOutputAmountInner,
-  TxContentUtxoInputsInner,
-  TxContentUtxoOutputsInner
+  TxContentOutputAmountInner
 } from '@laceanatomy/blockfrost-sdk';
 
 export function blockfrostAmountToValue(amounts: TxContentOutputAmountInner[]): Value {
@@ -48,45 +46,6 @@ function amountToValueAndCoin(amounts: TxContentOutputAmountInner[]): {
     if (unit !== 'lovelace') value[Unit(unit)] = BigInt(quantity);
   }
   return { coin, value };
-}
-
-export function blockfrostTxInputToCardanoUtxo(input: TxContentUtxoInputsInner): cardano.UTxO {
-  const { coin, value } = amountToValueAndCoin(input.amount);
-  return {
-    outRef: { hash: Hash(input.tx_hash), index: BigInt(input.output_index) },
-    address: Address(input.address),
-    coin,
-    value,
-    datum: input.inline_datum
-      ? { type: DatumType.INLINE, datumHex: HexString(input.inline_datum) }
-      : input.data_hash
-        ? { type: DatumType.HASH, datumHashHex: Hash(input.data_hash) }
-        : undefined,
-    referenceScript: input.reference_script_hash
-      ? { hash: HexString(input.reference_script_hash) }
-      : undefined
-  };
-}
-
-export function blockfrostTxOutputToCardanoUtxo(
-  txHash: string,
-  output: TxContentUtxoOutputsInner
-): cardano.UTxO {
-  const { coin, value } = amountToValueAndCoin(output.amount);
-  return {
-    outRef: { hash: Hash(txHash), index: BigInt(output.output_index) },
-    address: Address(output.address),
-    coin,
-    value,
-    datum: output.inline_datum
-      ? { type: DatumType.INLINE, datumHex: HexString(output.inline_datum) }
-      : output.data_hash
-        ? { type: DatumType.HASH, datumHashHex: Hash(output.data_hash) }
-        : undefined,
-    referenceScript: output.reference_script_hash
-      ? { hash: HexString(output.reference_script_hash) }
-      : undefined
-  };
 }
 
 export function blockfrostUtxoToCardanoUtxo(utxo: AddressUtxoContentInner): cardano.UTxO {

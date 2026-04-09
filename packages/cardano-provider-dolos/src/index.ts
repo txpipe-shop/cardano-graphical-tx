@@ -19,12 +19,7 @@ import {
   type TxsRes
 } from '@laceanatomy/provider-core';
 import { type Cardano, Hash, HexString, hexToBech32, type cardano } from '@laceanatomy/types';
-import {
-  CardanoAddressesApi,
-  CardanoBlocksApi,
-  CardanoTransactionsApi,
-  Configuration
-} from '@laceanatomy/blockfrost-sdk';
+import { CardanoAddressesApi, CardanoBlocksApi, Configuration } from '@laceanatomy/blockfrost-sdk';
 import {
   toBigInt,
   u5cToCardanoBlock,
@@ -38,8 +33,6 @@ import { Buffer } from 'buffer';
 import {
   blockfrostAmountToValue,
   blockfrostBlockToBlockRes,
-  blockfrostTxInputToCardanoUtxo,
-  blockfrostTxOutputToCardanoUtxo,
   blockfrostUtxoToCardanoUtxo
 } from './mappers.js';
 
@@ -56,7 +49,6 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
   private static readonly MAX_BLOCKS_LOOKBACK = 100;
 
   private utxoRpc: UtxoRpcClient;
-  private txApi: CardanoTransactionsApi;
   private blockApi: CardanoBlocksApi;
   private addrApi: CardanoAddressesApi;
   private addressPrefix: string;
@@ -69,7 +61,6 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
       apiKey: blockfrostApiKey,
       basePath: blockfrostUrl
     });
-    this.txApi = new CardanoTransactionsApi(config);
     this.blockApi = new CardanoBlocksApi(config);
     this.addrApi = new CardanoAddressesApi(config);
   }
@@ -235,9 +226,7 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
       }
     }
 
-    // TODO: either resolve inputs in Dolos for utxorpc ideally or resolve inputs with blockfrost here
-
-    // Return txs in the order Blockfrost returned them, skipping any not found
+    // Return txs in the order returned by blockfrost, skipping any not found in fetched blocks
     return txRefs.flatMap((ref) => {
       const tx = txsByHash.get(ref.hash);
       return tx ? [tx] : [];
@@ -245,67 +234,35 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
   }
 
   // ---------------------------------------------------------------------------
-  // Single tx — UTxORPC direct lookup
+  // Single tx — UTxORPC only (inputs are resolved via asOutput)
   // ---------------------------------------------------------------------------
   async getTx({ hash }: TxReq): Promise<cardano.Tx> {
-    const [txResp, utxoResp, redeemersResp, u5cTxResp] = await Promise.all([
-      this.txApi.txsHashGet(hash),
-      this.txApi.txsHashUtxosGet(hash),
-      this.txApi.txsHashRedeemersGet(hash),
-      this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') })
-    ]);
+    const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') });
+    const { tx, block } = this.validateTx(txResponse);
 
-    const tx = txResp.data;
+    const blockHash = Hash(Buffer.from(block.hash).toString('hex'));
+    const blockResp = await this.utxoRpc.sync.fetchBlock({
+      ref: [{ hash: Buffer.from(block.hash) }]
+    });
+    const { body } = this.validateBlock(blockResp);
 
-    const bfInputs = utxoResp.data.inputs;
-    const inputs = bfInputs
-      .filter((i) => !i.collateral && !i.reference)
-      .map(blockfrostTxInputToCardanoUtxo);
-    const referenceInputs = bfInputs.filter((i) => i.reference).map(blockfrostTxInputToCardanoUtxo);
-    const outputs = utxoResp.data.outputs
-      .filter((o) => !o.collateral)
-      .map((o) => blockfrostTxOutputToCardanoUtxo(hash, o));
+    return u5cToCardanoTx(
+      tx,
+      block.timestamp,
+      blockHash,
+      block.height,
+      block.slot,
+      this.findTxIndexInBlock(body, tx)
+    );
+  }
 
-    const redeemers: cardano.Redeemer[] = redeemersResp.data.map((r) => ({
-      index: r.tx_index,
-      purpose: r.purpose as cardano.RdmrPurpose,
-      scriptHash: HexString(r.script_hash),
-      redeemerDataHash: HexString(r.redeemer_data_hash),
-      unitMem: BigInt(r.unit_mem),
-      unitSteps: BigInt(r.unit_steps),
-      fee: BigInt(r.fee)
-    }));
-
-    const mint: Record<string, bigint> = {};
-    if (u5cTxResp.tx?.chain.case === 'cardano') {
-      for (const ma of u5cTxResp.tx.chain.value.mint) {
-        const policy = Buffer.from(ma.policyId).toString('hex');
-        for (const asset of ma.assets) {
-          const hexName = Buffer.from(asset.name).toString('hex');
-          mint[`${policy}${hexName}`] = toBigInt(asset.quantity.value?.bigInt.value);
-        }
-      }
-    }
-
-    return {
-      hash: Hash(tx.hash),
-      fee: BigInt(tx.fees),
-      inputs,
-      outputs,
-      referenceInputs,
-      mint,
-      metadata: undefined,
-      witnesses: { scripts: [], redeemers },
-      createdAt: tx.block_time * 1000,
-      block: {
-        hash: Hash(tx.block),
-        height: BigInt(tx.block_height),
-        epochNo: 0n,
-        slot: BigInt(tx.slot)
-      },
-      treasuryDonation: 0n,
-      indexInBlock: BigInt(tx.index)
-    };
+  private validateTx(txResponse: query.ReadTxResponse): {
+    tx: cardanoUtxoRpc.Tx;
+    block: query.ChainPoint;
+  } {
+    assert(txResponse.tx?.chain.case === 'cardano', 'Transaction is not a Cardano transaction');
+    assert(txResponse.tx.blockRef, 'Block reference of transaction empty');
+    return { tx: txResponse.tx.chain.value, block: txResponse.tx.blockRef };
   }
 
   async getLatestTx(): Promise<cardano.Tx> {
