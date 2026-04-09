@@ -15,7 +15,12 @@ export const ExplorerButton = () => {
       as={NextLink}
       href={ROUTES.EXPLORER_TXS(network)}
     >
-      Explorer
+      <span className="bg-gradient-to-r from-purple-500 to-orange-500 bg-clip-text font-mono text-lg font-bold text-transparent">
+        Explorer
+      </span>
+      <span className="ml-1 rounded-full bg-orange-400/20 px-1.5 py-0.5 text-xs font-semibold text-orange-500">
+        beta
+      </span>
     </Button>
   );
 };
