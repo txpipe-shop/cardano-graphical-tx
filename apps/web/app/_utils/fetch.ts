@@ -19,8 +19,6 @@ export const getApiKey = (network: Network): string => {
       return env.PREVIEW_BLOCKFROST_KEY;
     case NETWORK.DEVNET:
       return "";
-    case NETWORK.VECTOR:
-      throw new Error("Blockfrost is not supported for the Vector network");
     default:
       throw new Error("Invalid network provided");
   }

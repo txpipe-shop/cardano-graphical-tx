@@ -23,9 +23,6 @@ const NETWORK_CONFIGS_SERVER: Record<Network, NetworkConfig> = {
     dolosUtxorpcUrl: env.PREVIEW_DOLOS_UTXORPC_URL,
     dolosUtxorpcApiKey: env.PREVIEW_DOLOS_UTXORPC_API_KEY,
   },
-  vector: {
-    ...NETWORK_CONFIGS_BASE.vector,
-  },
   devnet: {
     ...NETWORK_CONFIGS_BASE.devnet,
   },
