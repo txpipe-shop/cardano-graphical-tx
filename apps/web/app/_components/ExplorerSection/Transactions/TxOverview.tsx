@@ -69,6 +69,7 @@ function UtxoList({
               <th className="px-4 py-3">Address</th>
               <th className="px-4 py-3">Coin</th>
               <th className="px-4 py-3">Has Datum</th>
+              <th className="px-4 py-3">Has Script</th>
               <th className="px-4 py-3">Tokens</th>
             </tr>
           </thead>
@@ -110,6 +111,18 @@ function UtxoList({
                     </Chip>
                   )}
                 </td>
+                <td className="px-4 py-3 align-top bg-surface">
+                  {utxo.referenceScript ? (
+                    <Chip size="sm" variant="dot" color="success">
+                      Yes
+                    </Chip>
+                  ) : (
+                    <Chip size="sm" variant="dot" color="danger">
+                      No
+                    </Chip>
+                  )}
+                </td>
+
                 <td className="px-4 py-3 align-top bg-surface">
                   {Object.keys(utxo.value).length > 0 ? (
                     <div className="flex flex-wrap gap-1">
