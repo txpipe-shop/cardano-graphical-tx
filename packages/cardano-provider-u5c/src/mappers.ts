@@ -10,11 +10,11 @@ import {
   uint8ToHexString,
   Unit,
   Value,
-  type cardano,
+  cardano,
   type Metadata,
   type Metadatum
 } from '@laceanatomy/types';
-import type { cardano as cardanoUtxoRpc } from '@utxorpc/spec';
+import { cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
 import { Buffer } from 'buffer';
 
@@ -161,6 +161,35 @@ export function u5cToCardanoMetadata(metadata: cardanoUtxoRpc.Metadata[]): Metad
     }, new Map<bigint, Metadatum>());
 }
 
+function mapRedeemerPurpose(purpose: cardanoUtxoRpc.RedeemerPurpose): cardano.RdmrPurpose {
+  switch (purpose) {
+    case cardanoUtxoRpc.RedeemerPurpose.SPEND:
+      return cardano.RdmrPurpose.Spend;
+    case cardanoUtxoRpc.RedeemerPurpose.MINT:
+      return cardano.RdmrPurpose.Mint;
+    case cardanoUtxoRpc.RedeemerPurpose.CERT:
+      return cardano.RdmrPurpose.Cert;
+    case cardanoUtxoRpc.RedeemerPurpose.REWARD:
+      return cardano.RdmrPurpose.Reward;
+    case cardanoUtxoRpc.RedeemerPurpose.VOTE:
+      return cardano.RdmrPurpose.Vote;
+    default:
+      return cardano.RdmrPurpose.Unspecified;
+  }
+}
+
+function u5cRedeemerToCardanoRedeemer(r: cardanoUtxoRpc.Redeemer): cardano.Redeemer {
+  return {
+    index: r.index,
+    purpose: mapRedeemerPurpose(r.purpose),
+    scriptHash: HexString(''),
+    redeemerDataHash: HexString(''),
+    unitMem: r.exUnits?.memory ?? 0n,
+    unitSteps: r.exUnits?.steps ?? 0n,
+    fee: 0n
+  };
+}
+
 export function u5cToCardanoTx(
   tx: cardanoUtxoRpc.Tx,
   time: bigint,
@@ -200,6 +229,17 @@ export function u5cToCardanoTx(
     };
   });
 
+  const redeemers: cardano.Redeemer[] = [
+    ...tx.inputs.flatMap((x) => (x.redeemer ? [u5cRedeemerToCardanoRedeemer(x.redeemer)] : [])),
+    ...tx.mint.flatMap((x) => (x.redeemer ? [u5cRedeemerToCardanoRedeemer(x.redeemer)] : [])),
+    ...tx.withdrawals.flatMap((x) =>
+      x.redeemer ? [u5cRedeemerToCardanoRedeemer(x.redeemer)] : []
+    ),
+    ...tx.certificates.flatMap((x) =>
+      x.redeemer ? [u5cRedeemerToCardanoRedeemer(x.redeemer)] : []
+    )
+  ];
+
   return {
     fee,
     hash,
@@ -209,7 +249,7 @@ export function u5cToCardanoTx(
     outputs,
     referenceInputs,
     createdAt: Number(time),
-    witnesses: { scripts },
+    witnesses: { scripts, redeemers: redeemers.length > 0 ? redeemers : undefined },
     block: { hash: blockHash, height: blockHeight, epochNo: 0n, slot: blockSlot },
     treasuryDonation: 0n,
     indexInBlock: BigInt(indexInBlock)
