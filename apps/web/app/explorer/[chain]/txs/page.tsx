@@ -45,10 +45,8 @@ async function TransactionsList({ chain }: { chain: Network }) {
     console.error("Failed to fetch transactions:", error);
     return (
       <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
-        <p className="font-semibold">Failed to load transactions</p>
-        <p className="mt-2 text-sm">
-          {error instanceof Error ? error.message : "Unknown error occurred"}
-        </p>
+        <p className="font-semibold">We&apos;re having trouble loading transactions</p>
+        <p className="mt-2 text-sm">This is likely on our end. Please try again in a moment.</p>
       </div>
     );
   }
