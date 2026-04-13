@@ -36,18 +36,6 @@ export function blockfrostBlockToBlockRes(block: BlockContent): BlockRes {
   };
 }
 
-function amountToValueAndCoin(amounts: TxContentOutputAmountInner[]): {
-  coin: bigint;
-  value: Value;
-} {
-  const coin = BigInt(amounts.find((a) => a.unit === 'lovelace')?.quantity ?? '0');
-  const value: Value = {};
-  for (const { unit, quantity } of amounts) {
-    if (unit !== 'lovelace') value[Unit(unit)] = BigInt(quantity);
-  }
-  return { coin, value };
-}
-
 export function blockfrostUtxoToCardanoUtxo(utxo: AddressUtxoContentInner): cardano.UTxO {
   const lovelace = utxo.amount.find((a) => a.unit === 'lovelace');
   const coin = BigInt(lovelace?.quantity ?? '0');
