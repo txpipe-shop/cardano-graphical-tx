@@ -109,10 +109,17 @@ pub struct Redeemer {
 
 /// A native script from the transaction witness set (key 1).
 /// Serialised as canonical JSON matching the pallas `NativeScript` serde output.
-#[derive(Default)]
-#[napi(object)]
-pub struct NativeScript {
-  pub json: String,
+//#[derive(Default)]
+//#[napi(object)]
+
+#[napi]
+pub enum NativeScript {
+  ScriptPubkey(String),
+  ScriptAll(Vec<NativeScript>),
+  ScriptAny(Vec<NativeScript>),
+  ScriptNOfK(u32, Vec<NativeScript>),
+  InvalidBefore(u128),
+  InvalidHereafter(u128),
 }
 
 /// One row from the `voting_procedures` map (tx_body key 19).
@@ -144,10 +151,37 @@ pub struct ProposalProcedure {
   pub anchor_data_hash: String,
 }
 
+/// A Byron-era bootstrap (signature) witness (witness_set key 2).
+/// All fields are hex-encoded bytes.
+#[derive(Default)]
+#[napi(object)]
+pub struct BootstrapWitness {
+  /// Hex-encoded Ed25519 extended public key (64 bytes)
+  pub public_key: String,
+  /// Hex-encoded signature
+  pub signature: String,
+  /// Hex-encoded chain code (32 bytes)
+  pub chain_code: String,
+  /// Hex-encoded address attributes (network magic / derivation path)
+  pub attributes: String,
+}
+
+/// Scripts attached to `auxiliary_data` (distinct from witness-set scripts).
+/// In the current pallas version (1.0.0-alpha.3) only native scripts and
+/// Plutus V1 scripts are accessible via the unified `alonzo::AuxiliaryData`
+/// type; V2/V3 aux-data scripts require a future pallas update.
+#[derive(Default)]
+#[napi(object)]
+pub struct AuxiliaryDataScripts {
+  pub native_scripts: Vec<NativeScript>,
+  pub plutus_v1_scripts: Vec<String>,
+}
+
 #[derive(Default)]
 #[napi(object)]
 pub struct Witnesses {
   pub vkey_witnesses: Vec<Witness>,
+  pub bootstrap_witnesses: Vec<BootstrapWitness>,
   pub native_scripts: Vec<NativeScript>,
   pub redeemers: Vec<Redeemer>,
   pub plutus_data: Vec<Datum>,
@@ -190,6 +224,8 @@ pub struct CborResponse {
   /// Donation to treasury in lovelace (tx_body key 22)
   pub donation: Option<i64>,
   pub witnesses: Witnesses,
+  /// Scripts embedded in auxiliary_data (distinct from witness-set scripts)
+  pub auxiliary_scripts: AuxiliaryDataScripts,
   pub size: i64,
   pub cbor: Option<String>,
 }
@@ -234,6 +270,7 @@ impl CborResponse {
     proposal_procedures: Vec<ProposalProcedure>,
     current_treasury_value: Option<i64>,
     donation: Option<i64>,
+    auxiliary_scripts: AuxiliaryDataScripts,
     cbor: Option<String>,
   ) -> Self {
     Self {
@@ -260,6 +297,7 @@ impl CborResponse {
       proposal_procedures,
       current_treasury_value,
       donation,
+      auxiliary_scripts,
       size: tx.size() as i64,
       cbor,
     }

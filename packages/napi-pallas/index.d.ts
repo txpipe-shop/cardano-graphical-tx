@@ -20,6 +20,17 @@ export interface Assets {
   assetsPolicy: Array<Asset>
 }
 
+/**
+ * Scripts attached to `auxiliary_data` (distinct from witness-set scripts).
+ * In the current pallas version (1.0.0-alpha.3) only native scripts and
+ * Plutus V1 scripts are accessible via the unified `alonzo::AuxiliaryData`
+ * type; V2/V3 aux-data scripts require a future pallas update.
+ */
+export interface AuxiliaryDataScripts {
+  nativeScripts: Array<NativeScript>
+  plutusV1Scripts: Array<string>
+}
+
 export interface BlockCborResponse {
   header: BlockHeader
   transactions: Array<CborResponse>
@@ -36,6 +47,21 @@ export interface BlockHeader {
   vrfVkey?: string
   blockBodySize?: number
   blockBodyHash?: string
+}
+
+/**
+ * A Byron-era bootstrap (signature) witness (witness_set key 2).
+ * All fields are hex-encoded bytes.
+ */
+export interface BootstrapWitness {
+  /** Hex-encoded Ed25519 extended public key (64 bytes) */
+  publicKey: string
+  /** Hex-encoded signature */
+  signature: string
+  /** Hex-encoded chain code (32 bytes) */
+  chainCode: string
+  /** Hex-encoded address attributes (network magic / derivation path) */
+  attributes: string
 }
 
 export declare function cborParse(raw: string): SafeCborResponse
@@ -74,6 +100,8 @@ export interface CborResponse {
   /** Donation to treasury in lovelace (tx_body key 22) */
   donation?: number
   witnesses: Witnesses
+  /** Scripts embedded in auxiliary_data (distinct from witness-set scripts) */
+  auxiliaryScripts: AuxiliaryDataScripts
   size: number
   cbor?: string
 }
@@ -203,6 +231,7 @@ export interface Witness {
 
 export interface Witnesses {
   vkeyWitnesses: Array<Witness>
+  bootstrapWitnesses: Array<BootstrapWitness>
   nativeScripts: Array<NativeScript>
   redeemers: Array<Redeemer>
   plutusData: Array<Datum>
