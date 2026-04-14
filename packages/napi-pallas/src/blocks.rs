@@ -25,16 +25,25 @@ pub struct BlockCborResponse {
 }
 
 fn get_block_header(block: &MultiEraBlock<'_>) -> BlockHeader {
+  let header = block.header();
+
+  // block_body_hash is available on the raw Babbage/Shelley-compatible header bodies
+  // but not yet exposed as a method on MultiEraHeader, so we access it directly.
+  let block_body_hash = header
+    .as_babbage()
+    .map(|h| h.header_body.block_body_hash.to_string())
+    .or_else(|| header.as_alonzo().map(|h| h.header_body.block_body_hash.to_string()));
+
   BlockHeader {
     era: block.era().to_string(),
     block_number: Some(block.number() as i64),
     slot: Some(block.slot() as i64),
     hash: block.hash().to_string(),
-    previous_hash: None,
-    issuer_vkey: None,
-    vrf_vkey: None,
+    previous_hash: header.previous_hash().map(|h| h.to_string()),
+    issuer_vkey: header.issuer_vkey().map(hex::encode),
+    vrf_vkey: header.vrf_vkey().map(hex::encode),
     block_body_size: block.body_size().map(|s| s as i64),
-    block_body_hash: None,
+    block_body_hash,
   }
 }
 
