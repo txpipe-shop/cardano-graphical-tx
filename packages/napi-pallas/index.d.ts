@@ -53,10 +53,26 @@ export interface CborResponse {
   mints: Array<Assets>
   validityStart?: number
   ttl?: number
+  /** Hex-encoded auxiliary data hash (tx_body key 7) */
+  auxiliaryDataHash?: string
+  /** Hex-encoded script data hash (tx_body key 11) */
+  scriptDataHash?: string
+  /** Hex-encoded required signer keyhashes (tx_body key 14) */
+  requiredSigners: Array<string>
+  /** Network id: 0 = testnet, 1 = mainnet (tx_body key 15) */
+  networkId?: number
   metadata: Array<Metadata>
   withdrawals: Array<Withdrawal>
   certificates: Array<Certificates>
   collateral: Collateral
+  /** Conway governance voting procedures (tx_body key 19) */
+  votingProcedures: Array<VotingProcedure>
+  /** Conway governance proposal procedures (tx_body key 20) */
+  proposalProcedures: Array<ProposalProcedure>
+  /** Current treasury value in lovelace (tx_body key 21) */
+  currentTreasuryValue?: number
+  /** Donation to treasury in lovelace (tx_body key 22) */
+  donation?: number
   witnesses: Witnesses
   size: number
   cbor?: string
@@ -94,9 +110,31 @@ export interface Metadata {
   jsonMetadata: Record<string, string>
 }
 
+/**
+ * A native script from the transaction witness set (key 1).
+ * Serialised as canonical JSON matching the pallas `NativeScript` serde output.
+ */
+export interface NativeScript {
+  json: string
+}
+
 export declare function parseAddress(raw: string): SafeAddressResponse
 
 export declare function parseDatumInfo(raw: string): Datum | null
+
+/**
+ * One entry from the `proposal_procedures` set (tx_body key 20).
+ * The governance action is serialised as JSON because it is a complex enum.
+ */
+export interface ProposalProcedure {
+  deposit: number
+  /** Hex-encoded reward account bytes */
+  rewardAccount: string
+  /** Serde-JSON of the `GovAction` enum */
+  govActionJson: string
+  anchorUrl: string
+  anchorDataHash: string
+}
 
 export interface Redeemer {
   tag: string
@@ -137,6 +175,21 @@ export interface Utxo {
   scriptRef?: string
 }
 
+/**
+ * One row from the `voting_procedures` map (tx_body key 19).
+ * Complex sub-structures (voter type) are encoded in `voter_json`.
+ */
+export interface VotingProcedure {
+  /** Serde-JSON of the `Voter` enum (ConstitutionalCommitteeKey/Script, DRepKey/Script, StakePoolKey) */
+  voterJson: string
+  govActionTxHash: string
+  govActionIndex: number
+  /** "No" | "Yes" | "Abstain" */
+  vote: string
+  anchorUrl?: string
+  anchorDataHash?: string
+}
+
 export interface Withdrawal {
   rawAddress: string
   amount: number
@@ -150,6 +203,7 @@ export interface Witness {
 
 export interface Witnesses {
   vkeyWitnesses: Array<Witness>
+  nativeScripts: Array<NativeScript>
   redeemers: Array<Redeemer>
   plutusData: Array<Datum>
   plutusV1Scripts: Array<string>

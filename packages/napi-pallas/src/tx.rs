@@ -1,14 +1,16 @@
 use crate::{
-  Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
-  SafeCborResponse, Utxo, Withdrawal, Witness, Witnesses,
+  Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata,
+  NativeScript, ProposalProcedure, Redeemer, SafeCborResponse, Utxo, Withdrawal, Witness,
+  Witnesses,
 };
 use pallas::ledger::primitives::conway::DatumOption;
 use pallas::ledger::traverse::{
   MultiEraCert, MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer,
 };
 use pallas_crypto::hash::Hasher;
-use pallas_primitives::conway::VKeyWitness;
+use pallas_primitives::conway::{Vote, VKeyWitness, Voter};
 use std::collections::HashMap;
+use std::ops::Deref;
 
 use pallas::ledger::{
   primitives::ToCanonicalJson,
@@ -221,6 +223,123 @@ pub(crate) fn get_collaterals(tx: &MultiEraTx<'_>) -> Collateral {
   }
 }
 
+/// Hex-encoded auxiliary data hash (tx_body key 7). Present in Alonzo, Babbage, and Conway.
+pub(crate) fn get_auxiliary_data_hash(tx: &MultiEraTx<'_>) -> Option<String> {
+  match tx {
+    MultiEraTx::AlonzoCompatible(x, _) => {
+      x.transaction_body.auxiliary_data_hash.map(|h| h.to_string())
+    }
+    MultiEraTx::Babbage(x) => x
+      .transaction_body
+      .auxiliary_data_hash
+      .as_ref()
+      .map(|b| hex::encode(b.as_slice())),
+    MultiEraTx::Conway(x) => x
+      .transaction_body
+      .auxiliary_data_hash
+      .map(|h| h.to_string()),
+    _ => None,
+  }
+}
+
+/// Hex-encoded script data hash (tx_body key 11). Present in Alonzo, Babbage, and Conway.
+pub(crate) fn get_script_data_hash(tx: &MultiEraTx<'_>) -> Option<String> {
+  match tx {
+    MultiEraTx::AlonzoCompatible(x, _) => {
+      x.transaction_body.script_data_hash.map(|h| h.to_string())
+    }
+    MultiEraTx::Babbage(x) => x
+      .transaction_body
+      .script_data_hash
+      .map(|h| h.to_string()),
+    MultiEraTx::Conway(x) => x
+      .transaction_body
+      .script_data_hash
+      .map(|h| h.to_string()),
+    _ => None,
+  }
+}
+
+/// Required signer keyhashes as hex strings (tx_body key 14).
+pub(crate) fn get_required_signers(tx: &MultiEraTx<'_>) -> Vec<String> {
+  tx.required_signers()
+    .collect::<Vec<_>>()
+    .into_iter()
+    .map(|h| h.to_string())
+    .collect()
+}
+
+/// Network id: 0 = testnet, 1 = mainnet (tx_body key 15).
+pub(crate) fn get_network_id(tx: &MultiEraTx<'_>) -> Option<u8> {
+  tx.network_id().map(|id| u8::from(id))
+}
+
+/// Current treasury value (tx_body key 21) — Conway only.
+pub(crate) fn get_treasury_value(tx: &MultiEraTx<'_>) -> Option<i64> {
+  match tx {
+    MultiEraTx::Conway(x) => x.transaction_body.treasury_value.map(|v| v as i64),
+    _ => None,
+  }
+}
+
+/// Donation to treasury (tx_body key 22) — Conway only.
+pub(crate) fn get_donation(tx: &MultiEraTx<'_>) -> Option<i64> {
+  match tx {
+    MultiEraTx::Conway(x) => x.transaction_body.donation.map(|v| u64::from(v) as i64),
+    _ => None,
+  }
+}
+
+fn voter_to_json(voter: &Voter) -> String {
+  serde_json::to_string(voter).unwrap_or_default()
+}
+
+/// Voting procedures (tx_body key 19) — Conway only.
+pub(crate) fn get_voting_procedures(tx: &MultiEraTx<'_>) -> Vec<crate::VotingProcedure> {
+  let Some(conway_tx) = tx.as_conway() else {
+    return vec![];
+  };
+  let Some(procedures) = &conway_tx.transaction_body.voting_procedures else {
+    return vec![];
+  };
+
+  let mut result = Vec::new();
+  for (voter, actions) in procedures.iter() {
+    for (gov_action_id, voting_proc) in actions.iter() {
+      result.push(crate::VotingProcedure {
+        voter_json: voter_to_json(voter),
+        gov_action_tx_hash: gov_action_id.transaction_id.to_string(),
+        gov_action_index: gov_action_id.action_index,
+        vote: match &voting_proc.vote {
+          Vote::No => "No".to_string(),
+          Vote::Yes => "Yes".to_string(),
+          Vote::Abstain => "Abstain".to_string(),
+        },
+        anchor_url: voting_proc.anchor.as_ref().map(|a| a.url.clone()),
+        anchor_data_hash: voting_proc.anchor.as_ref().map(|a| a.content_hash.to_string()),
+      });
+    }
+  }
+  result
+}
+
+/// Proposal procedures (tx_body key 20) — Conway only.
+pub(crate) fn get_proposal_procedures(tx: &MultiEraTx<'_>) -> Vec<ProposalProcedure> {
+  tx.gov_proposals()
+    .iter()
+    .filter_map(|proposal| {
+      let conway_proposal = proposal.as_conway()?;
+      Some(ProposalProcedure {
+        deposit: conway_proposal.deposit as i64,
+        reward_account: hex::encode(conway_proposal.reward_account.as_slice()),
+        gov_action_json: serde_json::to_string(&conway_proposal.gov_action).unwrap_or_default(),
+        anchor_url: conway_proposal.anchor.url.clone(),
+        anchor_data_hash: conway_proposal.anchor.content_hash.to_string(),
+      })
+    })
+    .collect()
+}
+
 fn build_witness(wit: &VKeyWitness) -> Witness {
   Witness {
     key: hex::encode(wit.vkey.as_slice()),
@@ -273,6 +392,13 @@ fn build_redeemer(r: &MultiEraRedeemer<'_>) -> Redeemer {
 pub(crate) fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
   Witnesses {
     vkey_witnesses: tx.vkey_witnesses().iter().map(build_witness).collect(),
+    native_scripts: tx
+      .native_scripts()
+      .iter()
+      .map(|s| NativeScript {
+        json: serde_json::to_string(s.deref()).unwrap_or_default(),
+      })
+      .collect(),
     redeemers: tx.redeemers().iter().map(|x| build_redeemer(x)).collect(),
     plutus_data: tx
       .plutus_data()
@@ -302,6 +428,14 @@ pub(crate) fn parse_tx_from_multiera(
   let certificates = get_certificates(tx);
   let collateral = get_collaterals(tx);
   let witnesses = get_witnesses(tx);
+  let auxiliary_data_hash = get_auxiliary_data_hash(tx);
+  let script_data_hash = get_script_data_hash(tx);
+  let required_signers = get_required_signers(tx);
+  let network_id = get_network_id(tx);
+  let voting_procedures = get_voting_procedures(tx);
+  let proposal_procedures = get_proposal_procedures(tx);
+  let current_treasury_value = get_treasury_value(tx);
+  let donation = get_donation(tx);
 
   let cbor = if include_cbor {
     Some(hex::encode(tx.encode()))
@@ -320,6 +454,14 @@ pub(crate) fn parse_tx_from_multiera(
     certificates,
     collateral,
     witnesses,
+    auxiliary_data_hash,
+    script_data_hash,
+    required_signers,
+    network_id,
+    voting_procedures,
+    proposal_procedures,
+    current_treasury_value,
+    donation,
     cbor,
   ))
 }

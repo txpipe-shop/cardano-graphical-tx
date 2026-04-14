@@ -107,10 +107,48 @@ pub struct Redeemer {
   pub ex_units: ExUnits,
 }
 
+/// A native script from the transaction witness set (key 1).
+/// Serialised as canonical JSON matching the pallas `NativeScript` serde output.
+#[derive(Default)]
+#[napi(object)]
+pub struct NativeScript {
+  pub json: String,
+}
+
+/// One row from the `voting_procedures` map (tx_body key 19).
+/// Complex sub-structures (voter type) are encoded in `voter_json`.
+#[derive(Default)]
+#[napi(object)]
+pub struct VotingProcedure {
+  /// Serde-JSON of the `Voter` enum (ConstitutionalCommitteeKey/Script, DRepKey/Script, StakePoolKey)
+  pub voter_json: String,
+  pub gov_action_tx_hash: String,
+  pub gov_action_index: u32,
+  /// "No" | "Yes" | "Abstain"
+  pub vote: String,
+  pub anchor_url: Option<String>,
+  pub anchor_data_hash: Option<String>,
+}
+
+/// One entry from the `proposal_procedures` set (tx_body key 20).
+/// The governance action is serialised as JSON because it is a complex enum.
+#[derive(Default)]
+#[napi(object)]
+pub struct ProposalProcedure {
+  pub deposit: i64,
+  /// Hex-encoded reward account bytes
+  pub reward_account: String,
+  /// Serde-JSON of the `GovAction` enum
+  pub gov_action_json: String,
+  pub anchor_url: String,
+  pub anchor_data_hash: String,
+}
+
 #[derive(Default)]
 #[napi(object)]
 pub struct Witnesses {
   pub vkey_witnesses: Vec<Witness>,
+  pub native_scripts: Vec<NativeScript>,
   pub redeemers: Vec<Redeemer>,
   pub plutus_data: Vec<Datum>,
   pub plutus_v1_scripts: Vec<String>,
@@ -131,10 +169,26 @@ pub struct CborResponse {
   pub mints: Vec<Assets>,
   pub validity_start: Option<i64>,
   pub ttl: Option<i64>,
+  /// Hex-encoded auxiliary data hash (tx_body key 7)
+  pub auxiliary_data_hash: Option<String>,
+  /// Hex-encoded script data hash (tx_body key 11)
+  pub script_data_hash: Option<String>,
+  /// Hex-encoded required signer keyhashes (tx_body key 14)
+  pub required_signers: Vec<String>,
+  /// Network id: 0 = testnet, 1 = mainnet (tx_body key 15)
+  pub network_id: Option<u8>,
   pub metadata: Vec<Metadata>,
   pub withdrawals: Vec<Withdrawal>,
   pub certificates: Vec<Certificates>,
   pub collateral: Collateral,
+  /// Conway governance voting procedures (tx_body key 19)
+  pub voting_procedures: Vec<VotingProcedure>,
+  /// Conway governance proposal procedures (tx_body key 20)
+  pub proposal_procedures: Vec<ProposalProcedure>,
+  /// Current treasury value in lovelace (tx_body key 21)
+  pub current_treasury_value: Option<i64>,
+  /// Donation to treasury in lovelace (tx_body key 22)
+  pub donation: Option<i64>,
   pub witnesses: Witnesses,
   pub size: i64,
   pub cbor: Option<String>,
@@ -159,6 +213,7 @@ impl CborResponse {
     Default::default()
   }
 
+  #[allow(clippy::too_many_arguments)]
   fn with_cbor_attr(
     self,
     tx: MultiEraTx<'_>,
@@ -171,6 +226,14 @@ impl CborResponse {
     certificates: Vec<Certificates>,
     collateral: Collateral,
     witnesses: Witnesses,
+    auxiliary_data_hash: Option<String>,
+    script_data_hash: Option<String>,
+    required_signers: Vec<String>,
+    network_id: Option<u8>,
+    voting_procedures: Vec<VotingProcedure>,
+    proposal_procedures: Vec<ProposalProcedure>,
+    current_treasury_value: Option<i64>,
+    donation: Option<i64>,
     cbor: Option<String>,
   ) -> Self {
     Self {
@@ -189,6 +252,14 @@ impl CborResponse {
       certificates,
       collateral,
       witnesses,
+      auxiliary_data_hash,
+      script_data_hash,
+      required_signers,
+      network_id,
+      voting_procedures,
+      proposal_procedures,
+      current_treasury_value,
+      donation,
       size: tx.size() as i64,
       cbor,
     }
