@@ -1,8 +1,11 @@
 "use client";
 
-import { Card, CardBody, Chip } from "@heroui/react";
+import { Card, CardBody, Chip, Tooltip } from "@heroui/react";
 import { type cardano, type Unit, type Value } from "@laceanatomy/types";
-import { formatSeconds } from "~/app/_utils";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { formatSeconds, ROUTES } from "~/app/_utils";
+import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
 import TokenPill from "../TokenPill";
@@ -46,6 +49,44 @@ function OverviewStats({ tx }: { tx: cardano.Tx }) {
   );
 }
 
+function UtxoRefPill({ hash, index }: { hash: string; index: bigint }) {
+  const params = useParams();
+  const chain = (params?.chain as Network) ?? "mainnet";
+  const fullRef = `${hash}#${index.toString()}`;
+
+  return (
+    <Tooltip content={fullRef} placement="top" delay={150}>
+      <Link
+        href={ROUTES.EXPLORER_TX(chain, hash)}
+        className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-mono text-gray-700 shadow-sm transition-colors hover:bg-gray-100"
+      >
+        <ExternalLinkIcon />
+        {hash.slice(0, 8)}…#{index.toString()}
+      </Link>
+    </Tooltip>
+  );
+}
+
+function ExternalLinkIcon() {
+  return (
+    <svg
+      width="11"
+      height="11"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
+}
+
 function UtxoList({
   title,
   list,
@@ -76,10 +117,12 @@ function UtxoList({
           <tbody className="divide-y divide-border">
             {list.map((utxo) => (
               <tr key={`${utxo.outRef.hash}#${utxo.outRef.index}`}>
-                <td className="px-4 py-3 font-mono align-top text-p-secondary bg-surface">
+                <td className="px-4 py-3 align-top bg-surface">
                   <div className="flex items-center gap-1">
-                    {utxo.outRef.hash.slice(0, 15)}...#
-                    {utxo.outRef.index.toString()}
+                    <UtxoRefPill
+                      hash={utxo.outRef.hash}
+                      index={utxo.outRef.index}
+                    />
                     <CopyButton
                       text={`${utxo.outRef.hash}#${utxo.outRef.index}`}
                       size={12}

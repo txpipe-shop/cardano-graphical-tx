@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Listbox,
   ListboxItem,
@@ -13,6 +15,7 @@ import {
   type Value,
 } from "@laceanatomy/types";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export interface TokenPillProps {
   unit: Unit;
@@ -74,7 +77,13 @@ export default function TokenPill({ unit, amount, mint }: TokenPillProps) {
                   };
                   const value = map[key as string];
                   if (value !== undefined && navigator?.clipboard?.writeText) {
-                    navigator.clipboard.writeText(value);
+                    navigator.clipboard
+                      .writeText(value)
+                      .then(() =>
+                        toast(`Copied ${value}`, {
+                          style: { fontSize: "1rem", maxWidth: "700px", wordBreak: "break-all" },
+                        }),
+                      );
                   }
                   setMenuOpen(false);
                 }}
