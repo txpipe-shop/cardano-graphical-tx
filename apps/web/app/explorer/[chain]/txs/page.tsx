@@ -5,6 +5,7 @@ import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
 import {
   TxSearch,
   TxTable,
+  TxTableSkeleton,
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
 import { EXPLORER_PAGE_SIZE } from "~/app/_utils";
@@ -13,7 +14,6 @@ import {
   NETWORK,
   type Network,
 } from "~/app/_utils/network-config";
-import Loading from "~/app/loading";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import DevnetTransactionsList from "./DevnetTransactionsList";
 
@@ -76,7 +76,9 @@ export default async function ExplorerTxsPage({ params }: ExplorerPageProps) {
           </div>
         </div>
 
-        <Suspense fallback={<Loading />}>
+        <Suspense
+          fallback={<TxTableSkeleton rows={Number(EXPLORER_PAGE_SIZE)} />}
+        >
           <TransactionsList chain={chain} />
         </Suspense>
       </main>
