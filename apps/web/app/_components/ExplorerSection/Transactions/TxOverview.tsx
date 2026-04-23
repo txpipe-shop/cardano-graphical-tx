@@ -26,7 +26,7 @@ function OverviewStats({ tx }: { tx: cardano.Tx }) {
         </div>
         <div className="flex gap-2 items-center">
           <p className="font-bold text-p-secondary">Block Height:</p>
-          <span className="text-p-secondary">{tx.block?.height ?? "-"}</span>
+          <span className="text-p-secondary">{tx.block?.height?.toString() ?? "-"}</span>
         </div>
         {tx.validityInterval && (
           <>
