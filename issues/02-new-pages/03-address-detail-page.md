@@ -24,13 +24,13 @@ Server component.
 
 ### Data loading
 
+**Eager (page level):** Only fetch what the overview card and default tab need.
 ```ts
-const [funds, utxos, txHistory] = await Promise.all([
-  provider.getAddressFunds({ address }),
-  provider.getAddressUTxOs({ limit: 20n, offset: 0n, query: { address } }),
-  provider.getTxs({ limit: EXPLORER_PAGE_SIZE, offset: 0n, query: { address } }),
-]);
+const funds = await provider.getAddressFunds({ address });
+const addressInfo = await getAddressInfo(address);
 ```
+
+**Deferred (tab level):** UTxOs and transactions are fetched inside async components wrapped in `<Suspense>`. This keeps the initial HTML small and streams tab content as it resolves.
 
 ### Tabs
 
@@ -38,9 +38,9 @@ Uses `DetailTabs` (from `explorer-block-scroll` / `02-blocks-list-and-detail`).
 
 | Tab | Default? | Loading Strategy |
 |-----|----------|------------------|
-| **Dissect** | **Yes** | Eager — rendered immediately with server data |
-| **UTxOs** | No | Lazy — fetched client-side on first tab activation |
-| **Transactions** | No | Lazy — fetched client-side on first tab activation |
+| **Dissect** | **Yes** | Eager — server-rendered immediately |
+| **UTxOs** | No | Deferred — server-fetched inside `<Suspense>` boundary |
+| **Transactions** | No | Deferred — server-fetched inside `<Suspense>` boundary |
 
 #### Dissect tab (default)
 
@@ -67,19 +67,25 @@ These components handle:
 
 The components are pure presentation and fit directly into the tab panel. No styling changes needed.
 
-#### UTxOs tab (lazy-loaded)
+#### UTxOs tab (deferred)
 
-- Fetched client-side via `useEffect` on first tab activation
-- Paginated list similar to TxTable's input/output display
+Create `app/explorer/[chain]/addresses/[address]/_components/AddressUTxOsList.tsx` as an **async server component** that calls `provider.getAddressUTxOs(...)`. The parent page wraps it in:
+
+```tsx
+<Suspense fallback={<UTxOsSkeleton />}>
+  <AddressUTxOsList address={address} chain={chain} />
+</Suspense>
+```
+
 - Each row: OutRef (hash truncated + #index), Value (ADA + TokenPills), Datum badge (if present)
-- Skeleton shown while loading
+- Skeleton shown while streaming
 
-#### Transactions tab (lazy-loaded)
+#### Transactions tab (deferred)
 
-- Fetched client-side via `useEffect` on first tab activation
+Create `app/explorer/[chain]/addresses/[address]/_components/AddressTxList.tsx` as an **async server component** that calls `provider.getTxs(...)`. Wrapped in `<Suspense fallback={<TxTableSkeleton />}>`.
+
 - Reuses `TxTable` with address highlighting for relevant I/Os
 - Each row shows whether this address was input, output, or both
-- Skeleton shown while loading
 
 ### Address overview card (above tabs)
 
@@ -140,8 +146,9 @@ If the route param looks like a handle (`$handle`), resolve it to an address (se
 - [ ] `/explorer/[chain]/addresses/[address]` renders for all 4 networks
 - [ ] **Dissect tab is the default tab**
 - [ ] Dissect tab shows address structure via `ShelleySection` / `StakeSection` / `ByronSection`
-- [ ] UTxOs tab lazy-loads on first activation with skeleton
-- [ ] Transactions tab lazy-loads on first activation with skeleton
+- [ ] UTxOs tab streams via Suspense with skeleton fallback
+- [ ] Transactions tab streams via Suspense with skeleton fallback
+- [ ] No `useEffect` data fetching in tab components
 - [ ] Address overview card shows total value, tx count, first/last seen
 - [ ] Address normalization handles hex/bech32/base58 inputs
 - [ ] Address type badge shown
@@ -155,7 +162,7 @@ If the route param looks like a handle (`$handle`), resolve it to an address (se
 - `02-blocks-list-and-detail` — for `DetailTabs` component
 - Uses existing `getAddressInfo` from `napi-pallas`
 - Uses existing `getAddressFunds`, `getAddressUTxOs`, `getTxs` from `ChainProvider`
-- #01 (optional — for token metadata lookup when displaying TokenPills)
+- `#01-a` (optional — for token metadata lookup when displaying TokenPills)
 - #09 (search bar — for address search)
 - #13 (ADA Handle — for handle-to-address resolution)
 
@@ -167,4 +174,4 @@ If the route param looks like a handle (`$handle`), resolve it to an address (se
 ## Notes
 
 - The `ShelleySection` / `StakeSection` / `ByronSection` components are pure presentation components from `app/_components/AddressSection/`. They require no changes and fit directly into the tab panel.
-- Lazy loading UTxOs and transactions reduces initial page load time since the dissection view (default) does not require provider RPC calls.
+- **Pattern to replicate:** All future tabbed pages (token detail, governance, pools) should use this same Suspense/async-component pattern instead of client-side `useEffect` fetching.

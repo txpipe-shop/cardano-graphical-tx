@@ -1,4 +1,4 @@
-# 08 — Navigation Status Bar + Explorer Header Redesign
+# 08 — Incremental Navigation Bar
 
 ## Summary
 
@@ -82,26 +82,31 @@ Modify `app/_components/Header.tsx`:
 
 - [ ] Navigation bar visible on all `/explorer/*` pages
 - [ ] Active section highlighted based on current route
-- [ ] All nav links navigate to correct explorer sections
+- [ ] All **active** nav links navigate correctly; inactive links are hidden
+- [ ] Phase 2/3 links are commented out or hidden behind feature flags until their pages ship
 - [ ] Links only navigate when user is on an explorer page (not on legacy pages)
 - [ ] Chain selector integrated into the bar (replaces standalone `ChainSelector`)
 - [ ] Search bar integrated into the bar (replaces standalone `TxSearch`)
 - [ ] Responsive: collapses gracefully on narrow screens
-- [ ] "More" dropdown for secondary sections
+- [ ] "More" dropdown for secondary sections (Phase 3)
 - [ ] Minimal header preserved for non-explorer pages
 - [ ] Theme toggle preserved
 - [ ] No layout shift — height consistent with current header
+- [ ] Adding a new link does not require redesigning the bar
 
-## Dependencies
+## Phased Rollout
 
-- #02 (blocks pages — for the Blocks link)
-- #03 (address page — for the Addresses link)
-- #04 (script page — for the Scripts link)
-- #05 (token page — for the Tokens link)
-- #06 (protocol page — for the Protocol link)
-- #07 (governance page — for the Governance link)
-- #09 (search bar — integrated into this nav bar)
-- #10, #11, #12 (maybe pages — for More dropdown links)
+### Phase 1 — Core Explorer Links (do this first)
+Links: **Transactions**, **Blocks**, **Addresses**
+Dependencies: `explorer-block-scroll` (txs exists), `#02` (block detail), `#03` (address page)
+
+### Phase 2 — Asset & Script Links
+Links: **Tokens**, **Scripts**
+Dependencies: `#04` (script page), `#05` (token page)
+
+### Phase 3 — Advanced Links
+Links: **Protocol**, **Governance**, **More** dropdown (Epochs, Pools)
+Dependencies: `#06` (protocol), `#07` (governance), `#10–12` (epochs/pools/dreps)
 
 ## Dependents
 

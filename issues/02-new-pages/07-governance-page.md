@@ -171,7 +171,7 @@ Paginated table from `governanceDrepsGet`:
 
 ## Dependencies
 
-- #01 (provider methods) OR direct Blockfrost `CardanoGovernanceApi` call
+- `#01-b` (provider methods) OR direct Blockfrost `CardanoGovernanceApi` call
 - #03 (address page — for delegator links)
 - #06 (protocol params — parameter change context)
 - #08 (status bar nav link)

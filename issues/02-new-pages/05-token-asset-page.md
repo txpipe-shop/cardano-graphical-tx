@@ -148,7 +148,7 @@ The existing `<TokenPill>` component should link to this token page when clicked
 
 ## Dependencies
 
-- #01 (provider methods for tokens) OR direct Blockfrost SDK call
+- `#01-a` (provider methods for tokens) OR direct Blockfrost SDK call
 - `@laceanatomy/cardano-token-registry-sdk` (already exists)
 - `@laceanatomy/cf-token-metadata-sdk` (new package — see separate issue)
 - Provider CIP-68 support (see separate provider issue)

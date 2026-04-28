@@ -17,7 +17,7 @@ Cardano scripts (timelock, Plutus V1/V2/V3) are a fundamental primitive. Users n
 ```
 
 
-Called directly from the server component (or via provider if #01 is done first).
+Called directly from the server component (or via `ChainProvider` if `#01-a` is done first).
 
 ### Page layout
 
@@ -87,7 +87,7 @@ Paginated table (from `scriptsScriptHashRedeemersGet`):
 
 ## Dependencies
 
-- #01 (provider methods for scripts) OR direct Blockfrost SDK call in server component
+- `#01-a` (provider methods for scripts) OR direct Blockfrost SDK call in server component
 - #09 (search bar — script hash detection)
 
 ## Dependents

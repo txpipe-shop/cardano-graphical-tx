@@ -133,7 +133,7 @@ Group parameters into collapsible sections for readability:
 
 ## Dependencies
 
-- #01 (provider method) OR direct Blockfrost `CardanoEpochsApi` call
+- `#01-c` (provider method) OR direct Blockfrost `CardanoEpochsApi` call
 - #08 (status bar — protocol nav link)
 - #09 (search bar — "protocol" keyword search)
 

@@ -1,4 +1,4 @@
-# 09 — Smart Multi-Type Search Bar
+# 09 — Incremental Smart Search Bar
 
 ## Summary
 
@@ -10,47 +10,44 @@ The current search (`TxSearch.tsx`) only accepts transaction hashes and blindly 
 
 ## Proposed Design
 
-### Input detection pipeline
+## Phased Detection Rollout
 
-```ts
-function detectInputType(input: string): {
-  type: 'tx' | 'block' | 'address' | 'script' | 'token' | 'pool' | 'drep' | 'epoch' | 'handle';
-  normalized?: string;
-} | null
-```
-
-Detection rules (evaluated in order):
+### Phase 1 — Core Types (ship first)
+These cover 90% of real user searches:
 
 | Priority | Pattern | Type | Route |
 |----------|---------|------|-------|
-| 1 | 64 hex chars | `tx` (or `block`) | `/txs/[hash]` or `/blocks/[hash]` — **ambiguous, ask or try tx first** |
-| 2 | Starts with `$` | `handle` | Resolve handle → address → `/addresses/[addr]` |
-| 3 | Starts with `addr1`, `addr_test1` | `address` | `/addresses/[address]` |
-| 4 | Starts with `stake1`, `stake_test1` | `address` | `/addresses/[address]` (stake address) |
-| 5 | Starts with `asset` + hex | `token` (fingerprint) | `/tokens/[fingerprint]` |
-| 6 | 56 hex chars (could be a script hash) | `/script/[hash]`
-| 7 | 56+ hex chars (policy concat) | `token` (unit) | `/tokens/[unit]` |
-| 8 | Starts with `pool1`, `pool_test1` | `pool` | `/pools/[id]` |
-| 9 | Starts with `drep1`, `drep_test1` | `drep` | `/governance/dreps/[id]` |
-| 10 | Starts with `script` + hex | `script` | `/scripts/[hash]` |
-| 11 | Positive integer | `epoch`, `slot` or `height` — **ambiguous** | Show disambiguation |
-| 12 | Bech32 with unrecognized prefix | `unknown` | Show "Unrecognized address format" error |
-| 13 | 64 hex | `tx` (default fallback) | `/txs/[input]` |
+| 1 | 64 hex chars | `tx` | `/txs/[hash]` (fallback; if not found, try block) |
+| 2 | Starts with `addr1`, `addr_test1` | `address` | `/addresses/[address]` |
+| 3 | Starts with `stake1`, `stake_test1` | `address` | `/addresses/[address]` |
+| 4 | Positive integer | `block_height` | `/blocks/[height]` |
+| 5 | 64 hex (fallback) | `tx` | `/txs/[input]` |
 
-### Ambiguous inputs
+### Phase 2 — Assets & Scripts
+Add after Phase 1 pages exist:
 
-**Case: 64 hex chars** — Could be a tx hash or block hash. Since tx hashes are the most common search, navigate to tx detail by default, but show a subtle "Search for block with this hash?" link on the tx detail page if it doesn't match.
+| Pattern | Type | Route |
+|---------|------|-------|
+| Starts with `asset` + hex | `token` (fingerprint) | `/tokens/[fingerprint]` |
+| 56+ hex chars (policy concat) | `token` (unit) | `/tokens/[unit]` |
+| 56 hex chars | `script` | `/scripts/[hash]` |
+| Starts with `script` + hex | `script` | `/scripts/[hash]` |
 
-**Case: large integer** — Could be an epoch number or slot number. Show a quick disambiguation dropdown:
+### Phase 3 — Governance & Handles
+Add after governance/ADA Handle pages exist:
 
-```
-[42,000,000                                ] [🔍]
-  ┌─────────────────────────────┐
-  │ Search as Epoch 420         │
-  │ Search as Block Slot        │
-  │ Search as Block Height      │
-  └─────────────────────────────┘
-```
+| Pattern | Type | Route |
+|---------|------|-------|
+| Starts with `$` | `handle` | Resolve → `/addresses/[addr]` |
+| Starts with `pool1` | `pool` | `/pools/[id]` |
+| Starts with `drep1` | `drep` | `/governance/dreps/[id]` |
+| Positive integer (alt) | `epoch` | `/epochs/[number]` |
+
+## Ambiguous Inputs (Phase 1 only)
+
+**64 hex chars:** Navigate to tx detail by default. If the tx is not found, show a "Search for block?" link on the error state.
+
+**Large integers:** Assume block height for Phase 1. Epoch disambiguation comes in Phase 3.
 
 ### Search results page (optional refinement)
 
@@ -84,26 +81,29 @@ The search placeholder should be dynamic: "Search transactions, blocks, addresse
 
 ## Acceptance Criteria
 
-- [ ] Input type detection correctly identifies all 10+ input types
-- [ ] Search navigates to the correct page for each input type
-- [ ] Ambiguous inputs (64-char hex, large integers) handled gracefully
-- [ ] ADA Handle resolution triggered for `$handle` inputs
+- [ ] Phase 1 detection correctly identifies tx hashes, addresses, and block heights
+- [ ] Phase 1 navigates to the correct page for each input type
 - [ ] Invalid/unrecognized inputs show a user-friendly error toast
-- [ ] Placeholder text hints at supported search types
+- [ ] Placeholder text matches Phase 1 capabilities (e.g., "Search transactions, blocks, addresses...")
 - [ ] Search works on all explorer pages
 - [ ] Enter key and search button both trigger search
-- [ ] Chain context preserved (search stays on the same network)
+- [ ] Chain context preserved
+- [ ] Phase 2/3 rules are stubbed or gated, not broken
 
 ## Dependencies
 
-- #02 (blocks page — for block search)
-- #03 (address page — for address search)
-- #04 (script page — for script search)
-- #05 (token page — for token search)
-- #06 (protocol page — for epoch search)
-- #07 (governance page — for DRep search)
-- #13 (ADA Handle — for handle resolution)
-- #11 (pools page — for pool search, if implemented)
+### Phase 1
+- `explorer-block-scroll` — block height search needs block pages
+- `#03` — address page must exist for address search
+
+### Phase 2
+- `#04` — script page
+- `#05` — token page
+
+### Phase 3
+- `#06` — protocol/epoch context
+- `#07` — governance page
+- `#13` — ADA Handle resolution
 
 ## Dependents
 

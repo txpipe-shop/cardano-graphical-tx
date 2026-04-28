@@ -6,11 +6,14 @@
 Ensure all pages in `apps/web` are usable on mobile devices (down to ~375px width). The developer implementing this should use their judgment to decide which elements to hide, rearrange, or simplify for smaller screens.
 
 ## Scope
-All pages under `apps/web/app/`:
+
+**Existing pages only.** Audit and retrofit these legacy/existing routes:
 - `/explorer/[chain]/txs` and `/explorer/[chain]/txs/[hash]`
 - `/tx/grapher` and `/tx/dissect`
 - `/address`
-- Any other public-facing routes
+- `/` (landing)
+
+**New pages are out of scope** — they must be built mobile-first from day one per the `mobile-first` skill (see `.agents/skills/mobile-first/SKILL.md`).
 
 ## Guiding Principles
 - **Progressive disclosure:** Show the most important information first; hide or collapse secondary details behind taps/accordions
@@ -26,7 +29,8 @@ The implementer should audit each page and decide:
 - How navigation (header, search, chain selector) should adapt
 
 ## Acceptance Criteria
-- [ ] No critical functionality is inaccessible on mobile
+- [ ] All existing pages above are usable down to 375px width
+- [ ] New pages are NOT audited here; they follow the mobile-first skill
 - [ ] `pnpm lint` and `pnpm check` pass after changes
 
 ## Notes
