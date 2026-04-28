@@ -27,34 +27,7 @@ A client component that renders a Heroui `Accordion` of blocks.
 
 Skeleton loader showing N block-header bars with a collapsed appearance, replacing `TxTableSkeleton` in the `Suspense` fallback.
 
-### Updated file: `apps/web/app/_components/ExplorerSection/Transactions/index.ts`
-
-Export the two new components.
-
-### Updated file: `apps/web/app/explorer/[chain]/txs/page.tsx`
-
-```tsx
-async function BlocksList({ chain }: { chain: Network }) {
-  if (chain === NETWORK.DEVNET) {
-    // DevnetTransactionsList will be updated separately
-    return <DevnetTransactionsList chain={chain} page={1} pageSize={Number(EXPLORER_BLOCK_PAGE_SIZE)} />;
-  }
-
-  const provider = getDolosProvider(chain);
-  const result = await provider.getBlocksWithTxs!({
-    limit: EXPLORER_BLOCK_PAGE_SIZE,
-    query: undefined,
-  });
-
-  return <BlockTxsAccordion blocks={result.data} chain={chain} />;
-}
-```
-
 Add `EXPLORER_BLOCK_PAGE_SIZE = 10n` to `apps/web/app/_utils/constants.ts`.
-
-### Updated file: `apps/web/app/explorer/[chain]/txs/DevnetTransactionsList.tsx`
-
-Replace the current `provider.getTxs` flow with `provider.getBlocksWithTxs`. Pagination logic remains the same heuristic (`result.data.length === pageSize ? currentPage + 1 : currentPage`) because `total` is still `0n`.
 
 ## UX Decisions
 - **Default expand state:** Expand the most recent block; collapse older ones.

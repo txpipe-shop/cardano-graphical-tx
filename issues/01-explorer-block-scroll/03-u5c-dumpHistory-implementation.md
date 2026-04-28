@@ -25,70 +25,13 @@ import type {
 } from '@laceanatomy/provider-core';
 ```
 
-#### 2. Cursor helpers (same as Dolos)
 
-```ts
-private encodeCursor(blockRef: sync.BlockRef): string {
-  return Buffer.from(JSON.stringify({
-    slot: Number(blockRef.slot),
-    hash: Buffer.from(blockRef.hash).toString('hex'),
-    height: Number(blockRef.height),
-    timestamp: Number(blockRef.timestamp),
-  })).toString('base64');
-}
-
-private decodeCursor(cursor: string): sync.BlockRef {
-  const parsed = JSON.parse(Buffer.from(cursor, 'base64').toString('utf-8'));
-  return new sync.BlockRef({
-    slot: BigInt(parsed.slot),
-    hash: Buffer.from(parsed.hash, 'hex'),
-    height: BigInt(parsed.height),
-    timestamp: BigInt(parsed.timestamp),
-  });
-}
-```
-
-#### 3. `getBlocksWithTxs` implementation
+#### 2. `getBlocksWithTxs` implementation
 
 ```ts
 async getBlocksWithTxs(
   params: CursorPaginatedRequest<BlocksQuery | undefined>
-): Promise<BlocksWithTxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
-  const { limit, cursor } = params;
-
-  const request = new sync.DumpHistoryRequest({
-    maxItems: Number(limit),
-    startToken: cursor ? this.decodeCursor(cursor) : undefined,
-  });
-
-  const response = await this.utxoRpc.sync.dumpHistory(request);
-
-  // Need tip height for confirmations. U5CProvider already has fetchBlockByQuery.
-  const tip = await this.readTip();
-  const { header: tipHeader } = await this.fetchBlockByQuery({ hash: tip.hash });
-  const tipHeight = tipHeader.height;
-
-  const data = response.block.map((anyChainBlock) => {
-    const { block, header, body } = this.validateBlock(anyChainBlock);
-    const blockMeta = u5cToCardanoBlock(block, tipHeight);
-    const transactions = body.tx.map((tx) =>
-      u5cToCardanoTx(
-        tx,
-        block.timestamp,
-        blockMeta.hash,
-        header.height,
-        header.slot,
-        this.findTxIndexInBlock(body, tx)
-      )
-    );
-    return { block: blockMeta, transactions };
-  });
-
-  return {
-    data,
-    nextCursor: response.nextToken ? this.encodeCursor(response.nextToken) : undefined,
-  };
-}
+): Promise<BlocksWithTxsRes<cardano.UTxO, cardano.Tx, Cardano>> { }
 ```
 
 ## Acceptance Criteria
