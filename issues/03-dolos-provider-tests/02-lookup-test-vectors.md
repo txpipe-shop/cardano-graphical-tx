@@ -23,14 +23,14 @@ Three TypeScript files:
 
 ```ts
 export const mainnetVectors = {
-  txHash: '64403900eb882a71f9aae0569b422c0c31a1787092a877ead54afd1b1f713b13',
+  txHash: '',
   block: {
     hash: '...',
     height: 12345n,
     slot: 12345678n,
   },
   address: {
-    withUtxos: 'addr1q8z6ty5v2yk5crjpdx7rswru92lhlryxh7xwc9mfzdmg855kn8exqdeytyq2uvd88av4l05qrpnh4aynhj6mtpetczys0jr0a0',
+    withUtxos: 'addr1...',
     withNativeAssets: 'addr1...',
     empty: 'addr1...',
   },

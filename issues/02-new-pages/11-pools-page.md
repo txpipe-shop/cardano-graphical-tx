@@ -39,10 +39,10 @@ Search bar at the top to filter by pool name or ID (delegates to Blockfrost's se
 
 ```
 ┌──────────────────────────────────────────────┐
-│ [Logo] POOLNAME [TICKER]                      │
-│ Pool ID: pool1abc...devx                [Copy]│
+│ [Logo] POOLNAME [TICKER]                     │
+│ Pool ID: pool1abc...devx               [Copy]│
 ├──────────────────────────────────────────────┤
-│ ┌── Overview ────────────────────────────────┐│
+│ ┌── Overview ───────────────────────────────┐│
 │ │ Stake:       12,345,678 ADA               ││
 │ │ Delegators:  1,234                        ││
 │ │ Pledge:      500,000 ADA                  ││
@@ -50,12 +50,12 @@ Search bar at the top to filter by pool name or ID (delegates to Blockfrost's se
 │ │ Fixed Cost:  340 ADA                      ││
 │ │ Hex:         0xabc123...                  ││
 │ │ Homepage:    https://pool.example.com     ││
-│ └────────────────────────────────────────────┘│
-│ ┌── Description ─────────────────────────────┐│
+│ └───────────────────────────────────────────┘│
+│ ┌── Description ────────────────────────────┐│
 │ │ A reliable stake pool operated by...      ││
-│ └────────────────────────────────────────────┘│
+│ └───────────────────────────────────────────┘│
 ├──────────────────────────────────────────────┤
-│ [Delegators (1,234)] [History] [Updates]      │ ← tabs
+│ [Delegators (1,234)] [History] [Updates]     │ ← tabs
 ├──────────────────────────────────────────────┤
 │ Address            │ Amount                  │
 │ addr1qxyz...       │ 1,000 ADA               │

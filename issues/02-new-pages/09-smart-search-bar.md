@@ -28,14 +28,14 @@ Detection rules (evaluated in order):
 | 3 | Starts with `addr1`, `addr_test1` | `address` | `/addresses/[address]` |
 | 4 | Starts with `stake1`, `stake_test1` | `address` | `/addresses/[address]` (stake address) |
 | 5 | Starts with `asset` + hex | `token` (fingerprint) | `/tokens/[fingerprint]` |
-| 6 | 56+ hex chars (policy concat) | `token` (unit) | `/tokens/[unit]` |
-| 7 | Starts with `pool1`, `pool_test1` | `pool` | `/pools/[id]` |
-| 8 | Starts with `drep1`, `drep_test1` | `drep` | `/governance/dreps/[id]` |
-| 9 | Starts with `script` + hex | `script` | `/scripts/[hash]` |
-| 10 | Positive integer < 1,000,000 | `block` (height) | `/blocks/[height]` |
-| 11 | Positive integer >= 1,000,000 | `epoch` or `slot` — **ambiguous** | Show disambiguation |
+| 6 | 56 hex chars (could be a script hash) | `/script/[hash]`
+| 7 | 56+ hex chars (policy concat) | `token` (unit) | `/tokens/[unit]` |
+| 8 | Starts with `pool1`, `pool_test1` | `pool` | `/pools/[id]` |
+| 9 | Starts with `drep1`, `drep_test1` | `drep` | `/governance/dreps/[id]` |
+| 10 | Starts with `script` + hex | `script` | `/scripts/[hash]` |
+| 11 | Positive integer | `epoch`, `slot` or `height` — **ambiguous** | Show disambiguation |
 | 12 | Bech32 with unrecognized prefix | `unknown` | Show "Unrecognized address format" error |
-| 13 | Otherwise | `tx` (default fallback) | `/txs/[input]` |
+| 13 | 64 hex | `tx` (default fallback) | `/txs/[input]` |
 
 ### Ambiguous inputs
 
@@ -46,9 +46,9 @@ Detection rules (evaluated in order):
 ```
 [42,000,000                                ] [🔍]
   ┌─────────────────────────────┐
-  │ Search as Epoch 420        │
-  │ Search as Block Slot       │
-  │ Search as Block Height     │
+  │ Search as Epoch 420         │
+  │ Search as Block Slot        │
+  │ Search as Block Height      │
   └─────────────────────────────┘
 ```
 
@@ -71,71 +71,6 @@ This is a nice-to-have; the initial implementation can just pick the most likely
 ### Component
 
 Replace `TxSearch.tsx` with `ExplorerSearch.tsx`:
-
-```tsx
-'use client';
-
-function ExplorerSearch({ chain, className }: { chain: ChainDescriptor; className?: string }) {
-  const [value, setValue] = useState('');
-  const router = useRouter();
-
-  const handleSearch = () => {
-    const trimmed = value.trim();
-    if (!trimmed) return;
-
-    const detected = detectInputType(trimmed);
-    if (!detected) {
-      toast.error('Unrecognized input');
-      return;
-    }
-
-    switch (detected.type) {
-      case 'tx':
-        router.push(`/explorer/${chain.id}/txs/${trimmed}`);
-        break;
-      case 'block':
-        router.push(`/explorer/${chain.id}/blocks/${trimmed}`);
-        break;
-      case 'address':
-        router.push(`/explorer/${chain.id}/addresses/${trimmed}`);
-        break;
-      case 'script':
-        router.push(`/explorer/${chain.id}/scripts/${trimmed}`);
-        break;
-      case 'token':
-        router.push(`/explorer/${chain.id}/tokens/${detected.normalized ?? trimmed}`);
-        break;
-      case 'pool':
-        router.push(`/explorer/${chain.id}/pools/${trimmed}`);
-        break;
-      case 'drep':
-        router.push(`/explorer/${chain.id}/governance/dreps/${trimmed}`);
-        break;
-      case 'epoch':
-        router.push(`/explorer/${chain.id}/protocol?epoch=${trimmed}`);
-        break;
-      case 'handle':
-        // Resolve handle first, then redirect
-        resolveHandleToAddress(chain, trimmed).then(addr => {
-          if (addr) router.push(`/explorer/${chain.id}/addresses/${addr}`);
-          else toast.error('Handle not found');
-        });
-        break;
-    }
-  };
-
-  return (
-    <Input
-      value={value}
-      onValueChange={setValue}
-      onKeyDown={e => e.key === 'Enter' && handleSearch()}
-      placeholder="Search transactions, blocks, addresses, tokens..."
-      endContent={<Button onPress={handleSearch}>Search</Button>}
-      className={className}
-    />
-  );
-}
-```
 
 ### Placeholder
 

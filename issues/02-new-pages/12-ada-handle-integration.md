@@ -6,7 +6,7 @@ Integrate ADA Handle resolution into the explorer: accept `$handle` inputs in th
 
 ## Motivation
 
-ADA Handle is the Cardano equivalent of ENS — human-readable names (e.g., `$alice`, `$bob`) that resolve to Cardano addresses. Integrating handles makes the explorer more user-friendly:
+Integrating handles makes the explorer more user-friendly:
 1. Users can search `$alice` instead of `addr1qx...`
 2. Address pages show associated handles
 3. Transaction views show handle names instead of (or alongside) raw addresses
@@ -18,21 +18,7 @@ ADA Handles are **CIP-68 NFT tokens** held in a user's wallet. The handle `$alic
 2. Finding the UTxO that holds this token
 3. The UTxO's address is the handle owner's address
 
-There are multiple ways to resolve handles:
-
-**Option A — Use the Koios API** (public, free):
-```
-GET https://api.koios.rest/api/v1/asset_address_list?_asset_policy=<handle_policy>&_asset_name=<hex_name>
-```
-
-**Option B — Query Blockfrost directly:**
-```
-assetsAssetAddressesGet(handlePolicyId + hexName) → list of addresses holding the handle
-```
-
-**Option C — Use the ADA Handle SDK** (if one exists as a package)
-
-**Option D — Use the existing Blockfrost `CardanoAssetsApi`** (already in the monorepo):
+Use the existing Blockfrost `CardanoAssetsApi` (already in the monorepo):
 
 ```ts
 const handlePolicyId = 'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a'; // mainnet
@@ -42,7 +28,6 @@ const holders = await assetsApi.assetsAssetAddressesGet(unit);
 const ownerAddress = holders[0]?.address;
 ```
 
-**Most pragmatic: Option B/D** using the already-available Blockfrost SDK. No additional dependencies needed.
 
 ## Proposed Design
 
@@ -51,7 +36,7 @@ const ownerAddress = holders[0]?.address;
 ```ts
 // app/_utils/handle-resolver.ts
 
-const HANDLE_POLICY_ID_MAINNET = 'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a';
+const HANDLE_POLICY_ID_MAINNET = '';
 const HANDLE_POLICY_ID_PREPROD = '...'; // preprod handle policy
 
 function getHandlePolicyId(network: Network): string {
@@ -61,23 +46,7 @@ function getHandlePolicyId(network: Network): string {
 export async function resolveHandle(
   handle: string, // e.g., "$alice" or "alice"
   network: Network
-): Promise<{ address: Address; handle: string } | null> {
-  const handleName = handle.replace(/^\$/, ''); // strip $ prefix
-  const hexName = Buffer.from(handleName).toString('hex');
-  const unit = getHandlePolicyId(network) + hexName;
-
-  try {
-    const assetsApi = new CardanoAssetsApi(/* config */);
-    const holders = await assetsApi.assetsAssetAddressesGet(unit, 1, 1);
-    if (holders.length === 0) return null;
-    return {
-      address: holders[0].address as Address,
-      handle: `$${handleName}`,
-    };
-  } catch {
-    return null;
-  }
-}
+): Promise<{ address: Address; handle: string } | null> { }
 
 export async function reverseResolveHandle(
   address: Address,

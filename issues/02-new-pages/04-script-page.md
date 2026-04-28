@@ -16,16 +16,6 @@ Cardano scripts (timelock, Plutus V1/V2/V3) are a fundamental primitive. Users n
 /explorer/[chain]/scripts/[scriptHash]
 ```
 
-### Data source
-
-Blockfrost `CardanoScriptsApi` (already generated in `@laceanatomy/blockfrost-sdk`):
-
-```
-scriptsScriptHashGet(scriptHash)          → Script (type, size)
-scriptsScriptHashCborGet(scriptHash)      → ScriptCbor (CBOR string)
-scriptsScriptHashJsonGet(scriptHash)      → ScriptJson (JSON for timelocks)
-scriptsScriptHashRedeemersGet(scriptHash) → Array<ScriptRedeemersInner>
-```
 
 Called directly from the server component (or via provider if #01 is done first).
 
@@ -33,19 +23,19 @@ Called directly from the server component (or via provider if #01 is done first)
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Script: 0xabc123...                      [Copy]│
+│ Script: 0xabc123...                    [Copy]│
 │ Type: Plutus V2  ·  Size: 15,432 bytes       │
 ├──────────────────────────────────────────────┤
 │ ┌─── Script CBOR ───────────────────────────┐│
 │ │ (CodeMirror or styled <pre>)              ││
 │ │ 5901a100d8799f...                         ││
-│ └────────────────────────────────────────────┘│
+│ └───────────────────────────────────────────┘│
 ├──────────────────────────────────────────────┤
 │ [Redeemers (156)                            ]│ ← tab
 ├──────────────────────────────────────────────┤
-│ Tx Hash         │ Purpose │ Mem   │ Steps  │ Fee  │
-│ a1b2c3d4...     │ Spend   │ 12345 │ 6.7M   │ 0.4A │
-│ e5f6a7b8...     │ Mint    │ 2000  │ 1.2M   │ 0.1A │
+│ Tx Hash    │ Purpose │ Mem   │ Steps  │ Fee  │
+│ a1b2c3d4...│ Spend   │ 12345 │ 6.7M   │ 0.4A │
+│ e5f6a7b8...│ Mint    │ 2000  │ 1.2M   │ 0.1A │
 │ ...                                          │
 └──────────────────────────────────────────────┘
 ```

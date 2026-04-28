@@ -21,17 +21,6 @@ Also support per-epoch query:
 /explorer/[chain]/protocol?epoch=420
 ```
 
-### Data source
-
-Blockfrost `CardanoEpochsApi`:
-
-```
-epochsLatestParametersGet()          → EpochParamContent (current params)
-epochsNumberParametersGet(number)    → EpochParamContent (historical params)
-```
-
-Called directly from the server component.
-
 ### Page layout
 
 ```

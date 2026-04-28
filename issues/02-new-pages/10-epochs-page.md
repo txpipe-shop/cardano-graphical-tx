@@ -60,17 +60,6 @@ Paginated table from Blockfrost `epochsLatestGet()` + `epochsNumberPreviousGet()
 └──────────────────────────────────────────────┘
 ```
 
-### Data sources
-
-Blockfrost `CardanoEpochsApi`:
-- `epochsLatestGet()` → latest epoch
-- `epochsNumberGet(number)` → specific epoch
-- `epochsNumberNextGet(number)` / `epochsNumberPreviousGet(number)` → pagination
-- `epochsNumberBlocksGet(number)` → blocks in epoch
-- `epochsNumberParametersGet(number)` → protocol params
-
-Or via DbSyncProvider (`getEpoch`, `getEpochs`) for DbSync-backed setups.
-
 ### Epoch navigation
 
 Previous / Next epoch buttons at the top of the detail page:

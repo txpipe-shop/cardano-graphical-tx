@@ -20,33 +20,13 @@ Cardano's Conway era introduced on-chain governance: DReps, governance actions (
 /explorer/[chain]/governance/dreps/[drepId]       → DRep detail
 ```
 
-### Data source
-
-Blockfrost `CardanoGovernanceApi`:
-
-```
-governanceProposalsGet(count, page, order)             → Array<ProposalsInner>
-governanceProposalsTxHashCertIndexGet(txHash, certIndex)  → Proposal
-governanceProposalsTxHashCertIndexMetadataGet(txHash, certIndex) → ProposalMetadata
-governanceProposalsTxHashCertIndexParametersGet(txHash, certIndex) → ProposalParameters
-governanceProposalsTxHashCertIndexVotesGet(txHash, certIndex) → Array<ProposalVotesInner>
-governanceProposalsTxHashCertIndexWithdrawalsGet(txHash, certIndex) → Array<ProposalWithdrawalsInner>
-
-governanceDrepsGet(count, page, order)                  → Array<DrepsInner>
-governanceDrepsDrepIdGet(drepId)                        → Drep
-governanceDrepsDrepIdMetadataGet(drepId)                → DrepMetadata
-governanceDrepsDrepIdDelegatorsGet(drepId)             → Array<DrepDelegatorsInner>
-governanceDrepsDrepIdUpdatesGet(drepId)                → Array<DrepUpdatesInner>
-governanceDrepsDrepIdVotesGet(drepId)                  → Array<DrepVotesInner>
-```
-
 ### Governance Overview Page
 
 A dashboard summarizing governance state:
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Governance Overview  ·  Cardano Mainnet       │
+│ Governance Overview  ·  Cardano Mainnet      │
 ├──────────────────────────────────────────────┤
 │ ┌───────────┐ ┌───────────┐ ┌──────────────┐ │
 │ │ Proposals │ │ DReps     │ │ Active Votes │ │
@@ -55,14 +35,14 @@ A dashboard summarizing governance state:
 │ └───────────┘ └───────────┘ └──────────────┘ │
 ├──────────────────────────────────────────────┤
 │ Recent Proposals                             │
-│ ┌────────────────────────────────────────────┐│
-│ │ Hard Fork Initiation  │ Ratified  │ Ep 523 ││
-│ │ New Constitution      │ Active    │ Ep 524 ││
-│ │ Treasury Withdrawal   │ Dropped   │ Ep 521 ││
-│ │ Info Action           │ Active    │ Ep 525 ││
-│ │ Parameter Change      │ Active    │ Ep 524 ││
-│ └────────────────────────────────────────────┘│
-│ [View all proposals →]                        │
+│┌────────────────────────────────────────────┐│
+││ Hard Fork Initiation  │ Ratified  │ Ep 523 ││
+││ New Constitution      │ Active    │ Ep 524 ││
+││ Treasury Withdrawal   │ Dropped   │ Ep 521 ││
+││ Info Action           │ Active    │ Ep 525 ││
+││ Parameter Change      │ Active    │ Ep 524 ││
+│└────────────────────────────────────────────┘│
+│ [View all proposals →]                       │
 └──────────────────────────────────────────────┘
 ```
 
@@ -96,32 +76,32 @@ Paginated table from `governanceProposalsGet`:
 │ Parameter Change — Tx a1b2c3... #0    [Copy] │
 │ Status: Active  ·  Proposed: Ep 524          │
 ├──────────────────────────────────────────────┤
-│ ┌─ Overview ─────────────────────────────────┐│
-│ │ Governance Type: parameter_change          ││
-│ │ Deposit: 100,000 ADA                       ││
-│ │ Return Address: stake1u...                 ││
-│ │ Expiration: Epoch 530                      ││
-│ │ Ratified: —                                ││
-│ │ Enacted: —                                 ││
-│ │ Dropped: —                                 ││
-│ └────────────────────────────────────────────┘│
-│ ┌─ Proposed Parameter Changes ───────────────┐│
+│ ┌─ Overview ────────────────────────────────┐│
+│ │ Governance Type: parameter_change         ││
+│ │ Deposit: 100,000 ADA                      ││
+│ │ Return Address: stake1u...                ││
+│ │ Expiration: Epoch 530                     ││
+│ │ Ratified: —                               ││
+│ │ Enacted: —                                ││
+│ │ Dropped: —                                ││
+│ └───────────────────────────────────────────┘│
+│ ┌─ Proposed Parameter Changes ──────────────┐│
 │ │ Max Tx Size: 16,384 → 32,768              ││
 │ │ Key Deposit: 2 ADA → 1 ADA                ││
-│ │ (shows only fields that would change)      ││
-│ └────────────────────────────────────────────┘│
-│ ┌─ Metadata ─────────────────────────────────┐│
+│ │ (shows only fields that would change)     ││
+│ └───────────────────────────────────────────┘│
+│ ┌─ Metadata ────────────────────────────────┐│
 │ │ URL: https://gov.tools/proposal/abc       ││
 │ │ Hash: 0xdef789...                         ││
 │ │ Raw JSON: { ... }                         ││
-│ └────────────────────────────────────────────┘│
+│ └───────────────────────────────────────────┘│
 ├──────────────────────────────────────────────┤
-│ [Votes (156)] [Withdrawals (2)]               │ ← tabs
+│ [Votes (156)] [Withdrawals (2)]              │ ← tabs
 ├──────────────────────────────────────────────┤
-│ Voter Role │ Voter     │ Vote               │
-│ DRep       │ drep1...  │ ✅ Yes             │
-│ SPO        │ pool1...  │ ❌ No              │
-│ CC         │ cc_hot... │ ⚪ Abstain         │
+│ Voter Role │ Voter     │ Vote                │
+│ DRep       │ drep1...  │ ✅ Yes              │
+│ SPO        │ pool1...  │ ❌ No               │
+│ CC         │ cc_hot... │ ⚪ Abstain          │
 └──────────────────────────────────────────────┘
 ```
 
@@ -141,24 +121,24 @@ Paginated table from `governanceDrepsGet`:
 
 ```
 ┌──────────────────────────────────────────────┐
-│ DRep: drep1abc...devx                   [Copy]│
+│ DRep: drep1abc...devx                  [Copy]│
 │ Status: Active  ·  Stake: 12,345,678 ADA     │
 ├──────────────────────────────────────────────┤
-│ ┌─ Info ─────────────────────────────────────┐│
+│ ┌─ Info ────────────────────────────────────┐│
 │ │ DRep ID: drep1...                         ││
 │ │ Hex: 0xabc123...                          ││
 │ │ Has Script: No                            ││
 │ │ Last Active Epoch: 525                    ││
-│ └────────────────────────────────────────────┘│
-│ ┌─ Metadata ─────────────────────────────────┐│
+│ └───────────────────────────────────────────┘│
+│ ┌─ Metadata ────────────────────────────────┐│
 │ │ URL: https://mydrep.io                    ││
 │ │ Hash: 0xdef789...                         ││
 │ │ Name: My DRep (from JSON metadata)        ││
-│ └────────────────────────────────────────────┘│
+│ └───────────────────────────────────────────┘│
 ├──────────────────────────────────────────────┤
 │ [Votes] [Delegators] [Updates]               │ ← tabs
 ├──────────────────────────────────────────────┤
-│ Tab content                                   │
+│ Tab content                                  │
 └──────────────────────────────────────────────┘
 ```
 
