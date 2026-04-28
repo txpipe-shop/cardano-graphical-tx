@@ -12,7 +12,7 @@ All pages under `apps/web/app/`:
 - `/address`
 - Any other public-facing routes
 
-## Guiding Principles (not prescriptive fixes)
+## Guiding Principles
 - **Progressive disclosure:** Show the most important information first; hide or collapse secondary details behind taps/accordions
 - **Touch-friendly:** Interactive elements should be easy to tap without zooming
 - **No horizontal overflow:** Content should fit within the viewport or scroll horizontally only where appropriate (e.g., data tables)
@@ -26,9 +26,6 @@ The implementer should audit each page and decide:
 - How navigation (header, search, chain selector) should adapt
 
 ## Acceptance Criteria
-- [ ] All public pages render without horizontal overflow at `375px` width
-- [ ] All tap targets are at least `44x44` px
-- [ ] The canvas-based grapher is interactively usable on mobile (method TBD by implementer)
 - [ ] No critical functionality is inaccessible on mobile
 - [ ] `pnpm lint` and `pnpm check` pass after changes
 
