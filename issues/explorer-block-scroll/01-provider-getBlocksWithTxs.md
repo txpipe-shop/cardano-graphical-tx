@@ -1,5 +1,7 @@
 # Issue 01: Extend provider-core with cursor-based block+txs types
 
+> **good first issue** — This issue is beginner-friendly and a great way to get familiar with the provider-core abstractions.
+
 ## Goal
 Add new types and an optional provider method that return blocks together with their fully resolved transactions, using cursor-based pagination instead of offset-based.
 

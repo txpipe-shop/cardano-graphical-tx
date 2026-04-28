@@ -1,5 +1,7 @@
 # Issue 03: Implement `getBlocksWithTxs` in `U5CProvider`
 
+> **good first issue** — This issue is beginner-friendly and a great way to get familiar with the U5CProvider and UTxORPC sync primitives.
+
 ## Goal
 Mirror the `DolosProvider` implementation in `U5CProvider` so the devnet explorer path can also fetch blocks with nested transactions via `DumpHistory`.
 

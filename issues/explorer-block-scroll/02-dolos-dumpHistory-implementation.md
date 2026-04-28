@@ -1,5 +1,7 @@
 # Issue 02: Implement `getBlocksWithTxs` in `DolosProvider`
 
+> **good first issue** — This issue is beginner-friendly and a great way to get familiar with the DolosProvider and UTxORPC sync primitives.
+
 ## Goal
 Implement the new `getBlocksWithTxs` method in `DolosProvider` using UTxORPC `DumpHistory`, returning blocks with fully resolved transactions and cursor-based pagination.
 

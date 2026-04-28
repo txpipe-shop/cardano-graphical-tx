@@ -1,5 +1,7 @@
 # Issue 04: UI — Refactor explorer txs page to scroll by foldable blocks
 
+> **good first issue** — This issue is beginner-friendly and a great way to get familiar with the Next.js frontend and Heroui components.
+
 ## Goal
 Update `apps/web/app/explorer/[chain]/txs/page.tsx` (and devnet variant) so the page scrolls blocks instead of a flat transaction list. Each block is a foldable accordion containing its transactions.
 

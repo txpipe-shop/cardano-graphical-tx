@@ -1,5 +1,7 @@
 # Issue 05: Migrate `DolosProvider.getBlocks` to `DumpHistory`
 
+> **good first issue** — This issue is beginner-friendly and a great way to get familiar with refactoring existing provider methods to use UTxORPC.
+
 ## Goal
 Migrate the existing `getBlocks` method in `DolosProvider` from Blockfrost to UTxORPC `DumpHistory`, achieving consistency with `getBlocksWithTxs` and removing the Blockfrost dependency from the blocks path.
 
