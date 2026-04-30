@@ -83,7 +83,7 @@ export function mapTx(tx: cardano.Tx, block?: BlockMetadata): TxApi {
     block_hash: tx.block.hash,
     block_slot: Number(tx.block.slot),
     // TODO: load it into the transactions object
-    confirmations: block ? Number(block.confirmations) : null,
+    confirmations: block && block.confirmations !== undefined ? Number(block.confirmations) : null,
     epoch: Number(tx.block.epochNo),
     fee: Number(tx.fee),
     fee_ada: Number(tx.fee) / 10 ** 6,
