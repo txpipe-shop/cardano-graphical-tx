@@ -31,11 +31,10 @@ export type PaginatedResult<T> = {
   total: bigint;
 };
 
-export type CursorPaginatedRequest<T, Cursor> = {
-  /** Opaque cursor for pagination. Dolos will base64-encode a BlockRef. */
+export type CursorPaginatedRequest<Cursor> = {
+  /** Cursor from the previous page response, or undefined for the first page. */
   cursor?: Cursor;
   limit: bigint;
-  query: T;
 };
 
 /**
@@ -49,7 +48,7 @@ export type BlockMetadata = {
   fees: bigint;
   time: number;
   /** blocksProduced since this block */
-  confirmations: bigint;
+  confirmations?: bigint;
   size?: bigint;
   epoch?: bigint;
 };
@@ -139,6 +138,7 @@ export type TxsRes<
 export type BlocksRes = PaginatedResult<BlockMetadata>;
 export type EpochsRes = PaginatedResult<Epoch>;
 export type TipRes = { hash: Hash; slot: bigint };
+export type BlockCursor = { hash: Hash; slot: bigint; height: bigint };
 export type LatestTxRes<
   U extends UTxO,
   T extends Tx<U>,
@@ -163,12 +163,20 @@ export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends Ba
   getTxs(params: TxsReq): Promise<TxsRes<U, T, Chain>>;
   getBlock(params: BlockReq): Promise<BlockRes>;
   getBlocks(params: BlocksReq): Promise<BlocksRes>;
-  getBlocksWithTxs?<Cursor>(
-    params: CursorPaginatedRequest<BlocksQuery | undefined, Cursor>
-  ): Promise<BlocksWithTxsRes<U, T, Chain, Cursor>>;
   getEpoch(params: EpochReq): Promise<EpochRes>;
   getEpochs(params: EpochsReq): Promise<EpochsRes>;
   readTip(): Promise<TipRes>;
   getPools?(params: PoolsReq): Promise<PoolsRes>;
   getPool?(params: PoolReq): Promise<PoolRes>;
+}
+
+export interface CursorPaginatedProvider<
+  U extends UTxO,
+  T extends Tx<U>,
+  Chain extends BaseChain<U, T>,
+  Cursor
+> {
+  getBlocksWithTxs(
+    params: CursorPaginatedRequest<Cursor>
+  ): Promise<BlocksWithTxsRes<U, T, Chain, Cursor>>;
 }

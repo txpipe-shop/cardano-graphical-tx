@@ -29,16 +29,17 @@ export function toBigInt(value: Uint8Array | bigint | undefined): bigint {
   return BigInt(value);
 }
 
-export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block, tipHeight: bigint): BlockRes {
+export function u5cToCardanoBlock(block: cardanoUtxoRpc.Block, tipHeight?: bigint): BlockRes {
   const fees = block.body!.tx.reduce((acc, tx) => acc + toBigInt(tx.fee?.bigInt.value), 0n);
+  const height = block.header?.height ?? 0n;
   return {
     hash: uint8ToHash(block.header!.hash),
-    height: toBigInt(block.header!.height),
+    height,
     slot: toBigInt(block.header!.slot),
     txCount: BigInt(block.body!.tx.length),
     fees,
     time: Number(block.timestamp) * 1000,
-    confirmations: tipHeight - toBigInt(block.header!.height)
+    confirmations: tipHeight !== undefined ? tipHeight - height : undefined
   };
 }
 

@@ -6,9 +6,13 @@ import {
   type AddressUTxOsRes,
   type BlockReq,
   type BlockRes,
+  type BlockCursor,
   type BlocksReq,
   type BlocksRes,
+  type BlocksWithTxsRes,
   type ChainProvider,
+  type CursorPaginatedProvider,
+  type CursorPaginatedRequest,
   type EpochReq,
   type EpochRes,
   type EpochsReq,
@@ -45,7 +49,11 @@ export type DolosProviderParams = {
   addressPrefix: string;
 };
 
-export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano> {
+export class DolosProvider
+  implements
+    ChainProvider<cardano.UTxO, cardano.Tx, Cardano>,
+    CursorPaginatedProvider<cardano.UTxO, cardano.Tx, Cardano, BlockCursor>
+{
   private static readonly MAX_BLOCKS_LOOKBACK = 100;
 
   private utxoRpc: UtxoRpcClient;
@@ -319,6 +327,57 @@ export class DolosProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Ca
     return {
       data: blocks.map((b) => blockfrostBlockToBlockRes(b.data)),
       total: 0n
+    };
+  }
+
+  async getBlocksWithTxs(
+    params: CursorPaginatedRequest<BlockCursor>
+  ): Promise<BlocksWithTxsRes<cardano.UTxO, cardano.Tx, Cardano, BlockCursor>> {
+    const { cursor, limit } = params;
+
+    const { block: blocks, nextToken } = await this.utxoRpc.sync.dumpHistory({
+      startToken: cursor
+        ? {
+            slot: cursor.slot,
+            hash: Buffer.from(cursor.hash, 'hex'),
+            height: cursor.height
+          }
+        : undefined,
+      maxItems: Number(limit)
+    });
+
+    const data = blocks.map((anyChainBlock) => {
+      const { block, header, body } = this.validateBlock(anyChainBlock);
+      const blockHash = Hash(Buffer.from(header.hash).toString('hex'));
+      const blockHeight = toBigInt(header.height);
+      const blockSlot = toBigInt(header.slot);
+
+      const transactions = body.tx.map((tx) =>
+        u5cToCardanoTx(
+          tx,
+          block.timestamp,
+          blockHash,
+          blockHeight,
+          blockSlot,
+          this.findTxIndexInBlock(body, tx)
+        )
+      );
+
+      return {
+        block: u5cToCardanoBlock(block, undefined),
+        transactions
+      };
+    });
+
+    return {
+      data,
+      nextCursor: nextToken
+        ? {
+            slot: nextToken.slot,
+            hash: Hash(Buffer.from(nextToken.hash).toString('hex')),
+            height: nextToken.height
+          }
+        : undefined
     };
   }
 
