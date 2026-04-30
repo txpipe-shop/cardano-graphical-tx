@@ -1,9 +1,7 @@
 import { Card, CardBody } from "@heroui/react";
 
 function SkeletonBar({ className = "" }: { className?: string }) {
-  return (
-    <div className={`rounded bg-explorer-row ${className}`} aria-hidden />
-  );
+  return <div className={`rounded bg-explorer-row ${className}`} aria-hidden />;
 }
 
 function UTxOsColumnSkeleton({ title }: { title: string }) {

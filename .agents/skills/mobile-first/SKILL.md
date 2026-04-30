@@ -11,14 +11,14 @@ All NEW pages and components in `apps/web` must be built mobile-first. This skil
 
 ## Scope
 
-| Area | Applies to |
-|------|------------|
-| Breakpoint convention | All Tailwind `className` usage |
-| Touch targets | Buttons, links, interactive elements |
-| Layout rules | Flex/grid, overflow, stacking order |
-| Data tables | Mobile card/stack conversion |
-| Images & Performance | `next/image`, lazy loading, paint cost |
-| Navigation | Header, search bar, chain selector |
+| Area                  | Applies to                             |
+| --------------------- | -------------------------------------- |
+| Breakpoint convention | All Tailwind `className` usage         |
+| Touch targets         | Buttons, links, interactive elements   |
+| Layout rules          | Flex/grid, overflow, stacking order    |
+| Data tables           | Mobile card/stack conversion           |
+| Images & Performance  | `next/image`, lazy loading, paint cost |
+| Navigation            | Header, search bar, chain selector     |
 
 ## Rules
 
@@ -48,6 +48,7 @@ If you find yourself writing `md:` on every property, invert the base style inst
 On mobile (`< md`), convert tables to cards or stacked rows.
 
 - **Don't:**
+
   ```tsx
   <table className="w-full text-xs">
   ```

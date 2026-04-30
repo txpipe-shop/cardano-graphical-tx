@@ -9,9 +9,17 @@ export interface CopyButtonProps {
 }
 export default function CopyButton({ text, size }: CopyButtonProps) {
   const handleCopy = () => {
-    navigator.clipboard.writeText(text).then(() =>
-      toast(`Copied ${text}`, { style: { fontSize: "1rem", maxWidth: "700px", wordBreak: "break-all" } }),
-    );
+    navigator.clipboard
+      .writeText(text)
+      .then(() =>
+        toast(`Copied ${text}`, {
+          style: {
+            fontSize: "1rem",
+            maxWidth: "700px",
+            wordBreak: "break-all",
+          },
+        }),
+      );
   };
 
   return (
