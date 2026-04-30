@@ -61,8 +61,8 @@ export default function TxTabs({
         onSelectionChange={(key) => setActive(key as TxTab)}
         variant="light"
         classNames={{
-          tabList: "w-full",
-          tab: "px-3 py-1 rounded border border-border bg-surface h-full",
+          tabList: "w-full flex-wrap md:flex-nowrap",
+          tab: "px-3 py-1 rounded border border-border bg-surface h-full w-auto md:w-full",
           tabContent: "text-p-primary text-sm font-medium",
           panel: "flex min-h-0 flex-1 flex-col p-0",
         }}
@@ -72,7 +72,7 @@ export default function TxTabs({
         </Tab>
 
         <Tab key="Diagram" title="Diagram">
-          <div className="relative h-[60vh] w-full overflow-hidden rounded-lg">
+          <div className="relative h-[40vh] w-full overflow-hidden rounded-lg md:h-[60vh]">
             <Button
               as={Link}
               size="sm"

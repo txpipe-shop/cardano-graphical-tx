@@ -11,14 +11,14 @@ export const ExplorerButton = () => {
   return (
     <Button
       variant="flat"
-      className="p-5 font-mono text-lg shadow-md"
+      className="px-2 py-2 font-mono text-sm shadow-md md:p-5 md:text-lg"
       as={NextLink}
       href={ROUTES.EXPLORER_TXS(network)}
     >
       <span className="bg-gradient-to-r from-purple-500 to-orange-500 bg-clip-text font-mono text-lg font-bold text-transparent">
         Explorer
       </span>
-      <span className="ml-1 rounded-full bg-orange-400/20 px-1.5 py-0.5 text-xs font-semibold text-orange-500">
+      <span className="ml-1 hidden rounded-full bg-orange-400/20 px-1.5 py-0.5 text-xs font-semibold text-orange-500 md:inline">
         beta
       </span>
     </Button>

@@ -17,11 +17,11 @@ interface TxRowHeaderProps {
 
 function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 bg-explorer-row p-4">
+    <div className="flex flex-col gap-3 bg-explorer-row p-4 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4">
       <div className="flex items-center gap-2">
         <Link
           href={ROUTES.EXPLORER_TX(chain as Network, tx.hash)}
-          className="font-mono text-sm text-accent-blue hover:underline"
+          className="break-all font-mono text-sm text-accent-blue hover:underline"
         >
           {tx.hash}
         </Link>
@@ -82,10 +82,12 @@ function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
       <div className="space-y-2">
         {utxos.map((utxo, i) => (
           <div className="rounded-lg bg-explorer-row p-2" key={i}>
-            <div className="flex flex-wrap items-center gap-2 justify-between">
-              {(Number(utxo.coin) / 1_000_000).toFixed(6)} ₳
+            <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between">
+              <span className="text-sm font-medium">
+                {(Number(utxo.coin) / 1_000_000).toFixed(6)} ₳
+              </span>
               <ColoredAddress address={utxo.address} />
-              <div className="font-mono text-xs text-p-secondary flex items-center gap-1">
+              <div className="flex items-center gap-1 font-mono text-xs text-p-secondary">
                 {utxo.outRef.hash.slice(0, 7)}...{utxo.outRef.hash.slice(-7)}#
                 {utxo.outRef.index.toString()}
                 <CopyButton

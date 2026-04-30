@@ -56,6 +56,7 @@ pnpm --filter @laceanatomy/cardano-provider-dbsync test:perf
 ## Test reality
 
 Most packages and apps have **no real tests**. Only these have working test suites:
+
 - `packages/cardano-provider-dbsync` — vitest (requires PostgreSQL)
 - `packages/napi-pallas` — ava (requires the native build)
 
@@ -77,6 +78,7 @@ Do not add test commands that don't exist.
 ## Environment
 
 Copy `apps/web/.env.example` → `apps/web/.env`. Main vars:
+
 - `DATABASE_URL` / `DIRECT_URL` — PostgreSQL for DB Sync provider
 - `NEXTAUTH_*` — NextAuth config
 - `*_BLOCKFROST_KEY` — Blockfrost API keys per network

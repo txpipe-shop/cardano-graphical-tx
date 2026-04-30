@@ -77,13 +77,15 @@ export default function TokenPill({ unit, amount, mint }: TokenPillProps) {
                   };
                   const value = map[key as string];
                   if (value !== undefined && navigator?.clipboard?.writeText) {
-                    navigator.clipboard
-                      .writeText(value)
-                      .then(() =>
-                        toast(`Copied ${value}`, {
-                          style: { fontSize: "1rem", maxWidth: "700px", wordBreak: "break-all" },
-                        }),
-                      );
+                    navigator.clipboard.writeText(value).then(() =>
+                      toast(`Copied ${value}`, {
+                        style: {
+                          fontSize: "1rem",
+                          maxWidth: "700px",
+                          wordBreak: "break-all",
+                        },
+                      }),
+                    );
                   }
                   setMenuOpen(false);
                 }}

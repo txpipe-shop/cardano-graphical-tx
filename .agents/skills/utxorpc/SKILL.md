@@ -19,10 +19,10 @@ import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 
 const client = new UtxoRpcClient({ transport });
 
-client.query   // QueryService   — readUtxos, searchUtxos, readTx, etc.
-client.submit  // SubmitService  — submitTx, watchMempool, etc.
-client.sync    // SyncService    — readTip, fetchBlock, dumpHistory, etc.
-client.watch   // WatchService   — stream UTxO / block updates
+client.query; // QueryService   — readUtxos, searchUtxos, readTx, etc.
+client.submit; // SubmitService  — submitTx, watchMempool, etc.
+client.sync; // SyncService    — readTip, fetchBlock, dumpHistory, etc.
+client.watch; // WatchService   — stream UTxO / block updates
 ```
 
 All protobuf-generated types are re-exported from `@utxorpc/spec`:
@@ -63,16 +63,16 @@ const transport = createGrpcTransport({
 
 ### Key protobuf types
 
-| Type | Purpose |
-|------|---------|
-| `sync.FetchBlockRequest` / `FetchBlockResponse` | Fetch one or more blocks by `BlockRef` |
-| `sync.DumpHistoryRequest` / `DumpBlockResponse` | Stream blocks from tip toward genesis |
-| `sync.ReadTipRequest` / `ReadTipResponse` | Get the current chain tip |
-| `query.ReadTxRequest` / `ReadTxResponse` | Read a single tx by hash |
-| `query.SearchUtxosRequest` / `SearchUtxosResponse` | Search UTxOs by address or pattern |
-| `sync.BlockRef` | Identifies a block by `hash`, `height`, or `slot` |
-| `sync.AnyChainBlock` | Polymorphic wrapper; unwrap with `chain.case === 'cardano'` |
-| `cardanoUtxoRpc.Block` | Concrete Cardano block (header + body + timestamp) |
+| Type                                               | Purpose                                                     |
+| -------------------------------------------------- | ----------------------------------------------------------- |
+| `sync.FetchBlockRequest` / `FetchBlockResponse`    | Fetch one or more blocks by `BlockRef`                      |
+| `sync.DumpHistoryRequest` / `DumpBlockResponse`    | Stream blocks from tip toward genesis                       |
+| `sync.ReadTipRequest` / `ReadTipResponse`          | Get the current chain tip                                   |
+| `query.ReadTxRequest` / `ReadTxResponse`           | Read a single tx by hash                                    |
+| `query.SearchUtxosRequest` / `SearchUtxosResponse` | Search UTxOs by address or pattern                          |
+| `sync.BlockRef`                                    | Identifies a block by `hash`, `height`, or `slot`           |
+| `sync.AnyChainBlock`                               | Polymorphic wrapper; unwrap with `chain.case === 'cardano'` |
+| `cardanoUtxoRpc.Block`                             | Concrete Cardano block (header + body + timestamp)          |
 
 ## Block validation pattern
 
@@ -108,6 +108,7 @@ function validateBlock(block: sync.FetchBlockResponse | sync.AnyChainBlock): {
 ```
 
 Key points:
+
 - `FetchBlockResponse.block` is an **array**; providers usually call with one ref and take index `0`.
 - `AnyChainBlock.chain` is a protobuf `oneof`; always assert `case === 'cardano'` before accessing `value`.
 - `header`, `body`, and `timestamp` live on `thisBlock.chain.value` (the `cardanoUtxoRpc.Block`).

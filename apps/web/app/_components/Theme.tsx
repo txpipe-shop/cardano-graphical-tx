@@ -18,7 +18,7 @@ export const ThemeButton = () => {
     return (
       <Button
         variant="flat"
-        className="p-5 font-mono text-lg shadow-md"
+        className="p-2 font-mono text-base shadow-md md:p-5 md:text-lg"
         isIconOnly
         isDisabled
       >
@@ -37,7 +37,7 @@ export const ThemeButton = () => {
   return (
     <Button
       variant="flat"
-      className="p-5 font-mono text-lg shadow-md"
+      className="p-2 font-mono text-base shadow-md md:p-5 md:text-lg"
       isIconOnly
       onPress={toggleTheme}
     >

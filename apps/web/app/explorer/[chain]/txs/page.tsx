@@ -67,11 +67,11 @@ export default async function ExplorerTxsPage({ params }: ExplorerPageProps) {
       <Header />
 
       <main className="container mx-auto px-4 py-6 bg-surface">
-        <div className="mb-6 flex w-full items-center gap-2">
+        <div className="mb-6 flex w-full flex-col items-stretch gap-2 md:flex-row md:items-center">
           <div className="min-w-0 flex-1">
             <TxSearch chain={chain} />
           </div>
-          <div className="min-w-[200px] shrink-0">
+          <div className="shrink-0 md:min-w-[200px]">
             <ChainSelector currentChain={chain} />
           </div>
         </div>

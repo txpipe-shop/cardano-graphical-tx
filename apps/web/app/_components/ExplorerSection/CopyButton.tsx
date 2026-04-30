@@ -9,17 +9,26 @@ export interface CopyButtonProps {
 }
 export default function CopyButton({ text, size }: CopyButtonProps) {
   const handleCopy = () => {
-    navigator.clipboard.writeText(text).then(() =>
-      toast(`Copied ${text}`, { style: { fontSize: "1rem", maxWidth: "700px", wordBreak: "break-all" } }),
-    );
+    navigator.clipboard
+      .writeText(text)
+      .then(() =>
+        toast(`Copied ${text}`, {
+          style: {
+            fontSize: "1rem",
+            maxWidth: "700px",
+            wordBreak: "break-all",
+          },
+        }),
+      );
   };
 
   return (
     <Tooltip content="Copy to clipboard">
       <button
         onClick={handleCopy}
-        className="ml-1 text-gray-400 transition-colors hover:text-gray-600 text-wrap"
+        className="relative ml-1 text-gray-400 transition-colors hover:text-gray-600 text-wrap"
       >
+        <span className="absolute inset-0 -m-3" aria-hidden />
         <CopyIcon size={size} />
       </button>
     </Tooltip>

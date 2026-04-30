@@ -1,9 +1,7 @@
 import { Card, CardBody } from "@heroui/react";
 
 function SkeletonBar({ className = "" }: { className?: string }) {
-  return (
-    <div className={`rounded bg-explorer-row ${className}`} aria-hidden />
-  );
+  return <div className={`rounded bg-explorer-row ${className}`} aria-hidden />;
 }
 
 function UTxOsColumnSkeleton({ title }: { title: string }) {
@@ -13,7 +11,7 @@ function UTxOsColumnSkeleton({ title }: { title: string }) {
       <div className="space-y-2">
         {Array.from({ length: 2 }).map((_, i) => (
           <div className="rounded-lg bg-explorer-row p-2" key={i}>
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between">
               <SkeletonBar className="h-4 w-20" />
               <SkeletonBar className="h-4 w-40" />
               <SkeletonBar className="h-4 w-32" />
@@ -33,7 +31,7 @@ function TxRowSkeleton() {
   return (
     <Card className="mb-4 border-2 border-dashed border-border shadow-md bg-background">
       <CardBody className="p-0">
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-explorer-row p-4">
+        <div className="flex flex-col gap-3 bg-explorer-row p-4 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4">
           <SkeletonBar className="h-5 w-72 max-w-full" />
           <SkeletonBar className="h-4 w-28" />
           <SkeletonBar className="h-4 w-32" />

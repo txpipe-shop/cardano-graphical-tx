@@ -26,7 +26,9 @@ function OverviewStats({ tx }: { tx: cardano.Tx }) {
         </div>
         <div className="flex gap-2 items-center">
           <p className="font-bold text-p-secondary">Block Height:</p>
-          <span className="text-p-secondary">{tx.block?.height?.toString() ?? "-"}</span>
+          <span className="text-p-secondary">
+            {tx.block?.height?.toString() ?? "-"}
+          </span>
         </div>
         {tx.validityInterval && (
           <>
@@ -102,7 +104,86 @@ function UtxoList({
       <div className="border-b px-4 py-2 bg-explorer-row font-semibold text-lg text-p-secondary">
         {title} ({list.length})
       </div>
-      <CardBody className="p-0 overflow-x-auto">
+      <CardBody className="p-0 md:hidden">
+        <div className="space-y-4 p-4">
+          {list.map((utxo) => (
+            <div
+              key={`${utxo.outRef.hash}#${utxo.outRef.index}`}
+              className="space-y-2 rounded-lg border border-border bg-surface p-3"
+            >
+              <div>
+                <p className="text-xs font-bold text-p-secondary">TxOut Ref</p>
+                <div className="flex items-center gap-1">
+                  <UtxoRefPill
+                    hash={utxo.outRef.hash}
+                    index={utxo.outRef.index}
+                  />
+                  <CopyButton
+                    text={`${utxo.outRef.hash}#${utxo.outRef.index}`}
+                    size={12}
+                  />
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-p-secondary">Address</p>
+                <ColoredAddress address={utxo.address} />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-p-secondary">Coin</p>
+                <Chip
+                  size="sm"
+                  variant="flat"
+                  className="bg-explorer-row text-p-secondary"
+                >
+                  {utxo.coin ? utxo.coin.toString() : "-"}
+                </Chip>
+              </div>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-bold text-p-secondary">Has Datum</p>
+                {utxo.datum ? (
+                  <Chip size="sm" variant="dot" color="success">
+                    Yes
+                  </Chip>
+                ) : (
+                  <Chip size="sm" variant="dot" color="danger">
+                    No
+                  </Chip>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-bold text-p-secondary">Has Script</p>
+                {utxo.referenceScript ? (
+                  <Chip size="sm" variant="dot" color="success">
+                    Yes
+                  </Chip>
+                ) : (
+                  <Chip size="sm" variant="dot" color="danger">
+                    No
+                  </Chip>
+                )}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-p-secondary">Tokens</p>
+                {Object.keys(utxo.value).length > 0 ? (
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {Object.entries(utxo.value).map(([unit, amount]) => (
+                      <TokenPill
+                        key={unit}
+                        unit={unit as Unit}
+                        amount={amount}
+                        mint={mint ?? {}}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-p-secondary">-</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardBody>
+      <CardBody className="hidden p-0 md:block overflow-x-auto">
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="text-p-secondary font-medium border-b bg-explorer-row">
             <tr>
