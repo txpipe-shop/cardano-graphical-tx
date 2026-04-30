@@ -5,7 +5,7 @@ export default function ExplorerLayout({
 }) {
   return (
     <>
-      <div className="pointer-events-none fixed right-0 top-24 z-50 h-[180px] w-[180px] overflow-hidden">
+      <div className="pointer-events-none fixed right-0 top-24 z-50 hidden h-[180px] w-[180px] overflow-hidden md:block">
         <a
           href="https://github.com/txpipe/dolos"
           target="_blank"

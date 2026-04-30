@@ -53,7 +53,7 @@ export default function Pagination({
         Page {currentPage} of {totalPages}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="hidden items-center gap-2 md:flex">
         <Button
           size="sm"
           variant="flat"
@@ -82,6 +82,30 @@ export default function Pagination({
           ))}
         </div>
 
+        <Button
+          size="sm"
+          variant="flat"
+          className="bg-explorer-row text-p-secondary shadow-sm"
+          isDisabled={!canGoNext}
+          onPress={navigateTo(currentPage + 1)}
+        >
+          Next
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-2 md:hidden">
+        <Button
+          size="sm"
+          variant="flat"
+          className="bg-explorer-row text-p-secondary shadow-sm"
+          isDisabled={!canGoPrev}
+          onPress={navigateTo(currentPage - 1)}
+        >
+          Previous
+        </Button>
+        <span className="px-2 font-mono text-sm text-p-secondary">
+          {currentPage} / {totalPages}
+        </span>
         <Button
           size="sm"
           variant="flat"

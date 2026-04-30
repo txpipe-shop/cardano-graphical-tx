@@ -40,7 +40,9 @@ export default async function TxPage({ params, searchParams }: Props) {
         <Header />
         <main className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
           <div className="mb-4 flex flex-shrink-0 items-center justify-between">
-            <h1 className="text-3xl font-extrabold text-p-primary">{hash}</h1>
+            <h1 className="break-all text-lg font-extrabold text-p-primary md:text-3xl">
+              {hash}
+            </h1>
             <div className="flex items-center gap-2">
               <CopyButton text={hash} size={16} />
             </div>
@@ -63,7 +65,9 @@ export default async function TxPage({ params, searchParams }: Props) {
         <Header />
         <main className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
           <div className="mb-4 flex flex-shrink-0 items-center justify-between">
-            <h1 className="text-3xl font-extrabold">{hash}</h1>
+            <h1 className="break-all text-lg font-extrabold md:text-3xl">
+              {hash}
+            </h1>
             <div className="flex items-center gap-2">
               <CopyButton text={hash} size={16} />
             </div>
