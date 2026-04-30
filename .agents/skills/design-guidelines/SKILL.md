@@ -65,7 +65,7 @@ const {
   dolosBlockfrostApiKey,
   dolosUtxorpcUrl,
   dolosUtxorpcApiKey,
-  addressPrefix,
+  addressPrefix
 } = getNetworkConfigServer(chain);
 ```
 
