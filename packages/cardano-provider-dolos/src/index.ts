@@ -51,8 +51,9 @@ export type DolosProviderParams = {
 
 export class DolosProvider
   implements
-  ChainProvider<cardano.UTxO, cardano.Tx, Cardano>,
-  CursorPaginatedProvider<cardano.UTxO, cardano.Tx, Cardano, BlockCursor> {
+    ChainProvider<cardano.UTxO, cardano.Tx, Cardano>,
+    CursorPaginatedProvider<cardano.UTxO, cardano.Tx, Cardano, BlockCursor>
+{
   private static readonly MAX_BLOCKS_LOOKBACK = 100;
 
   private utxoRpc: UtxoRpcClient;
@@ -334,14 +335,13 @@ export class DolosProvider
   ): Promise<BlocksWithTxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
     const { cursor, limit } = params;
 
-
     const { block: blocks } = await this.utxoRpc.sync.dumpHistory({
       startToken: cursor
         ? {
-          ...('slot' in cursor && { slot: cursor.slot }),
-          ...('hash' in cursor && { hash: Buffer.from(cursor.hash, 'hex') }),
-          ...('height' in cursor && { height: cursor.height })
-        }
+            ...('slot' in cursor && { slot: cursor.slot }),
+            ...('hash' in cursor && { hash: Buffer.from(cursor.hash, 'hex') }),
+            ...('height' in cursor && { height: cursor.height })
+          }
         : undefined,
       maxItems: Number(limit)
     });
@@ -369,7 +369,6 @@ export class DolosProvider
       };
     });
     data.sort((a, b) => Number(b.block.height) - Number(a.block.height));
-
 
     return { data };
   }

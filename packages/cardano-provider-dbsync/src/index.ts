@@ -77,7 +77,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
       return {
         hash: Hash(rows[0]!.hash),
         slot: BigInt(rows[0]!.slot),
-        height: BigInt(0),
+        height: BigInt(0)
       };
     } finally {
       this.gracefulRelease(client);
@@ -113,17 +113,17 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         txCount: BigInt(row.txCount || '0'),
         firstSeen: row.firstSeen
           ? {
-            blockHeight: BigInt(row.firstSeen.height ?? 0),
-            slot: BigInt(row.firstSeen.slot ?? 0),
-            hash: Hash(row.firstSeen.hash)
-          }
+              blockHeight: BigInt(row.firstSeen.height ?? 0),
+              slot: BigInt(row.firstSeen.slot ?? 0),
+              hash: Hash(row.firstSeen.hash)
+            }
           : undefined,
         lastSeen: row.lastSeen
           ? {
-            blockHeight: BigInt(row.lastSeen.height ?? 0),
-            slot: BigInt(row.lastSeen.slot ?? 0),
-            hash: Hash(row.lastSeen.hash)
-          }
+              blockHeight: BigInt(row.lastSeen.height ?? 0),
+              slot: BigInt(row.lastSeen.slot ?? 0),
+              hash: Hash(row.lastSeen.hash)
+            }
           : undefined
       };
     } finally {
@@ -240,7 +240,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
         ? isBase58(query.address)
           ? query?.address
           : // TODO: set up address prefix as configurable
-          hexToBech32(HexString(query.address), 'addr')
+            hexToBech32(HexString(query.address), 'addr')
         : null;
 
       const [blockHash, blockHeight, blockSlot] = this.parseBlockFilter(query);
