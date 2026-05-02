@@ -122,11 +122,8 @@ export type BlocksWithTxsRes<
   U extends UTxO,
   T extends Tx<U>,
   Chain extends BaseChain<U, T>,
-  Cursor
 > = {
   data: BlockWithTxs<U, T, Chain>[];
-  /** Cursor for the next page, if more blocks exist. */
-  nextCursor?: Cursor;
 };
 
 export type BlockRes = BlockMetadata;
@@ -137,8 +134,8 @@ export type TxsRes<
 > = PaginatedResult<Chain['tx']>;
 export type BlocksRes = PaginatedResult<BlockMetadata>;
 export type EpochsRes = PaginatedResult<Epoch>;
-export type TipRes = { hash: Hash; slot: bigint };
-export type BlockCursor = { hash: Hash; slot: bigint; height: bigint };
+export type TipRes = { hash: Hash; slot: bigint; height: bigint };
+export type BlockCursor = { hash: Hash; } | { slot: bigint; } | { height: bigint };
 export type LatestTxRes<
   U extends UTxO,
   T extends Tx<U>,
@@ -178,5 +175,5 @@ export interface CursorPaginatedProvider<
 > {
   getBlocksWithTxs(
     params: CursorPaginatedRequest<Cursor>
-  ): Promise<BlocksWithTxsRes<U, T, Chain, Cursor>>;
+  ): Promise<BlocksWithTxsRes<U, T, Chain>>;
 }

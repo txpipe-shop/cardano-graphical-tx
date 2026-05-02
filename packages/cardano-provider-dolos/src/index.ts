@@ -51,9 +51,8 @@ export type DolosProviderParams = {
 
 export class DolosProvider
   implements
-    ChainProvider<cardano.UTxO, cardano.Tx, Cardano>,
-    CursorPaginatedProvider<cardano.UTxO, cardano.Tx, Cardano, BlockCursor>
-{
+  ChainProvider<cardano.UTxO, cardano.Tx, Cardano>,
+  CursorPaginatedProvider<cardano.UTxO, cardano.Tx, Cardano, BlockCursor> {
   private static readonly MAX_BLOCKS_LOOKBACK = 100;
 
   private utxoRpc: UtxoRpcClient;
@@ -332,16 +331,17 @@ export class DolosProvider
 
   async getBlocksWithTxs(
     params: CursorPaginatedRequest<BlockCursor>
-  ): Promise<BlocksWithTxsRes<cardano.UTxO, cardano.Tx, Cardano, BlockCursor>> {
+  ): Promise<BlocksWithTxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
     const { cursor, limit } = params;
 
-    const { block: blocks, nextToken } = await this.utxoRpc.sync.dumpHistory({
+
+    const { block: blocks } = await this.utxoRpc.sync.dumpHistory({
       startToken: cursor
         ? {
-            slot: cursor.slot,
-            hash: Buffer.from(cursor.hash, 'hex'),
-            height: cursor.height
-          }
+          ...('slot' in cursor && { slot: cursor.slot }),
+          ...('hash' in cursor && { hash: Buffer.from(cursor.hash, 'hex') }),
+          ...('height' in cursor && { height: cursor.height })
+        }
         : undefined,
       maxItems: Number(limit)
     });
@@ -368,24 +368,18 @@ export class DolosProvider
         transactions
       };
     });
+    data.sort((a, b) => Number(b.block.height) - Number(a.block.height));
 
-    return {
-      data,
-      nextCursor: nextToken
-        ? {
-            slot: nextToken.slot,
-            hash: Hash(Buffer.from(nextToken.hash).toString('hex')),
-            height: nextToken.height
-          }
-        : undefined
-    };
+
+    return { data };
   }
 
   async readTip(): Promise<TipRes> {
     const resp = await this.blockApi.blocksLatestGet();
     return {
       hash: Hash(resp.data.hash),
-      slot: BigInt(resp.data.slot ?? 0)
+      slot: BigInt(resp.data.slot ?? 0),
+      height: BigInt(resp.data.height ?? 0)
     };
   }
 
