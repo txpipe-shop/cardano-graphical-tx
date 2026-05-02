@@ -3,18 +3,18 @@ export const revalidate = 10;
 import { Suspense } from "react";
 import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
 import {
+  BlockTxsSkeleton,
   TxSearch,
-  TxTable,
-  TxTableSkeleton,
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
-import { EXPLORER_PAGE_SIZE } from "~/app/_utils";
+import { EXPLORER_BLOCK_PAGE_SIZE, EXPLORER_PAGE_SIZE } from "~/app/_utils";
 import {
   isValidChain,
   NETWORK,
   type Network,
 } from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
+import { BlocksList } from "./BlocksList";
 import DevnetTransactionsList from "./DevnetTransactionsList";
 
 interface ExplorerPageProps {
@@ -34,13 +34,25 @@ async function TransactionsList({ chain }: { chain: Network }) {
 
   try {
     const provider = getDolosProvider(chain);
-    const result = await provider.getTxs({
-      limit: EXPLORER_PAGE_SIZE,
-      offset: 0n,
-      query: undefined,
+    const tip = await provider.readTip();
+    // +1 because it's not including tip currently
+    const result = await provider.getBlocksWithTxs({
+      limit: EXPLORER_BLOCK_PAGE_SIZE,
+      cursor: { height: tip.height - EXPLORER_BLOCK_PAGE_SIZE + 1n },
     });
+    const oldestHeight = result.data.at(-1)!.block.height;
+    const nextCursor =
+      result.data.length === Number(EXPLORER_BLOCK_PAGE_SIZE.toString())
+        ? { height: oldestHeight - EXPLORER_BLOCK_PAGE_SIZE }
+        : undefined;
 
-    return <TxTable transactions={result.data} chain={chain} />;
+    return (
+      <BlocksList
+        chain={chain}
+        initialData={result.data}
+        initialNextCursor={nextCursor}
+      />
+    );
   } catch (error) {
     console.error("Failed to fetch transactions:", error);
     return (
@@ -77,7 +89,9 @@ export default async function ExplorerTxsPage({ params }: ExplorerPageProps) {
         </div>
 
         <Suspense
-          fallback={<TxTableSkeleton rows={Number(EXPLORER_PAGE_SIZE)} />}
+          fallback={
+            <BlockTxsSkeleton rows={Number(EXPLORER_BLOCK_PAGE_SIZE)} />
+          }
         >
           <TransactionsList chain={chain} />
         </Suspense>

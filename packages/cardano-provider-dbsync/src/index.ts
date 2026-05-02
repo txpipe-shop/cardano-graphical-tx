@@ -25,7 +25,7 @@ import type { Pool, PoolClient } from 'pg';
 import { mapTx, mapUtxo, mapPool } from './mappers.js';
 import { SQLQuery } from './sql/index.js';
 import type * as QueryTypes from './types/queries.js';
-import type { PoolsReq, PoolsRes, PoolReq, PoolRes } from '@laceanatomy/provider-core';
+import type { PoolsReq, PoolsRes, PoolReq, PoolRes, TipRes } from '@laceanatomy/provider-core';
 
 export type DbSyncParams = {
   pool: Pool;
@@ -67,7 +67,7 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     return isBase58(address) ? address : hexToBech32(HexString(address), prefix);
   }
 
-  async readTip(): Promise<{ hash: Hash; slot: bigint }> {
+  async readTip(): Promise<TipRes> {
     const client = await this.getClient();
     try {
       const { rows } = await client.query<QueryTypes.Tip>(SQLQuery.get('tip'));
@@ -76,7 +76,8 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
       }
       return {
         hash: Hash(rows[0]!.hash),
-        slot: BigInt(rows[0]!.slot)
+        slot: BigInt(rows[0]!.slot),
+        height: BigInt(0)
       };
     } finally {
       this.gracefulRelease(client);

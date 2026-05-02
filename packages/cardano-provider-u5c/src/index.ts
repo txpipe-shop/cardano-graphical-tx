@@ -12,6 +12,7 @@ import {
   EpochRes,
   EpochsReq,
   EpochsRes,
+  TipRes,
   TxsRes,
   type ChainProvider,
   type TxReq,
@@ -489,11 +490,12 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     throw new Error('U5C cannot get epochs');
   }
 
-  async readTip(): Promise<{ hash: Hash; slot: bigint }> {
+  async readTip(): Promise<TipRes> {
     const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
     return {
       hash: Hash(Buffer.from(tip.tip!.hash).toString('hex')),
-      slot: BigInt(tip.tip?.slot || 0)
+      slot: BigInt(tip.tip?.slot || 0),
+      height: BigInt(tip.tip?.height ?? 0)
     };
   }
 
