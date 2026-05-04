@@ -3,7 +3,7 @@ import { Button, Card, CardBody } from "@heroui/react";
 import type { cardano, Unit } from "@laceanatomy/types";
 import Link from "next/link";
 import { ROUTES } from "~/app/_utils";
-import { formatSeconds } from "~/app/_utils/explorer";
+import { formatAda, formatSeconds } from "~/app/_utils/explorer";
 import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
@@ -33,9 +33,7 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
         {formatSeconds(tx.createdAt)}
       </div>
 
-      <div className="text-sm font-medium">
-        Fee: {(Number(tx.fee) / 1_000_000).toFixed(6)} ₳
-      </div>
+      <div className="text-sm font-medium">Fee: {formatAda(tx.fee)}</div>
 
       <div className="flex gap-2">
         <Button
@@ -84,7 +82,7 @@ function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
           <div className="rounded-lg bg-explorer-row p-2" key={i}>
             <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between">
               <span className="text-sm font-medium">
-                {(Number(utxo.coin) / 1_000_000).toFixed(6)} ₳
+                {formatAda(utxo.coin)}
               </span>
               <ColoredAddress address={utxo.address} />
               <div className="flex items-center gap-1 font-mono text-xs text-p-secondary">

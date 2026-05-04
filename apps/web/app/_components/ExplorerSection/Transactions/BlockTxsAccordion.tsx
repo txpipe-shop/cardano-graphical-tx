@@ -3,6 +3,10 @@
 import { Accordion, AccordionItem } from "@heroui/react";
 import type { BlockWithTxs } from "@laceanatomy/provider-core";
 import type { Cardano, cardano } from "@laceanatomy/types";
+import Link from "next/link";
+import { ROUTES } from "~/app/_utils";
+import { formatAda } from "~/app/_utils/explorer";
+import { type Network } from "~/app/_utils/network-config";
 import ClockIcon from "../Icons/ClockIcon";
 import { TxTable } from "./TxTable";
 
@@ -38,14 +42,24 @@ export function BlockTxsAccordion({
           classNames={{ indicator: "text-foreground" }}
           className="mb-3"
           title={
-            <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4">
+            <div
+              className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4"
+              onClick={(e) => e.stopPropagation()}
+            >
               <span className="font-mono text-sm">
                 Height: {block.height.toString()}
               </span>
               <span className="font-mono text-sm">
                 Slot: {block.slot.toString()}
               </span>
-              <span className="font-mono text-sm">Hash: {block.hash}</span>
+              <span className="font-mono text-sm">Hash:&nbsp;
+                <Link
+                  href={ROUTES.EXPLORER_BLOCK(chain as Network, block.hash)}
+                  className="break-all font-mono text-sm text-accent-blue hover:underline">
+                  {block.hash}
+                </Link>
+              </span>
+
               <span className="flex items-center gap-2 text-sm text-p-secondary">
                 <ClockIcon size={14} />
                 {new Date(block.time).toLocaleString()}
@@ -54,14 +68,14 @@ export function BlockTxsAccordion({
                 {block.txCount.toString()} tx{block.txCount !== 1n ? "s" : ""}
               </span>
               <span className="text-sm font-medium">
-                {(Number(block.fees) / 1_000_000).toFixed(6)} ₳
+                {formatAda(block.fees)}
               </span>
             </div>
           }
         >
           <TxTable transactions={transactions} chain={chain} />
-        </AccordionItem>
+        </AccordionItem >
       ))}
-    </Accordion>
+    </Accordion >
   );
 }
