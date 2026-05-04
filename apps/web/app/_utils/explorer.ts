@@ -26,3 +26,7 @@ export function resolveDevnetPort(port: string | undefined) {
   if (Number.isNaN(value) || value <= 0 || value > 65535) return fallback;
   return value;
 }
+
+export function formatAda(lovelace: bigint | number): string {
+  return `${(Number(lovelace) / 1_000_000).toFixed(6)} ₳`;
+}
