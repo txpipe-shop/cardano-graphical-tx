@@ -22,7 +22,7 @@ import {
   type TxsReq,
   type TxsRes
 } from '@laceanatomy/provider-core';
-import { type Cardano, Hash, HexString, hexToBech32, type cardano } from '@laceanatomy/types';
+import { cardano, type Cardano, Hash, HexString, hexToBech32 } from '@laceanatomy/types';
 import { CardanoAddressesApi, CardanoBlocksApi, Configuration } from '@laceanatomy/blockfrost-sdk';
 import {
   toBigInt,
@@ -312,20 +312,17 @@ export class DolosProvider
   }
 
   async getBlocks({ limit, offset }: BlocksReq): Promise<BlocksRes> {
-    const latestResp = await this.blockApi.blocksLatestGet();
-    const tipHeight = latestResp.data.height ?? 0;
-    const startHeight = tipHeight - Number(offset ?? 0n);
+    const tip = await this.readTip();
+    const tipHeight = tip.height;
+    const startHeight = tipHeight - (offset ?? 0n) - limit;
 
-    const heights = Array.from({ length: Number(limit) }, (_, i) => startHeight - i).filter(
-      (h) => h >= 0
-    );
-
-    const blocks = await Promise.all(
-      heights.map((h) => this.blockApi.blocksHashOrNumberGet(h.toString()))
-    );
+    const blocks = await this.utxoRpc.sync.dumpHistory({
+      startToken: { height: startHeight },
+      maxItems: Number(limit.toString())
+    });
 
     return {
-      data: blocks.map((b) => blockfrostBlockToBlockRes(b.data)),
+      data: blocks.block.map(this.validateBlock).map((b) => u5cToCardanoBlock(b.block, tip.height)),
       total: 0n
     };
   }
