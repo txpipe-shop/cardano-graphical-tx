@@ -20,10 +20,10 @@ import toast from "react-hot-toast";
 export interface TokenPillProps {
   unit: Unit;
   amount: bigint;
-  mint: Value;
+  mint?: Value;
 }
 
-export default function TokenPill({ unit, amount, mint }: TokenPillProps) {
+export default function TokenPill({ unit, amount, mint = {} }: TokenPillProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const state =
     mint[unit] === undefined ? "default" : mint[unit] > 0n ? "mint" : "burn";
