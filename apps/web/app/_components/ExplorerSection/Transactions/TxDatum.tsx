@@ -7,8 +7,8 @@ import {
   type Datum,
   type OutRef,
 } from "@laceanatomy/types";
-import * as cbor2 from "cbor2";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useCborDiagnostic } from "../../shared/CborView";
 import CopyButton from "../CopyButton";
 
 interface DatumItem {
@@ -39,25 +39,11 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
     return null;
   });
 
-  const [diagnostic, setDiagnostic] = useState("No diagnostic");
-
-  useEffect(() => {
-    if (
-      activeTab?.datum?.type === DatumType.INLINE &&
-      activeTab.datum.datumHex
-    ) {
-      try {
-        const diag = cbor2.diagnose(activeTab.datum.datumHex);
-        setDiagnostic(
-          typeof diag === "string" ? diag : JSON.stringify(diag, null, 2),
-        );
-      } catch {
-        setDiagnostic("Error parsing CBOR");
-      }
-    } else {
-      setDiagnostic("No diagnostic");
-    }
-  }, [activeTab]);
+  const activeCbor =
+    activeTab?.datum?.type === DatumType.INLINE && activeTab.datum.datumHex
+      ? activeTab.datum.datumHex
+      : "";
+  const diagnostic = useCborDiagnostic(activeCbor);
 
   if (!activeTab) {
     return (
@@ -167,7 +153,7 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
                   Diagnostic:
                 </div>
                 <Code className="block max-h-[400px] w-full overflow-y-auto whitespace-pre-wrap bg-surface p-4">
-                  {diagnostic}
+                  {diagnostic || "No diagnostic"}
                 </Code>
               </div>
             </>

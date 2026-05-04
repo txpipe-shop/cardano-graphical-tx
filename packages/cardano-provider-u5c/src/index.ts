@@ -455,6 +455,20 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     return u5cToCardanoBlock(block, tipHeader.height);
   }
 
+  async getBlockCBOR(params: BlockReq): Promise<string> {
+    const ref =
+      'hash' in params
+        ? { hash: Buffer.from(params.hash, 'hex') }
+        : 'height' in params
+          ? { height: params.height }
+          : { slot: params.slot };
+    const blockResponse = await this.utxoRpc.sync.fetchBlock({ ref: [ref] });
+    const anyChainBlock = blockResponse.block[0];
+    assert(anyChainBlock, 'Block not found');
+    assert(anyChainBlock.nativeBytes, 'CBOR not available for this block');
+    return Buffer.from(anyChainBlock.nativeBytes).toString('hex');
+  }
+
   async getBlocksWithTxs(
     params: CursorPaginatedRequest<BlockCursor>
   ): Promise<BlocksWithTxsRes<cardano.UTxO, cardano.Tx, Cardano>> {

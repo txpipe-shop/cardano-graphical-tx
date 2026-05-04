@@ -403,6 +403,10 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
     }
   }
 
+  async getBlockCBOR(_params: BlockReq): Promise<string> {
+    throw new Error('CBOR not available for this provider');
+  }
+
   async getEpochs({ offset, limit }: EpochsReq): Promise<EpochsRes> {
     const client = await this.getClient();
 

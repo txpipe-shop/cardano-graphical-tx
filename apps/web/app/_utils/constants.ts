@@ -9,6 +9,8 @@ export const ROUTES = {
   EXPLORER_TXS: (chain: Network) => `/explorer/${chain}/txs`,
   EXPLORER_TX: (chain: Network, hash: string) =>
     `/explorer/${chain}/txs/${hash}`,
+  EXPLORER_BLOCK: (chain: Network, id: string) =>
+    `/explorer/${chain}/blocks/${id}`,
   GRAPHER: "/tx/grapher",
   TX: "/tx",
   ADDRESS: "/address",
@@ -163,3 +165,6 @@ export const TX_TABS = [
   "Scripts",
 ] as const;
 export type TxTab = (typeof TX_TABS)[number];
+
+export const BLOCK_TABS = ["Overview", "Transactions", "CBOR"] as const;
+export type BlockTab = (typeof BLOCK_TABS)[number];
