@@ -1,12 +1,13 @@
 "use client";
 
-import { Button, Tab, Tabs } from "@heroui/react";
+import { Button } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useGraphical } from "~/app/_contexts";
 import { type ITransaction } from "~/app/_interfaces";
 import { type Network, ROUTES, type TxTab } from "~/app/_utils";
+import { DetailTabs } from "../../DetailTabs";
 import { DissectSection } from "../../DissectSection/DissectSection";
 import { Playground } from "../../GraphicalSection";
 import {
@@ -53,68 +54,80 @@ export default function TxTabs({
     );
   }, [setTransactionBox, dimensions.width, dimensions.height, tx]);
 
+  const tabs = [
+    {
+      key: "Overview",
+      title: "Overview",
+      content: <TxOverview tx={cardanoTx} />,
+    },
+    {
+      key: "Diagram",
+      title: "Diagram",
+      content: (
+        <div className="relative h-[40vh] w-full overflow-hidden rounded-lg md:h-[60vh]">
+          <Button
+            as={Link}
+            size="sm"
+            variant="flat"
+            className="absolute right-4 top-4 z-10 font-mono text-p-primary shadow-md bg-surface"
+            href={`${ROUTES.GRAPHER}?hash=${tx.txHash}&net=${chain}`}
+            target="_blank"
+          >
+            Playground
+          </Button>
+          <div className="h-full w-full">
+            <Playground fillMode="parent" />
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "Dissect",
+      title: "Dissect",
+      content: (
+        <div className="overflow-visible">
+          <DissectSection
+            tx={parseTxToGraphical([tx], { transactions: [], utxos: {} })[0]!}
+          />
+        </div>
+      ),
+    },
+    {
+      key: "CBOR",
+      title: "CBOR",
+      content: (
+        <div className="flex-1 min-h-0">
+          <TxCbor cbor={initialCbor} />
+        </div>
+      ),
+    },
+    {
+      key: "Datum",
+      title: "Datum",
+      content: (
+        <div className="flex-1 min-h-0 overflow-auto">
+          <TxDatum tx={cardanoTx} />
+        </div>
+      ),
+    },
+    {
+      key: "Scripts",
+      title: "Scripts",
+      content: (
+        <div className="flex-1 min-h-0 overflow-auto">
+          <TxScripts tx={cardanoTx} />
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <div className="flex min-h-0 w-full flex-col space-y-4">
-      <Tabs
-        aria-label="Transaction details"
-        selectedKey={active}
-        onSelectionChange={(key) => setActive(key as TxTab)}
-        variant="light"
-        classNames={{
-          tabList: "w-full flex-wrap md:flex-nowrap",
-          tab: "px-3 py-1 rounded border border-border bg-surface h-full w-auto md:w-full",
-          tabContent: "text-p-primary text-sm font-medium",
-          panel: "flex min-h-0 flex-1 flex-col p-0",
-        }}
-      >
-        <Tab key="Overview" title="Overview">
-          <TxOverview tx={cardanoTx} />
-        </Tab>
-
-        <Tab key="Diagram" title="Diagram">
-          <div className="relative h-[40vh] w-full overflow-hidden rounded-lg md:h-[60vh]">
-            <Button
-              as={Link}
-              size="sm"
-              variant="flat"
-              className="absolute right-4 top-4 z-10 font-mono text-p-primary shadow-md bg-surface"
-              href={`${ROUTES.GRAPHER}?hash=${tx.txHash}&net=${chain}`}
-              target="_blank"
-            >
-              Playground
-            </Button>
-            <div className="h-full w-full">
-              <Playground fillMode="parent" />
-            </div>
-          </div>
-        </Tab>
-
-        <Tab key="Dissect" title="Dissect">
-          <div className="overflow-visible">
-            <DissectSection
-              tx={parseTxToGraphical([tx], { transactions: [], utxos: {} })[0]!}
-            />
-          </div>
-        </Tab>
-
-        <Tab key="CBOR" title="CBOR">
-          <div className="flex-1 min-h-0">
-            <TxCbor cbor={initialCbor} />
-          </div>
-        </Tab>
-
-        <Tab key="Datum" title="Datum">
-          <div className="flex-1 min-h-0 overflow-auto">
-            <TxDatum tx={cardanoTx} />
-          </div>
-        </Tab>
-
-        <Tab key="Scripts" title="Scripts">
-          <div className="flex-1 min-h-0 overflow-auto">
-            <TxScripts tx={cardanoTx} />
-          </div>
-        </Tab>
-      </Tabs>
-    </div>
+    <DetailTabs
+      tabs={tabs}
+      defaultTab="Overview"
+      activeTab={active}
+      onTabChange={(key) => setActive(key as TxTab)}
+      ariaLabel="Transaction details"
+    />
   );
 }
