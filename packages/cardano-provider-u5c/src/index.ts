@@ -4,10 +4,13 @@ import {
   AddressFundsRes,
   AddressUTxOsReq,
   AddressUTxOsRes,
+  BlockCursor,
   BlockReq,
   BlockRes,
   BlocksReq,
   BlocksRes,
+  BlocksWithTxsRes,
+  CursorPaginatedRequest,
   EpochReq,
   EpochRes,
   EpochsReq,
@@ -24,7 +27,13 @@ import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
 import { Buffer } from 'buffer';
-import { u5cToCardanoBlock, u5cToCardanoTx, u5cToCardanoUtxo, u5cToCardanoValue } from './mappers';
+import {
+  toBigInt,
+  u5cToCardanoBlock,
+  u5cToCardanoTx,
+  u5cToCardanoUtxo,
+  u5cToCardanoValue
+} from './mappers';
 
 const DUMP_HISTORY_MAX_ITEMS = 100;
 
@@ -444,6 +453,49 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
     const { block } = await this.fetchBlockByQuery(params);
     return u5cToCardanoBlock(block, tipHeader.height);
+  }
+
+  async getBlocksWithTxs(
+    params: CursorPaginatedRequest<BlockCursor>
+  ): Promise<BlocksWithTxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
+    const { cursor, limit } = params;
+
+    const { block: blocks } = await this.utxoRpc.sync.dumpHistory({
+      startToken: cursor
+        ? {
+            ...('slot' in cursor && { slot: cursor.slot }),
+            ...('hash' in cursor && { hash: Buffer.from(cursor.hash, 'hex') }),
+            ...('height' in cursor && { height: cursor.height })
+          }
+        : undefined,
+      maxItems: Number(limit)
+    });
+
+    const data = blocks.map((anyChainBlock) => {
+      const { block, header, body } = this.validateBlock(anyChainBlock);
+      const blockHash = Hash(Buffer.from(header.hash).toString('hex'));
+      const blockHeight = toBigInt(header.height);
+      const blockSlot = toBigInt(header.slot);
+
+      const transactions = body.tx.map((tx) =>
+        u5cToCardanoTx(
+          tx,
+          block.timestamp,
+          blockHash,
+          blockHeight,
+          blockSlot,
+          this.findTxIndexInBlock(body, tx)
+        )
+      );
+
+      return {
+        block: u5cToCardanoBlock(block, undefined),
+        transactions
+      };
+    });
+    data.sort((a, b) => Number(b.block.height) - Number(a.block.height));
+
+    return { data };
   }
 
   async getBlocks(params: BlocksReq): Promise<BlocksRes> {
