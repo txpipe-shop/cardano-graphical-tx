@@ -52,10 +52,12 @@ export function BlockTxsAccordion({
               <span className="font-mono text-sm">
                 Slot: {block.slot.toString()}
               </span>
-              <span className="font-mono text-sm">Hash:&nbsp;
+              <span className="font-mono text-sm">
+                Hash:&nbsp;
                 <Link
                   href={ROUTES.EXPLORER_BLOCK(chain as Network, block.hash)}
-                  className="break-all font-mono text-sm text-accent-blue hover:underline">
+                  className="break-all font-mono text-sm text-accent-blue hover:underline"
+                >
                   {block.hash}
                 </Link>
               </span>
@@ -74,8 +76,8 @@ export function BlockTxsAccordion({
           }
         >
           <TxTable transactions={transactions} chain={chain} />
-        </AccordionItem >
+        </AccordionItem>
       ))}
-    </Accordion >
+    </Accordion>
   );
 }

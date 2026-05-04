@@ -42,7 +42,10 @@ export default function BlockOverview({
         input.address,
         (senderMap.get(input.address) ?? 0n) + input.coin,
       );
-      for (const [unit, amount] of Object.entries(input.value) as [Unit, bigint][]) {
+      for (const [unit, amount] of Object.entries(input.value) as [
+        Unit,
+        bigint,
+      ][]) {
         if (unit === "lovelace") continue;
         assetMap.set(unit, (assetMap.get(unit) ?? 0n) + amount);
       }
@@ -53,7 +56,10 @@ export default function BlockOverview({
         output.address,
         (recipientMap.get(output.address) ?? 0n) + output.coin,
       );
-      for (const [unit, amount] of Object.entries(output.value) as [Unit, bigint][]) {
+      for (const [unit, amount] of Object.entries(output.value) as [
+        Unit,
+        bigint,
+      ][]) {
         if (unit === "lovelace") continue;
         assetMap.set(unit, (assetMap.get(unit) ?? 0n) + amount);
       }
