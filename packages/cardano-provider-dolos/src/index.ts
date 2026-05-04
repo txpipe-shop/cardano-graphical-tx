@@ -33,7 +33,6 @@ import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
 import { Buffer } from 'buffer';
-
 import {
   blockfrostAmountToValue,
   blockfrostBlockToBlockRes,
@@ -84,11 +83,14 @@ export class DolosProvider
       return this.getLatestTxs(count);
     }
     if (q.block) {
-      return this.getTxsByBlock(q.block, count, page);
+      const tx = this.getTxsByBlock(q.block, count, page);
+      console.log(tx);
+      return tx;
     }
     if (q.address) {
       return this.getTxsByAddress(q.address, count, page);
     }
+
     throw new Error('Invalid query');
   }
 
@@ -309,6 +311,20 @@ export class DolosProvider
     const id = 'hash' in params ? params.hash : params.height.toString();
     const resp = await this.blockApi.blocksHashOrNumberGet(id);
     return blockfrostBlockToBlockRes(resp.data);
+  }
+
+  async getBlockCBOR(params: BlockReq): Promise<string> {
+    const ref =
+      'hash' in params
+        ? { hash: Buffer.from(params.hash, 'hex') }
+        : 'height' in params
+          ? { height: params.height }
+          : { slot: params.slot };
+    const blockResponse = await this.utxoRpc.sync.fetchBlock({ ref: [ref] });
+    const anyChainBlock = blockResponse.block[0];
+    assert(anyChainBlock, 'Block not found');
+    assert(anyChainBlock.nativeBytes, 'CBOR not available for this block');
+    return Buffer.from(anyChainBlock.nativeBytes).toString('hex');
   }
 
   async getBlocks({ limit, offset }: BlocksReq): Promise<BlocksRes> {
