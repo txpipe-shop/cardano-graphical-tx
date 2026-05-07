@@ -1,6 +1,6 @@
 import type {
   Assets,
-  Certificates,
+  Certificate,
   Collateral,
   Datum,
   Metadata,
@@ -39,7 +39,7 @@ export interface IGraphicalTransaction {
   ttl?: number;
   metadata?: Metadata[];
   withdrawals?: Withdrawal[];
-  certificates?: Certificates[];
+  certificates?: Certificate[];
   collateral?: Collateral;
   witnesses?: Witnesses;
   size: number;
