@@ -10,6 +10,7 @@ extern crate napi_derive;
 
 mod address;
 mod blocks;
+mod certs;
 mod tx;
 mod utils;
 
@@ -72,12 +73,6 @@ pub struct Withdrawal {
 
 #[derive(Default)]
 #[napi(object)]
-pub struct Certificates {
-  pub json: String,
-}
-
-#[derive(Default)]
-#[napi(object)]
 pub struct Collateral {
   pub total: Option<i64>,
   pub collateral_return: Vec<Input>,
@@ -133,7 +128,7 @@ pub struct CborResponse {
   pub ttl: Option<i64>,
   pub metadata: Vec<Metadata>,
   pub withdrawals: Vec<Withdrawal>,
-  pub certificates: Vec<Certificates>,
+  pub certificates: Vec<certs::Certificate>,
   pub collateral: Collateral,
   pub witnesses: Witnesses,
   pub size: i64,
@@ -168,7 +163,7 @@ impl CborResponse {
     mints: Vec<Assets>,
     metadata: Vec<Metadata>,
     withdrawals: Vec<Withdrawal>,
-    certificates: Vec<Certificates>,
+    certificates: Vec<certs::Certificate>,
     collateral: Collateral,
     witnesses: Witnesses,
     cbor: Option<String>,

@@ -9,6 +9,11 @@ export interface AddressDiagnostic {
   bytes?: string
 }
 
+export interface Anchor {
+  url: string
+  hash: string
+}
+
 export interface Asset {
   assetName: string
   assetNameAscii?: string
@@ -55,20 +60,43 @@ export interface CborResponse {
   ttl?: number
   metadata: Array<Metadata>
   withdrawals: Array<Withdrawal>
-  certificates: Array<Certificates>
+  certificates: Array<Certificate>
   collateral: Collateral
   witnesses: Witnesses
   size: number
   cbor?: string
 }
 
-export interface Certificates {
-  json: string
-}
+export type Certificate =
+  | { kind: 'NotApplicable' }
+  | { kind: 'StakeRegistration', stakeCredential: Credential }
+  | { kind: 'StakeDeregistration', stakeCredential: Credential }
+  | { kind: 'StakeDelegation', stakeCredential: Credential, poolKeyhash: string }
+  | { kind: 'PoolRegistration', poolParams: PoolParams }
+  | { kind: 'PoolRetirement', poolKeyhash: string, epoch: number }
+  | { kind: 'Reg', stakeCredential: Credential, coin: number }
+  | { kind: 'UnReg', stakeCredential: Credential, coin: number }
+  | { kind: 'VoteDeleg', stakeCredential: Credential, drep: DRep }
+  | { kind: 'StakeVoteDeleg', stakeCredential: Credential, poolKeyhash: string, drep: DRep }
+  | { kind: 'StakeRegDeleg', stakeCredential: Credential, poolKeyhash: string, coin: number }
+  | { kind: 'VoteRegDeleg', stakeCredential: Credential, drep: DRep, coin: number }
+  | { kind: 'StakeVoteRegDeleg', stakeCredential: Credential, poolKeyhash: string, drep: DRep, coin: number }
+  | { kind: 'AuthCommitteeHot', committeeColdCredential: Credential, committeeHotCredential: Credential }
+  | { kind: 'ResignCommitteeCold', committeeColdCredential: Credential, anchor?: Anchor }
+  | { kind: 'RegDRepCert', drepCredential: Credential, coin: number, anchor?: Anchor }
+  | { kind: 'UnRegDRepCert', drepCredential: Credential, coin: number }
+  | { kind: 'UpdateDRepCert', drepCredential: Credential, anchor?: Anchor }
+  | { kind: 'GenesisKeyDelegation', genesishash: string, genesisDelegateHash: string, vrfKeyhash: string }
+  | { kind: 'MoveInstantaneousRewardsCert', source: 'Reserves' | 'Treasury', stakeCredentials?: Array<MirTarget>, otherAccountingPot?: number }
 
 export interface Collateral {
   total?: number
   collateralReturn: Array<Input>
+}
+
+export interface Credential {
+  credentialType: 'Key' | 'Script'
+  hash: string
 }
 
 export interface Datum {
@@ -78,6 +106,11 @@ export interface Datum {
 }
 
 export declare function downloadBlock(nodeUrl: string, magic: number, slot: number, hash: string): Promise<Array<number>>
+
+export interface DRep {
+  drepType: 'Key' | 'Script' | 'Abstain' | 'NoConfidence'
+  hash?: string
+}
 
 export interface ExUnits {
   mem: number
@@ -94,15 +127,42 @@ export interface Metadata {
   jsonMetadata: Record<string, string>
 }
 
+export interface MirTarget {
+  credential: Credential
+  amount: number
+}
+
 export declare function parseAddress(raw: string): SafeAddressResponse
 
 export declare function parseDatumInfo(raw: string): Datum | null
+
+export interface PoolParams {
+  operator: string
+  vrfKeyhash: string
+  pledge: number
+  cost: number
+  marginNumerator: number
+  marginDenominator: number
+  rewardAccount: string
+  poolOwners: Array<string>
+  relays: Array<Relay>
+  poolMetadataUrl?: string
+  poolMetadataHash?: string
+}
 
 export interface Redeemer {
   tag: string
   index: number
   dataJson: string
   exUnits: ExUnits
+}
+
+export interface Relay {
+  relayType: 'SingleHostAddr' | 'SingleHostName' | 'MultiHostName'
+  port?: number
+  ipv4?: string
+  ipv6?: string
+  dnsName?: string
 }
 
 export interface SafeAddressResponse {
