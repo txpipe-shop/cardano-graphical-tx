@@ -2,3 +2,11 @@
 **/build
 **/.env*
 Dockerfile
+.git
+.github
+.turbo
+**/target
+**/.next
+**/dist
+*.md
+!.github/workflows/README.md

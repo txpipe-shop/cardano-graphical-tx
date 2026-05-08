@@ -35,6 +35,8 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     size,
   } = tx;
 
+  console.log(certificates);
+
   const propsBlocks = [
     { title: "Era", value: era, description: TOPICS.era },
     { title: "Tx Hash", value: txHash, description: TOPICS.hash },
@@ -292,7 +294,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                   {/* TODO: add per certificate rendering component - Could be related to staking addresses, dreps, etc and link to specific urls */}
                   <PropBlock
                     title="JSON"
-                    value={JSON.parse(JSON.stringify(cert))}
+                    value={JSON.stringify(cert)}
                   />
                 </AccordionItem>
               ))}
