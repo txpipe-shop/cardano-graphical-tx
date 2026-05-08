@@ -9,6 +9,8 @@ export const ROUTES = {
   EXPLORER_TXS: (chain: Network) => `/explorer/${chain}/txs`,
   EXPLORER_TX: (chain: Network, hash: string) =>
     `/explorer/${chain}/txs/${hash}`,
+  EXPLORER_ADDRESS: (chain: Network, address: string) =>
+    `/explorer/${chain}/addresses/${encodeURIComponent(address)}`,
   EXPLORER_BLOCK: (chain: Network, id: string) =>
     `/explorer/${chain}/blocks/${id}`,
   GRAPHER: "/tx/grapher",
