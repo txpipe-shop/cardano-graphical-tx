@@ -1,10 +1,10 @@
 use crate::{
-  Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
+  Asset, Assets, CborResponse, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
   SafeCborResponse, Utxo, Withdrawal, Witness, Witnesses,
 };
 use pallas::ledger::primitives::conway::DatumOption;
 use pallas::ledger::traverse::{
-  MultiEraCert, MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer,
+  MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer,
 };
 use pallas_crypto::hash::Hasher;
 use pallas_primitives::conway::VKeyWitness;
@@ -187,26 +187,6 @@ pub(crate) fn get_withdrawals(tx: &MultiEraTx<'_>) -> Vec<Withdrawal> {
   }
 }
 
-pub(crate) fn get_certificates(tx: &MultiEraTx<'_>) -> Vec<Certificates> {
-  tx.certs()
-    .iter()
-    .map(|cert| match cert {
-      MultiEraCert::NotApplicable => Certificates {
-        json: "Not applicable".to_string(),
-      },
-      MultiEraCert::AlonzoCompatible(cow) => Certificates {
-        json: serde_json::to_string(&cow).unwrap(),
-      },
-      MultiEraCert::Conway(cow) => Certificates {
-        json: serde_json::to_string(&cow).unwrap(),
-      },
-      _ => Certificates {
-        json: "Not implemented".to_string(),
-      },
-    })
-    .collect()
-}
-
 pub(crate) fn get_collaterals(tx: &MultiEraTx<'_>) -> Collateral {
   Collateral {
     total: tx.total_collateral().map(|x| x as i64),
@@ -299,7 +279,7 @@ pub(crate) fn parse_tx_from_multiera(
   let mints = get_mints(tx);
   let metadata = get_metadata(tx);
   let withdrawals = get_withdrawals(tx);
-  let certificates = get_certificates(tx);
+  let certificates = crate::certs::get_certificates(tx);
   let collateral = get_collaterals(tx);
   let witnesses = get_witnesses(tx);
 

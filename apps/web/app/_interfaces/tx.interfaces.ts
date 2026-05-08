@@ -1,6 +1,6 @@
 import type {
   Assets,
-  Certificates,
+  Certificate,
   Collateral,
   Metadata,
   Utxo,
@@ -25,7 +25,7 @@ export interface ITransaction {
   ttl?: number;
   metadata?: Metadata[];
   withdrawals?: Withdrawal[];
-  certificates?: Certificates[];
+  certificates?: Certificate[];
   collateral?: Collateral;
   witnesses?: Witnesses;
   size: number;

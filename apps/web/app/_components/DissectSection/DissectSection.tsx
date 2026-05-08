@@ -281,7 +281,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                 ...Array((certificates ?? []).length + 1).keys(),
               ].map(String)}
             >
-              {(certificates ?? []).map(({ json }, i) => (
+              {(certificates ?? []).map((cert, i) => (
                 <AccordionItem
                   key={i}
                   {...accordionItemProps(
@@ -289,7 +289,11 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                     defaultStyle("text-2xl", "px-7"),
                   )}
                 >
-                  <PropBlock title="JSON" value={JSON.parse(json)} />
+                  {/* TODO: add per certificate rendering component - Could be related to staking addresses, dreps, etc and link to specific urls */}
+                  <PropBlock
+                    title="JSON"
+                    value={JSON.parse(JSON.stringify(cert))}
+                  />
                 </AccordionItem>
               ))}
             </Accordion>
