@@ -1,11 +1,14 @@
-FROM node:20-slim AS alpine
+FROM node:22-slim AS alpine
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable
-RUN pnpm i -g turbo
+RUN corepack prepare pnpm@latest --activate
 
+RUN mkdir -p /pnpm
+RUN pnpm config set global-bin-dir /pnpm
+RUN pnpm i -g turbo
 WORKDIR /app
 
 FROM alpine AS base
