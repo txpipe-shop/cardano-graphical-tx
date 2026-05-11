@@ -450,9 +450,7 @@ function CollateralDetail({ col }: { col: CollateralType }) {
       {col.total !== undefined && (
         <div>
           <DetailLabel>Total</DetailLabel>
-          <span className="font-mono text-2xl font-extrabold">
-            {col.total}
-          </span>
+          <span className="font-mono text-2xl font-extrabold">{col.total}</span>
         </div>
       )}
 
