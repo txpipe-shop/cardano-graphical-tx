@@ -12,8 +12,6 @@ export default function Index() {
   const { error, loading } = useUI();
   const { configs } = useConfigs();
 
-  console.log(transactions);
-
   if (loading) return <Loading />;
 
   return (

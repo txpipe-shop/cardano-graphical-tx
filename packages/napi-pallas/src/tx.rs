@@ -53,7 +53,7 @@ fn build_assets_with_same_policy(asset: MultiEraPolicyAssets<'_>) -> Assets {
       .iter()
       .map(|asset| Asset {
         asset_name: hex::encode(asset.name()),
-        asset_name_ascii: asset.to_ascii_name(),
+        asset_name_ascii: Some(String::from_utf8_lossy(asset.name()).into_owned()),
         amount: asset.output_coin().map(|x| x as i64),
       })
       .collect(),
@@ -100,7 +100,7 @@ pub(crate) fn get_mints(tx: &MultiEraTx<'_>) -> Vec<Assets> {
         .into_iter()
         .map(|asset| Asset {
           asset_name: hex::encode(asset.name()),
-          asset_name_ascii: asset.to_ascii_name(),
+          asset_name_ascii: Some(String::from_utf8_lossy(asset.name()).into_owned()),
           amount: asset.mint_coin(),
         })
         .collect(),

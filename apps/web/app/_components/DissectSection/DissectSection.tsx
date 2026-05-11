@@ -450,9 +450,17 @@ function AssetsList({ assets }: { assets: Assets[] }) {
                     <span className="text-xs font-bold text-p-secondary">
                       Ascii name
                     </span>
-                    <span className="text-p-secondary flex-shrink-0 max-w-[160px] truncate">
-                      {a.assetNameAscii || "—"}
-                    </span>
+                    {a.assetNameAscii ? (
+                      <Tooltip content={a.assetNameAscii} delay={300} size="sm">
+                        <span className="text-p-secondary flex-shrink-0 max-w-[160px] truncate cursor-default">
+                          {a.assetNameAscii}
+                        </span>
+                      </Tooltip>
+                    ) : (
+                      <span className="text-p-secondary flex-shrink-0 max-w-[160px] truncate">
+                        —
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xs font-bold text-p-secondary">
@@ -525,7 +533,13 @@ function MintDetail({ mint, isMint }: { mint: Assets; isMint: boolean }) {
               {a.assetName}
             </span>
             <span className="text-p-secondary flex-shrink-0 max-w-[160px] truncate">
-              {a.assetNameAscii || "—"}
+              {a.assetNameAscii ? (
+                <Tooltip content={a.assetNameAscii} delay={300} size="sm">
+                  <span className="cursor-default">{a.assetNameAscii}</span>
+                </Tooltip>
+              ) : (
+                "—"
+              )}
             </span>
             <span className="font-mono font-bold flex-shrink-0 w-24 text-right">
               {a.amount?.toFixed(0) ?? 0}
