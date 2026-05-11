@@ -12,6 +12,8 @@ export default function Index() {
   const { error, loading } = useUI();
   const { configs } = useConfigs();
 
+  console.log(transactions);
+
   if (loading) return <Loading />;
 
   return (
@@ -23,7 +25,9 @@ export default function Index() {
         <Error action="dissecting" goal="transaction" option={configs.option} />
       ) : (
         transactions.transactions[0] && (
-          <DissectSection tx={transactions.transactions[0]} />
+          <div className="flex flex-col min-h-0 w-full p-5">
+            <DissectSection tx={transactions.transactions[0]} />
+          </div>
         )
       )}
     </div>
