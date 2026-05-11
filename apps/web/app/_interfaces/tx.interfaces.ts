@@ -5,8 +5,8 @@ import type {
   Metadata,
   ProposalProcedure,
   Utxo,
-  RewardWithdrawal as Withdrawal,
   VotingProcedureEntry,
+  RewardWithdrawal as Withdrawal,
   Witnesses,
 } from "@laceanatomy/napi-pallas";
 

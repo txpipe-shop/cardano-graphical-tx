@@ -5,8 +5,8 @@ import type {
   Datum,
   Metadata,
   ProposalProcedure,
-  RewardWithdrawal as Withdrawal,
   VotingProcedureEntry,
+  RewardWithdrawal as Withdrawal,
   Witnesses,
 } from "@laceanatomy/napi-pallas";
 import type Konva from "konva";

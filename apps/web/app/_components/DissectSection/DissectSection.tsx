@@ -1,11 +1,13 @@
 "use client";
 
-import { Button, Card, CardBody } from "@heroui/react";
+import { Button, Card, CardBody, Tooltip } from "@heroui/react";
 import type {
   Assets,
   Certificate,
   Collateral as CollateralType,
   Metadata,
+  ProposalProcedure,
+  VotingProcedureEntry,
   RewardWithdrawal as WithdrawalType,
   Witnesses,
 } from "@laceanatomy/napi-pallas";
@@ -34,6 +36,9 @@ const GROUP_TOPIC_KEY: Record<string, keyof typeof TOPICS | undefined> = {
   Mints: "mints",
   Metadata: "metadata",
   Witnesses: "witnesses",
+  "Required Signers": "required_signers",
+  "Voting Procedures": "voting_procedures",
+  "Proposal Procedures": "proposal_procedures",
 };
 
 export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
@@ -157,6 +162,61 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
       });
     }
 
+    const signers = tx.requiredSigners ?? [];
+    if (signers.length > 0) {
+      result.push({
+        group: "Required Signers",
+        key: "required-signers",
+        label: `Signers (${signers.length})`,
+        content: <RequiredSignersDetail signers={signers} />,
+      });
+    }
+
+    const voting = tx.votingProcedures ?? [];
+    voting.forEach((vp, i) => {
+      result.push({
+        group: "Voting Procedures",
+        key: `vote-${i}`,
+        label: `#${i}  ${vp.voter.kind}`,
+        content: <VotingProcedureDetail vp={vp} />,
+      });
+    });
+
+    const proposals = tx.proposalProcedures ?? [];
+    proposals.forEach((pp, i) => {
+      result.push({
+        group: "Proposal Procedures",
+        key: `proposal-${i}`,
+        label: `#${i}  ${pp.govAction.kind}`,
+        content: <ProposalProcedureDetail pp={pp} />,
+      });
+    });
+
+    if (tx.validityStart !== undefined || tx.ttl !== undefined) {
+      result.push({
+        group: "Validity Range",
+        key: "validity-range",
+        label: "Validity Range",
+        content: (
+          <ValidityRangeDetail validityStart={tx.validityStart} ttl={tx.ttl} />
+        ),
+      });
+    }
+
+    if (tx.treasuryValue !== undefined || tx.donation !== undefined) {
+      result.push({
+        group: "Treasury",
+        key: "treasury",
+        label: "Treasury",
+        content: (
+          <TreasuryDetail
+            treasuryValue={tx.treasuryValue}
+            donation={tx.donation}
+          />
+        ),
+      });
+    }
+
     return result;
   }, [tx]);
 
@@ -182,6 +242,11 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           <span className="font-mono text-base font-bold text-accent-blue">
             {tx.era}
           </span>
+          <span
+            className={`text-xs font-bold font-mono px-2 py-0.5 rounded ${tx.scriptsSuccessful ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}
+          >
+            {tx.scriptsSuccessful ? "SCRIPTS OK" : "SCRIPTS FAIL"}
+          </span>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 md:gap-x-6 md:gap-y-2 flex-shrink-0 md:ml-auto">
           <Stat label="Fee" value={formatAda(tx.fee)} suffix="₳" />
@@ -190,6 +255,24 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           <Stat label="Outputs" value={`${tx.outputs.length}`} />
           {tx.blockHeight !== undefined && (
             <Stat label="Block height" value={`${tx.blockHeight.toFixed(0)}`} />
+          )}
+          {tx.networkId !== undefined && (
+            <Stat label="Network" value={`${tx.networkId}`} />
+          )}
+          {tx.scriptDataHash && (
+            <div className="flex items-baseline gap-1.5 flex-shrink-0">
+              <span className="text-xs font-semibold uppercase tracking-wide text-p-secondary">
+                Script Data
+              </span>
+              <div className="flex items-center gap-1">
+                <Tooltip content={tx.scriptDataHash} delay={300} size="sm">
+                  <span className="font-mono text-sm font-medium text-p-primary cursor-default">
+                    {tx.scriptDataHash.slice(0, 10)}...
+                  </span>
+                </Tooltip>
+                <CopyButton text={tx.scriptDataHash} size={12} />
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -610,6 +693,171 @@ function PlutusDetail({ d }: { d: Witnesses["plutusData"][number] }) {
           <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
             {d.json}
           </pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RequiredSignersDetail({ signers }: { signers: string[] }) {
+  return (
+    <div className="space-y-2">
+      {signers.map((hash, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-2 font-mono text-sm break-all border border-border bg-explorer-row/30 px-3 py-2 rounded"
+        >
+          <span className="flex-1 min-w-0">{hash}</span>
+          <CopyButton text={hash} size={12} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function VotingProcedureDetail({ vp }: { vp: VotingProcedureEntry }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-sm font-bold">{vp.voter.kind}</span>
+        <span
+          className={`text-xs font-bold font-mono px-2 py-0.5 rounded ${
+            vp.vote === "Yes"
+              ? "bg-green-500/10 text-green-600"
+              : vp.vote === "No"
+                ? "bg-red-500/10 text-red-600"
+                : "bg-yellow-500/10 text-yellow-600"
+          }`}
+        >
+          {vp.vote}
+        </span>
+      </div>
+
+      <div>
+        <DetailLabel>Voter Hash</DetailLabel>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-sm break-all">{vp.voter.hash}</span>
+          <CopyButton text={vp.voter.hash} size={12} />
+        </div>
+      </div>
+
+      <div>
+        <DetailLabel>Gov Action</DetailLabel>
+        <span className="font-mono text-sm">
+          {vp.govActionId.transactionId}#{vp.govActionId.actionIndex}
+        </span>
+      </div>
+
+      {vp.anchor && (
+        <div className="space-y-2 border border-border bg-explorer-row/30 rounded p-3">
+          <DetailLabel>Anchor</DetailLabel>
+          <div>
+            <p className="text-xs text-p-secondary">URL</p>
+            <p className="font-mono text-sm break-all">{vp.anchor.url}</p>
+          </div>
+          <div>
+            <p className="text-xs text-p-secondary">Hash</p>
+            <p className="font-mono text-sm break-all">{vp.anchor.hash}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProposalProcedureDetail({ pp }: { pp: ProposalProcedure }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-sm font-bold">{pp.govAction.kind}</span>
+      </div>
+
+      <div>
+        <DetailLabel>Deposit</DetailLabel>
+        <span className="font-mono text-sm font-medium tabular-nums">
+          {formatAda(pp.deposit)}
+          <span className="ml-1 text-sm font-medium text-p-secondary">₳</span>
+        </span>
+      </div>
+
+      <div>
+        <DetailLabel>Reward Account</DetailLabel>
+        <ColoredAddress address={Address(pp.rewardAccount)} full />
+        <div className="font-mono text-sm break-all mt-1">
+          {pp.rewardAccount}
+        </div>
+      </div>
+
+      <div>
+        <DetailLabel>Gov Action Details</DetailLabel>
+        <pre className="mt-1 text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+          {JSONBIG.stringify(pp.govAction, null, 2)}
+        </pre>
+      </div>
+
+      <div className="space-y-2 border border-border bg-explorer-row/30 rounded p-3">
+        <DetailLabel>Anchor</DetailLabel>
+        <div>
+          <p className="text-xs text-p-secondary">URL</p>
+          <p className="font-mono text-sm break-all">{pp.anchor.url}</p>
+        </div>
+        <div>
+          <p className="text-xs text-p-secondary">Hash</p>
+          <p className="font-mono text-sm break-all">{pp.anchor.hash}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ValidityRangeDetail({
+  validityStart,
+  ttl,
+}: {
+  validityStart?: number;
+  ttl?: number;
+}) {
+  return (
+    <div className="space-y-3">
+      {validityStart !== undefined && (
+        <SubField
+          label="Validity Start (Invalid Before)"
+          value={`${validityStart}`}
+          mono
+        />
+      )}
+      {ttl !== undefined && (
+        <SubField label="TTL (Invalid Hereafter)" value={`${ttl}`} mono />
+      )}
+    </div>
+  );
+}
+
+function TreasuryDetail({
+  treasuryValue,
+  donation,
+}: {
+  treasuryValue?: number;
+  donation?: number;
+}) {
+  return (
+    <div className="space-y-4">
+      {treasuryValue !== undefined && (
+        <div>
+          <DetailLabel>Treasury Value</DetailLabel>
+          <span className="font-mono text-sm font-medium tabular-nums">
+            {formatAda(treasuryValue)}
+            <span className="ml-1 text-sm font-medium text-p-secondary">₳</span>
+          </span>
+        </div>
+      )}
+      {donation !== undefined && (
+        <div>
+          <DetailLabel>Donation</DetailLabel>
+          <span className="font-mono text-sm font-medium tabular-nums">
+            {formatAda(donation)}
+            <span className="ml-1 text-sm font-medium text-p-secondary">₳</span>
+          </span>
         </div>
       )}
     </div>
