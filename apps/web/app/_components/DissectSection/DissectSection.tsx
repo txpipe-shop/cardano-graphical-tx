@@ -1,511 +1,620 @@
-import { Accordion, AccordionItem } from "@heroui/accordion";
-import { Chip } from "@heroui/react";
-import { EmptyBlock, PropBlock } from "~/app/_components";
+"use client";
+
+import { Button, Card, CardBody } from "@heroui/react";
+import type {
+  Assets,
+  Certificate,
+  Collateral as CollateralType,
+  Metadata,
+  Withdrawal as WithdrawalType,
+  Witnesses,
+} from "@laceanatomy/napi-pallas";
+import { Address } from "@laceanatomy/types";
+import { useMemo, useState } from "react";
+import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { useUI } from "~/app/_contexts";
-import type { IGraphicalTransaction } from "~/app/_interfaces";
+import type { IGraphicalTransaction, IGraphicalUtxo } from "~/app/_interfaces";
 import { JSONBIG } from "~/app/_utils";
 import Loading from "~/app/loading";
-import {
-  accordionItemProps,
-  accordionProps,
-  defaultStyle,
-} from "./dissect.herlpers";
+import ColoredAddress from "../ExplorerSection/ColoredAddress";
+import { formatAda } from "./utils";
 import TOPICS from "./topics";
+
+type SidebarItem = {
+  group: string;
+  key: string;
+  label: string;
+  content: React.ReactNode;
+};
+
+const GROUP_TOPIC_KEY: Record<string, keyof typeof TOPICS | undefined> = {
+  Inputs: "inputs",
+  Outputs: "outputs",
+  "Ref Inputs": "reference_inputs",
+  Mints: "mints",
+  Metadata: "metadata",
+  Witnesses: "witnesses",
+};
 
 export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
   const { loading } = useUI();
-  const {
-    era,
-    txHash,
-    fee,
-    validityStart,
-    ttl,
-    inputs,
-    outputs,
-    certificates,
-    withdrawals,
-    mints,
-    metadata,
-    blockHash,
-    blockTxIndex,
-    blockHeight,
-    blockAbsoluteSlot,
-    witnesses,
-    collateral,
-    size,
-  } = tx;
+  const [activeKey, setActiveKey] = useState<string>("");
 
-  console.log(certificates);
+  const items = useMemo(() => {
+    const normalInputs = tx.inputs.filter((i) => !i.isReferenceInput);
+    const referenceInputs = tx.inputs.filter((i) => i.isReferenceInput);
+    const certs: Certificate[] = tx.certificates ?? [];
+    const wd: WithdrawalType[] = tx.withdrawals ?? [];
+    const meta: Metadata[] = tx.metadata ?? [];
+    const col = tx.collateral ?? { collateralReturn: [], total: 0 };
+    const wit = tx.witnesses ?? {
+      vkeyWitnesses: [],
+      redeemers: [],
+      plutusData: [],
+      plutusV1Scripts: [],
+      plutusV2Scripts: [],
+      plutusV3Scripts: [],
+    };
 
-  const propsBlocks = [
-    { title: "Era", value: era, description: TOPICS.era },
-    { title: "Tx Hash", value: txHash, description: TOPICS.hash },
-    { title: "Block Hash", value: blockHash },
-    { title: "Block Index", value: blockTxIndex },
-    { title: "Block Height", value: blockHeight },
-    { title: "Block Absolute Slot", value: blockAbsoluteSlot },
-    { title: "Size", value: size },
-    { title: "Fee", value: fee, description: TOPICS.fee },
-    { title: "Start", value: validityStart },
-    { title: "Time to Live", value: ttl, description: TOPICS.ttl },
-  ];
-  const normalInputs = inputs.filter((i) => !i.isReferenceInput);
-  const referenceInputs = inputs.filter((i) => i.isReferenceInput);
+    const result: SidebarItem[] = [];
+
+    normalInputs.forEach((utxo, i) => {
+      result.push({
+        group: "Inputs",
+        key: `input-${i}`,
+        label: `#${i}  ${utxo.txHash}#${utxo.index}`,
+        content: <UtxoDetail utxo={utxo} />,
+      });
+    });
+    tx.outputs.forEach((utxo, i) => {
+      result.push({
+        group: "Outputs",
+        key: `output-${i}`,
+        label: `#${i}  ${utxo.txHash}#${utxo.index}`,
+        content: <UtxoDetail utxo={utxo} />,
+      });
+    });
+    referenceInputs.forEach((utxo, i) => {
+      result.push({
+        group: "Ref Inputs",
+        key: `ref-${i}`,
+        label: `#${i}  ${utxo.txHash}#${utxo.index}`,
+        content: <UtxoDetail utxo={utxo} />,
+      });
+    });
+    certs.forEach((cert, i) => {
+      result.push({
+        group: "Certificates",
+        key: `cert-${i}`,
+        label: `#${i}  ${cert.kind}`,
+        content: <CertDetail cert={cert} />,
+      });
+    });
+    wd.forEach((w, i) => {
+      result.push({
+        group: "Withdrawals",
+        key: `wd-${i}`,
+        label: `#${i}  ${formatAda(w.amount)} ₳`,
+        content: <WithdrawalDetail w={w} />,
+      });
+    });
+    tx.mints.forEach((mint, i) => {
+      const isMint = mint.assetsPolicy.some((a) => a.amount && a.amount > 0);
+      result.push({
+        group: "Mints",
+        key: `mint-${i}`,
+        label: `#${i}  ${isMint ? "Mint" : "Burn"}`,
+        content: <MintDetail mint={mint} isMint={isMint} />,
+      });
+    });
+    meta.forEach((m, i) => {
+      result.push({
+        group: "Metadata",
+        key: `meta-${i}`,
+        label: `#${i}  Label ${m.label}`,
+        content: <MetadataDetail m={m} />,
+      });
+    });
+    if (
+      col &&
+      ((col.collateralReturn?.length ?? 0) > 0 || col.total !== undefined)
+    ) {
+      result.push({
+        group: "Collateral",
+        key: "collateral",
+        label: "Collateral",
+        content: <CollateralDetail col={col} />,
+      });
+    }
+    if (wit) {
+      const vkeys = wit.vkeyWitnesses ?? [];
+      const redeemers = wit.redeemers ?? [];
+      const plutus = wit.plutusData ?? [];
+      if (vkeys.length > 0)
+        result.push({
+          group: "Witnesses",
+          key: "witness-vkey",
+          label: `VKey (${vkeys.length})`,
+          content: <VKeyDetail items={vkeys} />,
+        });
+      redeemers.forEach((r, i) => {
+        result.push({
+          group: "Witnesses",
+          key: `witness-red-${i}`,
+          label: `Redeemer #${i}  ${r.tag} @${r.index}`,
+          content: <RedeemerDetail r={r} />,
+        });
+      });
+      plutus.forEach((d, i) => {
+        result.push({
+          group: "Witnesses",
+          key: `witness-plutus-${i}`,
+          label: `Plutus #${i}  ${d.hash}`,
+          content: <PlutusDetail d={d} />,
+        });
+      });
+    }
+
+    return result;
+  }, [tx]);
 
   if (loading) return <Loading />;
 
+  const grouped = new Map<string, SidebarItem[]>();
+  for (const item of items) {
+    if (!grouped.has(item.group)) grouped.set(item.group, []);
+    grouped.get(item.group)!.push(item);
+  }
+
+  const activeItem = items.find((i) => i.key === activeKey) ?? items[0];
+  if (activeKey === "" && items[0]) {
+    setActiveKey(items[0].key);
+  }
+
+  const normalInputs = tx.inputs.filter((i) => !i.isReferenceInput);
+
   return (
-    <div className="flex flex-grow flex-col gap-0 p-5">
-      <Accordion
-        selectionMode="multiple"
-        showDivider={false}
-        defaultExpandedKeys={[
-          "Valid CBOR data",
-          "Transaction Inputs",
-          "Transaction Outputs",
-          "Reference Inputs",
-          "Certificates",
-          "Withdrawals",
-          "Transaction Mints",
-          "Transaction Metadata",
-          "Collateral",
-          "Transaction Witnesses",
-        ]}
-      >
-        <AccordionItem
-          key="Valid CBOR data"
-          {...accordionItemProps(
-            "Valid CBOR data",
-            defaultStyle(),
-            "Your HEX bytes were successfully decoded using the CBOR standard.",
+    <div className="flex flex-col min-h-0 w-full">
+      <div className="flex items-center gap-4 pb-4 mb-4 border-b border-border flex-shrink-0 overflow-x-auto">
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <span className="font-mono text-base font-bold text-accent-blue">
+            {tx.era}
+          </span>
+        </div>
+        <div className="flex items-center gap-6 flex-shrink-0 ml-auto">
+          <Stat label="Fee" value={formatAda(tx.fee)} suffix="₳" />
+          <Stat label="Size" value={`${tx.size}`} suffix="B" />
+          <Stat label="Inputs" value={`${normalInputs.length}`} />
+          <Stat label="Outputs" value={`${tx.outputs.length}`} />
+          {tx.blockHeight !== undefined && (
+            <Stat label="Block height" value={`${tx.blockHeight.toFixed(0)}`} />
           )}
-        >
-          {propsBlocks.map(({ title, value, description }, i) => (
-            <PropBlock
-              title={title}
-              value={value}
-              description={i == 0 ? TOPICS.tx : description}
-              key={i}
-            />
-          ))}
-        </AccordionItem>
-        <AccordionItem
-          key="Transaction Inputs"
-          {...accordionItemProps(
-            "Transaction Inputs",
-            defaultStyle(
-              "font-bold text-accent-blue underline decoration-solid underline-offset-2",
-            ),
-            TOPICS.inputs,
+        </div>
+      </div>
+
+      <Card className="shadow-none border border-border bg-surface flex-1 min-h-0">
+        <CardBody className="flex flex-col gap-6 p-0 md:flex-row min-h-0">
+          <div className="flex flex-col gap-3 border-r border-border min-w-[220px] max-w-[260px] overflow-y-auto p-4">
+            {[...grouped.entries()].map(([group, groupItems]) => (
+              <div key={group} className="flex flex-col gap-1">
+                <div className="text-xs font-semibold uppercase tracking-wide text-p-secondary px-1">
+                  {group} ({groupItems.length})
+                </div>
+                {groupItems.map((item) => {
+                  const isActive = item.key === (activeItem?.key ?? "");
+                  return (
+                    <Button
+                      key={item.key}
+                      size="sm"
+                      variant={isActive ? "solid" : "ghost"}
+                      color={isActive ? "primary" : "default"}
+                      className="justify-start font-mono text-xs min-w-0"
+                      onPress={() => setActiveKey(item.key)}
+                    >
+                      <span className="truncate">{item.label}</span>
+                    </Button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4 pt-4">
+            {activeItem && GROUP_TOPIC_KEY[activeItem.group] && (
+              <p className="mb-4 text-xs text-p-secondary leading-relaxed border-b border-border pb-3">
+                {TOPICS[GROUP_TOPIC_KEY[activeItem.group]!]}
+              </p>
+            )}
+            {activeItem?.content ?? (
+              <div className="py-20 text-center">
+                <p className="text-5xl font-extrabold text-border">0</p>
+                <p className="mt-3 text-base text-p-secondary">
+                  No items to display
+                </p>
+              </div>
+            )}
+          </div>
+        </CardBody>
+      </Card>
+    </div>
+  );
+}
+
+function UtxoDetail({ utxo }: { utxo: IGraphicalUtxo }) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <DetailLabel>Transaction Output Reference</DetailLabel>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-sm font-bold break-all">
+            {utxo.txHash}#{utxo.index}
+          </span>
+          <CopyButton text={`${utxo.txHash}#${utxo.index}`} size={14} />
+        </div>
+      </div>
+
+      {utxo.address && (
+        <div>
+          <DetailLabel>Address</DetailLabel>
+          <div className="flex items-center gap-2 mb-2">
+            <ColoredAddress address={Address(utxo.address.bech32)} full />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <SubField label="Header Type" value={utxo.address.headerType} />
+            <SubField label="Network" value={utxo.address.netType} />
+            <SubField label="Kind" value={utxo.address.kind} />
+            <SubField label="Payment" value={utxo.address.payment} mono />
+            {utxo.address.delegation && (
+              <SubField
+                label="Delegation"
+                value={utxo.address.delegation}
+                mono
+              />
+            )}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <DetailLabel>Lovelace</DetailLabel>
+        <span className="font-mono text-lg font-extrabold">
+          {utxo.lovelace}
+          <span className="ml-1 text-sm font-medium text-p-secondary">₳</span>
+        </span>
+      </div>
+
+      {utxo.datum && (
+        <div>
+          <DetailLabel>Datum</DetailLabel>
+          <div className="font-mono text-sm break-all text-p-primary">
+            {utxo.datum.hash}
+          </div>
+          {utxo.datum.bytes && (
+            <pre className="mt-2 text-xs font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-60 overflow-y-auto border border-border bg-explorer-row/30 p-3 rounded">
+              {utxo.datum.bytes}
+            </pre>
           )}
-        >
-          {normalInputs.length > 0 ? (
-            <Accordion {...accordionProps(normalInputs)}>
-              {normalInputs.map(({ txHash, index }, i) => (
-                <AccordionItem
-                  key={i}
-                  {...accordionItemProps(
-                    "Input " + (i + 1).toString(),
-                    defaultStyle("text-2xl text-accent-blue", "px-7"),
-                  )}
-                  startContent={
-                    witnesses?.redeemers.find(
-                      (r) => r.index === i && r.tag === "Spend",
-                    ) && (
-                      <div
-                        onPointerDown={(e) => {
-                          e.stopPropagation();
-                          document
-                            .getElementById(`Spend-${i}`)
-                            ?.scrollIntoView({
-                              behavior: "smooth",
-                              block: "center",
-                            });
-                        }}
-                      >
-                        <Chip color="primary" radius="sm" size="sm">
-                          Redeemer
-                        </Chip>
+        </div>
+      )}
+
+      {utxo.scriptRef && (
+        <div>
+          <DetailLabel>Script Reference</DetailLabel>
+          <div className="font-mono text-sm break-all">{utxo.scriptRef}</div>
+        </div>
+      )}
+
+      {utxo.assets && utxo.assets.length > 0 && (
+        <div>
+          <DetailLabel>
+            Assets ({utxo.assets.reduce((s, a) => s + a.assetsPolicy.length, 0)}
+            )
+          </DetailLabel>
+          <div className="space-y-2 mt-1">
+            {utxo.assets.map(({ policyId, assetsPolicy }, j) => (
+              <div
+                key={j}
+                className="border border-border/50 bg-explorer-row/30 px-3 py-2 rounded"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-bold text-p-secondary">
+                    Policy
+                  </span>
+                  <span className="font-mono text-xs break-all">
+                    {policyId}
+                  </span>
+                </div>
+                <div className="space-y-px">
+                  {assetsPolicy.map((a, k) => (
+                    <div
+                      key={k}
+                      className="flex items-center gap-3 text-sm w-full justify-between"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-bold text-p-secondary">
+                          Hex name
+                        </span>
+                        <span className="font-mono flex-1 min-w-0 truncate">
+                          {a.assetName}
+                        </span>
                       </div>
-                    )
-                  }
-                >
-                  <PropBlock
-                    title="UtxoRef Hash"
-                    description={i == 0 ? TOPICS.inputs_hash : ""}
-                    value={txHash}
-                  />
-                  <PropBlock
-                    title="UtxoRef Index"
-                    description={i == 0 ? TOPICS.inputs_index : ""}
-                    value={index}
-                  />
-                </AccordionItem>
-              ))}
-            </Accordion>
-          ) : (
-            <EmptyBlock />
-          )}
-        </AccordionItem>
-        <AccordionItem
-          key="Transaction Outputs"
-          {...accordionItemProps(
-            "Transaction Outputs",
-            defaultStyle(
-              "font-bold text-red-2 underline decoration-solid underline-offset-2",
-            ),
-            TOPICS.outputs,
-          )}
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-bold text-p-secondary">
+                          Ascii name
+                        </span>
+                        <span className="text-p-secondary flex-shrink-0 max-w-[160px] truncate">
+                          {a.assetNameAscii || "—"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-bold text-p-secondary">
+                          Amount
+                        </span>
+                        <span className="font-mono font-bold flex-shrink-0 w-36 text-right text-xs">
+                          {a.amount?.toFixed(0) ?? 0}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CertDetail({ cert }: { cert: Certificate }) {
+  return (
+    <div className="space-y-3">
+      <DetailLabel>{cert.kind}</DetailLabel>
+      <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+        {JSON.stringify(cert, null, 2)}
+      </pre>
+    </div>
+  );
+}
+
+function WithdrawalDetail({ w }: { w: WithdrawalType }) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <DetailLabel>Address</DetailLabel>
+        <ColoredAddress address={Address(w.rawAddress)} full />
+        <div className="font-mono text-sm break-all">{w.rawAddress}</div>
+      </div>
+      <div>
+        <DetailLabel>Amount</DetailLabel>
+        <span className="font-mono text-lg font-extrabold">
+          {formatAda(w.amount)}
+          <span className="ml-1 text-sm font-medium text-p-secondary">₳</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function MintDetail({ mint, isMint }: { mint: Assets; isMint: boolean }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <DetailLabel>Policy ID</DetailLabel>
+        <span
+          className={`text-xs font-bold font-mono px-2 py-0.5 rounded ${isMint ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}
         >
-          {outputs.length > 0 ? (
-            <Accordion {...accordionProps(outputs)}>
-              {outputs.map(
-                ({ txHash, index, address, lovelace, assets }, i) => (
-                  <AccordionItem
-                    key={i}
-                    {...accordionItemProps(
-                      "Output " + (i + 1).toString(),
-                      defaultStyle("text-2xl text-red-2", "px-7"),
-                    )}
-                  >
-                    <PropBlock title="Tx Hash" value={txHash} />
-                    <PropBlock title="Output Index" value={index} />
-                    <PropBlock
-                      title="Bech32"
-                      value={address?.bech32}
-                      description={TOPICS.outputs_address}
-                    />
-                    <PropBlock
-                      title="Header Type"
-                      value={address?.headerType}
-                    />
-                    <PropBlock title="Kind" value={address?.kind} />
-                    <PropBlock title="Network Type" value={address?.netType} />
-                    <PropBlock title="Payment" value={address?.payment} />
-                    <PropBlock
-                      title="Lovelace"
-                      value={lovelace}
-                      description={TOPICS.outputs_lovelace}
-                    />
-                    <Accordion {...accordionProps(assets)}>
-                      {assets.map(({ policyId, assetsPolicy }, j) => (
-                        <AccordionItem
-                          key={j}
-                          {...accordionItemProps(
-                            "Policy Assets",
-                            defaultStyle("text-2xl", "px-6"),
-                          )}
-                        >
-                          <PropBlock title="Policy Id" value={policyId} />
-                          <Accordion {...accordionProps(assetsPolicy)}>
-                            <AccordionItem
-                              key={policyId + i}
-                              {...accordionItemProps(
-                                `Assets (${assetsPolicy.length})`,
-                                defaultStyle("text-xl", "px-5"),
-                              )}
-                            >
-                              {assetsPolicy.map((a, k) => (
-                                <div key={k}>
-                                  <h4 className="text-lg">Asset {k + 1}</h4>
-                                  <PropBlock
-                                    title="Asset Name"
-                                    value={a.assetName}
-                                  />
-                                  <PropBlock
-                                    title="Asset Name (ASCII)"
-                                    value={a.assetNameAscii}
-                                  />
-                                  <PropBlock title="Amount" value={a.amount} />
-                                </div>
-                              ))}
-                            </AccordionItem>
-                          </Accordion>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                  </AccordionItem>
-                ),
-              )}
-            </Accordion>
-          ) : (
-            <EmptyBlock />
-          )}
-        </AccordionItem>
-        <AccordionItem
-          key="Reference Inputs"
-          {...accordionItemProps(
-            "Reference Inputs",
-            defaultStyle(
-              "font-bold text-accent-blue underline decoration-dashed underline-offset-2",
-            ),
-            TOPICS.reference_inputs,
-          )}
-        >
-          {referenceInputs.length > 0 ? (
-            <Accordion {...accordionProps(referenceInputs)}>
-              {referenceInputs.map(({ txHash, index }, i) => (
-                <AccordionItem
-                  key={i}
-                  {...accordionItemProps(
-                    "Reference Input " + (i + 1).toString(),
-                    defaultStyle(
-                      "text-2xl text-accent-blue underline decoration-dashed underline-offset-2",
-                      "px-7",
-                    ),
-                  )}
-                >
-                  <PropBlock
-                    title="UtxoRef Hash"
-                    value={txHash}
-                    description={i == 0 ? TOPICS.inputs_hash : ""}
-                  />
-                  <PropBlock
-                    title="UtxoRef Index"
-                    value={index}
-                    description={i == 0 ? TOPICS.inputs_index : ""}
-                  />
-                </AccordionItem>
-              ))}
-            </Accordion>
-          ) : (
-            <EmptyBlock />
-          )}
-        </AccordionItem>
-        <AccordionItem
-          key="Certificates"
-          {...accordionItemProps("Certificates", defaultStyle())}
-        >
-          {(certificates ?? [])?.length > 0 ? (
-            <Accordion
-              selectionMode="multiple"
-              defaultExpandedKeys={[
-                ...Array((certificates ?? []).length + 1).keys(),
-              ].map(String)}
-            >
-              {(certificates ?? []).map((cert, i) => (
-                <AccordionItem
-                  key={i}
-                  {...accordionItemProps(
-                    `Certificate ${i + 1}`,
-                    defaultStyle("text-2xl", "px-7"),
-                  )}
-                >
-                  {/* TODO: add per certificate rendering component - Could be related to staking addresses, dreps, etc and link to specific urls */}
-                  <PropBlock
-                    title="JSON"
-                    value={JSON.stringify(cert)}
-                  />
-                </AccordionItem>
-              ))}
-            </Accordion>
-          ) : (
-            <EmptyBlock />
-          )}
-        </AccordionItem>
-        <AccordionItem
-          key="Withdrawals"
-          {...accordionItemProps("Withdrawals", defaultStyle())}
-        >
-          {(withdrawals ?? []).length > 0 ? (
-            <Accordion {...accordionProps(withdrawals ?? [])}>
-              {(withdrawals ?? []).map(({ rawAddress, amount }, i) => (
-                <AccordionItem
-                  key={i}
-                  {...accordionItemProps(
-                    `Withdrawal ${i + 1}`,
-                    defaultStyle("text-2xl", "px-7"),
-                  )}
-                >
-                  <PropBlock title="Raw Address" value={rawAddress} />
-                  <PropBlock title="Amount" value={amount} />
-                </AccordionItem>
-              ))}
-            </Accordion>
-          ) : (
-            <EmptyBlock />
-          )}
-        </AccordionItem>
-        <AccordionItem
-          key="Transaction Mints"
-          {...accordionItemProps(
-            "Transaction Mints",
-            defaultStyle(),
-            TOPICS.mints,
-          )}
-        >
-          {mints.length > 0 ? (
-            <Accordion {...accordionProps(mints)}>
-              {mints.map(({ policyId, assetsPolicy }, i) => {
-                const mint = assetsPolicy.find((a) => a.amount && a.amount > 0);
-                return (
-                  <AccordionItem
-                    key={i}
-                    {...accordionItemProps(
-                      `${mint ? "Minted" : "Burned"} token ${i + 1}`,
-                      defaultStyle("text-2xl", "px-7"),
-                    )}
-                  >
-                    <PropBlock
-                      title="Policy Id"
-                      value={policyId}
-                      color={mint ? "green" : "red"}
-                    />
-                    {assetsPolicy.map(
-                      ({ assetName, assetNameAscii, amount }, j) => (
-                        <div key={j}>
-                          <PropBlock title="Asset Name" value={assetName} />
-                          <PropBlock
-                            title="Asset Name (ASCII)"
-                            value={assetNameAscii}
-                          />
-                          <PropBlock title="Amount" value={amount} />
-                        </div>
-                      ),
-                    )}
-                  </AccordionItem>
-                );
-              })}
-            </Accordion>
-          ) : (
-            <PropBlock value="No minting or burning" />
-          )}
-        </AccordionItem>
-        <AccordionItem
-          key="Transaction Metadata"
-          {...accordionItemProps(
-            "Transaction Metadata",
-            defaultStyle(),
-            TOPICS.metadata,
-          )}
-        >
-          {metadata?.map(({ label, jsonMetadata }, i) => (
-            <div key={i}>
-              <PropBlock
-                title="Metadata Label"
-                value={label}
-                description={i == 0 ? TOPICS.inputs_hash : ""}
-              />
-              <PropBlock
-                title="Metadatum Value"
-                value={JSONBIG.stringify(jsonMetadata, null, 2)}
-                description={i == 0 ? TOPICS.inputs_index : ""}
-              />
+          {isMint ? "MINT" : "BURN"}
+        </span>
+      </div>
+      <div className="font-mono text-sm break-all">{mint.policyId}</div>
+      <DetailLabel>Assets</DetailLabel>
+      <div className="space-y-px border border-border/50 rounded">
+        {mint.assetsPolicy.map((a, j) => (
+          <div
+            key={j}
+            className="flex items-center gap-3 px-3 py-2 bg-explorer-row/30 text-sm"
+          >
+            <span className="font-mono flex-1 min-w-0 truncate">
+              {a.assetName}
+            </span>
+            <span className="text-p-secondary flex-shrink-0 max-w-[160px] truncate">
+              {a.assetNameAscii || "—"}
+            </span>
+            <span className="font-mono font-bold flex-shrink-0 w-24 text-right">
+              {a.amount?.toFixed(0) ?? 0}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MetadataDetail({ m }: { m: Metadata }) {
+  return (
+    <div className="space-y-3">
+      <DetailLabel>Label: {m.label}</DetailLabel>
+      <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+        {JSONBIG.stringify(m.jsonMetadata, null, 2)}
+      </pre>
+    </div>
+  );
+}
+
+function CollateralDetail({ col }: { col: CollateralType }) {
+  return (
+    <div className="space-y-4">
+      {col.total !== undefined && (
+        <div>
+          <DetailLabel>Total</DetailLabel>
+          <span className="font-mono text-2xl font-extrabold">
+            {formatAda(col.total)}
+          </span>
+          <span className="ml-1 text-sm font-medium text-p-secondary">₳</span>
+        </div>
+      )}
+      {col.collateralReturn && col.collateralReturn.length > 0 && (
+        <div>
+          <DetailLabel>Collateral Return</DetailLabel>
+          <div className="space-y-1 mt-1">
+            {col.collateralReturn.map((ref, i) => (
+              <div
+                key={i}
+                className="font-mono text-sm break-all border border-border bg-explorer-row/30 px-3 py-2 rounded"
+              >
+                {ref.txHash}#{ref.index}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VKeyDetail({ items }: { items: Witnesses["vkeyWitnesses"] }) {
+  return (
+    <div className="space-y-2">
+      {items.map((w, i) => (
+        <div key={i} className="border border-border bg-surface rounded">
+          <div className="px-4 py-2 bg-explorer-row border-b border-border flex items-center gap-2">
+            <span className="font-mono text-xs font-bold text-p-primary">
+              #{i}
+            </span>
+          </div>
+          <div className="divide-y divide-border/50">
+            <div className="flex items-start gap-4 px-4 py-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-p-secondary w-16 flex-shrink-0 pt-px">
+                Key
+              </span>
+              <span className="font-mono text-sm break-all">{w.key}</span>
             </div>
-          ))}
-          {metadata?.length === 0 && <EmptyBlock />}
-        </AccordionItem>
-        <AccordionItem
-          key="Collateral"
-          {...accordionItemProps("Collateral", defaultStyle("", "px-7"))}
-        >
-          {collateral?.collateralReturn.map(({ txHash, index }, i) => (
-            <div key={i}>
-              <h4 className="text-2xl">Collateral Return</h4>
-              <PropBlock
-                title="UtxoRef Hash"
-                value={txHash}
-                description={i == 0 ? TOPICS.inputs_hash : ""}
-              />
-              <PropBlock
-                title="UtxoRef Index"
-                value={index}
-                description={i == 0 ? TOPICS.inputs_index : ""}
-              />
+            <div className="flex items-start gap-4 px-4 py-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-p-secondary w-16 flex-shrink-0 pt-px">
+                Hash
+              </span>
+              <span className="font-mono text-sm break-all">{w.hash}</span>
             </div>
-          ))}
-          <PropBlock title="Total" value={collateral?.total} />
-        </AccordionItem>
-        <AccordionItem
-          key="Transaction Witnesses"
-          {...accordionItemProps(
-            "Transaction Witnesses",
-            defaultStyle("", "px-7"),
-            TOPICS.witnesses,
-          )}
-        >
-          {(witnesses?.vkeyWitnesses ?? []).length > 0 ? (
-            <Accordion {...accordionProps(witnesses?.vkeyWitnesses ?? [])}>
-              {(witnesses?.vkeyWitnesses ?? []).map(
-                ({ hash, key, signature }, i) => (
-                  <AccordionItem
-                    key={i}
-                    {...accordionItemProps(
-                      `Verification Key Witness ${i + 1}`,
-                      defaultStyle("text-2xl", "px-5"),
-                    )}
-                  >
-                    <PropBlock
-                      title="Key"
-                      value={key}
-                      description={i == 0 ? TOPICS.vkey_witness : ""}
-                    />
-                    <PropBlock title="Hash" value={hash} />
-                    <PropBlock title="Signature" value={signature} />
-                  </AccordionItem>
-                ),
-              )}
-            </Accordion>
-          ) : (
-            <EmptyBlock title="Verification Key Witness" />
-          )}
-          {(witnesses?.redeemers ?? []).length > 0 ? (
-            <Accordion {...accordionProps(witnesses?.redeemers ?? [])}>
-              {(witnesses?.redeemers ?? []).map(
-                ({ tag, index, dataJson, exUnits }, i) => (
-                  <AccordionItem
-                    key={i}
-                    id={tag + "-" + index}
-                    {...accordionItemProps(
-                      `Redeemer ${i + 1}`,
-                      defaultStyle("text-2xl", "px-5"),
-                    )}
-                  >
-                    <PropBlock title="Tag" value={tag} />
-                    <PropBlock title="Index" value={index} />
-                    <PropBlock
-                      title="Data"
-                      value={JSONBIG.stringify(JSON.parse(dataJson), null, 2)}
-                    />
-                    <PropBlock title="Ex Mem Units" value={exUnits.mem} />
-                    <PropBlock title="Ex Steps Units" value={exUnits.steps} />
-                  </AccordionItem>
-                ),
-              )}
-            </Accordion>
-          ) : (
-            <EmptyBlock title="Reedemers" />
-          )}
-          {(witnesses?.plutusData ?? []).length > 0 ? (
-            <Accordion {...accordionProps(witnesses?.plutusData ?? [])}>
-              {(witnesses?.plutusData ?? []).map(({ hash, bytes, json }, i) => (
-                <AccordionItem
-                  key={i}
-                  {...accordionItemProps(
-                    `Plutus Data Witness ${i + 1}`,
-                    defaultStyle("text-2xl", "px-5"),
-                    TOPICS.datum,
-                  )}
-                >
-                  <PropBlock
-                    title="Hash"
-                    value={hash}
-                    description={i === 0 ? TOPICS.datum_hash : ""}
-                  />
-                  <PropBlock title="Bytes" value={bytes} />
-                  <PropBlock
-                    title="JSON"
-                    value={json}
-                    description={i === 0 ? TOPICS.datum_json : ""}
-                  />
-                </AccordionItem>
-              ))}
-            </Accordion>
-          ) : (
-            <EmptyBlock title="Plutus Data" />
-          )}
-        </AccordionItem>
-      </Accordion>
+            <div className="flex items-start gap-4 px-4 py-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-p-secondary w-16 flex-shrink-0 pt-px">
+                Sig
+              </span>
+              <span className="font-mono text-sm break-all">{w.signature}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RedeemerDetail({ r }: { r: Witnesses["redeemers"][number] }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <span className="font-mono text-sm font-bold">{r.tag}</span>
+        <span className="font-mono text-xs text-p-secondary">
+          index {r.index}
+        </span>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <DetailLabel>Ex Mem</DetailLabel>
+          <span className="font-mono text-sm">{r.exUnits.mem.toFixed(0)}</span>
+        </div>
+        <div>
+          <DetailLabel>Ex Steps</DetailLabel>
+          <span className="font-mono text-sm">
+            {r.exUnits.steps.toFixed(0)}
+          </span>
+        </div>
+      </div>
+      <div>
+        <DetailLabel>Data</DetailLabel>
+        <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+          {JSONBIG.stringify(JSON.parse(r.dataJson), null, 2)}
+        </pre>
+      </div>
+    </div>
+  );
+}
+
+function PlutusDetail({ d }: { d: Witnesses["plutusData"][number] }) {
+  return (
+    <div className="space-y-3">
+      <div>
+        <DetailLabel>Hash</DetailLabel>
+        <div className="font-mono text-sm break-all">{d.hash}</div>
+      </div>
+      {d.bytes && (
+        <div>
+          <DetailLabel>Bytes</DetailLabel>
+          <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-60 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+            {d.bytes}
+          </pre>
+        </div>
+      )}
+      {d.json && (
+        <div>
+          <DetailLabel>JSON</DetailLabel>
+          <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+            {d.json}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DetailLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs font-bold uppercase tracking-wider text-p-secondary mb-1.5">
+      {children}
+    </p>
+  );
+}
+
+function SubField({
+  label,
+  value,
+  mono,
+}: {
+  label: string;
+  value?: string;
+  mono?: boolean;
+}) {
+  if (!value) return null;
+  return (
+    <div>
+      <p className="text-xs text-p-secondary">{label}</p>
+      <p className={`text-sm break-all ${mono ? "font-mono" : ""}`}>{value}</p>
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  suffix,
+}: {
+  label: string;
+  value: string;
+  suffix?: string;
+}) {
+  return (
+    <div className="flex items-baseline gap-1.5 flex-shrink-0">
+      <span className="text-xs font-semibold uppercase tracking-wider text-p-secondary">
+        {label}
+      </span>
+      <span className="font-mono text-sm font-bold text-p-primary tabular-nums">
+        {value}
+        {suffix && (
+          <span className="ml-0.5 text-xs font-medium text-p-secondary">
+            {suffix}
+          </span>
+        )}
+      </span>
     </div>
   );
 }

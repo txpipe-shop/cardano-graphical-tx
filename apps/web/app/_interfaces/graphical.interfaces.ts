@@ -67,5 +67,6 @@ export interface Address {
   headerType: string;
   netType: string;
   payment: string;
+  delegation?: string;
   kind: "key" | "script";
 }

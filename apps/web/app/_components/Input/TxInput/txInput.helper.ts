@@ -92,6 +92,10 @@ const formatAddress = (
     netType,
     payment: hexAddress.slice(2, POLICY_LENGTH),
     kind: Number(headerType) % 2 === 0 ? "key" : "script",
+    delegation:
+      hexAddress.length > 2 + POLICY_LENGTH
+        ? hexAddress.slice(2 + POLICY_LENGTH, -1)
+        : undefined,
   };
 };
 
@@ -113,7 +117,7 @@ export const generateGraphicalUTXO = ({
   if (exist) return exist;
 
   return {
-    txHash: txHash + "#" + index,
+    txHash: txHash,
     index,
     bytes,
     address: formatAddress(address),
@@ -366,6 +370,7 @@ const setCBORs = async (
 
       newUtxos.forEach((utxo) => (newUtxosObject[utxo.txHash] = utxo));
     });
+    console.log("Setting transaction box", newTransactionsList);
     setTransactionBox({
       transactions: newTransactionsList,
       utxos: newUtxosObject,

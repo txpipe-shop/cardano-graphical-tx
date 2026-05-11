@@ -7,11 +7,39 @@ import CopyButton from "./CopyButton";
 
 export interface ColoredAddressProps {
   address: Address;
+  full?: boolean;
 }
 
-export default function ColoredAddress({ address }: ColoredAddressProps) {
+export default function ColoredAddress({
+  address,
+  full = false,
+}: ColoredAddressProps) {
   const { addressPrefix } = useNetwork();
   const normalizedAddress = normalizeAddress(address, addressPrefix);
+
+  if (full) {
+    const prefix = isBech32(normalizedAddress)
+      ? normalizedAddress.slice(0, -5)
+      : normalizedAddress;
+    const suffix = isBech32(normalizedAddress)
+      ? normalizedAddress.slice(-5)
+      : "";
+
+    return (
+      <div className="flex items-center">
+        <span className="font-mono text-xs text-p-primary break-all">
+          {prefix}
+          {suffix && (
+            <span className="bg-gradient-to-r from-purple-500 to-orange-500 bg-clip-text font-bold text-transparent">
+              {suffix}
+            </span>
+          )}
+        </span>
+        <CopyButton text={normalizedAddress} size={12} />
+      </div>
+    );
+  }
+
   const uncoloredPrefix = isBech32(normalizedAddress)
     ? `${normalizedAddress.slice(0, 12)}...${normalizedAddress.slice(-13, -5)}`
     : "";
