@@ -46,7 +46,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     const certs: Certificate[] = tx.certificates ?? [];
     const wd: WithdrawalType[] = tx.withdrawals ?? [];
     const meta: Metadata[] = tx.metadata ?? [];
-    const col = tx.collateral ?? { collateralReturn: [], total: 0 };
+    const col = tx.collateral ?? { inputs: [], collateralReturn: [], total: 0 };
     const wit = tx.witnesses ?? {
       vkeyWitnesses: [],
       redeemers: [],
@@ -117,7 +117,9 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     });
     if (
       col &&
-      ((col.collateralReturn?.length ?? 0) > 0 || col.total !== undefined)
+      ((col.collateralReturn?.length ?? 0) > 0 ||
+        (col.inputs?.length ?? 0) > 0 ||
+        col.total !== undefined)
     ) {
       result.push({
         group: "Collateral",
@@ -304,64 +306,64 @@ function UtxoDetail({ utxo }: { utxo: IGraphicalUtxo }) {
         </div>
       )}
 
-      {utxo.assets && utxo.assets.length > 0 && (
-        <div>
-          <DetailLabel>
-            Assets ({utxo.assets.reduce((s, a) => s + a.assetsPolicy.length, 0)}
-            )
-          </DetailLabel>
-          <div className="space-y-2 mt-1">
-            {utxo.assets.map(({ policyId, assetsPolicy }, j) => (
-              <div
-                key={j}
-                className="border border-border/50 bg-explorer-row/30 px-3 py-2 rounded"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold text-p-secondary">
-                    Policy
-                  </span>
-                  <span className="font-mono text-xs break-all">
-                    {policyId}
-                  </span>
+      <AssetsList assets={utxo.assets} />
+    </div>
+  );
+}
+
+function AssetsList({ assets }: { assets: Assets[] }) {
+  if (!assets || assets.length === 0) return null;
+  return (
+    <div>
+      <DetailLabel>
+        Assets ({assets.reduce((s, a) => s + a.assetsPolicy.length, 0)})
+      </DetailLabel>
+      <div className="space-y-2 mt-1">
+        {assets.map(({ policyId, assetsPolicy }, j) => (
+          <div
+            key={j}
+            className="border border-border/50 bg-explorer-row/30 px-3 py-2 rounded"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-bold text-p-secondary">Policy</span>
+              <span className="font-mono text-xs break-all">{policyId}</span>
+            </div>
+            <div className="space-y-px">
+              {assetsPolicy.map((a, k) => (
+                <div
+                  key={k}
+                  className="flex items-center gap-3 text-sm w-full justify-between"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold text-p-secondary">
+                      Hex name
+                    </span>
+                    <span className="font-mono flex-1 min-w-0 truncate">
+                      {a.assetName}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold text-p-secondary">
+                      Ascii name
+                    </span>
+                    <span className="text-p-secondary flex-shrink-0 max-w-[160px] truncate">
+                      {a.assetNameAscii || "—"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold text-p-secondary">
+                      Amount
+                    </span>
+                    <span className="font-mono font-bold flex-shrink-0 w-36 text-right text-xs">
+                      {a.amount?.toFixed(0) ?? 0}
+                    </span>
+                  </div>
                 </div>
-                <div className="space-y-px">
-                  {assetsPolicy.map((a, k) => (
-                    <div
-                      key={k}
-                      className="flex items-center gap-3 text-sm w-full justify-between"
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold text-p-secondary">
-                          Hex name
-                        </span>
-                        <span className="font-mono flex-1 min-w-0 truncate">
-                          {a.assetName}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold text-p-secondary">
-                          Ascii name
-                        </span>
-                        <span className="text-p-secondary flex-shrink-0 max-w-[160px] truncate">
-                          {a.assetNameAscii || "—"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold text-p-secondary">
-                          Amount
-                        </span>
-                        <span className="font-mono font-bold flex-shrink-0 w-36 text-right text-xs">
-                          {a.amount?.toFixed(0) ?? 0}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 }
@@ -448,22 +450,81 @@ function CollateralDetail({ col }: { col: CollateralType }) {
       {col.total !== undefined && (
         <div>
           <DetailLabel>Total</DetailLabel>
-          <span className="font-mono text-2xl font-extrabold">
-            {formatAda(col.total)}
-          </span>
-          <span className="ml-1 text-sm font-medium text-p-secondary">₳</span>
+          <span className="font-mono text-2xl font-extrabold">{col.total}</span>
         </div>
       )}
+
+      {col.inputs && col.inputs.length > 0 && (
+        <div>
+          <DetailLabel>Collateral Inputs</DetailLabel>
+          <div className="space-y-1 mt-1">
+            {col.inputs.map((inp, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2 font-mono text-sm break-all border border-border bg-explorer-row/30 px-3 py-2 rounded"
+              >
+                <span>
+                  {inp.txHash}#{inp.index}
+                </span>
+                <CopyButton text={`${inp.txHash}#${inp.index}`} size={12} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {col.collateralReturn && col.collateralReturn.length > 0 && (
         <div>
           <DetailLabel>Collateral Return</DetailLabel>
-          <div className="space-y-1 mt-1">
+          <div className="space-y-3 mt-1">
             {col.collateralReturn.map((ref, i) => (
               <div
                 key={i}
-                className="font-mono text-sm break-all border border-border bg-explorer-row/30 px-3 py-2 rounded"
+                className="border border-border bg-explorer-row/30 rounded p-3 space-y-3"
               >
-                {ref.txHash}#{ref.index}
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm font-bold break-all">
+                    {ref.txHash}#{ref.index}
+                  </span>
+                  <CopyButton text={`${ref.txHash}#${ref.index}`} size={14} />
+                </div>
+
+                <div>
+                  <DetailLabel>Address</DetailLabel>
+                  <ColoredAddress address={Address(ref.address)} full />
+                </div>
+
+                <div>
+                  <DetailLabel>Lovelace</DetailLabel>
+                  <span className="font-mono text-lg font-extrabold">
+                    {ref.lovelace}
+                  </span>
+                </div>
+
+                {ref.datum && (
+                  <div>
+                    <DetailLabel>Datum</DetailLabel>
+                    <div className="font-mono text-sm break-all text-p-primary">
+                      {ref.datum.hash}
+                    </div>
+                    {ref.datum.bytes && (
+                      <pre className="mt-2 text-xs font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-60 overflow-y-auto border border-border bg-explorer-row/30 p-3 rounded">
+                        {ref.datum.bytes}
+                      </pre>
+                    )}
+                  </div>
+                )}
+
+                {ref.scriptRef && (
+                  <div>
+                    <DetailLabel>Script Reference</DetailLabel>
+                    <div className="font-mono text-sm break-all">
+                      {ref.scriptRef}
+                    </div>
+                  </div>
+                )}
+
+                <AssetsList assets={ref.assets} />
               </div>
             ))}
           </div>

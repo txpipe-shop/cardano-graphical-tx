@@ -75,7 +75,8 @@ pub struct Withdrawal {
 #[napi(object)]
 pub struct Collateral {
   pub total: Option<i64>,
-  pub collateral_return: Vec<Input>,
+  pub inputs: Vec<Input>,
+  pub collateral_return: Vec<Utxo>,
 }
 
 #[derive(Default)]

@@ -91,7 +91,8 @@ export type Certificate =
 
 export interface Collateral {
   total?: number
-  collateralReturn: Array<Input>
+  inputs: Array<Input>
+  collateralReturn: Array<Utxo>
 }
 
 export interface Credential {
