@@ -175,13 +175,13 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
 
   return (
     <div className="flex flex-col min-h-0 w-full">
-      <div className="flex items-center gap-4 pb-4 mb-4 border-b border-border flex-shrink-0 overflow-x-auto">
+      <div className="flex flex-col md:flex-row md:items-center gap-4 pb-4 mb-4 border-b border-border flex-shrink-0">
         <div className="flex items-center gap-3 flex-shrink-0">
           <span className="font-mono text-base font-bold text-accent-blue">
             {tx.era}
           </span>
         </div>
-        <div className="flex items-center gap-6 flex-shrink-0 ml-auto">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 md:gap-x-6 md:gap-y-2 flex-shrink-0 md:ml-auto">
           <Stat label="Fee" value={formatAda(tx.fee)} suffix="₳" />
           <Stat label="Size" value={`${tx.size}`} suffix="B" />
           <Stat label="Inputs" value={`${normalInputs.length}`} />
