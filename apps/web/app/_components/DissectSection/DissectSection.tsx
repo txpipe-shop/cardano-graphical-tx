@@ -482,13 +482,6 @@ function CollateralDetail({ col }: { col: CollateralType }) {
                 key={i}
                 className="border border-border bg-explorer-row/30 rounded p-3 space-y-3"
               >
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm font-bold break-all">
-                    {ref.txHash}#{ref.index}
-                  </span>
-                  <CopyButton text={`${ref.txHash}#${ref.index}`} size={14} />
-                </div>
-
                 <div>
                   <DetailLabel>Address</DetailLabel>
                   <ColoredAddress address={Address(ref.address)} full />
