@@ -17,8 +17,8 @@ import type { IGraphicalTransaction, IGraphicalUtxo } from "~/app/_interfaces";
 import { JSONBIG } from "~/app/_utils";
 import Loading from "~/app/loading";
 import ColoredAddress from "../ExplorerSection/ColoredAddress";
-import { formatAda } from "./utils";
 import TOPICS from "./topics";
+import { formatAda } from "./utils";
 
 type SidebarItem = {
   group: string;
