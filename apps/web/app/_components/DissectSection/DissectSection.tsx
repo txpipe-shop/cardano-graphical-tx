@@ -143,7 +143,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         result.push({
           group: "Witnesses",
           key: `witness-red-${i}`,
-          label: `Redeemer #${i}  ${r.tag} @${r.index}`,
+          label: `Redeemer ${r.tag} - Index: ${r.index}`,
           content: <RedeemerDetail r={r} />,
         });
       });
@@ -229,8 +229,8 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             )}
             {activeItem?.content ?? (
               <div className="py-20 text-center">
-                <p className="text-5xl font-extrabold text-border">0</p>
-                <p className="mt-3 text-base text-p-secondary">
+                <p className="text-lg font-semibold text-p-secondary">0</p>
+                <p className="mt-2 text-sm text-p-secondary">
                   No items to display
                 </p>
               </div>
@@ -248,7 +248,7 @@ function UtxoDetail({ utxo }: { utxo: IGraphicalUtxo }) {
       <div>
         <DetailLabel>Transaction Output Reference</DetailLabel>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-sm font-bold break-all">
+          <span className="font-mono text-sm font-bold break-all text-p-primary">
             {utxo.txHash}#{utxo.index}
           </span>
           <CopyButton text={`${utxo.txHash}#${utxo.index}`} size={14} />
@@ -279,9 +279,8 @@ function UtxoDetail({ utxo }: { utxo: IGraphicalUtxo }) {
 
       <div>
         <DetailLabel>Lovelace</DetailLabel>
-        <span className="font-mono text-lg font-extrabold">
+        <span className="font-mono text-sm font-medium tabular-nums">
           {utxo.lovelace}
-          <span className="ml-1 text-sm font-medium text-p-secondary">₳</span>
         </span>
       </div>
 
@@ -384,12 +383,12 @@ function WithdrawalDetail({ w }: { w: WithdrawalType }) {
     <div className="space-y-4">
       <div>
         <DetailLabel>Address</DetailLabel>
-        <ColoredAddress address={Address(w.rawAddress)} full />
-        <div className="font-mono text-sm break-all">{w.rawAddress}</div>
+        <ColoredAddress address={Address(w.rewardAccount)} full />
+        <div className="font-mono text-sm break-all">{w.rewardAccount}</div>
       </div>
       <div>
         <DetailLabel>Amount</DetailLabel>
-        <span className="font-mono text-lg font-extrabold">
+        <span className="font-mono text-sm font-medium tabular-nums">
           {formatAda(w.amount)}
           <span className="ml-1 text-sm font-medium text-p-secondary">₳</span>
         </span>
@@ -450,7 +449,7 @@ function CollateralDetail({ col }: { col: CollateralType }) {
       {col.total !== undefined && (
         <div>
           <DetailLabel>Total</DetailLabel>
-          <span className="font-mono text-2xl font-extrabold">{col.total}</span>
+          <span className="font-mono text-base font-semibold tabular-nums">{col.total}</span>
         </div>
       )}
 
@@ -489,7 +488,7 @@ function CollateralDetail({ col }: { col: CollateralType }) {
 
                 <div>
                   <DetailLabel>Lovelace</DetailLabel>
-                  <span className="font-mono text-lg font-extrabold">
+                  <span className="font-mono text-sm font-medium tabular-nums">
                     {ref.lovelace}
                   </span>
                 </div>
@@ -539,21 +538,15 @@ function VKeyDetail({ items }: { items: Witnesses["vkeyWitnesses"] }) {
           </div>
           <div className="divide-y divide-border/50">
             <div className="flex items-start gap-4 px-4 py-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-p-secondary w-16 flex-shrink-0 pt-px">
-                Key
-              </span>
+              <DetailLabel className="w-16 flex-shrink-0">Key</DetailLabel>
               <span className="font-mono text-sm break-all">{w.key}</span>
             </div>
             <div className="flex items-start gap-4 px-4 py-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-p-secondary w-16 flex-shrink-0 pt-px">
-                Hash
-              </span>
+              <DetailLabel className="w-16 flex-shrink-0">Hash</DetailLabel>
               <span className="font-mono text-sm break-all">{w.hash}</span>
             </div>
             <div className="flex items-start gap-4 px-4 py-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-p-secondary w-16 flex-shrink-0 pt-px">
-                Sig
-              </span>
+              <DetailLabel className="w-16 flex-shrink-0">Sig</DetailLabel>
               <span className="font-mono text-sm break-all">{w.signature}</span>
             </div>
           </div>
@@ -621,9 +614,24 @@ function PlutusDetail({ d }: { d: Witnesses["plutusData"][number] }) {
   );
 }
 
-function DetailLabel({ children }: { children: React.ReactNode }) {
+function DetailLabel({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  if (className) {
+    return (
+      <p
+        className={`text-xs font-semibold uppercase tracking-wide text-p-secondary ${className}`}
+      >
+        {children}
+      </p>
+    );
+  }
   return (
-    <p className="text-xs font-bold uppercase tracking-wider text-p-secondary mb-1.5">
+    <p className="text-xs font-semibold uppercase tracking-wide text-p-secondary mb-1.5">
       {children}
     </p>
   );
@@ -658,10 +666,10 @@ function Stat({
 }) {
   return (
     <div className="flex items-baseline gap-1.5 flex-shrink-0">
-      <span className="text-xs font-semibold uppercase tracking-wider text-p-secondary">
+      <span className="text-xs font-semibold uppercase tracking-wide text-p-secondary">
         {label}
       </span>
-      <span className="font-mono text-sm font-bold text-p-primary tabular-nums">
+      <span className="font-mono text-sm font-medium text-p-primary tabular-nums">
         {value}
         {suffix && (
           <span className="ml-0.5 text-xs font-medium text-p-secondary">
