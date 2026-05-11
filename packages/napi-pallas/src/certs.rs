@@ -153,7 +153,7 @@ pub enum Certificate {
 
 // --- Conversion helpers ---
 
-fn credential_to_napi(cred: &PallasStakeCredential) -> Credential {
+pub(crate) fn credential_to_napi(cred: &PallasStakeCredential) -> Credential {
   match cred {
     PallasStakeCredential::AddrKeyhash(hash) => Credential {
       credential_type: "Key".to_string(),
@@ -187,7 +187,7 @@ fn drep_to_napi(drep: &conway::DRep) -> DRep {
   }
 }
 
-fn anchor_to_napi(anchor: &conway::Anchor) -> Anchor {
+pub(crate) fn anchor_to_napi(anchor: &conway::Anchor) -> Anchor {
   Anchor {
     url: anchor.url.clone(),
     hash: anchor.content_hash.to_string(),

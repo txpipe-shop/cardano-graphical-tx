@@ -6,7 +6,7 @@ import type {
   Certificate,
   Collateral as CollateralType,
   Metadata,
-  Withdrawal as WithdrawalType,
+  RewardWithdrawal as WithdrawalType,
   Witnesses,
 } from "@laceanatomy/napi-pallas";
 import { Address } from "@laceanatomy/types";
@@ -449,7 +449,9 @@ function CollateralDetail({ col }: { col: CollateralType }) {
       {col.total !== undefined && (
         <div>
           <DetailLabel>Total</DetailLabel>
-          <span className="font-mono text-base font-semibold tabular-nums">{col.total}</span>
+          <span className="font-mono text-base font-semibold tabular-nums">
+            {col.total}
+          </span>
         </div>
       )}
 

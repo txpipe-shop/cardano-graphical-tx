@@ -1,7 +1,8 @@
 use crate::{
   Asset, Assets, CborResponse, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
-  SafeCborResponse, Utxo, Withdrawal, Witness, Witnesses,
+  RewardWithdrawal, SafeCborResponse, Utxo, Witness, Witnesses,
 };
+use crate::governance;
 use pallas::ledger::primitives::conway::DatumOption;
 use pallas::ledger::traverse::{MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer};
 use pallas_crypto::hash::Hasher;
@@ -169,14 +170,13 @@ pub(crate) fn get_metadata(tx: &MultiEraTx<'_>) -> Vec<Metadata> {
   }
 }
 
-pub(crate) fn get_withdrawals(tx: &MultiEraTx<'_>) -> Vec<Withdrawal> {
+pub(crate) fn get_withdrawals(tx: &MultiEraTx<'_>) -> Vec<RewardWithdrawal> {
   match tx.withdrawals().as_alonzo() {
     Some(withdrawals) => withdrawals
       .iter()
       .map(|(k, v)| {
-        // TODO - parse address into bech32
-        Withdrawal {
-          raw_address: k.to_string(),
+        RewardWithdrawal {
+          reward_account: k.to_string(),
           amount: v.to_owned() as i64,
         }
       })
@@ -296,6 +296,56 @@ pub(crate) fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
   }
 }
 
+fn get_script_data_hash(tx: &MultiEraTx<'_>) -> Option<String> {
+  match tx {
+    MultiEraTx::AlonzoCompatible(x, _) => x.transaction_body.script_data_hash.map(|h| h.to_string()),
+    MultiEraTx::Babbage(x) => x.transaction_body.script_data_hash.map(|h| h.to_string()),
+    MultiEraTx::Conway(x) => x.transaction_body.script_data_hash.map(|h| h.to_string()),
+    _ => None,
+  }
+}
+
+fn get_required_signers(tx: &MultiEraTx<'_>) -> Vec<String> {
+  tx.required_signers()
+    .collect::<Vec<_>>()
+    .into_iter()
+    .map(|h| h.to_string())
+    .collect()
+}
+
+fn get_network_id(tx: &MultiEraTx<'_>) -> Option<u8> {
+  tx.network_id().map(|n| n.into())
+}
+
+fn get_voting_procedures(tx: &MultiEraTx<'_>) -> Vec<governance::VotingProcedureEntry> {
+  let conway_tx = match tx.as_conway() {
+    Some(x) => x,
+    None => return vec![],
+  };
+
+  match &conway_tx.transaction_body.voting_procedures {
+    Some(vp) => governance::voting_procedures_to_napi(vp),
+    None => vec![],
+  }
+}
+
+fn get_proposal_procedures(tx: &MultiEraTx<'_>) -> Vec<governance::ProposalProcedure> {
+  tx.gov_proposals()
+    .iter()
+    .map(|p| governance::proposal_procedure_to_napi(p))
+    .collect()
+}
+
+fn get_treasury_value(tx: &MultiEraTx<'_>) -> Option<i64> {
+  tx.as_conway()
+    .and_then(|x| x.transaction_body.treasury_value.as_ref().map(|v| *v as i64))
+}
+
+fn get_donation(tx: &MultiEraTx<'_>) -> Option<i64> {
+  tx.as_conway()
+    .and_then(|x| x.transaction_body.donation.as_ref().map(|v| u64::from(v) as i64))
+}
+
 pub(crate) fn parse_tx_from_multiera(
   tx: &MultiEraTx<'_>,
   include_cbor: bool,
@@ -316,19 +366,32 @@ pub(crate) fn parse_tx_from_multiera(
     None
   };
 
-  Ok(CborResponse::new().with_cbor_attr(
-    tx.clone(),
+  Ok(CborResponse {
+    tx_hash: tx.hash().to_string(),
+    fee: tx.fee().map(|x| x as i64),
+    era: tx.era().to_string(),
+    validity_start: tx.validity_start().map(|v| v as i64),
+    ttl: tx.ttl().map(|v| v as i64),
     inputs,
     reference_inputs,
     outputs,
     mints,
+    scripts_successful: tx.is_valid(),
     metadata,
     withdrawals,
     certificates,
     collateral,
     witnesses,
+    size: tx.size() as i64,
     cbor,
-  ))
+    script_data_hash: get_script_data_hash(tx),
+    required_signers: get_required_signers(tx),
+    network_id: get_network_id(tx),
+    voting_procedures: get_voting_procedures(tx),
+    proposal_procedures: get_proposal_procedures(tx),
+    treasury_value: get_treasury_value(tx),
+    donation: get_donation(tx),
+  })
 }
 
 pub fn cbor_to_tx(raw: String) -> SafeCborResponse {

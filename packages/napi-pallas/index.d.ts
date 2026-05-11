@@ -59,12 +59,19 @@ export interface CborResponse {
   validityStart?: number
   ttl?: number
   metadata: Array<Metadata>
-  withdrawals: Array<Withdrawal>
+  withdrawals: Array<RewardWithdrawal>
   certificates: Array<Certificate>
   collateral: Collateral
   witnesses: Witnesses
   size: number
   cbor?: string
+  scriptDataHash?: string
+  requiredSigners: Array<string>
+  networkId?: number
+  votingProcedures: Array<VotingProcedureEntry>
+  proposalProcedures: Array<ProposalProcedure>
+  treasuryValue?: number
+  donation?: number
 }
 
 export type Certificate =
@@ -95,6 +102,11 @@ export interface Collateral {
   collateralReturn: Array<Utxo>
 }
 
+export interface CommitteeMember {
+  credential: Credential
+  epoch: number
+}
+
 export interface Credential {
   credentialType: 'Key' | 'Script'
   hash: string
@@ -116,6 +128,20 @@ export interface DRep {
 export interface ExUnits {
   mem: number
   steps: number
+}
+
+export type GovAction =
+  | { kind: 'ParameterChange', prevGovActionId?: GovActionId, protocolParamUpdate: ProtocolParamUpdate, policyHash?: string }
+  | { kind: 'HardForkInitiation', prevGovActionId?: GovActionId, majorVersion: number, minorVersion: number }
+  | { kind: 'TreasuryWithdrawals', withdrawals: Array<RewardWithdrawal>, policyHash?: string }
+  | { kind: 'NoConfidence', prevGovActionId?: GovActionId }
+  | { kind: 'UpdateCommittee', prevGovActionId?: GovActionId, removedMembers: Array<Credential>, addedMembers: Array<CommitteeMember>, quorum: UnitInterval }
+  | { kind: 'NewConstitution', prevGovActionId?: GovActionId, constitutionAnchor: Anchor, guardrailScript?: string }
+  | { kind: 'Information' }
+
+export interface GovActionId {
+  transactionId: string
+  actionIndex: number
 }
 
 export interface Input {
@@ -151,6 +177,55 @@ export interface PoolParams {
   poolMetadataHash?: string
 }
 
+export interface ProposalProcedure {
+  deposit: number
+  rewardAccount: string
+  govAction: GovAction
+  anchor: Anchor
+}
+
+export interface ProtocolParamUpdate {
+  minfeeA?: number
+  minfeeB?: number
+  maxBlockBodySize?: number
+  maxTransactionSize?: number
+  maxBlockHeaderSize?: number
+  keyDeposit?: number
+  poolDeposit?: number
+  maximumEpoch?: number
+  desiredNumberOfStakePools?: number
+  poolPledgeInfluenceNumerator?: number
+  poolPledgeInfluenceDenominator?: number
+  expansionRateNumerator?: number
+  expansionRateDenominator?: number
+  treasuryGrowthRateNumerator?: number
+  treasuryGrowthRateDenominator?: number
+  minPoolCost?: number
+  adaPerUtxoByte?: number
+  costModelsJson?: string
+  executionCostsMemNumerator?: number
+  executionCostsMemDenominator?: number
+  executionCostsStepNumerator?: number
+  executionCostsStepDenominator?: number
+  maxTxExUnitsMem?: number
+  maxTxExUnitsSteps?: number
+  maxBlockExUnitsMem?: number
+  maxBlockExUnitsSteps?: number
+  maxValueSize?: number
+  collateralPercentage?: number
+  maxCollateralInputs?: number
+  poolVotingThresholds?: Array<UnitInterval>
+  drepVotingThresholds?: Array<UnitInterval>
+  minCommitteeSize?: number
+  committeeTermLimit?: number
+  governanceActionValidityPeriod?: number
+  governanceActionDeposit?: number
+  drepDeposit?: number
+  drepInactivityPeriod?: number
+  minfeeRefscriptCostPerByteNumerator?: number
+  minfeeRefscriptCostPerByteDenominator?: number
+}
+
 export interface Redeemer {
   tag: string
   index: number
@@ -164,6 +239,11 @@ export interface Relay {
   ipv4?: string
   ipv6?: string
   dnsName?: string
+}
+
+export interface RewardWithdrawal {
+  rewardAccount: string
+  amount: number
 }
 
 export interface SafeAddressResponse {
@@ -187,6 +267,11 @@ export interface ShelleyPart {
   pointer?: string
 }
 
+export interface UnitInterval {
+  numerator: number
+  denominator: number
+}
+
 export interface Utxo {
   txHash: string
   index: number
@@ -198,9 +283,18 @@ export interface Utxo {
   scriptRef?: string
 }
 
-export interface Withdrawal {
-  rawAddress: string
-  amount: number
+export type Voter =
+  | { kind: 'ConstitutionalCommitteeKey', hash: string }
+  | { kind: 'ConstitutionalCommitteeScript', hash: string }
+  | { kind: 'DRepKey', hash: string }
+  | { kind: 'DRepScript', hash: string }
+  | { kind: 'StakePoolKey', hash: string }
+
+export interface VotingProcedureEntry {
+  voter: Voter
+  govActionId: GovActionId
+  vote: 'No' | 'Yes' | 'Abstain'
+  anchor?: Anchor
 }
 
 export interface Witness {

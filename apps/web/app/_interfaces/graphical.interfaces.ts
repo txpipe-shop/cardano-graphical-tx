@@ -4,7 +4,7 @@ import type {
   Collateral,
   Datum,
   Metadata,
-  Withdrawal,
+  RewardWithdrawal as Withdrawal,
   Witnesses,
 } from "@laceanatomy/napi-pallas";
 import type Konva from "konva";

@@ -4,7 +4,7 @@ import type {
   Collateral,
   Metadata,
   Utxo,
-  Withdrawal,
+  RewardWithdrawal as Withdrawal,
   Witnesses,
 } from "@laceanatomy/napi-pallas";
 

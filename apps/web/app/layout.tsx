@@ -36,7 +36,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${ibmPlexSans.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="en"
+      className={`${ibmPlexSans.variable} ${jetbrainsMono.variable}`}
+    >
       {process.env.NODE_ENV === "production" &&
         process.env.NEXT_PUBLIC_GA_TRACKING_ID && (
           <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GA_TRACKING_ID} />

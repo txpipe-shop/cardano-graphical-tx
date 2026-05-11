@@ -2,7 +2,6 @@
 
 use std::{collections::HashMap, str::FromStr};
 
-use pallas::ledger::traverse::MultiEraTx;
 use pallas_network::{facades::PeerClient, miniprotocols::Point};
 
 #[macro_use]
@@ -11,6 +10,7 @@ extern crate napi_derive;
 mod address;
 mod blocks;
 mod certs;
+mod governance;
 mod tx;
 mod utils;
 
@@ -66,8 +66,8 @@ pub struct Metadata {
 
 #[derive(Default)]
 #[napi(object)]
-pub struct Withdrawal {
-  pub raw_address: String,
+pub struct RewardWithdrawal {
+  pub reward_account: String,
   pub amount: i64,
 }
 
@@ -128,12 +128,19 @@ pub struct CborResponse {
   pub validity_start: Option<i64>,
   pub ttl: Option<i64>,
   pub metadata: Vec<Metadata>,
-  pub withdrawals: Vec<Withdrawal>,
+  pub withdrawals: Vec<RewardWithdrawal>,
   pub certificates: Vec<certs::Certificate>,
   pub collateral: Collateral,
   pub witnesses: Witnesses,
   pub size: i64,
   pub cbor: Option<String>,
+  pub script_data_hash: Option<String>,
+  pub required_signers: Vec<String>,
+  pub network_id: Option<u8>,
+  pub voting_procedures: Vec<governance::VotingProcedureEntry>,
+  pub proposal_procedures: Vec<governance::ProposalProcedure>,
+  pub treasury_value: Option<i64>,
+  pub donation: Option<i64>,
 }
 
 #[derive(Default)]
@@ -150,46 +157,7 @@ pub struct SafeBlockCborResponse {
   pub error: String,
 }
 
-impl CborResponse {
-  fn new() -> Self {
-    Default::default()
-  }
 
-  fn with_cbor_attr(
-    self,
-    tx: MultiEraTx<'_>,
-    inputs: Vec<Input>,
-    reference_inputs: Vec<Input>,
-    outputs: Vec<Utxo>,
-    mints: Vec<Assets>,
-    metadata: Vec<Metadata>,
-    withdrawals: Vec<Withdrawal>,
-    certificates: Vec<certs::Certificate>,
-    collateral: Collateral,
-    witnesses: Witnesses,
-    cbor: Option<String>,
-  ) -> Self {
-    Self {
-      tx_hash: tx.hash().to_string(),
-      fee: tx.fee().map(|x| x as i64),
-      era: tx.era().to_string(),
-      validity_start: tx.validity_start().map(|v| v as i64),
-      ttl: tx.ttl().map(|v| v as i64),
-      inputs,
-      reference_inputs,
-      outputs,
-      mints,
-      scripts_successful: tx.is_valid(),
-      metadata,
-      withdrawals,
-      certificates,
-      collateral,
-      witnesses,
-      size: tx.size() as i64,
-      cbor,
-    }
-  }
-}
 
 impl SafeCborResponse {
   pub(crate) fn new() -> Self {
