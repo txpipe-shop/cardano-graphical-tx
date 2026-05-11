@@ -3,9 +3,7 @@ use crate::{
   SafeCborResponse, Utxo, Withdrawal, Witness, Witnesses,
 };
 use pallas::ledger::primitives::conway::DatumOption;
-use pallas::ledger::traverse::{
-  MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer,
-};
+use pallas::ledger::traverse::{MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer};
 use pallas_crypto::hash::Hasher;
 use pallas_primitives::conway::VKeyWitness;
 use std::collections::HashMap;
@@ -187,18 +185,47 @@ pub(crate) fn get_withdrawals(tx: &MultiEraTx<'_>) -> Vec<Withdrawal> {
   }
 }
 
-pub(crate) fn get_collaterals(tx: &MultiEraTx<'_>) -> Collateral {
-  Collateral {
+pub(crate) fn get_collaterals(tx: &MultiEraTx<'_>) -> Result<Collateral, String> {
+  let collateral_return = tx
+    .collateral_return()
+    .iter()
+    .enumerate()
+    .map(|(index, o)| -> Result<Utxo, String> {
+      let address = o
+        .address()
+        .map_err(|_| format!("Failed to parse output address at index {index}"))?;
+
+      Ok(Utxo {
+        tx_hash: tx.hash().to_string(),
+        index: index as i64,
+        bytes: hex::encode(o.encode()),
+        address: address.to_string(),
+        lovelace: o.value().coin() as i64,
+        datum: o.datum().map(|x: DatumOption| build_datum(x)),
+        script_ref: o
+          .script_ref()
+          .and_then(|x| x.encode_fragment().ok().map(hex::encode)),
+        assets: o
+          .value()
+          .assets()
+          .into_iter()
+          .map(|x| build_assets_with_same_policy(x))
+          .collect(),
+      })
+    })
+    .collect::<Result<Vec<Utxo>, String>>()?;
+  Ok(Collateral {
     total: tx.total_collateral().map(|x| x as i64),
-    collateral_return: tx
+    inputs: tx
       .collateral()
       .iter()
-      .map(|i| Input {
-        tx_hash: i.hash().to_string(),
-        index: i.index() as i64,
+      .map(|x| Input {
+        tx_hash: x.hash().to_string(),
+        index: x.index() as i64,
       })
       .collect(),
-  }
+    collateral_return,
+  })
 }
 
 fn build_witness(wit: &VKeyWitness) -> Witness {
@@ -280,7 +307,7 @@ pub(crate) fn parse_tx_from_multiera(
   let metadata = get_metadata(tx);
   let withdrawals = get_withdrawals(tx);
   let certificates = crate::certs::get_certificates(tx);
-  let collateral = get_collaterals(tx);
+  let collateral = get_collaterals(tx)?;
   let witnesses = get_witnesses(tx);
 
   let cbor = if include_cbor {
