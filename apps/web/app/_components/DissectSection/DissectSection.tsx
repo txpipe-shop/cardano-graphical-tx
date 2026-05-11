@@ -12,7 +12,7 @@ import type {
   Witnesses,
 } from "@laceanatomy/napi-pallas";
 import { Address } from "@laceanatomy/types";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { useUI } from "~/app/_contexts";
 import type { IGraphicalTransaction, IGraphicalUtxo } from "~/app/_interfaces";
@@ -44,6 +44,18 @@ const GROUP_TOPIC_KEY: Record<string, keyof typeof TOPICS | undefined> = {
 export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
   const { loading } = useUI();
   const [activeKey, setActiveKey] = useState<string>("");
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const toggleGroup = useCallback((group: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) next.delete(group);
+      else next.add(group);
+      return next;
+    });
+  }, []);
 
   const items = useMemo(() => {
     const normalInputs = tx.inputs.filter((i) => !i.isReferenceInput);
@@ -280,28 +292,38 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
       <Card className="shadow-none border border-border bg-surface flex-1 min-h-0">
         <CardBody className="flex flex-col gap-6 p-0 md:flex-row min-h-0">
           <div className="flex flex-col gap-3 border-r border-border min-w-[220px] max-w-[260px] overflow-y-auto p-4">
-            {[...grouped.entries()].map(([group, groupItems]) => (
-              <div key={group} className="flex flex-col gap-1">
-                <div className="text-xs font-semibold uppercase tracking-wide text-p-secondary px-1">
-                  {group} ({groupItems.length})
+            {[...grouped.entries()].map(([group, groupItems]) => {
+              const isCollapsed = collapsedGroups.has(group);
+              return (
+                <div key={group} className="flex flex-col gap-1">
+                  <button
+                    className="text-xs font-semibold uppercase tracking-wide text-p-secondary px-1 flex items-center gap-1 w-full text-left hover:text-p-primary transition-colors cursor-pointer"
+                    onClick={() => toggleGroup(group)}
+                  >
+                    <span className="inline-block w-3 flex-shrink-0 text-center leading-none">
+                      {isCollapsed ? "▸" : "▾"}
+                    </span>
+                    {group} ({groupItems.length})
+                  </button>
+                  {!isCollapsed &&
+                    groupItems.map((item) => {
+                      const isActive = item.key === (activeItem?.key ?? "");
+                      return (
+                        <Button
+                          key={item.key}
+                          size="sm"
+                          variant={isActive ? "solid" : "ghost"}
+                          color={isActive ? "primary" : "default"}
+                          className="justify-start font-mono text-xs min-w-0"
+                          onPress={() => setActiveKey(item.key)}
+                        >
+                          <span className="truncate">{item.label}</span>
+                        </Button>
+                      );
+                    })}
                 </div>
-                {groupItems.map((item) => {
-                  const isActive = item.key === (activeItem?.key ?? "");
-                  return (
-                    <Button
-                      key={item.key}
-                      size="sm"
-                      variant={isActive ? "solid" : "ghost"}
-                      color={isActive ? "primary" : "default"}
-                      className="justify-start font-mono text-xs min-w-0"
-                      onPress={() => setActiveKey(item.key)}
-                    >
-                      <span className="truncate">{item.label}</span>
-                    </Button>
-                  );
-                })}
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4 pt-4">
