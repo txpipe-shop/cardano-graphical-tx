@@ -3,8 +3,10 @@ import type {
   Certificate,
   Collateral,
   Metadata,
+  ProposalProcedure,
   Utxo,
   RewardWithdrawal as Withdrawal,
+  VotingProcedureEntry,
   Witnesses,
 } from "@laceanatomy/napi-pallas";
 
@@ -29,4 +31,12 @@ export interface ITransaction {
   collateral?: Collateral;
   witnesses?: Witnesses;
   size: number;
+  cbor?: string;
+  scriptDataHash?: string;
+  requiredSigners: string[];
+  networkId?: number;
+  votingProcedures: VotingProcedureEntry[];
+  proposalProcedures: ProposalProcedure[];
+  treasuryValue?: number;
+  donation?: number;
 }

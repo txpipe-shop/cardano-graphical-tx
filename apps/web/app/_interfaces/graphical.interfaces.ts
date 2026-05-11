@@ -4,7 +4,9 @@ import type {
   Collateral,
   Datum,
   Metadata,
+  ProposalProcedure,
   RewardWithdrawal as Withdrawal,
+  VotingProcedureEntry,
   Witnesses,
 } from "@laceanatomy/napi-pallas";
 import type Konva from "konva";
@@ -45,6 +47,14 @@ export interface IGraphicalTransaction {
   size: number;
   alias: string;
   warning?: string;
+  cbor?: string;
+  scriptDataHash?: string;
+  requiredSigners: string[];
+  networkId?: number;
+  votingProcedures: VotingProcedureEntry[];
+  proposalProcedures: ProposalProcedure[];
+  treasuryValue?: number;
+  donation?: number;
 }
 
 export interface IGraphicalUtxo {

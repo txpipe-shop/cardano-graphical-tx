@@ -101,6 +101,14 @@ export async function loadTxPageData(
     validityStart: analyzedCbor.validityStart,
     withdrawals: analyzedCbor.withdrawals,
     witnesses: analyzedCbor.witnesses,
+    cbor: analyzedCbor.cbor,
+    scriptDataHash: analyzedCbor.scriptDataHash,
+    requiredSigners: analyzedCbor.requiredSigners,
+    networkId: analyzedCbor.networkId,
+    votingProcedures: analyzedCbor.votingProcedures,
+    proposalProcedures: analyzedCbor.proposalProcedures,
+    treasuryValue: analyzedCbor.treasuryValue,
+    donation: analyzedCbor.donation,
   };
 
   return { tx, cardanoTx, cbor };
