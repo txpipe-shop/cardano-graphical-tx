@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-11T00:00:00.000Z",
+  "title": "Design System: Lace Anatomy",
+  "extensions": {
+    "colorMeta": {
+      "blueprint-blue": {
+        "role": "primary",
+        "displayName": "Blueprint Blue",
+        "canonical": "#4299e1",
+        "tonalRamp": ["#0a1a2e", "#15304d", "#1e466b", "#285c8a", "#3272a8", "#4299e1", "#6ab4ed", "#92caf4", "#bde0f9", "#ebf5fd"]
+      },
+      "blueprint-blue-hover": {
+        "role": "primary-hover",
+        "displayName": "Blueprint Blue Hover",
+        "canonical": "#3182ce",
+        "tonalRamp": ["#08182a", "#122e47", "#1b4566", "#245b85", "#2d72a4", "#3182ce", "#5ba2de", "#85bde9", "#afd7f2", "#eaf4fc"]
+      },
+      "drafting-table": {
+        "role": "neutral-bg",
+        "displayName": "Drafting Table",
+        "canonical": "#fafafa",
+        "tonalRamp": ["#1a1a1a", "#313131", "#5c5c5c", "#878787", "#b3b3b3", "#dedede", "#fafafa", "#fcfcfc", "#fdfdfd", "#ffffff"]
+      },
+      "tracing-paper": {
+        "role": "neutral-surface",
+        "displayName": "Tracing Paper",
+        "canonical": "#f3f4f6",
+        "tonalRamp": ["#18191a", "#2e3033", "#56595e", "#7f8389", "#a7abb4", "#d1d5db", "#f3f4f6", "#f6f7f8", "#f9f9fa", "#fcfcfd"]
+      },
+      "inkwell": {
+        "role": "neutral-text",
+        "displayName": "Inkwell",
+        "canonical": "#1f2937",
+        "tonalRamp": ["#06080c", "#0e131c", "#1b2331", "#1f2937", "#374151", "#4b5563", "#6b7280", "#9ca3af", "#d1d5db", "#f3f4f6"]
+      },
+      "smudge": {
+        "role": "neutral-secondary",
+        "displayName": "Smudge",
+        "canonical": "#6b7280",
+        "tonalRamp": ["#08090b", "#1b1d21", "#343740", "#4d515e", "#6b7280", "#8b92a0", "#a8afba", "#c4c9d0", "#e2e5e9", "#f3f4f6"]
+      },
+      "graphite-border": {
+        "role": "neutral-border",
+        "displayName": "Graphite Border",
+        "canonical": "#e5e7eb",
+        "tonalRamp": ["#151618", "#2b2d31", "#51555b", "#787d85", "#9ea4af", "#c5c9d1", "#e5e7eb", "#eaecf0", "#f0f2f4", "#f8f9fa"]
+      },
+      "red-alert-text": {
+        "role": "semantic-error",
+        "displayName": "Red Alert Text",
+        "canonical": "#f04d4d",
+        "tonalRamp": ["#2b0404", "#550707", "#800b0b", "#aa0e0e", "#d51212", "#f04d4d", "#f57777", "#f8a1a1", "#fbcbcb", "#fef5f5"]
+      },
+      "red-alert-bg": {
+        "role": "semantic-error-bg",
+        "displayName": "Red Alert Background",
+        "canonical": "#f48b8b",
+        "tonalRamp": ["#2b0808", "#550f0f", "#801717", "#aa1f1f", "#d52626", "#f48b8b", "#f7a8a8", "#fac3c3", "#fcdddd", "#fef8f8"]
+      },
+      "red-alert-border": {
+        "role": "semantic-error-border",
+        "displayName": "Red Alert Border",
+        "canonical": "#d93e3e",
+        "tonalRamp": ["#260404", "#4d0808", "#730c0c", "#9a1010", "#c11414", "#d93e3e", "#e46b6b", "#ee9898", "#f6c4c4", "#fdf4f4"]
+      },
+      "green-confirm-bg": {
+        "role": "semantic-success-bg",
+        "displayName": "Green Confirm Background",
+        "canonical": "#d1fae5",
+        "tonalRamp": ["#022213", "#054326", "#07653a", "#0a874d", "#0da960", "#d1fae5", "#defceb", "#ebfdf3", "#f5fef9", "#ffffff"]
+      },
+      "green-confirm-border": {
+        "role": "semantic-success-border",
+        "displayName": "Green Confirm Border",
+        "canonical": "#86efac",
+        "tonalRamp": ["#023014", "#045f28", "#068f3c", "#08be50", "#22e764", "#86efac", "#acf4c4", "#d2f8dc", "#e9fcf0", "#ffffff"]
+      },
+      "explorer-glow": {
+        "role": "context-explorer",
+        "displayName": "Explorer Glow",
+        "canonical": "#f5f3ff",
+        "tonalRamp": ["#121024", "#232045", "#353067", "#474088", "#5950aa", "#f5f3ff", "#f8f7ff", "#fbfaff", "#fdfcff", "#ffffff"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Main page headings. 'Lace Anatomy' header, 'About Us' homepage title." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles. Explorer section headers, 'See more about us'." },
+      "title": { "displayName": "Title", "purpose": "Card headings, PropBlock values, dissector sidebar section labels." },
+      "body": { "displayName": "Body", "purpose": "Paragraph text, descriptions, instruction copy. Capped at 65–75ch." },
+      "label": { "displayName": "Label", "purpose": "UI labels, stat headings, section tags. Mono font, uppercase tracking." },
+      "mono-data": { "displayName": "Mono Data", "purpose": "All blockchain data: hashes, addresses, CBOR, asset names, amounts." }
+    },
+    "shadows": [
+      {
+        "name": "card-lift",
+        "value": "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1)",
+        "purpose": "Single elevation level for interactive cards and header. Light mode only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-quint",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Default easing for state transitions (hover, focus, toggle). Exponential out, no bounce."
+      }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Button (Draw/Dissect)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action button: Draw, Dissect. Dimensional slab with heavy bottom border and shadow.",
+      "html": "<button class=\"ds-btn-primary\">DRAW</button>",
+      "css": ".ds-btn-primary { background: #4299e1; color: #fafafa; padding: 10px 24px; border: none; border-bottom: 8px solid #1e3a8a; border-radius: 8px 8px 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; font-weight: 500; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); transition: background 0.2s cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-primary:hover { background: #3182ce; } .ds-btn-primary:focus-visible { outline: 2px solid #4299e1; outline-offset: 2px; }"
+    },
+    {
+      "name": "Transaction Input",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "Full-width monospace search bar for entering CBOR or transaction hashes.",
+      "html": "<div class=\"ds-input-group\"><div class=\"ds-input-mode\"><span class=\"ds-mode-active\">CBOR</span><span class=\"ds-mode-inactive\">Hash</span></div><input class=\"ds-input-tx\" placeholder=\"Paste CBOR or transaction hash...\" /></div>",
+      "css": ".ds-input-group { width: 100%; } .ds-input-mode { display: flex; gap: 4px; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; } .ds-mode-active { background: #1f2937; color: #fafafa; padding: 4px 12px; border-radius: 6px; cursor: pointer; } .ds-mode-inactive { background: #e5e7eb; color: #6b7280; padding: 4px 12px; border-radius: 6px; cursor: pointer; } .ds-input-tx { width: 100%; padding: 8px 12px; background: #f3f4f6; color: #1f2937; border: 2px solid #e5e7eb; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; outline: none; transition: border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1); box-sizing: border-box; } .ds-input-tx:focus { border-color: #4299e1; }"
+    },
+    {
+      "name": "Card (Default)",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Structured container with dashed border for grouping content blocks.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-body\">Card content</div></div>",
+      "css": ".ds-card { background: #fafafa; border: 2px dashed #e5e7eb; border-radius: 8px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); font-family: 'IBM Plex Sans', sans-serif; } .ds-card-body { color: #1f2937; font-size: 1rem; line-height: 1.6; }"
+    },
+    {
+      "name": "Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Horizontal nav button in the sticky header. Pill-shaped with monospace label.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\">Transaction</a><a class=\"ds-nav-item ds-nav-active\">Explorer</a><a class=\"ds-nav-item\">Address</a></nav>",
+      "css": ".ds-nav { display: flex; gap: 8px; } .ds-nav-item { padding: 8px 16px; background: #f3f4f6; color: #1f2937; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 500; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); cursor: pointer; text-decoration: none; transition: background 0.2s cubic-bezier(0.22, 1, 0.36, 1); } .ds-nav-item:hover { background: #d1d5db; } .ds-nav-active { background: #1f2937; color: #fafafa; } .ds-nav-active:hover { background: #374151; }"
+    },
+    {
+      "name": "PropBlock",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Atomic key-value data display unit. Used throughout the dissector and explorer.",
+      "html": "<div class=\"ds-propblock\"><span class=\"ds-propblock-label\">Policy ID</span><span class=\"ds-propblock-value\">d5e6c3...f9e8</span></div>",
+      "css": ".ds-propblock { display: flex; flex-direction: column; gap: 6px; } .ds-propblock-label { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; } .ds-propblock-value { font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; font-weight: 500; color: #1f2937; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "PropBlock (Error/Empty)",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Red alert variant of PropBlock for missing or invalid data.",
+      "html": "<div class=\"ds-propblock-error\"><span class=\"ds-propblock-label\">Script Hash</span><span class=\"ds-propblock-value\">No data</span></div>",
+      "css": ".ds-propblock-error { background: #f48b8b; border: 2px dashed #d93e3e; border-radius: 8px; padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; } .ds-propblock-error .ds-propblock-label { color: #f04d4d; } .ds-propblock-error .ds-propblock-value { color: #f04d4d; }"
+    },
+    {
+      "name": "Section Wrapper",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Bordered blockquote wrapper that groups related PropBlocks into a named section.",
+      "html": "<blockquote class=\"ds-section\"><div class=\"ds-propblock\"><span class=\"ds-propblock-label\">Amount</span><span class=\"ds-propblock-value\">100,000,000</span></div></blockquote>",
+      "css": ".ds-section { border-left: 4px dashed #e5e7eb; padding: 16px 40px; margin: 0; font-family: 'IBM Plex Sans', sans-serif; }"
+    },
+    {
+      "name": "Explorer Token Pill",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "Colored tag for mint/burn/asset token labels in the explorer. Green for mint, red for burn, gray for default.",
+      "html": "<span class=\"ds-token-pill ds-token-mint\">MINT</span> <span class=\"ds-token-pill ds-token-burn\">BURN</span>",
+      "css": ".ds-token-pill { padding: 2px 8px; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; font-size: 0.625rem; font-weight: 500; border-width: 1px; border-style: solid; } .ds-token-mint { background: #d1fae5; color: #047857; border-color: #86efac; } .ds-token-burn { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; } .ds-token-default { background: #f9fafb; color: #6b7280; border-color: #e5e7eb; }"
+    },
+    {
+      "name": "Dot-Grid Canvas Background",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "The signature blueprint grid background pattern on the Konva canvas. A CSS radial-gradient creating a 40px dot grid.",
+      "html": "<div class=\"ds-canvas-bg\"></div>",
+      "css": ".ds-canvas-bg { width: 320px; height: 200px; background-color: transparent; background-image: radial-gradient(#222222 1px, transparent 0); background-size: 40px 40px; background-position: -19px -19px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Engineering Blueprint",
+    "overview": "Lace Anatomy is a developer tool built on the metaphor of an engineering blueprint: gridded canvas, schematic clarity, purposeful annotation. Every element is a tool, not decoration. The interface renders transaction data like a draftsman renders mechanical systems: structured views, labeled components, spatial relationships carrying meaning. The visual language is technical and data-dense but never cluttered. Monospace anchors the data layer; sans-serif carries the UI chrome. The color system uses a single blue accent against warm-neutral backgrounds, with semantic red/green/purple reserved for error, success, and the explorer context. Nothing glows, nothing animates without purpose. This system explicitly rejects old-school enterprise density and Web3 decoration. The interface should feel like it was built by developers for developers: confident, precise, and boring in the best way.",
+    "keyCharacteristics": [
+      "Blueprint grid canvas as the signature surface; dot-grid pattern on the grapher",
+      "Single blue accent carries action; neutrals carry structure; semantic colors stay quarantined to their domain",
+      "IBM Plex Sans for chrome, JetBrains Mono for data; no third font",
+      "Cards are containers, not decorations; borders are structural, not ornamental",
+      "Dark mode is an alternate drafting surface, not a different product"
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Blueprint Blue is used on ≤10% of any given screen. Buttons, links, active states. Its rarity is the point: if everything is blue, nothing is actionable.",
+        "section": "colors"
+      },
+      {
+        "name": "The Canvas Quarantine Rule",
+        "body": "Konva diagram colors (red, true blue, green, purple, yellow) never appear in the UI chrome. The canvas is a separate visual layer with its own color language. The two palettes do not blend.",
+        "section": "colors"
+      },
+      {
+        "name": "The Data Face Rule",
+        "body": "JetBrains Mono is the exclusive typeface for all blockchain data (hashes, addresses, CBOR, asset names, policy IDs, amounts). Never render a hash or address in a proportional font.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Scale Rule",
+        "body": "Hierarchy is conveyed through weight contrast, not size inflation. A 700-weight Display sits against a 400-weight Body with a 3:1 size ratio.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Surfaces are flat at rest. A single shadow-md appears only on interactive cards and buttons in light mode. Dark mode disables shadows entirely. If it looks like a 2014 Material Design app, the shadow vocabulary is too aggressive.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do render all blockchain data (hashes, addresses, CBOR, policy IDs, asset names) in JetBrains Mono.",
+      "Do use tabular-nums for any numerical column: amounts, indices, counts.",
+      "Do keep the canvas color vocabulary quarantined to the Konva layer.",
+      "Do use dashed borders for structural grouping (cards, sections) and solid borders for interactive edges (inputs, buttons).",
+      "Do let the dot-grid canvas background be the signature texture. It signals 'blueprint' without saying it.",
+      "Do prefer progressive disclosure: show the transaction at a glance, let developers drill into any UTxO or field."
+    ],
+    "donts": [
+      "Don't use old-school enterprise patterns: dense nested tables, beveled chrome, 90s-era button styling, Oracle/IBM-style sidebars with tree menus.",
+      "Don't use Web3 clichés: neon-on-black, glassmorphism, gradient text, animated grid backgrounds.",
+      "Don't apply Blueprint Blue to more than 10% of a screen's surface area. Its job is to say 'click here', not 'look at me'.",
+      "Don't mix Konva canvas colors into the UI chrome. Red is for output UTxO lines, not for UI accents.",
+      "Don't use side-stripe borders (border-left or border-right > 1px) as accent decoration. Full borders or nothing.",
+      "Don't nest cards inside cards. A card is a terminal container.",
+      "Don't reach for a modal first. The slide-out InfoPanel and fullscreen JSON view already provide inline/progressive alternatives."
+    ]
+  }
+}
