@@ -1,8 +1,8 @@
+use crate::governance;
 use crate::{
-  Asset, Assets, CborResponse, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
+  Asset, Assets, Bootstrap, CborResponse, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
   RewardWithdrawal, SafeCborResponse, Utxo, Witness, Witnesses,
 };
-use crate::governance;
 use pallas::ledger::primitives::conway::DatumOption;
 use pallas::ledger::traverse::{MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer};
 use pallas_crypto::hash::Hasher;
@@ -174,11 +174,9 @@ pub(crate) fn get_withdrawals(tx: &MultiEraTx<'_>) -> Vec<RewardWithdrawal> {
   match tx.withdrawals().as_alonzo() {
     Some(withdrawals) => withdrawals
       .iter()
-      .map(|(k, v)| {
-        RewardWithdrawal {
-          reward_account: k.to_string(),
-          amount: v.to_owned() as i64,
-        }
+      .map(|(k, v)| RewardWithdrawal {
+        reward_account: k.to_string(),
+        amount: v.to_owned() as i64,
       })
       .collect(),
     None => vec![],
@@ -293,12 +291,29 @@ pub(crate) fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
     plutus_v1_scripts: tx.plutus_v1_scripts().iter().map(hex::encode).collect(),
     plutus_v2_scripts: tx.plutus_v2_scripts().iter().map(hex::encode).collect(),
     plutus_v3_scripts: tx.plutus_v3_scripts().iter().map(hex::encode).collect(),
+    native_scripts: tx
+      .native_scripts()
+      .iter()
+      .map(|x| hex::encode(x.raw_cbor()))
+      .collect(),
+    bootstrap_witnesses: tx
+      .bootstrap_witnesses()
+      .iter()
+      .map(|x| Bootstrap {
+        public_key: hex::encode(x.public_key.as_slice()),
+        signature: hex::encode(x.signature.as_slice()),
+        chain_code: hex::encode(x.chain_code.as_slice()),
+        attributes: hex::encode(x.attributes.as_slice()),
+      })
+      .collect(),
   }
 }
 
 fn get_script_data_hash(tx: &MultiEraTx<'_>) -> Option<String> {
   match tx {
-    MultiEraTx::AlonzoCompatible(x, _) => x.transaction_body.script_data_hash.map(|h| h.to_string()),
+    MultiEraTx::AlonzoCompatible(x, _) => {
+      x.transaction_body.script_data_hash.map(|h| h.to_string())
+    }
     MultiEraTx::Babbage(x) => x.transaction_body.script_data_hash.map(|h| h.to_string()),
     MultiEraTx::Conway(x) => x.transaction_body.script_data_hash.map(|h| h.to_string()),
     _ => None,
@@ -337,13 +352,21 @@ fn get_proposal_procedures(tx: &MultiEraTx<'_>) -> Vec<governance::ProposalProce
 }
 
 fn get_treasury_value(tx: &MultiEraTx<'_>) -> Option<i64> {
-  tx.as_conway()
-    .and_then(|x| x.transaction_body.treasury_value.as_ref().map(|v| *v as i64))
+  tx.as_conway().and_then(|x| {
+    x.transaction_body
+      .treasury_value
+      .as_ref()
+      .map(|v| *v as i64)
+  })
 }
 
 fn get_donation(tx: &MultiEraTx<'_>) -> Option<i64> {
-  tx.as_conway()
-    .and_then(|x| x.transaction_body.donation.as_ref().map(|v| u64::from(v) as i64))
+  tx.as_conway().and_then(|x| {
+    x.transaction_body
+      .donation
+      .as_ref()
+      .map(|v| u64::from(v) as i64)
+  })
 }
 
 pub(crate) fn parse_tx_from_multiera(

@@ -89,6 +89,15 @@ pub struct Witness {
 
 #[derive(Default)]
 #[napi(object)]
+pub struct Bootstrap {
+  pub public_key: String,
+  pub signature: String,
+  pub chain_code: String,
+  pub attributes: String,
+}
+
+#[derive(Default)]
+#[napi(object)]
 pub struct ExUnits {
   pub mem: i64,
   pub steps: i64,
@@ -112,6 +121,8 @@ pub struct Witnesses {
   pub plutus_v1_scripts: Vec<String>,
   pub plutus_v2_scripts: Vec<String>,
   pub plutus_v3_scripts: Vec<String>,
+  pub native_scripts: Vec<String>,
+  pub bootstrap_witnesses: Vec<Bootstrap>,
 }
 
 #[derive(Default)]
@@ -156,8 +167,6 @@ pub struct SafeBlockCborResponse {
   pub cbor_res: Option<blocks::BlockCborResponse>,
   pub error: String,
 }
-
-
 
 impl SafeCborResponse {
   pub(crate) fn new() -> Self {

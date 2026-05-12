@@ -43,6 +43,13 @@ export interface BlockHeader {
   blockBodyHash?: string
 }
 
+export interface Bootstrap {
+  publicKey: string
+  signature: string
+  chainCode: string
+  attributes: string
+}
+
 export declare function cborParse(raw: string): SafeCborResponse
 
 export declare function cborParseBlock(raw: string): SafeBlockCborResponse
@@ -310,4 +317,6 @@ export interface Witnesses {
   plutusV1Scripts: Array<string>
   plutusV2Scripts: Array<string>
   plutusV3Scripts: Array<string>
+  nativeScripts: Array<string>
+  bootstrapWitnesses: Array<Bootstrap>
 }
