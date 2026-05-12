@@ -11,7 +11,6 @@ crate-type = ["cdylib", "lib"]
 anyhow = "1.0.79"
 hex = "0.4.3"
 jsonschema = "0.26.1"
-minicbor = "0.25.0"
 napi = { version = "3.0.0", features = ["async"] }
 napi-derive = "3.0.0"
 pallas = { version = "1.0.0" }

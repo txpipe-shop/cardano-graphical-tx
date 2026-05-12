@@ -114,6 +114,14 @@ pub struct Redeemer {
 
 #[derive(Default)]
 #[napi(object)]
+pub struct AuxiliaryScripts {
+  pub native_scripts: Vec<String>,
+  pub plutus_v1_scripts: Vec<String>,
+  // TODO: add plutus_v2_scripts and plutus_v3_scripts when pallas-traverse exposes aux_plutus_v2/3_scripts()
+}
+
+#[derive(Default)]
+#[napi(object)]
 pub struct Witnesses {
   pub vkey_witnesses: Vec<Witness>,
   pub redeemers: Vec<Redeemer>,
@@ -143,6 +151,8 @@ pub struct CborResponse {
   pub certificates: Vec<certs::Certificate>,
   pub collateral: Collateral,
   pub witnesses: Witnesses,
+  pub auxiliary_scripts: AuxiliaryScripts,
+  pub auxiliary_data_hash: Option<String>,
   pub size: i64,
   pub cbor: Option<String>,
   pub script_data_hash: Option<String>,

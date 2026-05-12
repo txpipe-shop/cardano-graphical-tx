@@ -1,7 +1,7 @@
 use crate::governance;
 use crate::{
-  Asset, Assets, Bootstrap, CborResponse, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
-  RewardWithdrawal, SafeCborResponse, Utxo, Witness, Witnesses,
+  Asset, Assets, AuxiliaryScripts, Bootstrap, CborResponse, Collateral, Datum, ExUnits, Input,
+  Metadata, Redeemer, RewardWithdrawal, SafeCborResponse, Utxo, Witness, Witnesses,
 };
 use pallas::ledger::primitives::conway::DatumOption;
 use pallas::ledger::traverse::{MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer};
@@ -309,6 +309,17 @@ pub(crate) fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
   }
 }
 
+fn get_auxiliary_scripts(tx: &MultiEraTx<'_>) -> AuxiliaryScripts {
+  AuxiliaryScripts {
+    native_scripts: tx
+      .aux_native_scripts()
+      .iter()
+      .map(|s| hex::encode(pallas_codec::minicbor::to_vec(s).unwrap()))
+      .collect(),
+    plutus_v1_scripts: tx.aux_plutus_v1_scripts().iter().map(hex::encode).collect(),
+  }
+}
+
 fn get_script_data_hash(tx: &MultiEraTx<'_>) -> Option<String> {
   match tx {
     MultiEraTx::AlonzoCompatible(x, _) => {
@@ -316,6 +327,17 @@ fn get_script_data_hash(tx: &MultiEraTx<'_>) -> Option<String> {
     }
     MultiEraTx::Babbage(x) => x.transaction_body.script_data_hash.map(|h| h.to_string()),
     MultiEraTx::Conway(x) => x.transaction_body.script_data_hash.map(|h| h.to_string()),
+    _ => None,
+  }
+}
+
+fn get_auxiliary_data_hash(tx: &MultiEraTx<'_>) -> Option<String> {
+  match tx {
+    MultiEraTx::AlonzoCompatible(x, _) => {
+      x.transaction_body.auxiliary_data_hash.as_ref().map(|h| h.to_string())
+    }
+    MultiEraTx::Babbage(x) => x.transaction_body.auxiliary_data_hash.as_ref().map(|h| h.to_string()),
+    MultiEraTx::Conway(x) => x.transaction_body.auxiliary_data_hash.as_ref().map(|h| h.to_string()),
     _ => None,
   }
 }
@@ -382,6 +404,8 @@ pub(crate) fn parse_tx_from_multiera(
   let certificates = crate::certs::get_certificates(tx);
   let collateral = get_collaterals(tx)?;
   let witnesses = get_witnesses(tx);
+  let auxiliary_scripts = get_auxiliary_scripts(tx);
+  let auxiliary_data_hash = get_auxiliary_data_hash(tx);
 
   let cbor = if include_cbor {
     Some(hex::encode(tx.encode()))
@@ -405,6 +429,8 @@ pub(crate) fn parse_tx_from_multiera(
     certificates,
     collateral,
     witnesses,
+    auxiliary_scripts,
+    auxiliary_data_hash,
     size: tx.size() as i64,
     cbor,
     script_data_hash: get_script_data_hash(tx),

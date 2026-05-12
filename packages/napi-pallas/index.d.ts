@@ -25,6 +25,11 @@ export interface Assets {
   assetsPolicy: Array<Asset>
 }
 
+export interface AuxiliaryScripts {
+  nativeScripts: Array<string>
+  plutusV1Scripts: Array<string>
+}
+
 export interface BlockCborResponse {
   header: BlockHeader
   transactions: Array<CborResponse>
@@ -70,6 +75,8 @@ export interface CborResponse {
   certificates: Array<Certificate>
   collateral: Collateral
   witnesses: Witnesses
+  auxiliaryScripts: AuxiliaryScripts
+  auxiliaryDataHash?: string
   size: number
   cbor?: string
   scriptDataHash?: string
