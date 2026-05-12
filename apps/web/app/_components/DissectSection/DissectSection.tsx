@@ -274,12 +274,13 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           {tx.scriptDataHash && (
             <div className="flex items-baseline gap-1.5 flex-shrink-0">
               <span className="text-xs font-semibold uppercase tracking-wide text-p-secondary">
-                Script Data
+                Script Data Hash
               </span>
               <div className="flex items-center gap-1">
                 <Tooltip content={tx.scriptDataHash} delay={300} size="sm">
                   <span className="font-mono text-sm font-medium text-p-primary cursor-default">
                     {tx.scriptDataHash.slice(0, 10)}...
+                    {tx.scriptDataHash.slice(-10)}
                   </span>
                 </Tooltip>
                 <CopyButton text={tx.scriptDataHash} size={12} />
