@@ -64,9 +64,14 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
 interface UTxOsColumnProps {
   tx: cardano.Tx;
   column: "inputs" | "outputs";
+  highlightAddress?: cardano.UTxO["address"];
 }
 
-function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
+function UTxOsColumn({
+  tx,
+  column,
+  highlightAddress,
+}: Readonly<UTxOsColumnProps>) {
   const utxos = column === "inputs" ? tx.inputs : tx.outputs;
 
   const title =
@@ -78,8 +83,16 @@ function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
     <div>
       <h4 className="semibold mb-2 text-sm text-p-secondary">{title}</h4>
       <div className="space-y-2">
-        {utxos.map((utxo, i) => (
-          <div className="rounded-lg bg-explorer-row p-2" key={i}>
+        {utxos.map((utxo) => (
+          <div
+            className={`rounded-lg bg-explorer-row p-2 ${
+              highlightAddress !== undefined &&
+              utxo.address === highlightAddress
+                ? "ring-1 ring-accent-blue"
+                : ""
+            }`}
+            key={`${utxo.outRef.hash}#${utxo.outRef.index.toString()}`}
+          >
             <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between">
               <span className="text-sm font-medium">
                 {formatAda(utxo.coin)}
@@ -113,14 +126,30 @@ function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
   );
 }
 
-export function TxRow({ tx, chain }: { tx: cardano.Tx; chain: string }) {
+export function TxRow({
+  tx,
+  chain,
+  highlightAddress,
+}: Readonly<{
+  tx: cardano.Tx;
+  chain: string;
+  highlightAddress?: cardano.UTxO["address"];
+}>) {
   return (
     <Card className="mb-4 border-2 border-dashed border-border shadow-md bg-background">
       <CardBody className="p-0">
         <TxRowHeader tx={tx} chain={chain} />
         <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-          <UTxOsColumn tx={tx} column="inputs" />
-          <UTxOsColumn tx={tx} column="outputs" />
+          <UTxOsColumn
+            tx={tx}
+            column="inputs"
+            highlightAddress={highlightAddress}
+          />
+          <UTxOsColumn
+            tx={tx}
+            column="outputs"
+            highlightAddress={highlightAddress}
+          />
         </div>
       </CardBody>
     </Card>
