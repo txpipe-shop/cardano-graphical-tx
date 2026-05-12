@@ -7,7 +7,9 @@ import type {
   Utxo,
 } from "@laceanatomy/napi-pallas";
 import {
+  Address,
   assetNameFromUnit,
+  cardano,
   DatumType,
   Hash,
   HexString,
@@ -15,14 +17,13 @@ import {
   hexToBech32,
   policyFromUnit,
   Unit,
-  type cardano,
 } from "@laceanatomy/types";
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
 import { type Dispatch, type SetStateAction } from "react";
 import toast from "react-hot-toast";
 import type {
-  Address,
+  Address as GraphicalAddress,
   IGraphicalTransaction,
   IGraphicalUtxo,
   ITransaction,
@@ -64,10 +65,7 @@ interface IGenerateUTXO extends Utxo {
  * @returns - An object containing the bech32|hex address, the header type, the network type,
  * the payment part, and the kind of address (key or script).
  */
-const formatAddress = (
-  address: string,
-  prefix?: string,
-): Address | undefined => {
+const formatAddress = (address: string): GraphicalAddress | undefined => {
   if (isEmpty(address)) return undefined;
   let hexAddress = "";
   if (isHexa(address)) {
@@ -84,11 +82,13 @@ const formatAddress = (
   const netType = hexAddress[1];
   if (!headerType || !netType) return undefined;
 
+  const normalizedAddress = Address(address);
+  const prefix = cardano.addressToBech32Prefix(normalizedAddress);
+
   return {
-    bech32:
-      isHexa(address) && prefix
-        ? hexToBech32(HexString(address), prefix)
-        : address,
+    bech32: prefix
+      ? hexToBech32(HexString(normalizedAddress), prefix)
+      : address,
     headerType,
     netType,
     payment: hexAddress.slice(2, POLICY_LENGTH),

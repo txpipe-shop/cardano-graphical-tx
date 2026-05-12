@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import { useConfigs } from "~/app/_contexts";
 import { getU5CProviderWeb, resolveDevnetPort } from "~/app/_utils";
 import {
-  getAddressPrefix,
   getNetworkConfig,
   NETWORK,
   type Network,
@@ -15,7 +14,6 @@ import {
 export interface UseNetworkReturn {
   config: NetworkConfig;
   network: Network;
-  addressPrefix: string;
   devnetPort: number;
   getU5CProvider: () => U5CProvider | null;
   isProviderAvailable: boolean;
@@ -30,7 +28,6 @@ export function useNetwork(): UseNetworkReturn {
   );
 
   const config = useMemo(() => getNetworkConfig(network), [network]);
-  const addressPrefix = useMemo(() => getAddressPrefix(network), [network]);
 
   const getU5CProvider = useMemo(
     () => () => {
@@ -49,7 +46,6 @@ export function useNetwork(): UseNetworkReturn {
   return {
     config,
     network,
-    addressPrefix,
     devnetPort,
     getU5CProvider,
     isProviderAvailable,

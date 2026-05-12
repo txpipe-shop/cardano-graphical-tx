@@ -99,7 +99,7 @@ declare module "cbor-core" {
     createUint64(value: number | bigint): CborInt;
     createInt128(value: number | bigint): CborInt;
     createUint128(value: number | bigint): CborInt;
-    new(): never;
+    new (): never;
   }
 
   interface CborFloat extends CborObject {
@@ -111,7 +111,7 @@ declare module "cbor-core" {
     createExtendedFloat(value: number): CborFloat | CborNonFinite;
     createFloat32(value: number): CborFloat;
     createFloat16(value: number): CborFloat;
-    new(): never;
+    new (): never;
   }
 
   interface CborString extends CborObject {
@@ -119,7 +119,7 @@ declare module "cbor-core" {
   }
   interface CborStringConstructor {
     (value: string): CborString;
-    new(): never;
+    new (): never;
   }
 
   interface CborBytes extends CborObject {
@@ -127,7 +127,7 @@ declare module "cbor-core" {
   }
   interface CborBytesConstructor {
     (value: Uint8Array): CborBytes;
-    new(): never;
+    new (): never;
   }
 
   interface CborBoolean extends CborObject {
@@ -135,7 +135,7 @@ declare module "cbor-core" {
   }
   interface CborBooleanConstructor {
     (value: boolean): CborBoolean;
-    new(): never;
+    new (): never;
   }
 
   interface CborNull extends CborObject {
@@ -143,7 +143,7 @@ declare module "cbor-core" {
   }
   interface CborNullConstructor {
     (): CborNull;
-    new(): never;
+    new (): never;
   }
 
   interface CborArray extends CborObject {
@@ -158,7 +158,7 @@ declare module "cbor-core" {
   }
   interface CborArrayConstructor {
     (): CborArray;
-    new(): never;
+    new (): never;
   }
 
   interface CborMap extends CborObject {
@@ -167,8 +167,15 @@ declare module "cbor-core" {
     getKeys(): CborObject[];
     remove(key: CborObject): CborObject;
     containsKey(key: CborObject): boolean;
-    update(key: CborObject, value: CborObject, existing: boolean): CborObject | null;
-    getConditionally(key: CborObject, defaultObject: CborObject | null): CborObject | null;
+    update(
+      key: CborObject,
+      value: CborObject,
+      existing: boolean,
+    ): CborObject | null;
+    getConditionally(
+      key: CborObject,
+      defaultObject: CborObject | null,
+    ): CborObject | null;
     merge(map: CborMap): this;
     setDynamic(dynamic: (map: CborMap) => CborMap): this;
     setSortingMode(preSortedKeys: boolean): this;
@@ -176,7 +183,7 @@ declare module "cbor-core" {
   }
   interface CborMapConstructor {
     (): CborMap;
-    new(): never;
+    new (): never;
   }
 
   interface CborTag extends CborObject {
@@ -192,7 +199,7 @@ declare module "cbor-core" {
     readonly TAG_DATE_TIME: bigint;
     readonly TAG_EPOCH_TIME: bigint;
     readonly TAG_COTX: bigint;
-    new(): never;
+    new (): never;
   }
 
   interface CborSimple extends CborObject {
@@ -200,7 +207,7 @@ declare module "cbor-core" {
   }
   interface CborSimpleConstructor {
     (value: number): CborSimple;
-    new(): never;
+    new (): never;
   }
 
   interface CborNonFinite extends CborObject {
@@ -217,7 +224,7 @@ declare module "cbor-core" {
   interface CborNonFiniteConstructor {
     (value: bigint): CborNonFinite;
     createPayload(payload: bigint): CborNonFinite;
-    new(): never;
+    new (): never;
   }
 
   // ============================================================
@@ -313,7 +320,11 @@ declare module "cbor-core" {
     static compareArrays(a: Uint8Array, b: Uint8Array): number;
 
     // -- Date / time creators --
-    static createDateTime(instant: Date, millis: boolean, utc: boolean): CborString;
+    static createDateTime(
+      instant: Date,
+      millis: boolean,
+      utc: boolean,
+    ): CborString;
     static createEpochTime(instant: Date, millis: boolean): CborInt | CborFloat;
   }
 

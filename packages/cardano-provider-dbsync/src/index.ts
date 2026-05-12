@@ -19,7 +19,7 @@ import {
   type TxReq
 } from '@laceanatomy/provider-core';
 import type { Cardano } from '@laceanatomy/types';
-import { cardano, Hash, HexString, hexToBech32, isBase58, Unit } from '@laceanatomy/types';
+import { Address, cardano, Hash, HexString, hexToBech32, isBase58, Unit } from '@laceanatomy/types';
 import assert from 'assert';
 import type { Pool, PoolClient } from 'pg';
 import { mapTx, mapUtxo, mapPool } from './mappers.js';
@@ -63,8 +63,10 @@ export class DbSyncProvider implements ChainProvider<cardano.UTxO, cardano.Tx, C
    * If address is in base58 format, return as it is (Byron format).
    * Otherwise return in bech32 format.
    */
-  private normalizeAddress(address: string, prefix: string): string {
-    return isBase58(address) ? address : hexToBech32(HexString(address), prefix);
+  private normalizeAddress(address: string, _prefix: string): string {
+    // TODO: remove previous prefix
+    const prefix = cardano.addressToBech32Prefix(Address(address));
+    return prefix ? hexToBech32(HexString(address), prefix) : address;
   }
 
   async readTip(): Promise<TipRes> {

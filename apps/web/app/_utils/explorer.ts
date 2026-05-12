@@ -1,17 +1,15 @@
 import {
   type Address,
+  cardano,
   HexString,
   hexToBech32,
-  isBase58,
 } from "@laceanatomy/types";
 import { DEFAULT_DEVNET_PORT } from "./constants";
 
-export function normalizeAddress(
-  address: Address | undefined,
-  prefix: string,
-): string {
+export function normalizeAddress(address: Address | undefined): string {
   if (!address) return "No address found";
-  return isBase58(address) ? address : hexToBech32(HexString(address), prefix);
+  const prefix = cardano.addressToBech32Prefix(address);
+  return prefix ? hexToBech32(HexString(address), prefix) : address;
 }
 
 export function formatSeconds(s?: number): string {

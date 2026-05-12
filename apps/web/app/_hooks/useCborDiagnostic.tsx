@@ -20,7 +20,9 @@ function tryDiagnose(hex: string): string {
   return typeof diag === "string" ? diag : JSON.stringify(diag, null, 2);
 }
 
-export function useCborDiagnostic(cbor: string | null | undefined): CborEditorState {
+export function useCborDiagnostic(
+  cbor: string | null | undefined,
+): CborEditorState {
   const [cborText, setCborText] = useState("");
   const [diagnosticText, setDiagnosticText] = useState("");
   const [decodeError, setDecodeError] = useState<string | null>(null);
@@ -41,7 +43,9 @@ export function useCborDiagnostic(cbor: string | null | undefined): CborEditorSt
       setDiagnosticText(tryDiagnose(cbor));
     } catch (e) {
       setDiagnosticText(
-        e instanceof Error ? `Diagnostic error: ${e.message}` : "Unknown diagnostic error",
+        e instanceof Error
+          ? `Diagnostic error: ${e.message}`
+          : "Unknown diagnostic error",
       );
     }
   }, [cbor]);

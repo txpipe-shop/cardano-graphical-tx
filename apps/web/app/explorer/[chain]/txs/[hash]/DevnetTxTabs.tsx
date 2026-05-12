@@ -51,7 +51,6 @@ export default function DevnetTxTabs({ hash, tab }: DevnetTxTabsProps) {
           provider,
           hashValue,
           parseCborViaApi,
-          NETWORK.DEVNET,
         );
 
         if (!isActive) return;
