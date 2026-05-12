@@ -101,6 +101,8 @@ export async function loadTxPageData(
     validityStart: analyzedCbor.validityStart,
     withdrawals: analyzedCbor.withdrawals,
     witnesses: analyzedCbor.witnesses,
+    auxiliaryScripts: analyzedCbor.auxiliaryScripts,
+    auxiliaryDataHash: analyzedCbor.auxiliaryDataHash,
     cbor: analyzedCbor.cbor,
     scriptDataHash: analyzedCbor.scriptDataHash,
     requiredSigners: analyzedCbor.requiredSigners,

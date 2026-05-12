@@ -1,5 +1,6 @@
 import type {
   Assets,
+  AuxiliaryScripts,
   Certificate,
   Collateral,
   Metadata,
@@ -30,6 +31,8 @@ export interface ITransaction {
   certificates?: Certificate[];
   collateral?: Collateral;
   witnesses?: Witnesses;
+  auxiliaryScripts: AuxiliaryScripts;
+  auxiliaryDataHash?: string;
   size: number;
   cbor?: string;
   scriptDataHash?: string;

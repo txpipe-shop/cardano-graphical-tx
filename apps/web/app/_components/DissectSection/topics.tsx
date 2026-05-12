@@ -37,6 +37,8 @@ const TOPICS = {
     "Votes cast by governance actors (DReps, SPOs, Constitutional Committee) on governance actions. Part of CIP-1694.",
   proposal_procedures:
     "Governance action proposals included in this transaction. Each proposal specifies a gov action, deposit, and reward account.",
+  auxiliary_scripts:
+    "Scripts attached to the auxiliary data section of the transaction. These are distinct from witness-set scripts and appear in Shelley MA and Alonzo+ era auxiliary data. Includes native scripts and Plutus V1 scripts.",
 };
 
 export default TOPICS;

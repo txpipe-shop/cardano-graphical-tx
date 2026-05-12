@@ -3,6 +3,7 @@
 import { Button, Card, CardBody, Tooltip } from "@heroui/react";
 import type {
   Assets,
+  Bootstrap,
   Certificate,
   Collateral as CollateralType,
   Metadata,
@@ -39,6 +40,7 @@ const GROUP_TOPIC_KEY: Record<string, keyof typeof TOPICS | undefined> = {
   "Required Signers": "required_signers",
   "Voting Procedures": "voting_procedures",
   "Proposal Procedures": "proposal_procedures",
+  "Auxiliary Scripts": "auxiliary_scripts",
 };
 
 export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
@@ -71,6 +73,12 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
       plutusV1Scripts: [],
       plutusV2Scripts: [],
       plutusV3Scripts: [],
+      nativeScripts: [],
+      bootstrapWitnesses: [],
+    };
+    const aux = tx.auxiliaryScripts ?? {
+      nativeScripts: [],
+      plutusV1Scripts: [],
     };
 
     const result: SidebarItem[] = [];
@@ -172,7 +180,59 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
           content: <PlutusDetail d={d} />,
         });
       });
+      if (wit.plutusV1Scripts.length > 0)
+        result.push({
+          group: "Witnesses",
+          key: "witness-plutus-v1",
+          label: `Plutus V1 (${wit.plutusV1Scripts.length})`,
+          content: <ScriptList items={wit.plutusV1Scripts} label="Plutus V1" />,
+        });
+      if (wit.plutusV2Scripts.length > 0)
+        result.push({
+          group: "Witnesses",
+          key: "witness-plutus-v2",
+          label: `Plutus V2 (${wit.plutusV2Scripts.length})`,
+          content: <ScriptList items={wit.plutusV2Scripts} label="Plutus V2" />,
+        });
+      if (wit.plutusV3Scripts.length > 0)
+        result.push({
+          group: "Witnesses",
+          key: "witness-plutus-v3",
+          label: `Plutus V3 (${wit.plutusV3Scripts.length})`,
+          content: <ScriptList items={wit.plutusV3Scripts} label="Plutus V3" />,
+        });
+      if ((wit.nativeScripts?.length ?? 0) > 0)
+        result.push({
+          group: "Witnesses",
+          key: "witness-native-scripts",
+          label: `Native Scripts (${wit.nativeScripts!.length})`,
+          content: (
+            <ScriptList items={wit.nativeScripts!} label="Native Script" />
+          ),
+        });
+      if ((wit.bootstrapWitnesses?.length ?? 0) > 0)
+        result.push({
+          group: "Witnesses",
+          key: "witness-bootstrap",
+          label: `Bootstrap (${wit.bootstrapWitnesses!.length})`,
+          content: <BootstrapDetail items={wit.bootstrapWitnesses!} />,
+        });
     }
+
+    if (aux.nativeScripts.length > 0)
+      result.push({
+        group: "Auxiliary Scripts",
+        key: "aux-native-scripts",
+        label: `Native (${aux.nativeScripts.length})`,
+        content: <ScriptList items={aux.nativeScripts} label="Native Script" />,
+      });
+    if (aux.plutusV1Scripts.length > 0)
+      result.push({
+        group: "Auxiliary Scripts",
+        key: "aux-plutus-v1",
+        label: `Plutus V1 (${aux.plutusV1Scripts.length})`,
+        content: <ScriptList items={aux.plutusV1Scripts} label="Plutus V1" />,
+      });
 
     const signers = tx.requiredSigners ?? [];
     if (signers.length > 0) {
@@ -260,11 +320,9 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             {tx.scriptsSuccessful ? "SCRIPTS OK" : "SCRIPTS FAIL"}
           </span>
         </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 md:gap-x-6 md:gap-y-2 flex-shrink-0 md:ml-auto">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 md:gap-x-6 md:gap-y-2 md:ml-auto">
           <Stat label="Fee" value={formatAda(tx.fee)} suffix="₳" />
           <Stat label="Size" value={`${tx.size}`} suffix="B" />
-          <Stat label="Inputs" value={`${normalInputs.length}`} />
-          <Stat label="Outputs" value={`${tx.outputs.length}`} />
           {tx.blockHeight !== undefined && (
             <Stat label="Block height" value={`${tx.blockHeight.toFixed(0)}`} />
           )}
@@ -284,6 +342,22 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
                   </span>
                 </Tooltip>
                 <CopyButton text={tx.scriptDataHash} size={12} />
+              </div>
+            </div>
+          )}
+          {tx.auxiliaryDataHash && (
+            <div className="flex items-baseline gap-1.5 flex-shrink-0">
+              <span className="text-xs font-semibold uppercase tracking-wide text-p-secondary">
+                Aux Data Hash
+              </span>
+              <div className="flex items-center gap-1">
+                <Tooltip content={tx.auxiliaryDataHash} delay={300} size="sm">
+                  <span className="font-mono text-sm font-medium text-p-primary cursor-default">
+                    {tx.auxiliaryDataHash.slice(0, 10)}...
+                    {tx.auxiliaryDataHash.slice(-10)}
+                  </span>
+                </Tooltip>
+                <CopyButton text={tx.auxiliaryDataHash} size={12} />
               </div>
             </div>
           )}
@@ -709,6 +783,74 @@ function RedeemerDetail({ r }: { r: Witnesses["redeemers"][number] }) {
   );
 }
 
+function ScriptList({ items, label }: { items: string[]; label: string }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="space-y-2">
+      {items.map((script, i) => (
+        <div
+          key={i}
+          className="border border-border bg-surface rounded overflow-hidden"
+        >
+          <div className="px-4 py-2 bg-explorer-row border-b border-border flex items-center gap-2">
+            <span className="font-mono text-xs font-bold text-p-primary">
+              {label} #{i}
+            </span>
+          </div>
+          <div className="p-4">
+            <div className="flex items-start gap-2">
+              <span className="font-mono text-xs break-all flex-1 min-w-0 leading-relaxed">
+                {script}
+              </span>
+              <CopyButton text={script} size={14} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BootstrapDetail({ items }: { items: Bootstrap[] }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="space-y-2">
+      {items.map((bw, i) => (
+        <div
+          key={i}
+          className="border border-border bg-surface rounded overflow-hidden"
+        >
+          <div className="px-4 py-2 bg-explorer-row border-b border-border flex items-center gap-2">
+            <span className="font-mono text-xs font-bold text-p-primary">
+              Bootstrap #{i}
+            </span>
+          </div>
+          <div className="divide-y divide-border/50">
+            <HexRow label="Public Key" value={bw.publicKey} />
+            <HexRow label="Signature" value={bw.signature} />
+            <HexRow label="Chain Code" value={bw.chainCode} />
+            <HexRow label="Attributes" value={bw.attributes} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function HexRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-4 px-4 py-3">
+      <span className="text-xs font-semibold uppercase tracking-wide text-p-secondary w-24 flex-shrink-0">
+        {label}
+      </span>
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <span className="font-mono text-sm break-all">{value}</span>
+        <CopyButton text={value} size={12} />
+      </div>
+    </div>
+  );
+}
+
 function PlutusDetail({ d }: { d: Witnesses["plutusData"][number] }) {
   return (
     <div className="space-y-3">
@@ -758,13 +900,12 @@ function VotingProcedureDetail({ vp }: { vp: VotingProcedureEntry }) {
       <div className="flex items-center gap-2">
         <span className="font-mono text-sm font-bold">{vp.voter.kind}</span>
         <span
-          className={`text-xs font-bold font-mono px-2 py-0.5 rounded ${
-            vp.vote === "Yes"
+          className={`text-xs font-bold font-mono px-2 py-0.5 rounded ${vp.vote === "Yes"
               ? "bg-green-500/10 text-green-600"
               : vp.vote === "No"
                 ? "bg-red-500/10 text-red-600"
                 : "bg-yellow-500/10 text-yellow-600"
-          }`}
+            }`}
         >
           {vp.vote}
         </span>

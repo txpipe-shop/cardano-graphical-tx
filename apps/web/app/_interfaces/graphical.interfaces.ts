@@ -1,5 +1,6 @@
 import type {
   Assets,
+  AuxiliaryScripts,
   Certificate,
   Collateral,
   Datum,
@@ -44,6 +45,8 @@ export interface IGraphicalTransaction {
   certificates?: Certificate[];
   collateral?: Collateral;
   witnesses?: Witnesses;
+  auxiliaryScripts: AuxiliaryScripts;
+  auxiliaryDataHash?: string;
   size: number;
   alias: string;
   warning?: string;
