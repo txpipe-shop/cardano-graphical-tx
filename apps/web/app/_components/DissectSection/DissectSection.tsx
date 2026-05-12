@@ -305,8 +305,6 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     setActiveKey(items[0].key);
   }
 
-  const normalInputs = tx.inputs.filter((i) => !i.isReferenceInput);
-
   return (
     <div className="flex flex-col min-h-0 w-full">
       <div className="flex flex-col md:flex-row md:items-center gap-4 pb-4 mb-4 border-b border-border flex-shrink-0">
@@ -900,12 +898,13 @@ function VotingProcedureDetail({ vp }: { vp: VotingProcedureEntry }) {
       <div className="flex items-center gap-2">
         <span className="font-mono text-sm font-bold">{vp.voter.kind}</span>
         <span
-          className={`text-xs font-bold font-mono px-2 py-0.5 rounded ${vp.vote === "Yes"
+          className={`text-xs font-bold font-mono px-2 py-0.5 rounded ${
+            vp.vote === "Yes"
               ? "bg-green-500/10 text-green-600"
               : vp.vote === "No"
                 ? "bg-red-500/10 text-red-600"
                 : "bg-yellow-500/10 text-yellow-600"
-            }`}
+          }`}
         >
           {vp.vote}
         </span>
