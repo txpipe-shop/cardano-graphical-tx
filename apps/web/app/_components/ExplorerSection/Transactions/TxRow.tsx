@@ -3,10 +3,11 @@ import { Button, Card, CardBody } from "@heroui/react";
 import type { cardano, Unit } from "@laceanatomy/types";
 import Link from "next/link";
 import { ROUTES } from "~/app/_utils";
-import { formatAda, formatSeconds } from "~/app/_utils/explorer";
+import { formatAda } from "~/app/_utils/explorer";
 import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
+import DateViewer from "../DateViewer";
 import ClockIcon from "../Icons/ClockIcon";
 import TokenPill from "../TokenPill";
 
@@ -30,7 +31,7 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
 
       <div className="flex items-center gap-2 text-sm text-p-secondary">
         <ClockIcon size={14} />
-        {formatSeconds(tx.createdAt)}
+        <DateViewer timestamp={tx.createdAt} className="text-p-secondary" />
       </div>
 
       <div className="text-sm font-medium">Fee: {formatAda(tx.fee)}</div>

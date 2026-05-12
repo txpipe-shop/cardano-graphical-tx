@@ -4,10 +4,11 @@ import { Card, CardBody, Chip, Tooltip } from "@heroui/react";
 import { type cardano, type Unit, type Value } from "@laceanatomy/types";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { formatSeconds, ROUTES } from "~/app/_utils";
+import { ROUTES } from "~/app/_utils";
 import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
+import DateViewer from "../DateViewer";
 import TokenPill from "../TokenPill";
 
 function OverviewStats({ tx }: { tx: cardano.Tx }) {
@@ -16,9 +17,7 @@ function OverviewStats({ tx }: { tx: cardano.Tx }) {
       <CardBody className="flex flex-row flex-wrap justify-around gap-4 p-4">
         <div className="flex gap-2 items-center">
           <p className="font-bold text-p-secondary">Created:</p>
-          <span className="text-p-secondary">
-            {formatSeconds(tx.createdAt)}
-          </span>
+          <DateViewer timestamp={tx.createdAt} className="text-p-secondary" />
         </div>
         <div className="flex gap-2 items-center">
           <p className="font-bold text-p-secondary">Fee:</p>

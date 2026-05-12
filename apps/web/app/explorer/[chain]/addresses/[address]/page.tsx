@@ -19,6 +19,7 @@ import {
   StakeSection,
 } from "~/app/_components/AddressSection";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
+import DateViewer from "~/app/_components/ExplorerSection/DateViewer";
 import TokenPill from "~/app/_components/ExplorerSection/TokenPill";
 import { TxTableSkeleton } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
@@ -125,36 +126,6 @@ function OverviewStat({
       <div className="mt-2 text-sm leading-relaxed text-p-primary">{value}</div>
     </div>
   );
-}
-
-function formatTimestamp24h(timestamp: number): string {
-  return new Date(timestamp * 1000).toLocaleString(undefined, {
-    hour12: false,
-  });
-}
-
-function formatTimestampAge(timestamp: number): string {
-  const date = new Date(timestamp * 1000);
-  const now = new Date();
-
-  let months = (now.getFullYear() - date.getFullYear()) * 12;
-  months += now.getMonth() - date.getMonth();
-
-  let days = now.getDate() - date.getDate();
-  if (days < 0) {
-    months -= 1;
-    const previousMonthDays = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      0,
-    ).getDate();
-    days += previousMonthDays;
-  }
-
-  const safeMonths = Math.max(months, 0);
-  const safeDays = Math.max(days, 0);
-
-  return `${safeMonths}mo ${safeDays}d ago`;
 }
 
 function UTxOsSkeleton() {
@@ -436,12 +407,10 @@ export default async function AddressDetailPage({
                         Slot {funds.firstSeen.slot.toString()}
                       </div>
                       {firstSeen.timestamp !== undefined && (
-                        <div
+                        <DateViewer
+                          timestamp={firstSeen.timestamp}
                           className="text-xs text-p-secondary"
-                          title={formatTimestampAge(firstSeen.timestamp)}
-                        >
-                          {formatTimestamp24h(firstSeen.timestamp)}
-                        </div>
+                        />
                       )}
                     </div>
                   ) : (
@@ -471,12 +440,10 @@ export default async function AddressDetailPage({
                         Slot {funds.lastSeen.slot.toString()}
                       </div>
                       {lastSeen.timestamp !== undefined && (
-                        <div
+                        <DateViewer
+                          timestamp={lastSeen.timestamp}
                           className="text-xs text-p-secondary"
-                          title={formatTimestampAge(lastSeen.timestamp)}
-                        >
-                          {formatTimestamp24h(lastSeen.timestamp)}
-                        </div>
+                        />
                       )}
                     </div>
                   ) : (
