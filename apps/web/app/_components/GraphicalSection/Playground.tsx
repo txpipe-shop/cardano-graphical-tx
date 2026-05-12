@@ -10,6 +10,7 @@ import {
   KONVA_COLORS,
   TX_URL_PARAM,
   UTXO_URL_PARAM,
+  utxoKey,
 } from "~/app/_utils";
 import Loading from "~/app/loading";
 import { Line, Transaction, Utxo } from ".";
@@ -133,8 +134,12 @@ export function Playground({ fillMode = "window" }: PlaygroundProps) {
         });
         const newUtxos = { ...prev.utxos };
         newTxs.forEach((tx) => {
-          tx.inputs.forEach((utxo) => (newUtxos[utxo.txHash] = utxo));
-          tx.outputs.forEach((utxo) => (newUtxos[utxo.txHash] = utxo));
+          tx.inputs.forEach(
+            (utxo) => (newUtxos[utxoKey(utxo.txHash, utxo.index)] = utxo),
+          );
+          tx.outputs.forEach(
+            (utxo) => (newUtxos[utxoKey(utxo.txHash, utxo.index)] = utxo),
+          );
         });
         return {
           ...prev,
@@ -215,7 +220,7 @@ export function Playground({ fillMode = "window" }: PlaygroundProps) {
                 <Line
                   key={index}
                   txHash={tx.txHash}
-                  utxoHash={utxo.txHash || ""}
+                  utxoHash={utxoKey(utxo.txHash, utxo.index)}
                   index={index}
                   isOutput
                 />
@@ -226,7 +231,7 @@ export function Playground({ fillMode = "window" }: PlaygroundProps) {
                 <Line
                   key={index}
                   txHash={tx.txHash}
-                  utxoHash={utxo.txHash || ""}
+                  utxoHash={utxoKey(utxo.txHash, utxo.index)}
                   index={index}
                   isReferenceInput={utxo.isReferenceInput}
                 />

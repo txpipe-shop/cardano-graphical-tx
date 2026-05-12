@@ -46,6 +46,7 @@ import {
   TX_HEIGHT,
   TX_WIDTH,
   UTXO_LINE_GAP,
+  utxoKey,
   type Network,
 } from "~/app/_utils";
 
@@ -113,7 +114,7 @@ export const generateGraphicalUTXO = ({
   distance = defaultPosition,
   isReferenceInput = false,
 }: IGenerateUTXO): IGraphicalUtxo => {
-  const exist = getUtxo(existingTxs)(txHash + "#" + index);
+  const exist = getUtxo(existingTxs)(utxoKey(txHash, index));
   if (exist) return exist;
 
   return {
@@ -298,7 +299,9 @@ export const setITransaction = (
         newTransactionsList.push(tx);
       }
 
-      newUtxos.forEach((utxo) => (newUtxosObject[utxo.txHash] = utxo));
+      newUtxos.forEach(
+        (utxo) => (newUtxosObject[utxoKey(utxo.txHash, utxo.index)] = utxo),
+      );
     });
     setTransactionBox({
       transactions: newTransactionsList,
@@ -368,7 +371,9 @@ const setCBORs = async (
         newTransactionsList.push(tx);
       }
 
-      newUtxos.forEach((utxo) => (newUtxosObject[utxo.txHash] = utxo));
+      newUtxos.forEach(
+        (utxo) => (newUtxosObject[utxoKey(utxo.txHash, utxo.index)] = utxo),
+      );
     });
     console.log("Setting transaction box", newTransactionsList);
     setTransactionBox({
@@ -622,7 +627,9 @@ export async function addDevnetCBORsToContext(
         newTransactionsList.push(tx);
       }
 
-      newUtxos.forEach((utxo) => (newUtxosObject[utxo.txHash] = utxo));
+      newUtxos.forEach(
+        (utxo) => (newUtxosObject[utxoKey(utxo.txHash, utxo.index)] = utxo),
+      );
     });
     setTransactionBox({
       transactions: newTransactionsList,
