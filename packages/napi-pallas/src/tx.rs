@@ -4,7 +4,9 @@ use crate::{
   Metadata, Redeemer, RewardWithdrawal, SafeCborResponse, Utxo, Witness, Witnesses,
 };
 use pallas::ledger::primitives::conway::DatumOption;
-use pallas::ledger::traverse::{MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer};
+use pallas::ledger::traverse::{
+  MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer, MultiEraWithdrawals,
+};
 use pallas_crypto::hash::Hasher;
 use pallas_primitives::conway::VKeyWitness;
 use std::collections::HashMap;
@@ -171,16 +173,20 @@ pub(crate) fn get_metadata(tx: &MultiEraTx<'_>) -> Vec<Metadata> {
 }
 
 pub(crate) fn get_withdrawals(tx: &MultiEraTx<'_>) -> Vec<RewardWithdrawal> {
-  match tx.withdrawals().as_alonzo() {
-    Some(withdrawals) => withdrawals
-      .iter()
+  let m = match tx.withdrawals() {
+    MultiEraWithdrawals::Conway(w) => Some(w),
+    MultiEraWithdrawals::AlonzoCompatible(w) => Some(w),
+    _ => None,
+  };
+  m.map(|x| {
+    x.iter()
       .map(|(k, v)| RewardWithdrawal {
         reward_account: k.to_string(),
         amount: v.to_owned() as i64,
       })
-      .collect(),
-    None => vec![],
-  }
+      .collect()
+  })
+  .unwrap_or(vec![])
 }
 
 pub(crate) fn get_collaterals(tx: &MultiEraTx<'_>) -> Result<Collateral, String> {
@@ -333,11 +339,21 @@ fn get_script_data_hash(tx: &MultiEraTx<'_>) -> Option<String> {
 
 fn get_auxiliary_data_hash(tx: &MultiEraTx<'_>) -> Option<String> {
   match tx {
-    MultiEraTx::AlonzoCompatible(x, _) => {
-      x.transaction_body.auxiliary_data_hash.as_ref().map(|h| h.to_string())
-    }
-    MultiEraTx::Babbage(x) => x.transaction_body.auxiliary_data_hash.as_ref().map(|h| h.to_string()),
-    MultiEraTx::Conway(x) => x.transaction_body.auxiliary_data_hash.as_ref().map(|h| h.to_string()),
+    MultiEraTx::AlonzoCompatible(x, _) => x
+      .transaction_body
+      .auxiliary_data_hash
+      .as_ref()
+      .map(|h| h.to_string()),
+    MultiEraTx::Babbage(x) => x
+      .transaction_body
+      .auxiliary_data_hash
+      .as_ref()
+      .map(|h| h.to_string()),
+    MultiEraTx::Conway(x) => x
+      .transaction_body
+      .auxiliary_data_hash
+      .as_ref()
+      .map(|h| h.to_string()),
     _ => None,
   }
 }
