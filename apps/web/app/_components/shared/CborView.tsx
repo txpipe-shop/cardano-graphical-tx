@@ -1,8 +1,7 @@
 "use client";
 
-import { Card, CardBody, Textarea } from "@heroui/react";
-import * as cbor2 from "cbor2";
-import { useEffect, useState } from "react";
+import { Button, Card, CardBody, Textarea } from "@heroui/react";
+import { useCborDiagnostic } from "~/app/_hooks/useCborDiagnostic";
 
 interface CborViewProps {
   cbor: string | null;
@@ -17,36 +16,20 @@ const textareaClassNames = {
   input: "min-h-0 h-full flex-1 resize-none overflow-auto font-mono text-sm",
 } as const;
 
-export function useCborDiagnostic(cbor: string | null | undefined): string {
-  const [decoded, setDecoded] = useState("");
-
-  useEffect(() => {
-    if (!cbor) {
-      setDecoded("");
-      return;
-    }
-    try {
-      const diag = cbor2.diagnose(cbor);
-      setDecoded(
-        typeof diag === "string" ? diag : JSON.stringify(diag, null, 2),
-      );
-    } catch (e) {
-      if (e instanceof Error) {
-        setDecoded(`Diagnostic error: ${e.message}`);
-      } else {
-        setDecoded("Unknown diagnostic error");
-      }
-    }
-  }, [cbor]);
-
-  return decoded;
-}
-
 export default function CborView({
   cbor,
   emptyMessage = "CBOR not available",
 }: CborViewProps) {
-  const decoded = useCborDiagnostic(cbor);
+  const {
+    cborText,
+    setCborText,
+    diagnosticText,
+    setDiagnosticText,
+    decodeToDiagnostic,
+    encodeToCbor,
+    decodeError,
+    encodeError,
+  } = useCborDiagnostic(cbor);
 
   if (!cbor) {
     return (
@@ -60,30 +43,56 @@ export default function CborView({
 
   return (
     <Card className="h-full min-h-0 border border-border bg-surface shadow-none">
-      <CardBody className="grid h-full min-h-0 grid-cols-1 gap-4 p-4 md:grid-cols-2">
-        <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <div className="font-medium text-p-secondary">Decoded</div>
-          <Textarea
-            readOnly
-            value={decoded}
-            placeholder="No decoded CBOR available"
-            minRows={12}
-            disableAutosize
-            classNames={textareaClassNames}
-            variant="bordered"
-          />
+      <CardBody className="flex h-full min-h-0 flex-col gap-4 p-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 md:flex-row">
+          <div className="flex min-h-0 flex-1 flex-col gap-2">
+            <div className="font-medium text-p-secondary">Decoded</div>
+            {encodeError && (
+              <div className="text-xs text-red-2">{encodeError}</div>
+            )}
+            <Textarea
+              value={diagnosticText}
+              onValueChange={setDiagnosticText}
+              placeholder="No decoded CBOR available"
+              minRows={12}
+              disableAutosize
+              classNames={textareaClassNames}
+              variant="bordered"
+            />
+          </div>
+          <div className="flex min-h-0 flex-1 flex-col gap-2">
+            <div className="font-medium text-p-secondary">CBOR</div>
+            {decodeError && (
+              <div className="text-xs text-red-2">{decodeError}</div>
+            )}
+            <Textarea
+              value={cborText}
+              onValueChange={setCborText}
+              placeholder="CBOR not available"
+              minRows={12}
+              disableAutosize
+              classNames={textareaClassNames}
+              variant="bordered"
+            />
+          </div>
         </div>
-        <div className="flex min-h-0 flex-1 flex-col gap-2">
-          <div className="font-medium text-p-secondary">CBOR</div>
-          <Textarea
-            readOnly
-            value={cbor}
-            placeholder="CBOR not available"
-            minRows={12}
-            disableAutosize
-            classNames={textareaClassNames}
-            variant="bordered"
-          />
+        <div className="flex shrink-0 justify-center gap-2">
+          <Button
+            size="sm"
+            variant="flat"
+            className="font-mono shadow-md"
+            onPress={encodeToCbor}
+          >
+            Diagnostic → CBOR
+          </Button>
+          <Button
+            size="sm"
+            variant="flat"
+            className="font-mono shadow-md"
+            onPress={decodeToDiagnostic}
+          >
+            CBOR → Diagnostic
+          </Button>
         </div>
       </CardBody>
     </Card>
