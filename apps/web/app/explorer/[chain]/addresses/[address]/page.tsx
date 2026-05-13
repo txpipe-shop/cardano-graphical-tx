@@ -26,7 +26,7 @@ import { Header } from "~/app/_components/Header";
 import { DEFAULT_DEVNET_PORT, ROUTES } from "~/app/_utils/constants";
 import { formatAda } from "~/app/_utils/explorer";
 import {
-  getAddressPrefix,
+  getNetworkConfig,
   isValidChain,
   NETWORK,
   type Network,
@@ -64,6 +64,17 @@ function resolveProvider(chain: Network) {
   return getDolosProvider(chain);
 }
 
+function isNotFoundError(error: unknown): boolean {
+  return Boolean(
+    error &&
+      typeof error === "object" &&
+      "response" in error &&
+      typeof (error as { response?: { status?: number } }).response?.status ===
+        "number" &&
+      (error as { response?: { status?: number } }).response?.status === 404,
+  );
+}
+
 function resolveStakePrefix(chain: Network): string {
   return chain === NETWORK.MAINNET ? "stake" : "stake_test";
 }
@@ -77,12 +88,28 @@ function resolveDisplayAddress(
   if (!isHexString(raw)) return raw;
 
   const prefix =
-    kind === "Stake" ? resolveStakePrefix(chain) : getAddressPrefix(chain);
+    kind === "Stake"
+      ? resolveStakePrefix(chain)
+      : getNetworkConfig(chain).addressPrefix;
   try {
     return hexToBech32(HexString(raw), prefix);
   } catch {
     return raw;
   }
+}
+
+function resolveShelleyTypeLabel(
+  addressInfo: NonNullable<ReturnType<typeof parseAddress>["address"]>,
+): string {
+  const payment = addressInfo.paymentPart;
+  const delegation = addressInfo.delegationPart;
+
+  if (delegation?.pointer) return "Pointer address";
+  if (delegation?.hash && payment) return "Base address (payment & delegation)";
+  if (payment && !delegation?.hash && !delegation?.pointer)
+    return "Base address (payment only)";
+
+  return "Shelley";
 }
 
 function resolveTypeLabel(
@@ -100,20 +127,99 @@ function resolveTypeLabel(
   if (kind === "Byron") return "Byron Legacy";
   if (kind === "Stake") return "Reward address";
 
-  if (kind === "Shelley") {
-    const payment = addressInfo.paymentPart;
-    const delegation = addressInfo.delegationPart;
-
-    if (delegation?.pointer) return "Pointer address";
-    if (delegation?.hash && payment)
-      return "Base address (payment & delegation)";
-    if (payment && !delegation?.hash && !delegation?.pointer)
-      return "Base address (payment only)";
-
-    return "Shelley";
-  }
+  if (kind === "Shelley") return resolveShelleyTypeLabel(addressInfo);
 
   return "Unknown";
+}
+
+interface AddressStats {
+  funds: AddressFundsRes;
+  statsError: string | null;
+  utxoCount: bigint;
+  txCount: bigint;
+  firstSeen: { timestamp?: number };
+  lastSeen: { timestamp?: number };
+}
+
+async function loadAddressStats({
+  chain,
+  normalizedAddress,
+  page,
+}: Readonly<{
+  chain: Network;
+  normalizedAddress: Address;
+  page: number;
+}>): Promise<AddressStats> {
+  const result: AddressStats = {
+    funds: {
+      value: { [UnitValue("lovelace")]: 0n },
+      txCount: 0n,
+    },
+    statsError: null,
+    utxoCount: 0n,
+    txCount: 0n,
+    firstSeen: {},
+    lastSeen: {},
+  };
+
+  const [fundsRes, utxosRes, txsRes] = await Promise.allSettled([
+    resolveProvider(chain).getAddressFunds({ address: normalizedAddress }),
+    getAddressUTxOsPage({
+      chain,
+      address: normalizedAddress,
+      page,
+    }),
+    getAddressTxPage({
+      chain,
+      address: normalizedAddress,
+      page,
+    }),
+  ]);
+
+  if (fundsRes.status === "fulfilled") {
+    result.funds = fundsRes.value;
+  } else if (!isNotFoundError(fundsRes.reason)) {
+    console.error(fundsRes.reason);
+    result.statsError = "Address stats are unavailable right now.";
+  }
+
+  if (utxosRes.status === "fulfilled") {
+    result.utxoCount = BigInt(utxosRes.value.data.length);
+  } else if (!isNotFoundError(utxosRes.reason)) {
+    console.error(utxosRes.reason);
+    result.statsError = "Address stats are unavailable right now.";
+  }
+
+  if (txsRes.status === "fulfilled") {
+    result.txCount = BigInt(txsRes.value.data.length);
+
+    if (txsRes.value.data.length > 0) {
+      const newestTx = txsRes.value.data[0];
+      if (newestTx) {
+        result.funds.lastSeen = {
+          blockHeight: newestTx.block.height,
+          slot: newestTx.block.slot,
+          hash: newestTx.hash,
+        };
+        result.lastSeen.timestamp = newestTx.createdAt;
+      }
+
+      const oldestTx = txsRes.value.data[txsRes.value.data.length - 1];
+      if (oldestTx) {
+        result.funds.firstSeen = {
+          blockHeight: oldestTx.block.height,
+          slot: oldestTx.block.slot,
+          hash: oldestTx.hash,
+        };
+        result.firstSeen.timestamp = oldestTx.createdAt;
+      }
+    }
+  } else if (!isNotFoundError(txsRes.reason)) {
+    console.error(txsRes.reason);
+    result.statsError = "Address stats are unavailable right now.";
+  }
+
+  return result;
 }
 
 function OverviewStat({
@@ -206,60 +312,8 @@ export default async function AddressDetailPage({
 
   const basePath = `/explorer/${chain}/addresses/${encodeURIComponent(raw)}`;
 
-  let funds: AddressFundsRes = {
-    value: { [UnitValue("lovelace")]: 0n },
-    txCount: 0n,
-  };
-  let statsError: string | null = null;
-  let utxoCount = 0n;
-  let txCount = 0n;
-  let firstSeen: { timestamp?: number } = {};
-  let lastSeen: { timestamp?: number } = {};
-
-  try {
-    const [fundsRes, utxosRes, txsRes] = await Promise.all([
-      resolveProvider(chain).getAddressFunds({ address: normalizedAddress }),
-      getAddressUTxOsPage({
-        chain,
-        address: normalizedAddress,
-        page,
-      }),
-      getAddressTxPage({
-        chain,
-        address: normalizedAddress,
-        page,
-      }),
-    ]);
-
-    funds = fundsRes;
-    utxoCount = BigInt(utxosRes.data.length);
-    txCount = BigInt(txsRes.data.length);
-
-    if (txsRes.data.length > 0) {
-      const newestTx = txsRes.data[0];
-      if (newestTx) {
-        funds.lastSeen = {
-          blockHeight: newestTx.block.height,
-          slot: newestTx.block.slot,
-          hash: newestTx.hash,
-        };
-        lastSeen.timestamp = newestTx.createdAt;
-      }
-
-      const oldestTx = txsRes.data[txsRes.data.length - 1];
-      if (oldestTx) {
-        funds.firstSeen = {
-          blockHeight: oldestTx.block.height,
-          slot: oldestTx.block.slot,
-          hash: oldestTx.hash,
-        };
-        firstSeen.timestamp = oldestTx.createdAt;
-      }
-    }
-  } catch (err) {
-    console.error(err);
-    statsError = "Address stats are unavailable right now.";
-  }
+  const { funds, statsError, utxoCount, txCount, firstSeen, lastSeen } =
+    await loadAddressStats({ chain, normalizedAddress, page });
 
   const lovelace = funds.value["lovelace" as Unit] ?? 0n;
   const tokenEntries = Object.entries(funds.value).filter(
