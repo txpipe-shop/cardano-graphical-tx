@@ -13,6 +13,7 @@ mod certs;
 mod governance;
 mod tx;
 mod utils;
+mod validate;
 
 #[derive(Clone)]
 #[napi(object)]

@@ -113,3 +113,4 @@ module.exports.cborParseBlock = __napiModule.exports.cborParseBlock
 module.exports.downloadBlock = __napiModule.exports.downloadBlock
 module.exports.parseAddress = __napiModule.exports.parseAddress
 module.exports.parseDatumInfo = __napiModule.exports.parseDatumInfo
+module.exports.validateCborTx = __napiModule.exports.validateCborTx
