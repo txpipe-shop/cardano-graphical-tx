@@ -31,6 +31,14 @@ const TOPICS = {
     "This is a list of inputs that are referenced by this transaction but not consumed. These inputs are a read-only way to access values from existing UTxOs, allowing transactions to reuse scripts without having to repeat them in each required tx.",
   mints:
     "This is a list of Cardano native tokens minted (or burned) by this transaction.",
+  required_signers:
+    "Signers whose signatures are required for this transaction to be valid. Each entry is a hash identifying a verification key.",
+  voting_procedures:
+    "Votes cast by governance actors (DReps, SPOs, Constitutional Committee) on governance actions. Part of CIP-1694.",
+  proposal_procedures:
+    "Governance action proposals included in this transaction. Each proposal specifies a gov action, deposit, and reward account.",
+  auxiliary_scripts:
+    "Scripts attached to the auxiliary data section of the transaction. These are distinct from witness-set scripts and appear in Shelley MA and Alonzo+ era auxiliary data. Includes native scripts and Plutus V1 scripts.",
 };
 
 export default TOPICS;

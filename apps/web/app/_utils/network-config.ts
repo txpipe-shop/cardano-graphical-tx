@@ -48,10 +48,6 @@ export function getNetworkConfig(network: Network): NetworkConfig {
   return NETWORK_CONFIGS_BASE[network];
 }
 
-export function getAddressPrefix(network: Network): string {
-  return NETWORK_CONFIGS_BASE[network].addressPrefix;
-}
-
 export function isValidChain(chain: string): chain is Network {
   return Object.keys(NETWORK_CONFIGS_BASE).includes(chain);
 }

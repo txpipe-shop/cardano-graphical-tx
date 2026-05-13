@@ -42,5 +42,5 @@ export async function loadPageData({ chain, hash }: PageData) {
     return data.tx;
   };
 
-  return loadTxPageData(provider, hash, parseCborViaApi, chain);
+  return loadTxPageData(provider, hash, parseCborViaApi);
 }

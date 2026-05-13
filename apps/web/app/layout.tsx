@@ -1,7 +1,7 @@
 import { GoogleTagManager } from "@next/third-parties/google";
 import type Konva from "konva";
 import { type Metadata } from "next";
-import { Lato, Source_Code_Pro } from "next/font/google";
+import { IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
@@ -15,15 +15,15 @@ declare global {
   }
 }
 
-const lato = Lato({
+const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  weight: ["400", "700", "900"],
-  variable: "--lato-font",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
 });
-const martianMono = Source_Code_Pro({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400"],
-  variable: "--code-font",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
@@ -36,12 +36,15 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${lato.variable} ${martianMono.variable}`}>
+    <html
+      lang="en"
+      className={`${ibmPlexSans.variable} ${jetbrainsMono.variable}`}
+    >
       {process.env.NODE_ENV === "production" &&
         process.env.NEXT_PUBLIC_GA_TRACKING_ID && (
           <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GA_TRACKING_ID} />
         )}
-      <body className="bg-surface">
+      <body className="bg-surface font-sans">
         <ThemeProvider>
           <NextTopLoader color="#7c3aed" showSpinner={false} />
           <Providers>

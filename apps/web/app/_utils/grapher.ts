@@ -7,6 +7,7 @@ import {
   getUtxo,
   isInputUtxo,
   isOutputUtxo,
+  utxoKey,
 } from "./txHelpers";
 
 /**
@@ -31,7 +32,7 @@ export const updateLines =
       const selectedUtxo = selectedTx.outputs[utxoIndex];
       if (!selectedUtxo) return;
       const { x: distanceX, y: distanceY } = selectedUtxo.distance;
-      const utxoHash = selectedUtxo.txHash;
+      const utxoHash = utxoKey(selectedUtxo.txHash, selectedUtxo.index);
 
       if (newUtxos[utxoHash])
         newUtxos[utxoHash] = {
@@ -45,7 +46,7 @@ export const updateLines =
       const selectedUtxo = selectedTx.inputs[utxoIndex];
       if (!selectedUtxo) return;
       const { x: distanceX, y: distanceY } = selectedUtxo.distance;
-      const utxoHash = selectedUtxo.txHash;
+      const utxoHash = utxoKey(selectedUtxo.txHash, selectedUtxo.index);
 
       if (newUtxos[utxoHash])
         newUtxos[utxoHash] = {

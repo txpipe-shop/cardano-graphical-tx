@@ -5,6 +5,9 @@ export const getTransaction =
     return transactionBox.transactions.find((tx) => tx.txHash === txHash);
   };
 
+export const utxoKey = (txHash: string, index: number): string =>
+  `${txHash}#${index}`;
+
 export const getUtxo =
   (transactionBox: TransactionsBox) => (utxoHash: string) => {
     return transactionBox.utxos[utxoHash];
@@ -15,7 +18,7 @@ export const getUtxoIndex =
     const inputs = transactions.flatMap(({ inputs }) =>
       inputs
         .filter(({ isReferenceInput }) => !isReferenceInput)
-        .map(({ txHash }) => txHash),
+        .map(({ txHash, index }) => utxoKey(txHash, index)),
     );
 
     return inputs.indexOf(utxoHash);
@@ -24,14 +27,14 @@ export const getUtxoIndex =
 export const isInputUtxo =
   (transactionBox: TransactionsBox) => (utxoHash: string) => {
     return transactionBox.transactions.some((tx) =>
-      tx.inputs.some((utxo) => utxo.txHash === utxoHash),
+      tx.inputs.some((utxo) => utxoKey(utxo.txHash, utxo.index) === utxoHash),
     );
   };
 
 export const isOutputUtxo =
   (transactionBox: TransactionsBox) => (utxoHash: string) => {
     return transactionBox.transactions.some((tx) =>
-      tx.outputs.some((utxo) => utxo.txHash === utxoHash),
+      tx.outputs.some((utxo) => utxoKey(utxo.txHash, utxo.index) === utxoHash),
     );
   };
 

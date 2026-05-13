@@ -6,7 +6,7 @@ This entire repo is being built on each push to `main`
 
 ## How is this all being built?
 
-It's built as a docker image through this [workflow](https://github.com/txpipe-shop/cardano-graphical-tx/blob/4fc36fbd5260b3773eaa40ca450d01feac51b8d7/.github/workflows/build.yml#L1-L37). It's pushed to Docker Hub. You can change the account it's being pushed to by changing the repository secrets.
+It's built as a docker image through this [workflow](https://github.com/txpipe-shop/cardano-graphical-tx/blob/main/.github/workflows/docker.yml). It's pushed to Docker Hub. You can change the account it's being pushed to by changing the repository secrets.
 
 ## Just merged a PR. What do I do to see this in production?
 
@@ -24,13 +24,13 @@ Done!
 
 ## My NEXT_PUBLIC variable is undefined
 
-Given that this repo uses `Next.js` to serve the website and that environment variables that start with `NEXT_PUBLIC` are bundled at build time, those env variables need to be available when building the docker image (not only when serving the website!!!). To do this just follow the `NEXT_PUBLIC_CBOR_ENDPOINT` example inside this [Dockerfile](https://github.com/txpipe-shop/cardano-graphical-tx/blob/4fc36fbd5260b3773eaa40ca450d01feac51b8d7/Dockerfile#L15-L19) and this [Github workflow](https://github.com/txpipe-shop/cardano-graphical-tx/blob/4fc36fbd5260b3773eaa40ca450d01feac51b8d7/.github/workflows/build.yml#L36-L37).
+Given that this repo uses `Next.js` to serve the website and that environment variables that start with `NEXT_PUBLIC` are bundled at build time, those env variables need to be available when building the docker image (not only when serving the website!!!). To do this just follow the `NEXT_PUBLIC_CBOR_ENDPOINT` example inside this [Dockerfile](https://github.com/txpipe-shop/cardano-graphical-tx/blob/main/Dockerfile) and this [Github workflow](https://github.com/txpipe-shop/cardano-graphical-tx/blob/main/.github/workflows/docker.yml).
 
-Notice that here, `CBOR_ENDPOINT` is defined a repository variable in Github:
+Notice that here, `NEXT_PUBLIC_CBOR_ENDPOINT` is defined as a repository variable in Github:
 
 ```yml
 build-args: |
-  NEXT_PUBLIC_CBOR_ENDPOINT=${{ vars.CBOR_ENDPOINT }}
+  NEXT_PUBLIC_CBOR_ENDPOINT=${{ vars.NEXT_PUBLIC_CBOR_ENDPOINT }}
 ```
 
 ## Where do I add my environment variables?

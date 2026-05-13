@@ -9,6 +9,11 @@ export interface AddressDiagnostic {
   bytes?: string
 }
 
+export interface Anchor {
+  url: string
+  hash: string
+}
+
 export interface Asset {
   assetName: string
   assetNameAscii?: string
@@ -18,6 +23,11 @@ export interface Asset {
 export interface Assets {
   policyId: string
   assetsPolicy: Array<Asset>
+}
+
+export interface AuxiliaryScripts {
+  nativeScripts: Array<string>
+  plutusV1Scripts: Array<string>
 }
 
 export interface BlockCborResponse {
@@ -38,6 +48,13 @@ export interface BlockHeader {
   blockBodyHash?: string
 }
 
+export interface Bootstrap {
+  publicKey: string
+  signature: string
+  chainCode: string
+  attributes: string
+}
+
 export declare function cborParse(raw: string): SafeCborResponse
 
 export declare function cborParseBlock(raw: string): SafeBlockCborResponse
@@ -54,21 +71,59 @@ export interface CborResponse {
   validityStart?: number
   ttl?: number
   metadata: Array<Metadata>
-  withdrawals: Array<Withdrawal>
-  certificates: Array<Certificates>
+  withdrawals: Array<RewardWithdrawal>
+  certificates: Array<Certificate>
   collateral: Collateral
   witnesses: Witnesses
+  auxiliaryScripts: AuxiliaryScripts
+  auxiliaryDataHash?: string
   size: number
   cbor?: string
+  scriptDataHash?: string
+  requiredSigners: Array<string>
+  networkId?: number
+  votingProcedures: Array<VotingProcedureEntry>
+  proposalProcedures: Array<ProposalProcedure>
+  treasuryValue?: number
+  donation?: number
 }
 
-export interface Certificates {
-  json: string
-}
+export type Certificate =
+  | { kind: 'NotApplicable' }
+  | { kind: 'StakeRegistration', stakeCredential: Credential }
+  | { kind: 'StakeDeregistration', stakeCredential: Credential }
+  | { kind: 'StakeDelegation', stakeCredential: Credential, poolKeyhash: string }
+  | { kind: 'PoolRegistration', poolParams: PoolParams }
+  | { kind: 'PoolRetirement', poolKeyhash: string, epoch: number }
+  | { kind: 'Reg', stakeCredential: Credential, coin: number }
+  | { kind: 'UnReg', stakeCredential: Credential, coin: number }
+  | { kind: 'VoteDeleg', stakeCredential: Credential, drep: DRep }
+  | { kind: 'StakeVoteDeleg', stakeCredential: Credential, poolKeyhash: string, drep: DRep }
+  | { kind: 'StakeRegDeleg', stakeCredential: Credential, poolKeyhash: string, coin: number }
+  | { kind: 'VoteRegDeleg', stakeCredential: Credential, drep: DRep, coin: number }
+  | { kind: 'StakeVoteRegDeleg', stakeCredential: Credential, poolKeyhash: string, drep: DRep, coin: number }
+  | { kind: 'AuthCommitteeHot', committeeColdCredential: Credential, committeeHotCredential: Credential }
+  | { kind: 'ResignCommitteeCold', committeeColdCredential: Credential, anchor?: Anchor }
+  | { kind: 'RegDRepCert', drepCredential: Credential, coin: number, anchor?: Anchor }
+  | { kind: 'UnRegDRepCert', drepCredential: Credential, coin: number }
+  | { kind: 'UpdateDRepCert', drepCredential: Credential, anchor?: Anchor }
+  | { kind: 'GenesisKeyDelegation', genesishash: string, genesisDelegateHash: string, vrfKeyhash: string }
+  | { kind: 'MoveInstantaneousRewardsCert', source: 'Reserves' | 'Treasury', stakeCredentials?: Array<MirTarget>, otherAccountingPot?: number }
 
 export interface Collateral {
   total?: number
-  collateralReturn: Array<Input>
+  inputs: Array<Input>
+  collateralReturn: Array<Utxo>
+}
+
+export interface CommitteeMember {
+  credential: Credential
+  epoch: number
+}
+
+export interface Credential {
+  credentialType: 'Key' | 'Script'
+  hash: string
 }
 
 export interface Datum {
@@ -79,9 +134,28 @@ export interface Datum {
 
 export declare function downloadBlock(nodeUrl: string, magic: number, slot: number, hash: string): Promise<Array<number>>
 
+export interface DRep {
+  drepType: 'Key' | 'Script' | 'Abstain' | 'NoConfidence'
+  hash?: string
+}
+
 export interface ExUnits {
   mem: number
   steps: number
+}
+
+export type GovAction =
+  | { kind: 'ParameterChange', prevGovActionId?: GovActionId, protocolParamUpdate: ProtocolParamUpdate, policyHash?: string }
+  | { kind: 'HardForkInitiation', prevGovActionId?: GovActionId, majorVersion: number, minorVersion: number }
+  | { kind: 'TreasuryWithdrawals', withdrawals: Array<RewardWithdrawal>, policyHash?: string }
+  | { kind: 'NoConfidence', prevGovActionId?: GovActionId }
+  | { kind: 'UpdateCommittee', prevGovActionId?: GovActionId, removedMembers: Array<Credential>, addedMembers: Array<CommitteeMember>, quorum: UnitInterval }
+  | { kind: 'NewConstitution', prevGovActionId?: GovActionId, constitutionAnchor: Anchor, guardrailScript?: string }
+  | { kind: 'Information' }
+
+export interface GovActionId {
+  transactionId: string
+  actionIndex: number
 }
 
 export interface Input {
@@ -94,15 +168,96 @@ export interface Metadata {
   jsonMetadata: Record<string, string>
 }
 
+export interface MirTarget {
+  credential: Credential
+  amount: number
+}
+
 export declare function parseAddress(raw: string): SafeAddressResponse
 
 export declare function parseDatumInfo(raw: string): Datum | null
+
+export interface PoolParams {
+  operator: string
+  vrfKeyhash: string
+  pledge: number
+  cost: number
+  marginNumerator: number
+  marginDenominator: number
+  rewardAccount: string
+  poolOwners: Array<string>
+  relays: Array<Relay>
+  poolMetadataUrl?: string
+  poolMetadataHash?: string
+}
+
+export interface ProposalProcedure {
+  deposit: number
+  rewardAccount: string
+  govAction: GovAction
+  anchor: Anchor
+}
+
+export interface ProtocolParamUpdate {
+  minfeeA?: number
+  minfeeB?: number
+  maxBlockBodySize?: number
+  maxTransactionSize?: number
+  maxBlockHeaderSize?: number
+  keyDeposit?: number
+  poolDeposit?: number
+  maximumEpoch?: number
+  desiredNumberOfStakePools?: number
+  poolPledgeInfluenceNumerator?: number
+  poolPledgeInfluenceDenominator?: number
+  expansionRateNumerator?: number
+  expansionRateDenominator?: number
+  treasuryGrowthRateNumerator?: number
+  treasuryGrowthRateDenominator?: number
+  minPoolCost?: number
+  adaPerUtxoByte?: number
+  costModelsJson?: string
+  executionCostsMemNumerator?: number
+  executionCostsMemDenominator?: number
+  executionCostsStepNumerator?: number
+  executionCostsStepDenominator?: number
+  maxTxExUnitsMem?: number
+  maxTxExUnitsSteps?: number
+  maxBlockExUnitsMem?: number
+  maxBlockExUnitsSteps?: number
+  maxValueSize?: number
+  collateralPercentage?: number
+  maxCollateralInputs?: number
+  poolVotingThresholds?: Array<UnitInterval>
+  drepVotingThresholds?: Array<UnitInterval>
+  minCommitteeSize?: number
+  committeeTermLimit?: number
+  governanceActionValidityPeriod?: number
+  governanceActionDeposit?: number
+  drepDeposit?: number
+  drepInactivityPeriod?: number
+  minfeeRefscriptCostPerByteNumerator?: number
+  minfeeRefscriptCostPerByteDenominator?: number
+}
 
 export interface Redeemer {
   tag: string
   index: number
   dataJson: string
   exUnits: ExUnits
+}
+
+export interface Relay {
+  relayType: 'SingleHostAddr' | 'SingleHostName' | 'MultiHostName'
+  port?: number
+  ipv4?: string
+  ipv6?: string
+  dnsName?: string
+}
+
+export interface RewardWithdrawal {
+  rewardAccount: string
+  amount: number
 }
 
 export interface SafeAddressResponse {
@@ -126,6 +281,11 @@ export interface ShelleyPart {
   pointer?: string
 }
 
+export interface UnitInterval {
+  numerator: number
+  denominator: number
+}
+
 export interface Utxo {
   txHash: string
   index: number
@@ -137,9 +297,18 @@ export interface Utxo {
   scriptRef?: string
 }
 
-export interface Withdrawal {
-  rawAddress: string
-  amount: number
+export type Voter =
+  | { kind: 'ConstitutionalCommitteeKey', hash: string }
+  | { kind: 'ConstitutionalCommitteeScript', hash: string }
+  | { kind: 'DRepKey', hash: string }
+  | { kind: 'DRepScript', hash: string }
+  | { kind: 'StakePoolKey', hash: string }
+
+export interface VotingProcedureEntry {
+  voter: Voter
+  govActionId: GovActionId
+  vote: 'No' | 'Yes' | 'Abstain'
+  anchor?: Anchor
 }
 
 export interface Witness {
@@ -155,4 +324,6 @@ export interface Witnesses {
   plutusV1Scripts: Array<string>
   plutusV2Scripts: Array<string>
   plutusV3Scripts: Array<string>
+  nativeScripts: Array<string>
+  bootstrapWitnesses: Array<Bootstrap>
 }

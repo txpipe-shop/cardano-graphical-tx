@@ -2,7 +2,6 @@
 
 use std::{collections::HashMap, str::FromStr};
 
-use pallas::ledger::traverse::MultiEraTx;
 use pallas_network::{facades::PeerClient, miniprotocols::Point};
 
 #[macro_use]
@@ -10,6 +9,8 @@ extern crate napi_derive;
 
 mod address;
 mod blocks;
+mod certs;
+mod governance;
 mod tx;
 mod utils;
 
@@ -65,22 +66,17 @@ pub struct Metadata {
 
 #[derive(Default)]
 #[napi(object)]
-pub struct Withdrawal {
-  pub raw_address: String,
+pub struct RewardWithdrawal {
+  pub reward_account: String,
   pub amount: i64,
-}
-
-#[derive(Default)]
-#[napi(object)]
-pub struct Certificates {
-  pub json: String,
 }
 
 #[derive(Default)]
 #[napi(object)]
 pub struct Collateral {
   pub total: Option<i64>,
-  pub collateral_return: Vec<Input>,
+  pub inputs: Vec<Input>,
+  pub collateral_return: Vec<Utxo>,
 }
 
 #[derive(Default)]
@@ -89,6 +85,15 @@ pub struct Witness {
   pub key: String,
   pub hash: String,
   pub signature: String,
+}
+
+#[derive(Default)]
+#[napi(object)]
+pub struct Bootstrap {
+  pub public_key: String,
+  pub signature: String,
+  pub chain_code: String,
+  pub attributes: String,
 }
 
 #[derive(Default)]
@@ -109,6 +114,14 @@ pub struct Redeemer {
 
 #[derive(Default)]
 #[napi(object)]
+pub struct AuxiliaryScripts {
+  pub native_scripts: Vec<String>,
+  pub plutus_v1_scripts: Vec<String>,
+  // TODO: add plutus_v2_scripts and plutus_v3_scripts when pallas-traverse exposes aux_plutus_v2/3_scripts()
+}
+
+#[derive(Default)]
+#[napi(object)]
 pub struct Witnesses {
   pub vkey_witnesses: Vec<Witness>,
   pub redeemers: Vec<Redeemer>,
@@ -116,6 +129,8 @@ pub struct Witnesses {
   pub plutus_v1_scripts: Vec<String>,
   pub plutus_v2_scripts: Vec<String>,
   pub plutus_v3_scripts: Vec<String>,
+  pub native_scripts: Vec<String>,
+  pub bootstrap_witnesses: Vec<Bootstrap>,
 }
 
 #[derive(Default)]
@@ -132,12 +147,21 @@ pub struct CborResponse {
   pub validity_start: Option<i64>,
   pub ttl: Option<i64>,
   pub metadata: Vec<Metadata>,
-  pub withdrawals: Vec<Withdrawal>,
-  pub certificates: Vec<Certificates>,
+  pub withdrawals: Vec<RewardWithdrawal>,
+  pub certificates: Vec<certs::Certificate>,
   pub collateral: Collateral,
   pub witnesses: Witnesses,
+  pub auxiliary_scripts: AuxiliaryScripts,
+  pub auxiliary_data_hash: Option<String>,
   pub size: i64,
   pub cbor: Option<String>,
+  pub script_data_hash: Option<String>,
+  pub required_signers: Vec<String>,
+  pub network_id: Option<u8>,
+  pub voting_procedures: Vec<governance::VotingProcedureEntry>,
+  pub proposal_procedures: Vec<governance::ProposalProcedure>,
+  pub treasury_value: Option<i64>,
+  pub donation: Option<i64>,
 }
 
 #[derive(Default)]
@@ -152,47 +176,6 @@ pub struct SafeCborResponse {
 pub struct SafeBlockCborResponse {
   pub cbor_res: Option<blocks::BlockCborResponse>,
   pub error: String,
-}
-
-impl CborResponse {
-  fn new() -> Self {
-    Default::default()
-  }
-
-  fn with_cbor_attr(
-    self,
-    tx: MultiEraTx<'_>,
-    inputs: Vec<Input>,
-    reference_inputs: Vec<Input>,
-    outputs: Vec<Utxo>,
-    mints: Vec<Assets>,
-    metadata: Vec<Metadata>,
-    withdrawals: Vec<Withdrawal>,
-    certificates: Vec<Certificates>,
-    collateral: Collateral,
-    witnesses: Witnesses,
-    cbor: Option<String>,
-  ) -> Self {
-    Self {
-      tx_hash: tx.hash().to_string(),
-      fee: tx.fee().map(|x| x as i64),
-      era: tx.era().to_string(),
-      validity_start: tx.validity_start().map(|v| v as i64),
-      ttl: tx.ttl().map(|v| v as i64),
-      inputs,
-      reference_inputs,
-      outputs,
-      mints,
-      scripts_successful: tx.is_valid(),
-      metadata,
-      withdrawals,
-      certificates,
-      collateral,
-      witnesses,
-      size: tx.size() as i64,
-      cbor,
-    }
-  }
 }
 
 impl SafeCborResponse {

@@ -14,6 +14,7 @@ import {
   NETWORK,
   OPTIONS,
   ROUTES,
+  utxoKey,
 } from "~/app/_utils";
 import TrashRedIcon from "~/public/delete-red.svg";
 import NoContractsIcon from "~/public/no-contract.svg";
@@ -63,14 +64,16 @@ export const TransactionsList = ({
         }
         setTransactionBox((prev) => {
           const inputsToRemove = transactionToRemove.inputs.filter(
-            ({ txHash }) => !isOutputUtxo(transactions)(txHash),
+            (input) =>
+              !isOutputUtxo(transactions)(utxoKey(input.txHash, input.index)),
           );
           const outputsToRemove = transactionToRemove.outputs.filter(
-            ({ txHash }) => !isInputUtxo(transactions)(txHash),
+            (output) =>
+              !isInputUtxo(transactions)(utxoKey(output.txHash, output.index)),
           );
 
-          [...inputsToRemove, ...outputsToRemove].forEach(({ txHash }) => {
-            delete prev.utxos[txHash];
+          [...inputsToRemove, ...outputsToRemove].forEach((utxo) => {
+            delete prev.utxos[utxoKey(utxo.txHash, utxo.index)];
           });
 
           const newTransactions = prev.transactions.filter(

@@ -7,7 +7,9 @@ import type {
   Utxo,
 } from "@laceanatomy/napi-pallas";
 import {
+  Address,
   assetNameFromUnit,
+  cardano,
   DatumType,
   Hash,
   HexString,
@@ -15,14 +17,13 @@ import {
   hexToBech32,
   policyFromUnit,
   Unit,
-  type cardano,
 } from "@laceanatomy/types";
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
 import { type Dispatch, type SetStateAction } from "react";
 import toast from "react-hot-toast";
 import type {
-  Address,
+  Address as GraphicalAddress,
   IGraphicalTransaction,
   IGraphicalUtxo,
   ITransaction,
@@ -46,6 +47,7 @@ import {
   TX_HEIGHT,
   TX_WIDTH,
   UTXO_LINE_GAP,
+  utxoKey,
   type Network,
 } from "~/app/_utils";
 
@@ -63,10 +65,7 @@ interface IGenerateUTXO extends Utxo {
  * @returns - An object containing the bech32|hex address, the header type, the network type,
  * the payment part, and the kind of address (key or script).
  */
-const formatAddress = (
-  address: string,
-  prefix?: string,
-): Address | undefined => {
+const formatAddress = (address: string): GraphicalAddress | undefined => {
   if (isEmpty(address)) return undefined;
   let hexAddress = "";
   if (isHexa(address)) {
@@ -83,15 +82,21 @@ const formatAddress = (
   const netType = hexAddress[1];
   if (!headerType || !netType) return undefined;
 
+  const normalizedAddress = Address(address);
+  const prefix = cardano.addressToBech32Prefix(normalizedAddress);
+
   return {
-    bech32:
-      isHexa(address) && prefix
-        ? hexToBech32(HexString(address), prefix)
-        : address,
+    bech32: prefix
+      ? hexToBech32(HexString(normalizedAddress), prefix)
+      : address,
     headerType,
     netType,
     payment: hexAddress.slice(2, POLICY_LENGTH),
     kind: Number(headerType) % 2 === 0 ? "key" : "script",
+    delegation:
+      hexAddress.length > 2 + POLICY_LENGTH
+        ? hexAddress.slice(2 + POLICY_LENGTH, -1)
+        : undefined,
   };
 };
 
@@ -109,11 +114,11 @@ export const generateGraphicalUTXO = ({
   distance = defaultPosition,
   isReferenceInput = false,
 }: IGenerateUTXO): IGraphicalUtxo => {
-  const exist = getUtxo(existingTxs)(txHash + "#" + index);
+  const exist = getUtxo(existingTxs)(utxoKey(txHash, index));
   if (exist) return exist;
 
   return {
-    txHash: txHash + "#" + index,
+    txHash: txHash,
     index,
     bytes,
     address: formatAddress(address),
@@ -294,7 +299,9 @@ export const setITransaction = (
         newTransactionsList.push(tx);
       }
 
-      newUtxos.forEach((utxo) => (newUtxosObject[utxo.txHash] = utxo));
+      newUtxos.forEach(
+        (utxo) => (newUtxosObject[utxoKey(utxo.txHash, utxo.index)] = utxo),
+      );
     });
     setTransactionBox({
       transactions: newTransactionsList,
@@ -364,8 +371,11 @@ const setCBORs = async (
         newTransactionsList.push(tx);
       }
 
-      newUtxos.forEach((utxo) => (newUtxosObject[utxo.txHash] = utxo));
+      newUtxos.forEach(
+        (utxo) => (newUtxosObject[utxoKey(utxo.txHash, utxo.index)] = utxo),
+      );
     });
+    console.log("Setting transaction box", newTransactionsList);
     setTransactionBox({
       transactions: newTransactionsList,
       utxos: newUtxosObject,
@@ -617,7 +627,9 @@ export async function addDevnetCBORsToContext(
         newTransactionsList.push(tx);
       }
 
-      newUtxos.forEach((utxo) => (newUtxosObject[utxo.txHash] = utxo));
+      newUtxos.forEach(
+        (utxo) => (newUtxosObject[utxoKey(utxo.txHash, utxo.index)] = utxo),
+      );
     });
     setTransactionBox({
       transactions: newTransactionsList,

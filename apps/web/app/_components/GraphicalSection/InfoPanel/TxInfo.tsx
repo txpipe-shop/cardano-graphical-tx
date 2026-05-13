@@ -189,15 +189,15 @@ export const TxInfo = () => {
               className="flex flex-col bg-surface px-5 py-2 shadow-none"
             >
               <div className="mb-2 flex items-center justify-between">
-                <b>Raw Address:</b>&nbsp;
+                <b>Reward Account:</b>&nbsp;
                 <div className="flex">
                   <span className="ml-1 mr-auto">
-                    {trimString(withdrawal.rawAddress, 12)}
+                    {trimString(withdrawal.rewardAccount, 12)}
                   </span>
                   <Image
                     src={CopyIcon}
                     alt="Copy"
-                    onClick={handleCopy(withdrawal.rawAddress)}
+                    onClick={handleCopy(withdrawal.rewardAccount)}
                     className="ml-2 cursor-pointer"
                   />
                 </div>

@@ -1,10 +1,11 @@
+use crate::governance;
 use crate::{
-  Asset, Assets, CborResponse, Certificates, Collateral, Datum, ExUnits, Input, Metadata, Redeemer,
-  SafeCborResponse, Utxo, Withdrawal, Witness, Witnesses,
+  Asset, Assets, AuxiliaryScripts, Bootstrap, CborResponse, Collateral, Datum, ExUnits, Input,
+  Metadata, Redeemer, RewardWithdrawal, SafeCborResponse, Utxo, Witness, Witnesses,
 };
 use pallas::ledger::primitives::conway::DatumOption;
 use pallas::ledger::traverse::{
-  MultiEraCert, MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer,
+  MultiEraInput, MultiEraPolicyAssets, MultiEraRedeemer, MultiEraWithdrawals,
 };
 use pallas_crypto::hash::Hasher;
 use pallas_primitives::conway::VKeyWitness;
@@ -54,7 +55,7 @@ fn build_assets_with_same_policy(asset: MultiEraPolicyAssets<'_>) -> Assets {
       .iter()
       .map(|asset| Asset {
         asset_name: hex::encode(asset.name()),
-        asset_name_ascii: asset.to_ascii_name(),
+        asset_name_ascii: Some(String::from_utf8_lossy(asset.name()).into_owned()),
         amount: asset.output_coin().map(|x| x as i64),
       })
       .collect(),
@@ -101,7 +102,7 @@ pub(crate) fn get_mints(tx: &MultiEraTx<'_>) -> Vec<Assets> {
         .into_iter()
         .map(|asset| Asset {
           asset_name: hex::encode(asset.name()),
-          asset_name_ascii: asset.to_ascii_name(),
+          asset_name_ascii: Some(String::from_utf8_lossy(asset.name()).into_owned()),
           amount: asset.mint_coin(),
         })
         .collect(),
@@ -171,54 +172,64 @@ pub(crate) fn get_metadata(tx: &MultiEraTx<'_>) -> Vec<Metadata> {
   }
 }
 
-pub(crate) fn get_withdrawals(tx: &MultiEraTx<'_>) -> Vec<Withdrawal> {
-  match tx.withdrawals().as_alonzo() {
-    Some(withdrawals) => withdrawals
-      .iter()
-      .map(|(k, v)| {
-        // TODO - parse address into bech32
-        Withdrawal {
-          raw_address: k.to_string(),
-          amount: v.to_owned() as i64,
-        }
+pub(crate) fn get_withdrawals(tx: &MultiEraTx<'_>) -> Vec<RewardWithdrawal> {
+  let m = match tx.withdrawals() {
+    MultiEraWithdrawals::Conway(w) => Some(w),
+    MultiEraWithdrawals::AlonzoCompatible(w) => Some(w),
+    _ => None,
+  };
+  m.map(|x| {
+    x.iter()
+      .map(|(k, v)| RewardWithdrawal {
+        reward_account: k.to_string(),
+        amount: v.to_owned() as i64,
       })
-      .collect(),
-    None => vec![],
-  }
+      .collect()
+  })
+  .unwrap_or(vec![])
 }
 
-pub(crate) fn get_certificates(tx: &MultiEraTx<'_>) -> Vec<Certificates> {
-  tx.certs()
+pub(crate) fn get_collaterals(tx: &MultiEraTx<'_>) -> Result<Collateral, String> {
+  let collateral_return = tx
+    .collateral_return()
     .iter()
-    .map(|cert| match cert {
-      MultiEraCert::NotApplicable => Certificates {
-        json: "Not applicable".to_string(),
-      },
-      MultiEraCert::AlonzoCompatible(cow) => Certificates {
-        json: serde_json::to_string(&cow).unwrap(),
-      },
-      MultiEraCert::Conway(cow) => Certificates {
-        json: serde_json::to_string(&cow).unwrap(),
-      },
-      _ => Certificates {
-        json: "Not implemented".to_string(),
-      },
-    })
-    .collect()
-}
+    .enumerate()
+    .map(|(index, o)| -> Result<Utxo, String> {
+      let address = o
+        .address()
+        .map_err(|_| format!("Failed to parse output address at index {index}"))?;
 
-pub(crate) fn get_collaterals(tx: &MultiEraTx<'_>) -> Collateral {
-  Collateral {
+      Ok(Utxo {
+        tx_hash: tx.hash().to_string(),
+        index: index as i64,
+        bytes: hex::encode(o.encode()),
+        address: address.to_string(),
+        lovelace: o.value().coin() as i64,
+        datum: o.datum().map(|x: DatumOption| build_datum(x)),
+        script_ref: o
+          .script_ref()
+          .and_then(|x| x.encode_fragment().ok().map(hex::encode)),
+        assets: o
+          .value()
+          .assets()
+          .into_iter()
+          .map(|x| build_assets_with_same_policy(x))
+          .collect(),
+      })
+    })
+    .collect::<Result<Vec<Utxo>, String>>()?;
+  Ok(Collateral {
     total: tx.total_collateral().map(|x| x as i64),
-    collateral_return: tx
+    inputs: tx
       .collateral()
       .iter()
-      .map(|i| Input {
-        tx_hash: i.hash().to_string(),
-        index: i.index() as i64,
+      .map(|x| Input {
+        tx_hash: x.hash().to_string(),
+        index: x.index() as i64,
       })
       .collect(),
-  }
+    collateral_return,
+  })
 }
 
 fn build_witness(wit: &VKeyWitness) -> Witness {
@@ -286,7 +297,114 @@ pub(crate) fn get_witnesses(tx: &MultiEraTx<'_>) -> Witnesses {
     plutus_v1_scripts: tx.plutus_v1_scripts().iter().map(hex::encode).collect(),
     plutus_v2_scripts: tx.plutus_v2_scripts().iter().map(hex::encode).collect(),
     plutus_v3_scripts: tx.plutus_v3_scripts().iter().map(hex::encode).collect(),
+    native_scripts: tx
+      .native_scripts()
+      .iter()
+      .map(|x| hex::encode(x.raw_cbor()))
+      .collect(),
+    bootstrap_witnesses: tx
+      .bootstrap_witnesses()
+      .iter()
+      .map(|x| Bootstrap {
+        public_key: hex::encode(x.public_key.as_slice()),
+        signature: hex::encode(x.signature.as_slice()),
+        chain_code: hex::encode(x.chain_code.as_slice()),
+        attributes: hex::encode(x.attributes.as_slice()),
+      })
+      .collect(),
   }
+}
+
+fn get_auxiliary_scripts(tx: &MultiEraTx<'_>) -> AuxiliaryScripts {
+  AuxiliaryScripts {
+    native_scripts: tx
+      .aux_native_scripts()
+      .iter()
+      .map(|s| hex::encode(pallas_codec::minicbor::to_vec(s).unwrap()))
+      .collect(),
+    plutus_v1_scripts: tx.aux_plutus_v1_scripts().iter().map(hex::encode).collect(),
+  }
+}
+
+fn get_script_data_hash(tx: &MultiEraTx<'_>) -> Option<String> {
+  match tx {
+    MultiEraTx::AlonzoCompatible(x, _) => {
+      x.transaction_body.script_data_hash.map(|h| h.to_string())
+    }
+    MultiEraTx::Babbage(x) => x.transaction_body.script_data_hash.map(|h| h.to_string()),
+    MultiEraTx::Conway(x) => x.transaction_body.script_data_hash.map(|h| h.to_string()),
+    _ => None,
+  }
+}
+
+fn get_auxiliary_data_hash(tx: &MultiEraTx<'_>) -> Option<String> {
+  match tx {
+    MultiEraTx::AlonzoCompatible(x, _) => x
+      .transaction_body
+      .auxiliary_data_hash
+      .as_ref()
+      .map(|h| h.to_string()),
+    MultiEraTx::Babbage(x) => x
+      .transaction_body
+      .auxiliary_data_hash
+      .as_ref()
+      .map(|h| h.to_string()),
+    MultiEraTx::Conway(x) => x
+      .transaction_body
+      .auxiliary_data_hash
+      .as_ref()
+      .map(|h| h.to_string()),
+    _ => None,
+  }
+}
+
+fn get_required_signers(tx: &MultiEraTx<'_>) -> Vec<String> {
+  tx.required_signers()
+    .collect::<Vec<_>>()
+    .into_iter()
+    .map(|h| h.to_string())
+    .collect()
+}
+
+fn get_network_id(tx: &MultiEraTx<'_>) -> Option<u8> {
+  tx.network_id().map(|n| n.into())
+}
+
+fn get_voting_procedures(tx: &MultiEraTx<'_>) -> Vec<governance::VotingProcedureEntry> {
+  let conway_tx = match tx.as_conway() {
+    Some(x) => x,
+    None => return vec![],
+  };
+
+  match &conway_tx.transaction_body.voting_procedures {
+    Some(vp) => governance::voting_procedures_to_napi(vp),
+    None => vec![],
+  }
+}
+
+fn get_proposal_procedures(tx: &MultiEraTx<'_>) -> Vec<governance::ProposalProcedure> {
+  tx.gov_proposals()
+    .iter()
+    .map(|p| governance::proposal_procedure_to_napi(p))
+    .collect()
+}
+
+fn get_treasury_value(tx: &MultiEraTx<'_>) -> Option<i64> {
+  tx.as_conway().and_then(|x| {
+    x.transaction_body
+      .treasury_value
+      .as_ref()
+      .map(|v| *v as i64)
+  })
+}
+
+fn get_donation(tx: &MultiEraTx<'_>) -> Option<i64> {
+  tx.as_conway().and_then(|x| {
+    x.transaction_body
+      .donation
+      .as_ref()
+      .map(|v| u64::from(v) as i64)
+  })
 }
 
 pub(crate) fn parse_tx_from_multiera(
@@ -299,9 +417,11 @@ pub(crate) fn parse_tx_from_multiera(
   let mints = get_mints(tx);
   let metadata = get_metadata(tx);
   let withdrawals = get_withdrawals(tx);
-  let certificates = get_certificates(tx);
-  let collateral = get_collaterals(tx);
+  let certificates = crate::certs::get_certificates(tx);
+  let collateral = get_collaterals(tx)?;
   let witnesses = get_witnesses(tx);
+  let auxiliary_scripts = get_auxiliary_scripts(tx);
+  let auxiliary_data_hash = get_auxiliary_data_hash(tx);
 
   let cbor = if include_cbor {
     Some(hex::encode(tx.encode()))
@@ -309,19 +429,34 @@ pub(crate) fn parse_tx_from_multiera(
     None
   };
 
-  Ok(CborResponse::new().with_cbor_attr(
-    tx.clone(),
+  Ok(CborResponse {
+    tx_hash: tx.hash().to_string(),
+    fee: tx.fee().map(|x| x as i64),
+    era: tx.era().to_string(),
+    validity_start: tx.validity_start().map(|v| v as i64),
+    ttl: tx.ttl().map(|v| v as i64),
     inputs,
     reference_inputs,
     outputs,
     mints,
+    scripts_successful: tx.is_valid(),
     metadata,
     withdrawals,
     certificates,
     collateral,
     witnesses,
+    auxiliary_scripts,
+    auxiliary_data_hash,
+    size: tx.size() as i64,
     cbor,
-  ))
+    script_data_hash: get_script_data_hash(tx),
+    required_signers: get_required_signers(tx),
+    network_id: get_network_id(tx),
+    voting_procedures: get_voting_procedures(tx),
+    proposal_procedures: get_proposal_procedures(tx),
+    treasury_value: get_treasury_value(tx),
+    donation: get_donation(tx),
+  })
 }
 
 pub fn cbor_to_tx(raw: String) -> SafeCborResponse {

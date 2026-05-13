@@ -14,6 +14,7 @@ import {
   isOutputUtxo,
   trimString,
   updateUtxoLines,
+  utxoKey,
 } from "~/app/_utils";
 
 interface UtxoProps {
@@ -69,9 +70,6 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
   const handleUtxoMoveEnd =
     (utxoHash: string) => (e: KonvaEventObject<DragEvent>) => {
       const { x, y } = e.currentTarget.position();
-      const utxoHashMap = Object.keys(transactions.utxos).find(
-        (utxo) => utxo === utxoHash,
-      );
       setTransactionBox((prev) => ({
         ...prev,
         transactions: prev.transactions.map((tx) => {
@@ -79,12 +77,12 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
           return {
             ...tx,
             inputs: tx.inputs.map((utxo) =>
-              utxo.txHash === utxoHashMap
+              utxoKey(utxo.txHash, utxo.index) === utxoHash
                 ? { ...utxo, distance: newPos }
                 : utxo,
             ),
             outputs: tx.outputs.map((utxo) =>
-              utxo.txHash === utxoHashMap
+              utxoKey(utxo.txHash, utxo.index) === utxoHash
                 ? { ...utxo, distance: newPos }
                 : utxo,
             ),
@@ -164,7 +162,7 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
     }, "");
     return accc + actual;
   }, "")}`
-    : `txHash: ${trimString(utxo.txHash.slice(0, -2), 10)}\nIndex: ${utxo.index}\n`;
+    : `txHash: ${trimString(utxo.txHash, 10)}\nIndex: ${utxo.index}\n`;
   return (
     <>
       <Circle

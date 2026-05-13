@@ -1,10 +1,13 @@
 import type {
   Assets,
-  Certificates,
+  AuxiliaryScripts,
+  Certificate,
   Collateral,
   Datum,
   Metadata,
-  Withdrawal,
+  ProposalProcedure,
+  VotingProcedureEntry,
+  RewardWithdrawal as Withdrawal,
   Witnesses,
 } from "@laceanatomy/napi-pallas";
 import type Konva from "konva";
@@ -39,12 +42,22 @@ export interface IGraphicalTransaction {
   ttl?: number;
   metadata?: Metadata[];
   withdrawals?: Withdrawal[];
-  certificates?: Certificates[];
+  certificates?: Certificate[];
   collateral?: Collateral;
   witnesses?: Witnesses;
+  auxiliaryScripts: AuxiliaryScripts;
+  auxiliaryDataHash?: string;
   size: number;
   alias: string;
   warning?: string;
+  cbor?: string;
+  scriptDataHash?: string;
+  requiredSigners: string[];
+  networkId?: number;
+  votingProcedures: VotingProcedureEntry[];
+  proposalProcedures: ProposalProcedure[];
+  treasuryValue?: number;
+  donation?: number;
 }
 
 export interface IGraphicalUtxo {
@@ -67,5 +80,6 @@ export interface Address {
   headerType: string;
   netType: string;
   payment: string;
+  delegation?: string;
   kind: "key" | "script";
 }
