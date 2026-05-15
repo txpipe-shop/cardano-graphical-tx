@@ -8,14 +8,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@heroui/react";
+import type { ValidationResponse } from "@laceanatomy/napi-pallas";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import ValidationView from "~/app/_components/ValidationView";
 import { DissectSection, Header } from "~/app/_components";
 import { DetailTabs } from "~/app/_components/DetailTabs";
 import { parseTxToGraphical } from "~/app/_components/Input/TxInput/txInput.helper";
 import CborView from "~/app/_components/shared/CborView";
 import { type IGraphicalTransaction } from "~/app/_interfaces";
-import { getTxFromCbor } from "~/app/_utils";
+import { getTxFromCbor, validateTx } from "~/app/_utils";
 import { NETWORK, type Network } from "~/app/_utils/network-config";
 
 const NETWORKS = Object.values(NETWORK);
@@ -67,6 +69,9 @@ export default function CborPage() {
   const [parseError, setParseError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("dissect");
+  const [validationLoading, setValidationLoading] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResponse | null>(null);
 
   useEffect(() => {
     const hashParam = searchParams.get("hash");
@@ -205,6 +210,23 @@ export default function CborPage() {
     }
   }, [currentCbor, network]);
 
+  const handleValidate = useCallback(async () => {
+    if (!currentCbor) return;
+    setValidationLoading(true);
+    setValidationError(null);
+    setValidationResult(null);
+    try {
+      const result = await validateTx(currentCbor, network);
+      setValidationResult(result);
+    } catch (e) {
+      setValidationError(
+        e instanceof Error ? e.message : "Validation failed",
+      );
+    } finally {
+      setValidationLoading(false);
+    }
+  }, [currentCbor, network]);
+
   const tabs = [
     {
       key: "dissect",
@@ -235,9 +257,32 @@ export default function CborPage() {
     {
       key: "validation",
       title: "Validation",
-      content: (
+      content: validationLoading ? (
+        <div className="flex flex-1 items-center justify-center text-p-secondary">
+          Validating...
+        </div>
+      ) : validationError ? (
         <div className="flex flex-1 items-center justify-center p-6">
-          <p className="text-center text-p-secondary">Validation coming soon</p>
+          <p className="whitespace-pre-wrap text-center text-red-2">
+            {validationError}
+          </p>
+        </div>
+      ) : validationResult ? (
+        <div className="flex-1 min-h-0 overflow-auto">
+          <ValidationView validation={validationResult} />
+        </div>
+      ) : (
+        <div className="flex flex-1 items-center justify-center p-6">
+          <Button
+            size="sm"
+            variant="flat"
+            className="font-mono shadow-md"
+            onPress={handleValidate}
+            isLoading={validationLoading}
+            isDisabled={!currentCbor}
+          >
+            Run Validation
+          </Button>
         </div>
       ),
     },

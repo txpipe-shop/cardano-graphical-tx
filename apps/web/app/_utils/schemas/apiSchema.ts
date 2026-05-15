@@ -24,3 +24,9 @@ export const getTxFromHashSchema = z.object({
 export const getAddressFromScema = z.object({
   raw: z.string({ required_error: "Address is required" }),
 });
+
+export const validateTxSchema = z.object({
+  network: networkSchema,
+  cbor: z.string({ required_error: "CBOR is required" }),
+  slot: z.number().optional(),
+});

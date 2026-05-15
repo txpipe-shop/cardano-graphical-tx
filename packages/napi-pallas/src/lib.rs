@@ -15,6 +15,8 @@ mod tx;
 mod utils;
 mod validate;
 
+pub use validate::{ValidationCheck, ValidationResponse};
+
 #[derive(Clone)]
 #[napi(object)]
 pub struct Datum {
