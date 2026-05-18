@@ -465,13 +465,9 @@ function UtxoDetail({ utxo }: { utxo: IGraphicalUtxo }) {
       {utxo.datum && (
         <div>
           <DetailLabel>Datum</DetailLabel>
-          <div className="font-mono text-sm break-all text-p-primary">
-            {utxo.datum.hash}
-          </div>
+          <SubField label="Hash" value={utxo.datum.hash} mono />
           {utxo.datum.bytes && (
-            <pre className="mt-2 text-xs font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-60 overflow-y-auto border border-border bg-explorer-row/30 p-3 rounded">
-              {utxo.datum.bytes}
-            </pre>
+            <SubField label="Bytes" value={utxo.datum.bytes} mono />
           )}
         </div>
       )}
@@ -509,39 +505,41 @@ function AssetsList({ assets }: { assets: Assets[] }) {
               {assetsPolicy.map((a, k) => (
                 <div
                   key={k}
-                  className="flex items-center gap-3 text-sm w-full justify-between"
+                  className="grid grid-cols-[1fr_minmax(160px,160px)_80px] gap-3 items-start text-sm w-full"
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold text-p-secondary">
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-p-secondary">
                       Hex name
-                    </span>
-                    <span className="font-mono flex-1 min-w-0 truncate">
+                    </div>
+                    <div className="font-mono truncate text-sm">
                       {a.assetName}
-                    </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold text-p-secondary">
+
+                  <div className="text-right">
+                    <div className="text-xs font-bold text-p-secondary">
                       Ascii name
-                    </span>
+                    </div>
                     {a.assetNameAscii ? (
                       <Tooltip content={a.assetNameAscii} delay={300} size="sm">
-                        <span className="text-p-secondary flex-shrink-0 max-w-[160px] truncate cursor-default">
+                        <div className="text-p-secondary truncate max-w-[160px] ml-auto">
                           {a.assetNameAscii}
-                        </span>
+                        </div>
                       </Tooltip>
                     ) : (
-                      <span className="text-p-secondary flex-shrink-0 max-w-[160px] truncate">
+                      <div className="text-p-secondary truncate max-w-[160px] ml-auto">
                         —
-                      </span>
+                      </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold text-p-secondary">
+
+                  <div className="text-right">
+                    <div className="text-xs font-bold text-p-secondary">
                       Amount
-                    </span>
-                    <span className="font-mono font-bold flex-shrink-0 w-36 text-right text-xs">
+                    </div>
+                    <div className="font-mono font-bold text-xs">
                       {a.amount?.toFixed(0) ?? 0}
-                    </span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -690,13 +688,9 @@ function CollateralDetail({ col }: { col: CollateralType }) {
                 {ref.datum && (
                   <div>
                     <DetailLabel>Datum</DetailLabel>
-                    <div className="font-mono text-sm break-all text-p-primary">
-                      {ref.datum.hash}
-                    </div>
+                    <SubField label="Hash" value={ref.datum.hash} mono />
                     {ref.datum.bytes && (
-                      <pre className="mt-2 text-xs font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-60 overflow-y-auto border border-border bg-explorer-row/30 p-3 rounded">
-                        {ref.datum.bytes}
-                      </pre>
+                      <SubField label="Bytes" value={ref.datum.bytes} mono />
                     )}
                   </div>
                 )}
