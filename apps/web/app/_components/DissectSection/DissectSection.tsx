@@ -306,7 +306,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
   }
 
   return (
-    <div className="flex flex-col min-h-0 w-full">
+    <div className="flex h-full min-h-0 w-full flex-col">
       <div className="flex flex-col md:flex-row md:items-center gap-4 pb-4 mb-4 border-b border-border flex-shrink-0">
         <div className="flex items-center gap-3 flex-shrink-0">
           <span className="font-mono text-base font-bold text-accent-blue">
@@ -399,7 +399,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
             })}
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-auto p-4 pt-4">
+          <div className="flex h-full min-h-0 flex-1 flex-col overflow-auto p-4 pt-4">
             {activeItem && GROUP_TOPIC_KEY[activeItem.group] && (
               <p className="mb-4 text-xs text-p-secondary leading-relaxed border-b border-border pb-3">
                 {TOPICS[GROUP_TOPIC_KEY[activeItem.group]!]}

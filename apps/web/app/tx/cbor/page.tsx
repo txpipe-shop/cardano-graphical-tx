@@ -11,11 +11,11 @@ import {
 import type { ValidationResponse } from "@laceanatomy/napi-pallas";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import ValidationView from "~/app/_components/ValidationView";
 import { DissectSection, Header } from "~/app/_components";
 import { DetailTabs } from "~/app/_components/DetailTabs";
 import { parseTxToGraphical } from "~/app/_components/Input/TxInput/txInput.helper";
 import CborView from "~/app/_components/shared/CborView";
+import ValidationView from "~/app/_components/ValidationView";
 import { type IGraphicalTransaction } from "~/app/_interfaces";
 import { getTxFromCbor, validateTx } from "~/app/_utils";
 import { NETWORK, type Network } from "~/app/_utils/network-config";
@@ -71,7 +71,8 @@ export default function CborPage() {
   const [activeTab, setActiveTab] = useState("dissect");
   const [validationLoading, setValidationLoading] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [validationResult, setValidationResult] = useState<ValidationResponse | null>(null);
+  const [validationResult, setValidationResult] =
+    useState<ValidationResponse | null>(null);
 
   useEffect(() => {
     const hashParam = searchParams.get("hash");
@@ -219,9 +220,7 @@ export default function CborPage() {
       const result = await validateTx(currentCbor, network);
       setValidationResult(result);
     } catch (e) {
-      setValidationError(
-        e instanceof Error ? e.message : "Validation failed",
-      );
+      setValidationError(e instanceof Error ? e.message : "Validation failed");
     } finally {
       setValidationLoading(false);
     }
@@ -328,8 +327,8 @@ export default function CborPage() {
           </Button>
         </div>
 
-        <div className="flex flex-1 flex-col gap-4 md:flex-row md:min-h-0">
-          <div className="flex flex-1 flex-col min-h-0">
+        <div className="flex flex-1 flex-col gap-4 overflow-hidden md:min-h-0 md:flex-row">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             <CborView
               cbor={initialCbor}
               variant="single"
@@ -348,7 +347,7 @@ export default function CborPage() {
             />
           </div>
 
-          <div className="flex flex-1 flex-col min-h-0 rounded-lg border border-border bg-surface p-4">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface p-4">
             <DetailTabs
               tabs={tabs}
               defaultTab="dissect"
