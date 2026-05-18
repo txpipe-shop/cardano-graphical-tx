@@ -48,12 +48,13 @@ export default function CborView({
     () => ({
       base: "min-h-0 flex-1",
       mainWrapper: "min-h-0 flex-1",
-      inputWrapper: "min-h-0 h-full flex-1 items-stretch",
+      inputWrapper:
+        "min-h-0 h-full flex-1 items-stretch rounded-lg !border-2 !border-border !shadow-none bg-surface data-[hover=true]:!border-border group-data-[focus=true]:!border-p-primary",
       innerWrapper: "min-h-0 h-full flex-1",
       input:
         variant === "single"
-          ? "min-h-0 h-full flex-1 resize-none overflow-auto font-mono text-sm"
-          : "min-h-[500px] resize-none overflow-auto font-mono text-sm",
+          ? "min-h-0 h-full flex-1 resize-none overflow-auto font-mono text-sm outline-none"
+          : "min-h-[500px] resize-none overflow-auto font-mono text-sm outline-none",
     }),
     [variant],
   );
@@ -129,7 +130,7 @@ export default function CborView({
             minRows={32}
             disableAutosize
             classNames={textareaClassNames}
-            variant="bordered"
+            variant="flat"
           />
 
           <div className="flex shrink-0 justify-center gap-2">
