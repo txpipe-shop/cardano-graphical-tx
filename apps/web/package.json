@@ -20,7 +20,7 @@
     "@codemirror/state": "^6.5.3",
     "@codemirror/view": "^6.39.9",
     "@heroui/accordion": "2.2.26",
-    "@heroui/react": "2.8.7",
+    "@heroui/react": "3.0.5",
     "@heroui/tabs": "2.2.26",
     "@heroui/theme": "2.4.25",
     "@laceanatomy/cardano-provider-dolos": "workspace:*",
