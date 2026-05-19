@@ -18,7 +18,7 @@
     "@codemirror/lang-json": "^6.0.1",
     "@codemirror/lint": "^6.9.2",
     "@codemirror/state": "^6.5.3",
-    "@codemirror/view": "^6.39.9",
+    "@codemirror/view": "^6.43.0",
     "@heroui/accordion": "2.2.26",
     "@heroui/react": "2.8.7",
     "@heroui/tabs": "2.2.26",
