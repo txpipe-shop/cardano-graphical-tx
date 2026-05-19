@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     console.error(err);
     const zodErr = err as { issues?: Array<{ message: string }> };
     if (zodErr.issues) {
-      const errors = zodErr.issues.map((issue) => issue.message);
+      const errors = zodErr.issues.map((issue) => issue.message).join(", ");
       return new Response(null, {
         status: StatusCodes.BAD_REQUEST,
         statusText: errors,

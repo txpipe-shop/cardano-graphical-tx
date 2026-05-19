@@ -37,7 +37,7 @@ export const getTransactionURL = (network: Network, hash: string) => {
 
 const parseQuery = (
   route: (typeof API_ROUTES)[keyof typeof API_ROUTES],
-  query: Record<string, unknown>,
+  query: Record<string, string>,
 ) => {
   const url = new URL(route, window.location.origin);
   Object.keys(query).forEach((key) => {
@@ -138,7 +138,7 @@ export const getAddressInfo = async (
     return responseJson || "Unknown error";
   } catch (error: unknown) {
     console.error("Error processing Address:", error);
-    setError(error.statusText);
+    setError((error as Response).statusText);
     throw error;
   }
 };

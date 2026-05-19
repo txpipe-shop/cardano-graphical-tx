@@ -1,18 +1,21 @@
-import { useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 
-interface IUseLocalStorage {
+interface IUseLocalStorage<T> {
   key: string;
-  initialState: Record<string, unknown>;
+  initialState: T;
 }
 
-export const useLocalStorage = ({ key, initialState }: IUseLocalStorage) => {
-  const [state, setState] = useState(initialState);
+export const useLocalStorage = <T,>({
+  key,
+  initialState,
+}: IUseLocalStorage<T>) => {
+  const [state, setState] = useState<T>(initialState);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const item = localStorage.getItem(key);
     if (item) {
-      const parsedItem = JSON.parse(item);
+      const parsedItem = JSON.parse(item) as T;
       if (JSON.stringify(parsedItem) !== JSON.stringify(initialState)) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setState(parsedItem);
@@ -29,5 +32,5 @@ export const useLocalStorage = ({ key, initialState }: IUseLocalStorage) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, isInitialized]);
 
-  return [state, setState];
+  return [state, setState] as [T, Dispatch<SetStateAction<T>>];
 };

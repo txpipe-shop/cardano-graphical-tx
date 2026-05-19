@@ -108,7 +108,9 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
     }
   };
 
-  const pendingClickRef = useRef<ReturnType<typeof setTimeout>>();
+  const pendingClickRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   const handleClick = () => {
     clearTimeout(pendingClickRef.current);
     pendingClickRef.current = setTimeout(function () {

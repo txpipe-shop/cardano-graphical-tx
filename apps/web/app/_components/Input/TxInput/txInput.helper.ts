@@ -309,7 +309,7 @@ export const setITransaction = (
     });
   } catch (error: unknown) {
     console.error(`Error processing CBOR`, error);
-    setError(error.statusText);
+    setError((error as Response).statusText);
   } finally {
     setLoading(false);
   }
@@ -382,7 +382,7 @@ const setCBORs = async (
     });
   } catch (error: unknown) {
     console.error(`Error processing ${fromHash ? "hash" : "CBOR"}:`, error);
-    setError(error.statusText);
+    setError((error as Response).statusText);
   } finally {
     setLoading(false);
   }
@@ -644,7 +644,7 @@ export async function addDevnetCBORsToContext(
           : error.message,
       );
     } else {
-      setError(error.statusText);
+      setError((error as Response).statusText);
     }
   } finally {
     setLoading(false);
