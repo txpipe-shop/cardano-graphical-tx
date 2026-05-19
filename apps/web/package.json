@@ -77,7 +77,7 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.2.6",
     "nextjs-node-loader": "^1.1.9",
-    "postcss": "^8.4.39",
+    "postcss": "^8.5.10",
     "postcss-cli": "^11.0.0",
     "prettier": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
