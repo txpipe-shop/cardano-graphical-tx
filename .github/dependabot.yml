@@ -5,7 +5,7 @@
 
 version: 2
 updates:
-  - package-system: 'pnpm' # Tells Dependabot to look for pnpm-lock.yaml
+  - package-ecosystem: 'npm' # Tells Dependabot to look for pnpm-lock.yaml
     directory: '/'
     schedule:
       interval: 'weekly' # Checks for updates once a week
