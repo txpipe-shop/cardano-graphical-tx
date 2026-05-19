@@ -44,7 +44,7 @@
     "@vitest/coverage-v8": "^4.0.18",
     "dotenv": "^17.2.3",
     "typescript": "^5.0.0",
-    "vitest": "^4.0.16",
+    "vitest": "^4.1.6",
     "zod": "^4.0.14"
   }
 }
