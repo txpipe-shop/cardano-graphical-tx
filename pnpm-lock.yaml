@@ -674,8 +674,8 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       emnapi:
-        specifier: ^1.5.0
-        version: 1.8.1(node-addon-api@7.1.1)
+        specifier: ^1.10.0
+        version: 1.10.0(node-addon-api@7.1.1)
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -5167,8 +5167,8 @@ packages:
     resolution: {integrity: sha512-KxdRyyFcS85pH3dnU8Y5yFUm2YJdaHwcBZWrfG8o89ZY9a13/f9itbN+YG3ELbBo9Pg5zvIozstmuV8bX13q6g==}
     engines: {node: '>=14.16'}
 
-  emnapi@1.8.1:
-    resolution: {integrity: sha512-34i2BbgHx1LnEO4JCGQYo6h6s4e4KrdWtdTHfllBNLbXSHPmdIHplxKejfabsRK+ukNciqVdalB+fxMibqHdaQ==}
+  emnapi@1.10.0:
+    resolution: {integrity: sha512-swoyZjupDvLoe/KC3HZ4SY1JUN+tviT6eOZ3Px28TZAYdBHtRIiMWWrIUUH+2/9CYY4fNTID1YhYZ+kdFHszHg==}
     peerDependencies:
       node-addon-api: '>= 6.1.0'
     peerDependenciesMeta:
@@ -10829,7 +10829,7 @@ snapshots:
       '@octokit/rest': 22.0.1
       clipanion: 4.0.0-rc.4(typanion@3.14.0)
       colorette: 2.0.20
-      emnapi: 1.8.1(node-addon-api@7.1.1)
+      emnapi: 1.10.0(node-addon-api@7.1.1)
       es-toolkit: 1.43.0
       js-yaml: 4.1.1
       obug: 2.1.1
@@ -13739,7 +13739,7 @@ snapshots:
 
   emittery@1.2.0: {}
 
-  emnapi@1.8.1(node-addon-api@7.1.1):
+  emnapi@1.10.0(node-addon-api@7.1.1):
     optionalDependencies:
       node-addon-api: 7.1.1
 
