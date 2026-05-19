@@ -28,13 +28,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@connectrpc/connect": "1.4",
+    "@connectrpc/connect": "2.1",
     "@laceanatomy/blockfrost-sdk": "workspace:*",
     "@laceanatomy/cardano-provider-u5c": "workspace:*",
     "@laceanatomy/provider-core": "workspace:*",
     "@laceanatomy/types": "workspace:*",
     "@laceanatomy/utxorpc-sdk": "workspace:*",
-    "@utxorpc/spec": "^0.18.1",
+    "@utxorpc/spec": "^0.19.0",
     "assert": "^2.1.0",
     "buffer": "^6.0.3"
   },
