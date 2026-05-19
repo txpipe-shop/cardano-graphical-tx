@@ -214,12 +214,14 @@ async function loadAddressStats({
 
 function OverviewStat({
   label,
-  value,
-}: Readonly<{ label: string; value: React.ReactNode }>) {
+  children,
+}: Readonly<{ label: string; children?: React.ReactNode }>) {
   return (
     <div className="rounded-lg border-2 border-dashed border-border bg-background p-4 shadow-md">
       <div className="text-xs font-medium text-p-secondary">{label}</div>
-      <div className="mt-2 text-sm leading-relaxed text-p-primary">{value}</div>
+      <div className="mt-2 text-sm leading-relaxed text-p-primary">
+        {children}
+      </div>
     </div>
   );
 }
@@ -405,101 +407,91 @@ export default async function AddressDetailPage({
         <div className="rounded-lg border-2 border-dashed border-border bg-surface shadow-md">
           <div className="p-4">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <OverviewStat
-                label="Total Value"
-                value={
+              <OverviewStat label="Total Value">
+                <div className="space-y-2">
+                  <div className="font-mono">ADA: {formatAda(lovelace)}</div>
+                  {tokenEntries.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {tokenEntries.slice(0, 3).map(([unit, amount]) => (
+                        <TokenPill
+                          key={unit}
+                          unit={unit as Unit}
+                          amount={amount}
+                        />
+                      ))}
+                      {tokenEntries.length > 3 && (
+                        <span className="rounded-full border border-border bg-explorer-row px-3 py-1 text-xs text-p-secondary">
+                          +{tokenEntries.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </OverviewStat>
+
+              <OverviewStat label="Transaction Count">
+                {txCount.toString()}
+              </OverviewStat>
+
+              <OverviewStat label="First Seen">
+                {funds.firstSeen ? (
                   <div className="space-y-2">
-                    <div className="font-mono">ADA: {formatAda(lovelace)}</div>
-                    {tokenEntries.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {tokenEntries.slice(0, 3).map(([unit, amount]) => (
-                          <TokenPill
-                            key={unit}
-                            unit={unit as Unit}
-                            amount={amount}
-                          />
-                        ))}
-                        {tokenEntries.length > 3 && (
-                          <span className="rounded-full border border-border bg-explorer-row px-3 py-1 text-xs text-p-secondary">
-                            +{tokenEntries.length - 3} more
-                          </span>
+                    <div className="font-mono text-xs">
+                      Block{" "}
+                      <Link
+                        href={ROUTES.EXPLORER_BLOCK(
+                          chain,
+                          funds.firstSeen.blockHeight.toString(),
                         )}
-                      </div>
+                        className="hover:underline"
+                      >
+                        {funds.firstSeen.blockHeight.toString()}
+                      </Link>
+                    </div>
+                    <div className="font-mono text-xs">
+                      Slot {funds.firstSeen.slot.toString()}
+                    </div>
+                    {firstSeen.timestamp !== undefined && (
+                      <DateViewer
+                        timestamp={firstSeen.timestamp}
+                        className="text-xs text-p-secondary"
+                      />
                     )}
                   </div>
-                }
-              />
+                ) : (
+                  <span className="text-p-secondary">—</span>
+                )}
+              </OverviewStat>
 
-              <OverviewStat
-                label="Transaction Count"
-                value={txCount.toString()}
-              />
-
-              <OverviewStat
-                label="First Seen"
-                value={
-                  funds.firstSeen ? (
-                    <div className="space-y-2">
-                      <div className="font-mono text-xs">
-                        Block{" "}
-                        <Link
-                          href={ROUTES.EXPLORER_BLOCK(
-                            chain,
-                            funds.firstSeen.blockHeight.toString(),
-                          )}
-                          className="hover:underline"
-                        >
-                          {funds.firstSeen.blockHeight.toString()}
-                        </Link>
-                      </div>
-                      <div className="font-mono text-xs">
-                        Slot {funds.firstSeen.slot.toString()}
-                      </div>
-                      {firstSeen.timestamp !== undefined && (
-                        <DateViewer
-                          timestamp={firstSeen.timestamp}
-                          className="text-xs text-p-secondary"
-                        />
-                      )}
+              <OverviewStat label="Last Seen">
+                {funds.lastSeen ? (
+                  <div className="space-y-2">
+                    <div className="font-mono text-xs">
+                      Block{" "}
+                      <Link
+                        href={ROUTES.EXPLORER_BLOCK(
+                          chain,
+                          funds.lastSeen.blockHeight.toString(),
+                        )}
+                        className="hover:underline"
+                      >
+                        {funds.lastSeen.blockHeight.toString()}
+                      </Link>
                     </div>
-                  ) : (
-                    <span className="text-p-secondary">—</span>
-                  )
-                }
-              />
-
-              <OverviewStat
-                label="Last Seen"
-                value={
-                  funds.lastSeen ? (
-                    <div className="space-y-2">
-                      <div className="font-mono text-xs">
-                        Block{" "}
-                        <Link
-                          href={ROUTES.EXPLORER_BLOCK(
-                            chain,
-                            funds.lastSeen.blockHeight.toString(),
-                          )}
-                          className="hover:underline"
-                        >
-                          {funds.lastSeen.blockHeight.toString()}
-                        </Link>
-                      </div>
-                      <div className="font-mono text-xs">
-                        Slot {funds.lastSeen.slot.toString()}
-                      </div>
-                      {lastSeen.timestamp !== undefined && (
-                        <DateViewer
-                          timestamp={lastSeen.timestamp}
-                          className="text-xs text-p-secondary"
-                        />
-                      )}
+                    <div className="font-mono text-xs">
+                      Slot {funds.lastSeen.slot.toString()}
                     </div>
-                  ) : (
-                    <span className="text-p-secondary">—</span>
-                  )
-                }
-              />
+                    {lastSeen.timestamp !== undefined && (
+                      <DateViewer
+                        timestamp={lastSeen.timestamp}
+                        className="text-xs text-p-secondary"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-p-secondary">—</span>
+                )}
+              </OverviewStat>
             </div>
           </div>
 
