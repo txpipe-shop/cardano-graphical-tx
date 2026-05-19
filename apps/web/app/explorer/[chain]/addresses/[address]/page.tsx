@@ -2,6 +2,7 @@ import { parseAddress } from "@laceanatomy/napi-pallas";
 import { type AddressFundsRes } from "@laceanatomy/provider-core";
 import {
   Address as AddressValue,
+  cardano,
   HexString,
   hexToBech32,
   isBase58,
@@ -75,41 +76,30 @@ function isNotFoundError(error: unknown): boolean {
   );
 }
 
-function resolveStakePrefix(chain: Network): string {
-  return chain === NETWORK.MAINNET ? "stake" : "stake_test";
-}
-
 function resolveDisplayAddress(
   raw: string,
   kind: string | undefined,
   chain: Network,
+  normalized?: Address,
 ): string {
   if (isBech32(raw) || isBase58(raw)) return raw;
   if (!isHexString(raw)) return raw;
 
-  const prefix =
-    kind === "Stake"
-      ? resolveStakePrefix(chain)
-      : getNetworkConfig(chain).addressPrefix;
+  const fallbackPrefix = getNetworkConfig(chain).addressPrefix;
+
+  let prefix: string | null = null;
+  if (kind === "Stake") {
+    prefix =
+      cardano.addressToBech32Prefix((normalized ?? raw) as Address) ?? null;
+  }
+
+  const finalPrefix = prefix ?? fallbackPrefix;
+
   try {
-    return hexToBech32(HexString(raw), prefix);
+    return hexToBech32(HexString(raw), finalPrefix);
   } catch {
     return raw;
   }
-}
-
-function resolveShelleyTypeLabel(
-  addressInfo: NonNullable<ReturnType<typeof parseAddress>["address"]>,
-): string {
-  const payment = addressInfo.paymentPart;
-  const delegation = addressInfo.delegationPart;
-
-  if (delegation?.pointer) return "Pointer address";
-  if (delegation?.hash && payment) return "Base address (payment & delegation)";
-  if (payment && !delegation?.hash && !delegation?.pointer)
-    return "Base address (payment only)";
-
-  return "Shelley";
 }
 
 function resolveTypeLabel(
@@ -127,7 +117,7 @@ function resolveTypeLabel(
   if (kind === "Byron") return "Byron Legacy";
   if (kind === "Stake") return "Reward address";
 
-  if (kind === "Shelley") return resolveShelleyTypeLabel(addressInfo);
+  if (kind === "Shelley") return cardano.resolveShelleyTypeLabel(addressInfo);
 
   return "Unknown";
 }
@@ -308,7 +298,12 @@ export default async function AddressDetailPage({
 
   const addressInfo = addressInfoRes.address;
   const typeLabel = resolveTypeLabel(addressInfo, raw);
-  const displayAddress = resolveDisplayAddress(raw, addressInfo?.kind, chain);
+  const displayAddress = resolveDisplayAddress(
+    raw,
+    addressInfo?.kind,
+    chain,
+    normalizedAddress,
+  );
 
   const basePath = `/explorer/${chain}/addresses/${encodeURIComponent(raw)}`;
 

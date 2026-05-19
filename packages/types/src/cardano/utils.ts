@@ -25,3 +25,17 @@ export function addressToBech32Prefix(addr: Address): string | null {
 
   return null;
 }
+
+export function resolveShelleyTypeLabel(addressInfo: {
+  paymentPart?: unknown;
+  delegationPart?: { pointer?: unknown; hash?: unknown };
+}): string {
+  const payment = addressInfo.paymentPart;
+  const delegation = addressInfo.delegationPart;
+
+  if (delegation?.pointer) return 'Pointer address';
+  if (delegation?.hash && payment) return 'Base address (payment & delegation)';
+  if (payment && !delegation?.hash && !delegation?.pointer) return 'Base address (payment only)';
+
+  return 'Shelley';
+}
