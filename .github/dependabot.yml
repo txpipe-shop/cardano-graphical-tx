@@ -1,12 +1,78 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
-  - package-ecosystem: 'npm' # Tells Dependabot to look for pnpm-lock.yaml
-    directory: '/'
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: 'weekly' # Checks for updates once a week
-    open-pull-requests-limit: 5 # Optional: Prevents getting flooded with PRs
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      connectrpc:
+        patterns:
+          - "@bufbuild/protobuf"
+          - "@connectrpc/*"
+          - "@utxorpc/spec"
+      nextjs:
+        patterns:
+          - "next"
+          - "@next/*"
+          - "eslint-config-next"
+          - "nextjs-*"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+          - "react-konva"
+          - "react-*"
+      trpc:
+        patterns:
+          - "@trpc/*"
+      heroui:
+        patterns:
+          - "@heroui/*"
+      fastify:
+        patterns:
+          - "fastify"
+          - "fastify-*"
+          - "@fastify/*"
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+      typescript-eslint:
+        patterns:
+          - "@typescript-eslint/*"
+      svelte:
+        patterns:
+          - "svelte"
+          - "svelte-*"
+          - "@sveltejs/*"
+      tailwindcss:
+        patterns:
+          - "tailwindcss"
+          - "tailwind-*"
+          - "@tailwindcss/*"
+          - "postcss"
+          - "autoprefixer"
+      codemirror:
+        patterns:
+          - "@codemirror/*"
+          - "codemirror"
+          - "@uiw/react-codemirror"
+      tanstack:
+        patterns:
+          - "@tanstack/*"
+      framer-motion:
+        patterns:
+          - "framer-motion"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - "*"
