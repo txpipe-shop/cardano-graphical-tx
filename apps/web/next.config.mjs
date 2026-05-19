@@ -17,7 +17,7 @@ const nextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    config.externals = [...config.externals, { canvas: "canvas" }]; // required to make Konva & react-konva work
+    config.externals = [...config.externals, { canvas: "canvas" }];
 
     if (!isServer) {
       config.externals = [...config.externals, "@connectrpc/connect-node"];
@@ -43,6 +43,7 @@ const nextConfig = {
 
     return config;
   },
+  turbopack: {},
 };
 
 export default nextConfig;
