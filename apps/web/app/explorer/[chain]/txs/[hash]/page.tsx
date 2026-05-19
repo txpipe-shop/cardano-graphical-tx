@@ -12,8 +12,8 @@ import DevnetTxTabs from "./DevnetTxTabs";
 import { loadPageData } from "./_utils";
 
 interface Props {
-  params: { chain: string; hash: string };
-  searchParams?: { tab?: string };
+  params: Promise<{ chain: string; hash: string }>;
+  searchParams?: Promise<{ tab?: string }>;
 }
 
 function resolveTab(tab?: string): TxTab {
@@ -26,12 +26,12 @@ function resolveTab(tab?: string): TxTab {
 }
 
 export default async function TxPage({ params, searchParams }: Props) {
-  const hash = params.hash;
-  const chainParam = params.chain || NETWORK.MAINNET;
+  const { hash, chain: chainParam } = await params;
+  const searchParamsAwaited = searchParams ? await searchParams : undefined;
   const chain: Network = isValidChain(chainParam)
     ? chainParam
     : NETWORK.MAINNET;
-  const tabParam = searchParams?.tab;
+  const tabParam = searchParamsAwaited?.tab;
   const tab = resolveTab(tabParam);
 
   if (chain === NETWORK.DEVNET) {
