@@ -18,7 +18,7 @@ import { BlocksList } from "./BlocksList";
 import DevnetTransactionsList from "./DevnetTransactionsList";
 
 interface ExplorerPageProps {
-  params: { chain: string };
+  params: Promise<{ chain: string }>;
 }
 
 async function TransactionsList({ chain }: { chain: Network }) {
@@ -69,7 +69,7 @@ async function TransactionsList({ chain }: { chain: Network }) {
 }
 
 export default async function ExplorerTxsPage({ params }: ExplorerPageProps) {
-  const chainParam = params.chain || NETWORK.MAINNET;
+  const { chain: chainParam } = await params;
   const chain: Network = isValidChain(chainParam)
     ? chainParam
     : NETWORK.MAINNET;

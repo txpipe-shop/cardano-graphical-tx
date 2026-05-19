@@ -15,7 +15,7 @@ export async function loadPageData({ chain, hash }: PageData) {
     const formData = new FormData();
     formData.append("tx", cbor);
 
-    const requestHeaders = headers();
+    const requestHeaders = await headers();
     const host =
       requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
     const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
