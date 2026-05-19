@@ -2,9 +2,7 @@ await import("./app/env.mjs");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ["@laceanatomy/napi-pallas"],
-  },
+  serverExternalPackages: ["@laceanatomy/napi-pallas"],
   reactStrictMode: true,
   images: {
     remotePatterns: [
