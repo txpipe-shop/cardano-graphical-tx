@@ -30,6 +30,7 @@ export function useCborDiagnostic(
 
   useEffect(() => {
     if (!cbor) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCborText("");
       setDiagnosticText("");
       setDecodeError(null);

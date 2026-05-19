@@ -151,6 +151,7 @@ export function Playground({ fillMode = "window" }: PlaygroundProps) {
   }, [dimensions, transactions.transactions.length, setTransactionBox]);
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transactions.transactions.forEach((tx: any) => {
       if (tx.warning) {
         const warningKey = `${tx.txHash}-${tx.warning}`;

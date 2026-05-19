@@ -14,9 +14,9 @@ import {
   trimString,
 } from "~/app/_utils";
 import CopyIcon from "~/public/copy.svg";
+import FullScreen from "~/public/fullscreen.svg";
 import { AssetCard } from "./AssetCard";
 import { JSONModal } from "./JSONModal";
-import FullScreen from "/public/fullscreen.svg";
 
 export const TxInfo = () => {
   const [name, setName] = useState("");
@@ -32,6 +32,7 @@ export const TxInfo = () => {
 
   useEffect(() => {
     const selectedTx = getTransaction(transactions)(selectedTxHash || "");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setName(selectedTx?.alias || "");
   }, [selectedTxHash, transactions]);
 

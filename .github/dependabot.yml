@@ -8,64 +8,64 @@ updates:
     groups:
       connectrpc:
         patterns:
-          - "@bufbuild/protobuf"
-          - "@connectrpc/*"
-          - "@utxorpc/spec"
+          - '@bufbuild/protobuf'
+          - '@connectrpc/*'
+          - '@utxorpc/spec'
       nextjs:
         patterns:
-          - "next"
-          - "@next/*"
-          - "eslint-config-next"
-          - "nextjs-*"
+          - 'next'
+          - '@next/*'
+          - 'eslint-config-next'
+          - 'nextjs-*'
       react:
         patterns:
-          - "react"
-          - "react-dom"
-          - "@types/react"
-          - "@types/react-dom"
-          - "react-konva"
-          - "react-*"
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+          - 'react-konva'
+          - 'react-*'
       trpc:
         patterns:
-          - "@trpc/*"
+          - '@trpc/*'
       heroui:
         patterns:
-          - "@heroui/*"
+          - '@heroui/*'
       fastify:
         patterns:
-          - "fastify"
-          - "fastify-*"
-          - "@fastify/*"
+          - 'fastify'
+          - 'fastify-*'
+          - '@fastify/*'
       vitest:
         patterns:
-          - "vitest"
-          - "@vitest/*"
+          - 'vitest'
+          - '@vitest/*'
       typescript-eslint:
         patterns:
-          - "@typescript-eslint/*"
+          - '@typescript-eslint/*'
       svelte:
         patterns:
-          - "svelte"
-          - "svelte-*"
-          - "@sveltejs/*"
+          - 'svelte'
+          - 'svelte-*'
+          - '@sveltejs/*'
       tailwindcss:
         patterns:
-          - "tailwindcss"
-          - "tailwind-*"
-          - "@tailwindcss/*"
-          - "postcss"
-          - "autoprefixer"
+          - 'tailwindcss'
+          - 'tailwind-*'
+          - '@tailwindcss/*'
+          - 'postcss'
+          - 'autoprefixer'
       codemirror:
         patterns:
-          - "@codemirror/*"
-          - "codemirror"
-          - "@uiw/react-codemirror"
+          - '@codemirror/*'
+          - 'codemirror'
+          - '@uiw/react-codemirror'
       tanstack:
         patterns:
-          - "@tanstack/*"
+          - '@tanstack/*'
       framer-motion:
         patterns:
-          - "framer-motion"
+          - 'framer-motion'
 
   - package-ecosystem: github-actions
     directory: /
@@ -75,4 +75,4 @@ updates:
     groups:
       actions:
         patterns:
-          - "*"
+          - '*'

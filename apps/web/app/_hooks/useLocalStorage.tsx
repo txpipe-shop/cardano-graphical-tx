@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 
 interface IUseLocalStorage {
   key: string;
-  initialState: {
-    [key: string]: any;
-  };
+  initialState: Record<string, unknown>;
 }
 
 export const useLocalStorage = ({ key, initialState }: IUseLocalStorage) => {
@@ -16,6 +14,7 @@ export const useLocalStorage = ({ key, initialState }: IUseLocalStorage) => {
     if (item) {
       const parsedItem = JSON.parse(item);
       if (JSON.stringify(parsedItem) !== JSON.stringify(initialState)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setState(parsedItem);
       }
     }

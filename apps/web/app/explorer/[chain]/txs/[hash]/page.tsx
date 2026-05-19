@@ -60,6 +60,7 @@ export default async function TxPage({ params, searchParams }: Props) {
       chain,
       hash: Hash(hash),
     });
+    /* eslint-disable react-hooks/error-boundaries */
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <Header />

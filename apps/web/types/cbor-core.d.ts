@@ -230,6 +230,7 @@ declare module "cbor-core" {
   // ============================================================
   //  CborException — thrown on all CBOR errors
   // ============================================================
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   class CborException extends Error {
     constructor(message: string);
   }
@@ -250,6 +251,7 @@ declare module "cbor-core" {
   // ============================================================
   //  DiagnosticNotation — parser for CBOR diagnostic notation
   // ============================================================
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   class DiagnosticNotation {
     static ParserError: typeof ParserError;
     constructor(cborText: string, sequenceMode: boolean);
@@ -259,6 +261,7 @@ declare module "cbor-core" {
     getObject(): CborObject;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   class ParserError extends Error {
     constructor(message: string);
   }

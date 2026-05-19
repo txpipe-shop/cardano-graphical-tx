@@ -38,6 +38,7 @@ export default function TxTabs({
   const { setTransactionBox, dimensions } = useGraphical();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActive(initialTab);
   }, [initialTab]);
 

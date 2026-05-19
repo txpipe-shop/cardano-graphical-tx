@@ -24,7 +24,7 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
     const cbor = await cborRes.json();
     const parsedData = BlockfrostResponseSchema.parse(cbor);
     return Response.json(parsedData);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
     if (err instanceof ZodError) {
       return Response.json(
@@ -42,26 +42,28 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
       return Response.json({ cbor: "", warning: ERRORS.internal_error });
     }
 
-    if (err.status === StatusCodes.NOT_FOUND) {
-      return Response.json(
-        {
-          error:
-            "Transaction not found. Check your hash or try using another network",
-        },
-        {
-          status: err.status,
-          statusText:
-            "Transaction not found. Check your hash or try using another network",
-        },
-      );
-    } else if (err.status !== StatusCodes.OK) {
-      return Response.json(
-        { error: err.statusText },
-        {
-          status: err.status,
-          statusText: err.statusText,
-        },
-      );
+    if (err instanceof Response) {
+      if (err.status === StatusCodes.NOT_FOUND) {
+        return Response.json(
+          {
+            error:
+              "Transaction not found. Check your hash or try using another network",
+          },
+          {
+            status: err.status,
+            statusText:
+              "Transaction not found. Check your hash or try using another network",
+          },
+        );
+      } else if (err.status !== StatusCodes.OK) {
+        return Response.json(
+          { error: err.statusText },
+          {
+            status: err.status,
+            statusText: err.statusText,
+          },
+        );
+      }
     }
     return Response.json(
       { error: ReasonPhrases.INTERNAL_SERVER_ERROR },
