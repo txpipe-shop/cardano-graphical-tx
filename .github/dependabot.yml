@@ -5,8 +5,8 @@
 
 version: 2
 updates:
-  - package-system: "pnpm" # Tells Dependabot to look for pnpm-lock.yaml
-    directory: "/"
+  - package-system: 'pnpm' # Tells Dependabot to look for pnpm-lock.yaml
+    directory: '/'
     schedule:
-      interval: "weekly"     # Checks for updates once a week
+      interval: 'weekly' # Checks for updates once a week
     open-pull-requests-limit: 5 # Optional: Prevents getting flooded with PRs
