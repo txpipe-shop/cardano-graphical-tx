@@ -29,7 +29,7 @@
     "access": "public"
   },
   "dependencies": {
-    "axios": "^1.11.0"
+    "axios": "^1.15.2"
   },
   "devDependencies": {
     "@laceanatomy/typescript-config": "workspace:*",
