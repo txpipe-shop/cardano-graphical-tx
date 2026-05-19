@@ -49,7 +49,7 @@
     "json-bigint": "^1.0.0",
     "jsonpointer": "^5.0.1",
     "konva": "^9.3.13",
-    "next": "^14.2.22",
+    "next": "^15.5.18",
     "next-auth": "^4.24.7",
     "next-themes": "^0.2.1",
     "nextjs-toploader": "^3.9.17",
