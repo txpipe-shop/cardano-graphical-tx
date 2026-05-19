@@ -1,4 +1,8 @@
-import { Network, NETWORK_CONFIGS_BASE, NetworkConfig } from "~/app/_utils";
+import {
+  type Network,
+  NETWORK_CONFIGS_BASE,
+  type NetworkConfig,
+} from "~/app/_utils";
 import { env } from "~/app/env.mjs";
 
 const NETWORK_CONFIGS_SERVER: Record<Network, NetworkConfig> = {

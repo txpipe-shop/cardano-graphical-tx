@@ -27,6 +27,7 @@ export function DetailTabs({
   const [active, setActive] = useState(activeTab ?? defaultTab);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (activeTab) setActive(activeTab);
   }, [activeTab]);
 

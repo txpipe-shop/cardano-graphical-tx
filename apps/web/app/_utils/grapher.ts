@@ -23,8 +23,8 @@ export const updateLines =
   ) => {
     const selectedTx = getTransaction(transactions)(txHash);
     if (!selectedTx) return;
-    let newTransaction = { ...selectedTx };
-    let newUtxos = { ...transactions.utxos };
+    const newTransaction = { ...selectedTx };
+    const newUtxos = { ...transactions.utxos };
 
     selectedTx.producedLines.forEach((line) => {
       if (!line) return;

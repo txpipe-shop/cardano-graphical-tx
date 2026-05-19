@@ -37,7 +37,7 @@ export const getTransactionURL = (network: Network, hash: string) => {
 
 const parseQuery = (
   route: (typeof API_ROUTES)[keyof typeof API_ROUTES],
-  query: Record<string, any>,
+  query: Record<string, unknown>,
 ) => {
   const url = new URL(route, window.location.origin);
   Object.keys(query).forEach((key) => {
@@ -59,7 +59,7 @@ export const getTxFromDevnetCBOR = async (
     if (res.status !== StatusCodes.OK) throw res;
     const data = await res.json();
     return data;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
     throw err;
   }
@@ -84,7 +84,7 @@ export const getTxFromCbor = async (
     if (data.warning) console.warn(data.warning);
 
     return data as ITransaction;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
     throw err;
   }
@@ -136,7 +136,7 @@ export const getAddressInfo = async (
 
     const responseJson = await res.json();
     return responseJson || "Unknown error";
-  } catch (error: Response | any) {
+  } catch (error: unknown) {
     console.error("Error processing Address:", error);
     setError(error.statusText);
     throw error;

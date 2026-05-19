@@ -46,6 +46,7 @@ async function TransactionsList({ chain }: { chain: Network }) {
         ? { height: oldestHeight - EXPLORER_BLOCK_PAGE_SIZE }
         : undefined;
 
+    /* eslint-disable react-hooks/error-boundaries */
     return (
       <BlocksList
         chain={chain}

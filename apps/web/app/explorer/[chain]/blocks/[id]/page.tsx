@@ -95,6 +95,7 @@ export default async function BlockPage({ params, searchParams }: Props) {
       ? await provider.getBlockCBOR(blockReq)
       : null;
 
+    /* eslint-disable react-hooks/error-boundaries */
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
@@ -120,6 +121,7 @@ export default async function BlockPage({ params, searchParams }: Props) {
         </main>
       </div>
     );
+    /* eslint-enable react-hooks/error-boundaries */
   } catch (err) {
     console.error(err);
     return (

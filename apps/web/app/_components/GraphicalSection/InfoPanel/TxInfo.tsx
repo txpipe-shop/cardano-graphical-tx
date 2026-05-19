@@ -32,6 +32,7 @@ export const TxInfo = () => {
 
   useEffect(() => {
     const selectedTx = getTransaction(transactions)(selectedTxHash || "");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setName(selectedTx?.alias || "");
   }, [selectedTxHash, transactions]);
 

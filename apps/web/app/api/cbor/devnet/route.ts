@@ -17,10 +17,11 @@ export async function POST(req: Request) {
     return Response.json({
       tx: txRes.cborRes,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    if (err.issues) {
-      const errors = err.issues.map((issue: any) => issue.message);
+    const zodErr = err as { issues?: Array<{ message: string }> };
+    if (zodErr.issues) {
+      const errors = zodErr.issues.map((issue) => issue.message);
       return new Response(null, {
         status: StatusCodes.BAD_REQUEST,
         statusText: errors,
