@@ -61,7 +61,7 @@
     "@laceanatomy/utxorpc-sdk": "workspace:*",
     "@connectrpc/connect": "1.4",
     "@connectrpc/connect-node": "1.4",
-    "@connectrpc/connect-web": "1.4",
+    "@connectrpc/connect-web": "2.1",
     "@connectrpc/protoc-gen-connect-es": "^1.4.0",
     "@utxorpc/spec": "^0.18.1",
     "assert": "^2.1.0",
