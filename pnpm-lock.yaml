@@ -404,8 +404,8 @@ importers:
         specifier: ^2.4.1
         version: 2.4.1(csstype@3.2.3)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react-intersection-observer:
-        specifier: ^9.8.0
-        version: 9.13.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: ^10.0.3
+        version: 10.0.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       react-konva:
         specifier: ^19.0.1
         version: 19.2.4(@types/react@19.2.14)(konva@9.3.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -7399,11 +7399,11 @@ packages:
       react: '>=16'
       react-dom: '>=16'
 
-  react-intersection-observer@9.13.0:
-    resolution: {integrity: sha512-y0UvBfjDiXqC8h0EWccyaj4dVBWMxgEx0t5RGNzQsvkfvZwugnKwxpu70StY4ivzYuMajavwUDjH4LJyIki9Lw==}
+  react-intersection-observer@10.0.3:
+    resolution: {integrity: sha512-luICLMbs0zxTO/70Zy7K5jOXkABPEVSAF8T3FdZUlctsrIaPLmx8TZe2SSA+CY2HGWfz2INyNTnp82pxNNsShA==}
     peerDependencies:
-      react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-      react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
     peerDependenciesMeta:
       react-dom:
         optional: true
@@ -16125,7 +16125,7 @@ snapshots:
     transitivePeerDependencies:
       - csstype
 
-  react-intersection-observer@9.13.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
+  react-intersection-observer@10.0.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
     dependencies:
       react: 19.2.6
     optionalDependencies:
