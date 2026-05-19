@@ -74,7 +74,7 @@
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^15.5.18",
+    "eslint-config-next": "^16.2.6",
     "nextjs-node-loader": "^1.1.5-alpha.0",
     "postcss": "^8.4.39",
     "postcss-cli": "^11.0.0",
