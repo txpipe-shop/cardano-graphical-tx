@@ -1,16 +1,14 @@
 import { parseAddress } from "@laceanatomy/napi-pallas";
 import { type AddressFundsRes } from "@laceanatomy/provider-core";
 import {
-  Address as AddressValue,
+  Address,
   cardano,
   HexString,
   hexToBech32,
   isBase58,
   isBech32,
   isHexString,
-  Unit as UnitValue,
-  type Address,
-  type Unit,
+  Unit,
 } from "@laceanatomy/types";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -24,7 +22,7 @@ import DateViewer from "~/app/_components/ExplorerSection/DateViewer";
 import TokenPill from "~/app/_components/ExplorerSection/TokenPill";
 import { TxTableSkeleton } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
-import { DEFAULT_DEVNET_PORT, ROUTES } from "~/app/_utils/constants";
+import { ROUTES } from "~/app/_utils/constants";
 import { formatAda } from "~/app/_utils/explorer";
 import {
   getNetworkConfig,
@@ -32,8 +30,6 @@ import {
   NETWORK,
   type Network,
 } from "~/app/_utils/network-config";
-import { getDolosProvider } from "~/server/api/dolos-provider";
-import { getU5CProviderNode } from "~/server/api/u5c-provider";
 import AddressTabs, { type AddressTab } from "./_components/AddressTabs";
 import { AddressTxList, getAddressTxPage } from "./_components/AddressTxList";
 import {
@@ -44,8 +40,8 @@ import {
 export const revalidate = 10;
 
 interface Props {
-  params: { chain: string; address: string };
-  searchParams?: { tab?: string; page?: string };
+  params: Promise<{ chain: string; address: string }>;
+  searchParams?: Promise<{ tab?: string; page?: string }>;
 }
 const ADDRESS_TABS: AddressTab[] = ["Dissect", "UTxOs", "Transactions"];
 
@@ -56,13 +52,6 @@ function resolveTab(tab?: string): AddressTab {
     (candidate) => candidate.toLowerCase() === normalized,
   );
   return match ?? "Dissect";
-}
-
-function resolveProvider(chain: Network) {
-  if (chain === NETWORK.DEVNET) {
-    return getU5CProviderNode(Number.parseInt(DEFAULT_DEVNET_PORT, 10));
-  }
-  return getDolosProvider(chain);
 }
 
 function isNotFoundError(error: unknown): boolean {
@@ -142,7 +131,7 @@ async function loadAddressStats({
 }>): Promise<AddressStats> {
   const result: AddressStats = {
     funds: {
-      value: { [UnitValue("lovelace")]: 0n },
+      value: { [Unit("lovelace")]: 0n },
       txCount: 0n,
     },
     statsError: null,
@@ -152,8 +141,7 @@ async function loadAddressStats({
     lastSeen: {},
   };
 
-  const [fundsRes, utxosRes, txsRes] = await Promise.allSettled([
-    resolveProvider(chain).getAddressFunds({ address: normalizedAddress }),
+  const [utxosRes, txsRes] = await Promise.allSettled([
     getAddressUTxOsPage({
       chain,
       address: normalizedAddress,
@@ -166,15 +154,15 @@ async function loadAddressStats({
     }),
   ]);
 
-  if (fundsRes.status === "fulfilled") {
-    result.funds = fundsRes.value;
-  } else if (!isNotFoundError(fundsRes.reason)) {
-    console.error(fundsRes.reason);
-    result.statsError = "Address stats are unavailable right now.";
-  }
-
   if (utxosRes.status === "fulfilled") {
     result.utxoCount = BigInt(utxosRes.value.data.length);
+
+    let lovelaceSum = 0n;
+    for (const utxo of utxosRes.value.data) {
+      lovelaceSum += utxo.coin ?? 0n;
+    }
+
+    result.funds.value[Unit("lovelace")] = lovelaceSum;
   } else if (!isNotFoundError(utxosRes.reason)) {
     console.error(utxosRes.reason);
     result.statsError = "Address stats are unavailable right now.";
@@ -253,17 +241,20 @@ export default async function AddressDetailPage({
   params,
   searchParams,
 }: Readonly<Props>) {
-  const chainParam = params.chain || NETWORK.MAINNET;
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+
+  const chainParam = resolvedParams.chain || NETWORK.MAINNET;
   const chain: Network = isValidChain(chainParam)
     ? chainParam
     : NETWORK.MAINNET;
-  const raw = params.address;
-  const tab = resolveTab(searchParams?.tab);
-  const page = Math.max(1, Number(searchParams?.page) || 1);
+  const raw = resolvedParams.address;
+  const tab = resolveTab(resolvedSearchParams?.tab);
+  const page = Math.max(1, Number(resolvedSearchParams?.page) || 1);
 
   let normalizedAddress: Address;
   try {
-    normalizedAddress = AddressValue(raw);
+    normalizedAddress = Address(raw);
   } catch {
     return (
       <div className="flex min-h-screen flex-col bg-background">
