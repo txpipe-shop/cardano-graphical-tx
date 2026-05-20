@@ -41,10 +41,10 @@
     "@laceanatomy/provider-tests": "workspace:*",
     "@laceanatomy/typescript-config": "workspace:*",
     "@types/pg": "^8.11.10",
-    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/coverage-v8": "^4.1.6",
     "dotenv": "^17.2.3",
     "typescript": "^5.0.0",
-    "vitest": "^4.0.16",
+    "vitest": "^4.1.6",
     "zod": "^4.0.14"
   }
 }
