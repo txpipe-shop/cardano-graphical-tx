@@ -45,7 +45,7 @@
     "tw-animate-css": "^1.3.6",
     "typescript": "^5.0.0",
     "typescript-eslint": "^8.20.0",
-    "vite": "^7.0.4"
+    "vite": "^7.3.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
