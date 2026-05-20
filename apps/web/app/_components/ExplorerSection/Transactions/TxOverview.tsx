@@ -88,15 +88,19 @@ function ExternalLinkIcon() {
   );
 }
 
-function UtxoList({
+export function UtxoList({
   title,
   list,
   mint,
+  showAddress = true,
 }: {
   title: string;
   list: cardano.UTxO[];
   mint?: Value;
+  showAddress?: boolean;
 }) {
+  const params = useParams();
+  const chain = (params?.chain as Network) ?? "mainnet";
   if (list.length === 0) return null;
   return (
     <Card className="shadow-none border border-default-200">
@@ -123,10 +127,12 @@ function UtxoList({
                   />
                 </div>
               </div>
-              <div>
-                <p className="text-xs font-bold text-p-secondary">Address</p>
-                <ColoredAddress address={utxo.address} />
-              </div>
+              {showAddress && (
+                <div>
+                  <p className="text-xs font-bold text-p-secondary">Address</p>
+                  <ColoredAddress address={utxo.address} />
+                </div>
+              )}
               <div>
                 <p className="text-xs font-bold text-p-secondary">Coin</p>
                 <Chip
@@ -140,9 +146,15 @@ function UtxoList({
               <div className="flex items-center gap-2">
                 <p className="text-xs font-bold text-p-secondary">Has Datum</p>
                 {utxo.datum ? (
-                  <Chip size="sm" variant="dot" color="success">
-                    Yes
-                  </Chip>
+                  <Link
+                    href={`${ROUTES.EXPLORER_TX(chain, utxo.outRef.hash)}?tab=Datum`}
+                    className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-p-secondary shadow-sm transition-colors hover:bg-explorer-row"
+                  >
+                    <span className="text-success">
+                      <ExternalLinkIcon />
+                    </span>
+                    View
+                  </Link>
                 ) : (
                   <Chip size="sm" variant="dot" color="danger">
                     No
@@ -187,7 +199,7 @@ function UtxoList({
           <thead className="text-p-secondary font-medium border-b bg-explorer-row">
             <tr>
               <th className="px-4 py-3">TxOut Ref</th>
-              <th className="px-4 py-3">Address</th>
+              {showAddress && <th className="px-4 py-3">Address</th>}
               <th className="px-4 py-3">Coin</th>
               <th className="px-4 py-3">Has Datum</th>
               <th className="px-4 py-3">Has Script</th>
@@ -209,11 +221,13 @@ function UtxoList({
                     />
                   </div>
                 </td>
-                <td className="px-4 py-3 font-mono align-top bg-surface">
-                  <div className="flex items-center gap-2">
-                    <ColoredAddress address={utxo.address} />
-                  </div>
-                </td>
+                {showAddress && (
+                  <td className="px-4 py-3 font-mono align-top bg-surface">
+                    <div className="flex items-center gap-2">
+                      <ColoredAddress address={utxo.address} />
+                    </div>
+                  </td>
+                )}
                 <td className="px-4 py-3 font-mono align-top bg-surface">
                   <Chip
                     size="sm"
@@ -225,9 +239,15 @@ function UtxoList({
                 </td>
                 <td className="px-4 py-3 align-top bg-surface">
                   {utxo.datum ? (
-                    <Chip size="sm" variant="dot" color="success">
-                      Yes
-                    </Chip>
+                    <Link
+                      href={`${ROUTES.EXPLORER_TX(chain, utxo.outRef.hash)}?tab=Datum`}
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-p-secondary shadow-sm transition-colors hover:bg-explorer-row"
+                    >
+                      <span className="text-success">
+                        <ExternalLinkIcon />
+                      </span>
+                      View
+                    </Link>
                   ) : (
                     <Chip size="sm" variant="dot" color="danger">
                       No
