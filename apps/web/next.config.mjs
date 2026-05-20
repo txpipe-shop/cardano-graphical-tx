@@ -4,18 +4,6 @@ await import("./app/env.mjs");
 const nextConfig = {
   serverExternalPackages: ["@laceanatomy/napi-pallas"],
   reactStrictMode: true,
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-      },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-      },
-    ],
-  },
   webpack: (config, { isServer }) => {
     config.externals = [...config.externals, { canvas: "canvas" }];
 

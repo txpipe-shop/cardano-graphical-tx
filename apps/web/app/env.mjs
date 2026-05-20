@@ -7,12 +7,6 @@ export const env = createEnv({
    * Will throw if you access these variables on the client.
    */
   server: {
-    GITHUB_CLIENT_ID: z.string(),
-    GITHUB_CLIENT_SECRET: z.string(),
-    GOOGLE_CLIENT_ID: z.string(),
-    GOOGLE_CLIENT_SECRET: z.string(),
-    NEXTAUTH_SECRET: z.string(),
-    NEXTAUTH_URL: z.string().url(),
     NODE_ENV: z.string(),
     PREPROD_BLOCKFROST_KEY: z.string(),
     MAINNET_BLOCKFROST_KEY: z.string(),
@@ -51,12 +45,6 @@ export const env = createEnv({
     PREVIEW_BLOCKFROST_KEY: process.env.PREVIEW_BLOCKFROST_KEY,
     NEXT_PUBLIC_CBOR_ENDPOINT: process.env.NEXT_PUBLIC_CBOR_ENDPOINT,
     NEXT_PUBLIC_GA_TRACKING_ID: process.env.NEXT_PUBLIC_GA_TRACKING_ID,
-    GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
-    GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     NODE_ENV: process.env.NODE_ENV,
     MAINNET_DOLOS_BLOCKFROST_URL: process.env.MAINNET_DOLOS_BLOCKFROST_URL,
     PREPROD_DOLOS_BLOCKFROST_URL: process.env.PREPROD_DOLOS_BLOCKFROST_URL,
