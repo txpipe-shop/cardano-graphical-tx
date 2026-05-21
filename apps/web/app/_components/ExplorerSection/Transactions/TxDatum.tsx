@@ -7,7 +7,8 @@ import {
   type Datum,
   type OutRef,
 } from "@laceanatomy/types";
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { useCborDiagnostic } from "~/app/_hooks/useCborDiagnostic";
 import CopyButton from "../CopyButton";
 
@@ -17,6 +18,8 @@ interface DatumItem {
 }
 
 export default function TxDatum({ tx }: { tx: cardano.Tx }) {
+  const searchParams = useSearchParams();
+  const datumRefParam = searchParams.get("txOutRef");
   const inputsWithDatum = useMemo(
     () =>
       tx.inputs
@@ -33,11 +36,37 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
     [tx.outputs],
   );
 
-  const [activeTab, setActiveTab] = useState<DatumItem | null>(() => {
-    if (inputsWithDatum.length > 0) return inputsWithDatum[0]!;
-    if (outputsWithDatum.length > 0) return outputsWithDatum[0]!;
-    return null;
-  });
+  const parsedRef = useMemo(() => {
+    if (!datumRefParam) return null;
+    const [hash, indexRaw] = datumRefParam.split("#");
+    if (!hash || !indexRaw) return null;
+    try {
+      return { hash, index: BigInt(indexRaw) };
+    } catch {
+      return null;
+    }
+  }, [datumRefParam]);
+
+  const matchedDatum = useMemo(() => {
+    if (!parsedRef) return null;
+    const all = [...inputsWithDatum, ...outputsWithDatum];
+    return (
+      all.find(
+        (item) =>
+          item.ref.hash === parsedRef.hash &&
+          item.ref.index === parsedRef.index,
+      ) ?? null
+    );
+  }, [inputsWithDatum, outputsWithDatum, parsedRef]);
+
+  const [activeTab, setActiveTab] = useState<DatumItem | null>(
+    matchedDatum ?? inputsWithDatum[0] ?? outputsWithDatum[0] ?? null,
+  );
+
+  useEffect(() => {
+    if (!matchedDatum) return;
+    setActiveTab(matchedDatum);
+  }, [matchedDatum]);
 
   const activeCbor =
     activeTab?.datum?.type === DatumType.INLINE && activeTab.datum.datumHex

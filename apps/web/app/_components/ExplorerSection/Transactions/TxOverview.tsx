@@ -93,11 +93,13 @@ export function UtxoList({
   list,
   mint,
   showAddress = true,
+  linkTxHash,
 }: {
   title: string;
   list: cardano.UTxO[];
   mint?: Value;
   showAddress?: boolean;
+  linkTxHash?: string;
 }) {
   const params = useParams();
   const chain = (params?.chain as Network) ?? "mainnet";
@@ -147,7 +149,7 @@ export function UtxoList({
                 <p className="text-xs font-bold text-p-secondary">Has Datum</p>
                 {utxo.datum ? (
                   <Link
-                    href={`${ROUTES.EXPLORER_TX(chain, utxo.outRef.hash)}?tab=Datum`}
+                    href={`${ROUTES.EXPLORER_TX(chain, linkTxHash ?? utxo.outRef.hash)}?tab=Datum&txOutRef=${encodeURIComponent(`${utxo.outRef.hash}#${utxo.outRef.index.toString()}`)}`}
                     className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-p-secondary shadow-sm transition-colors hover:bg-explorer-row"
                   >
                     <span className="text-success">
@@ -240,7 +242,7 @@ export function UtxoList({
                 <td className="px-4 py-3 align-top bg-surface">
                   {utxo.datum ? (
                     <Link
-                      href={`${ROUTES.EXPLORER_TX(chain, utxo.outRef.hash)}?tab=Datum`}
+                      href={`${ROUTES.EXPLORER_TX(chain, linkTxHash ?? utxo.outRef.hash)}?tab=Datum&txOutRef=${encodeURIComponent(`${utxo.outRef.hash}#${utxo.outRef.index.toString()}`)}`}
                       className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-p-secondary shadow-sm transition-colors hover:bg-explorer-row"
                     >
                       <span className="text-success">
@@ -330,13 +332,24 @@ export default function TxOverview({ tx }: TxOverviewProps) {
   return (
     <div className="space-y-6">
       <OverviewStats tx={tx} />
-      <UtxoList title="Inputs" list={tx.inputs} mint={tx.mint} />
-      <UtxoList title="Outputs" list={tx.outputs} mint={tx.mint} />
+      <UtxoList
+        title="Inputs"
+        list={tx.inputs}
+        mint={tx.mint}
+        linkTxHash={tx.hash}
+      />
+      <UtxoList
+        title="Outputs"
+        list={tx.outputs}
+        mint={tx.mint}
+        linkTxHash={tx.hash}
+      />
       {tx.referenceInputs && tx.referenceInputs.length > 0 ? (
         <UtxoList
           title="Reference Inputs"
           list={tx.referenceInputs}
           mint={tx.mint}
+          linkTxHash={tx.hash}
         />
       ) : (
         <Card className="shadow-none border border-border bg-surface">
