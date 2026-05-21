@@ -2,24 +2,10 @@ await import("./app/env.mjs");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ["@laceanatomy/napi-pallas"],
-  },
+  serverExternalPackages: ["@laceanatomy/napi-pallas"],
   reactStrictMode: true,
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-      },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-      },
-    ],
-  },
   webpack: (config, { isServer }) => {
-    config.externals = [...config.externals, { canvas: "canvas" }]; // required to make Konva & react-konva work
+    config.externals = [...config.externals, { canvas: "canvas" }];
 
     if (!isServer) {
       config.externals = [...config.externals, "@connectrpc/connect-node"];
@@ -45,6 +31,7 @@ const nextConfig = {
 
     return config;
   },
+  turbopack: {},
 };
 
 export default nextConfig;

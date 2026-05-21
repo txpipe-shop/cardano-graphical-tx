@@ -13,8 +13,8 @@ import { getDolosProvider } from "~/server/api/dolos-provider";
 import DevnetBlockTabs from "./DevnetBlockTabs";
 
 interface Props {
-  params: { chain: string; id: string };
-  searchParams?: { tab?: string; page?: string };
+  params: Promise<{ chain: string; id: string }>;
+  searchParams?: Promise<{ tab?: string; page?: string }>;
 }
 
 function resolveTab(tab?: string): BlockTab {
@@ -39,14 +39,14 @@ function resolveBlockReq(
 }
 
 export default async function BlockPage({ params, searchParams }: Props) {
-  const id = params.id;
-  const chainParam = params.chain || NETWORK.MAINNET;
+  const { id, chain: chainParam } = await params;
+  const searchParamsAwaited = searchParams ? await searchParams : undefined;
   const chain: Network = isValidChain(chainParam)
     ? chainParam
     : NETWORK.MAINNET;
-  const tabParam = searchParams?.tab;
+  const tabParam = searchParamsAwaited?.tab;
   const tab = resolveTab(tabParam);
-  const txPage = Math.max(1, Number(searchParams?.page) || 1);
+  const txPage = Math.max(1, Number(searchParamsAwaited?.page) || 1);
 
   const blockReq = resolveBlockReq(id);
 
@@ -95,6 +95,7 @@ export default async function BlockPage({ params, searchParams }: Props) {
       ? await provider.getBlockCBOR(blockReq)
       : null;
 
+    /* eslint-disable react-hooks/error-boundaries */
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
@@ -120,6 +121,7 @@ export default async function BlockPage({ params, searchParams }: Props) {
         </main>
       </div>
     );
+    /* eslint-enable react-hooks/error-boundaries */
   } catch (err) {
     console.error(err);
     return (

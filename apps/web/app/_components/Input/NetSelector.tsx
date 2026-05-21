@@ -73,6 +73,7 @@ export const NetSelector = ({ network }: NetSelectorProps) => {
   useEffect(() => {
     setError("");
     if (configs.net !== NETWORK.DEVNET) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNetStatus("success");
     } else {
       const port = configs.port || DEFAULT_DEVNET_PORT;

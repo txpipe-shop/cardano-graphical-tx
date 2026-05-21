@@ -18,6 +18,7 @@ export const MultipleInputModal = ({
 
   useEffect(() => {
     if (transactions.transactions.length === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNewTxs(
       transactions.transactions.map((tx) => ({
         type: OPTIONS.HASH,

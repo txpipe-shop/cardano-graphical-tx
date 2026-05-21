@@ -2,7 +2,7 @@
 
 ## What is being built and when?
 
-This entire repo is being built on each push to `main`
+The docker image is built manually via `workflow_dispatch` — go to Actions → "Build and push dockers" → "Run workflow"
 
 ## How is this all being built?
 
@@ -12,7 +12,8 @@ It's built as a docker image through this [workflow](https://github.com/txpipe-s
 
 If you've just added a PR and you want this deployed. Do the following:
 
-1. Check if docker image was built and published successfully (green checkmark on latest `main` commit).
+1. Go to Actions → "Build and push dockers" → "Run workflow" to trigger a build on `main`.
+2. Check if docker image was built and published successfully (green checkmark on the workflow run).
 
 2. Copy the first **7** characters of the commit.
 

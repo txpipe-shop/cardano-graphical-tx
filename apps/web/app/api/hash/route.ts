@@ -8,9 +8,9 @@ export async function GET(req: NextRequest) {
   try {
     const { network, txId } = getTxFromHashSchema.parse(getQuery(req.url));
     return await hashHandler({ network, hash: txId });
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof ZodError) {
-      const errors = err.issues.map((issue: any) => issue.message).join(", ");
+      const errors = err.issues.map((issue) => issue.message).join(", ");
       return new Response(null, {
         status: StatusCodes.BAD_REQUEST,
         statusText: errors,

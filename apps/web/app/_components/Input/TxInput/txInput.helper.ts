@@ -242,7 +242,7 @@ export const setPositions = (
       blocks.size === 1
         ? 0
         : Array.from(blocks).findIndex((block) => block === tx.blockHeight);
-    let indexInBlock = normalizedBlockIndex[tx.blockHeight ?? -1]!.findIndex(
+    const indexInBlock = normalizedBlockIndex[tx.blockHeight ?? -1]!.findIndex(
       (txHash) => txHash === tx.txHash,
     );
     // Gap between blocks. Its zero if the tx is the first in the block
@@ -278,8 +278,8 @@ export const setITransaction = (
       dimensions,
     );
 
-    let newUtxosObject: UtxoObject = { ...existingTxs.utxos };
-    let newTransactionsList: IGraphicalTransaction[] = [
+    const newUtxosObject: UtxoObject = { ...existingTxs.utxos };
+    const newTransactionsList: IGraphicalTransaction[] = [
       ...existingTxs.transactions,
     ];
 
@@ -307,9 +307,9 @@ export const setITransaction = (
       transactions: newTransactionsList,
       utxos: newUtxosObject,
     });
-  } catch (error: Response | any) {
+  } catch (error: unknown) {
     console.error(`Error processing CBOR`, error);
-    setError(error.statusText);
+    setError((error as Response).statusText);
   } finally {
     setLoading(false);
   }
@@ -350,8 +350,8 @@ const setCBORs = async (
       dimensions,
     );
 
-    let newUtxosObject: UtxoObject = { ...existingTxs.utxos };
-    let newTransactionsList: IGraphicalTransaction[] = [
+    const newUtxosObject: UtxoObject = { ...existingTxs.utxos };
+    const newTransactionsList: IGraphicalTransaction[] = [
       ...existingTxs.transactions,
     ];
 
@@ -380,9 +380,9 @@ const setCBORs = async (
       transactions: newTransactionsList,
       utxos: newUtxosObject,
     });
-  } catch (error: Response | any) {
+  } catch (error: unknown) {
     console.error(`Error processing ${fromHash ? "hash" : "CBOR"}:`, error);
-    setError(error.statusText);
+    setError((error as Response).statusText);
   } finally {
     setLoading(false);
   }
@@ -606,8 +606,8 @@ export async function addDevnetCBORsToContext(
       dimensions,
     );
 
-    let newUtxosObject: UtxoObject = { ...transactions.utxos };
-    let newTransactionsList: IGraphicalTransaction[] = [
+    const newUtxosObject: UtxoObject = { ...transactions.utxos };
+    const newTransactionsList: IGraphicalTransaction[] = [
       ...transactions.transactions,
     ];
 
@@ -635,7 +635,7 @@ export async function addDevnetCBORsToContext(
       transactions: newTransactionsList,
       utxos: newUtxosObject,
     });
-  } catch (error: Response | any) {
+  } catch (error: unknown) {
     console.error(error);
     if (error instanceof Error) {
       setError(
@@ -644,7 +644,7 @@ export async function addDevnetCBORsToContext(
           : error.message,
       );
     } else {
-      setError(error.statusText);
+      setError((error as Response).statusText);
     }
   } finally {
     setLoading(false);

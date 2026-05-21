@@ -1,0 +1,78 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      connectrpc:
+        patterns:
+          - '@bufbuild/protobuf'
+          - '@connectrpc/*'
+          - '@utxorpc/spec'
+      nextjs:
+        patterns:
+          - 'next'
+          - '@next/*'
+          - 'eslint-config-next'
+          - 'nextjs-*'
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+          - 'react-konva'
+          - 'react-*'
+      trpc:
+        patterns:
+          - '@trpc/*'
+      heroui:
+        patterns:
+          - '@heroui/*'
+      fastify:
+        patterns:
+          - 'fastify'
+          - 'fastify-*'
+          - '@fastify/*'
+      vitest:
+        patterns:
+          - 'vitest'
+          - '@vitest/*'
+      typescript-eslint:
+        patterns:
+          - '@typescript-eslint/*'
+      svelte:
+        patterns:
+          - 'svelte'
+          - 'svelte-*'
+          - '@sveltejs/*'
+      tailwindcss:
+        patterns:
+          - 'tailwindcss'
+          - 'tailwind-*'
+          - '@tailwindcss/*'
+          - 'postcss'
+          - 'autoprefixer'
+      codemirror:
+        patterns:
+          - '@codemirror/*'
+          - 'codemirror'
+          - '@uiw/react-codemirror'
+      tanstack:
+        patterns:
+          - '@tanstack/*'
+      framer-motion:
+        patterns:
+          - 'framer-motion'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    groups:
+      actions:
+        patterns:
+          - '*'
