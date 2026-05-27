@@ -87,7 +87,12 @@ static POST_ALONZO_CHECKS: &[(&str, ErrorMatcher)] = &[
   ("check_minting", check_minting_policy_error),
   (
     "check_well_formedness",
-    post_alonzo_matcher!(RedeemerMissing, UnneededRedeemer, DatumMissing, UnneededDatum),
+    post_alonzo_matcher!(
+      RedeemerMissing,
+      UnneededRedeemer,
+      DatumMissing,
+      UnneededDatum
+    ),
   ),
   (
     "check_witness_set",
@@ -125,7 +130,11 @@ pub static ALONZO_CHECKS: &[(&str, ErrorMatcher)] = &[
   ),
   (
     "check_tx_validity_interval",
-    alonzo_matcher!(BlockPrecedesValInt, BlockExceedsValInt, ValIntUpperBoundMissing),
+    alonzo_matcher!(
+      BlockPrecedesValInt,
+      BlockExceedsValInt,
+      ValIntUpperBoundMissing
+    ),
   ),
   (
     "check_fee",
@@ -177,34 +186,30 @@ pub fn build_checks_from_error(
   checks: &[(&str, ErrorMatcher)],
   error: &ValidationError,
 ) -> Vec<ValidationCheck> {
-  let mut results = Vec::with_capacity(checks.len());
+  let failed_at = checks.iter().position(|&(_, matcher)| matcher(error));
 
-  for &(name, matcher) in checks {
-    if matcher(error) {
-      results.push(ValidationCheck {
-        rule: name.to_string(),
-        passed: false,
-        error: Some(error.to_string()),
-      });
-      break;
+  match failed_at {
+    None => build_all_passed(checks),
+    Some(failed_at) => {
+      let message = error.to_string();
+
+      checks
+        .iter()
+        .enumerate()
+        .map(|(index, &(name, _))| ValidationCheck {
+          rule: name.to_string(),
+          passed: index < failed_at,
+          error: if index == failed_at {
+            Some(message.clone())
+          } else if index > failed_at {
+            Some("skipped".to_string())
+          } else {
+            None
+          },
+        })
+        .collect()
     }
-    results.push(ValidationCheck {
-      rule: name.to_string(),
-      passed: true,
-      error: None,
-    });
   }
-
-  while results.len() < checks.len() {
-    let name = checks[results.len()].0;
-    results.push(ValidationCheck {
-      rule: name.to_string(),
-      passed: false,
-      error: Some("skipped".to_string()),
-    });
-  }
-
-  results
 }
 
 pub fn build_all_passed(checks: &[(&str, ErrorMatcher)]) -> Vec<ValidationCheck> {
