@@ -1,8 +1,11 @@
 import JSONbig from "json-bigint";
-import { type Network } from "./network-config";
+import { NETWORK, type Network } from "./network-config";
 
 export const EXPLORER_PAGE_SIZE = 10n;
-export const EXPLORER_BLOCK_PAGE_SIZE = 10n;
+
+export function getBlockPageSize(network: Network): bigint {
+  return network === NETWORK.MAINNET ? 4n : 10n;
+}
 
 export const ROUTES = {
   HOME: "/",
