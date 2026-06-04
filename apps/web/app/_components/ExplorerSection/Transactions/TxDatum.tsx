@@ -65,6 +65,7 @@ export default function TxDatum({ tx }: { tx: cardano.Tx }) {
 
   useEffect(() => {
     if (!matchedDatum) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveTab(matchedDatum);
   }, [matchedDatum]);
 
