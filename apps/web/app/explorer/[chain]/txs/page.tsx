@@ -7,7 +7,7 @@ import {
   TxSearch,
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
-import { EXPLORER_BLOCK_PAGE_SIZE, EXPLORER_PAGE_SIZE } from "~/app/_utils";
+import { EXPLORER_PAGE_SIZE, getBlockPageSize } from "~/app/_utils";
 import {
   isValidChain,
   NETWORK,
@@ -35,15 +35,16 @@ async function TransactionsList({ chain }: { chain: Network }) {
   try {
     const provider = getDolosProvider(chain);
     const tip = await provider.readTip();
+    const pageSize = getBlockPageSize(chain);
     // +1 because it's not including tip currently
     const result = await provider.getBlocksWithTxs({
-      limit: EXPLORER_BLOCK_PAGE_SIZE,
-      cursor: { height: tip.height - EXPLORER_BLOCK_PAGE_SIZE + 1n },
+      limit: pageSize,
+      cursor: { height: tip.height - pageSize + 1n },
     });
     const oldestHeight = result.data.at(-1)!.block.height;
     const nextCursor =
-      result.data.length === Number(EXPLORER_BLOCK_PAGE_SIZE.toString())
-        ? { height: oldestHeight - EXPLORER_BLOCK_PAGE_SIZE }
+      result.data.length === Number(pageSize.toString())
+        ? { height: oldestHeight - pageSize }
         : undefined;
 
     /* eslint-disable react-hooks/error-boundaries */
@@ -90,9 +91,7 @@ export default async function ExplorerTxsPage({ params }: ExplorerPageProps) {
         </div>
 
         <Suspense
-          fallback={
-            <BlockTxsSkeleton rows={Number(EXPLORER_BLOCK_PAGE_SIZE)} />
-          }
+          fallback={<BlockTxsSkeleton rows={Number(getBlockPageSize(chain))} />}
         >
           <TransactionsList chain={chain} />
         </Suspense>
