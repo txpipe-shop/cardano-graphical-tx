@@ -5,7 +5,7 @@ import type { BlockCursor, BlockWithTxs } from "@laceanatomy/provider-core";
 import type { Cardano, cardano } from "@laceanatomy/types";
 import { useState } from "react";
 import { BlockTxsAccordion } from "~/app/_components/ExplorerSection/Transactions/BlockTxsAccordion";
-import { EXPLORER_BLOCK_PAGE_SIZE } from "~/app/_utils";
+import { getBlockPageSize, type Network } from "~/app/_utils";
 import { loadMoreBlocks } from "./actions";
 
 interface BlocksListProps {
@@ -36,7 +36,7 @@ export function BlocksList({
 
       setNextCursor(
         oldestHeight
-          ? { height: oldestHeight - EXPLORER_BLOCK_PAGE_SIZE }
+          ? { height: oldestHeight - getBlockPageSize(chain as Network) }
           : undefined,
       );
     } finally {

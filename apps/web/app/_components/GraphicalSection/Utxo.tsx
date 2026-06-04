@@ -46,6 +46,7 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
   }, [showInfo, transactions, utxoHash]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setShowInfo(false);
   }, [utxoHash]);
 
@@ -54,8 +55,10 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
   const handleUtxoMove =
     (utxoHash: string) => (e: KonvaEventObject<DragEvent>) => {
       const { x, y } = e.currentTarget.position();
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       isOutputUtxo(transactions)(utxoHash) &&
         updateUtxoLines(transactions)(utxoHash, { x, y }, true);
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       isInputUtxo(transactions)(utxoHash) &&
         updateUtxoLines(transactions)(utxoHash, { x, y }, false);
       setTransactionBox((prev) => ({
@@ -105,10 +108,12 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
     }
   };
 
-  let pendingClick: ReturnType<typeof setTimeout>;
+  const pendingClickRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   const handleClick = () => {
-    clearTimeout(pendingClick);
-    pendingClick = setTimeout(function () {
+    clearTimeout(pendingClickRef.current);
+    pendingClickRef.current = setTimeout(function () {
       setTransactionBox((prev) => ({
         ...prev,
         selectedUtxo: utxo,
@@ -119,7 +124,7 @@ export const Utxo = ({ utxoHash, utxoInfoVisible }: UtxoProps) => {
 
   const handleDoubleClick = (e: KonvaEventObject<MouseEvent>) => {
     e.evt.preventDefault();
-    clearTimeout(pendingClick);
+    clearTimeout(pendingClickRef.current);
     setShowInfo(!showInfo);
   };
 

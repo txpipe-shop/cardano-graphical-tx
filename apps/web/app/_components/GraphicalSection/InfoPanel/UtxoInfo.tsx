@@ -17,10 +17,10 @@ import {
   handleCopy,
   trimString,
 } from "~/app/_utils";
+import CopyIcon from "~/public/copy.svg";
+import FullScreen from "~/public/fullscreen.svg";
 import { AssetCard } from "./AssetCard";
 import { JSONModal } from "./JSONModal";
-import CopyIcon from "/public/copy.svg";
-import FullScreen from "/public/fullscreen.svg";
 
 export const UtxoInfo = () => {
   const { transactions } = useGraphical();
