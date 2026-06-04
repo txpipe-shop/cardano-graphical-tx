@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import type { DetailTab } from "~/app/_components/DetailTabs";
 import { DetailTabs } from "~/app/_components/DetailTabs";
+import { buildTabUrl } from "~/app/_utils/tabs";
 
 export type AddressTab = "Dissect" | "UTxOs" | "Transactions";
 
@@ -26,18 +27,13 @@ export default function AddressTabs({
       defaultTab="Dissect"
       activeTab={activeTab}
       onTabChange={(key) => {
-        const params = new URLSearchParams(searchParams.toString());
-
-        if (key === "Dissect") {
-          params.delete("tab");
-        } else {
-          params.set("tab", key);
-        }
-
-        params.delete("page");
-
-        const query = params.toString();
-        router.push(query ? `${basePath}?${query}` : basePath);
+        const url = buildTabUrl(
+          basePath,
+          searchParams,
+          key as string,
+          "Dissect",
+        );
+        router.push(url);
       }}
       ariaLabel="Address details"
     />
