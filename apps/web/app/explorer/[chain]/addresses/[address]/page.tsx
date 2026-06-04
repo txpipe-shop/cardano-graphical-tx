@@ -106,7 +106,18 @@ function resolveTypeLabel(
   if (kind === "Byron") return "Byron Legacy";
   if (kind === "Stake") return "Reward address";
 
-  if (kind === "Shelley") return cardano.resolveShelleyTypeLabel(addressInfo);
+  if (kind === "Shelley") {
+    const payment = addressInfo.paymentPart;
+    const delegation = addressInfo.delegationPart;
+
+    if (delegation?.pointer) return "Pointer address";
+    if (delegation?.hash && payment)
+      return "Base address (payment & delegation)";
+    if (payment && !delegation?.hash && !delegation?.pointer)
+      return "Base address (payment only)";
+
+    return "Shelley";
+  }
 
   return "Unknown";
 }
