@@ -14,6 +14,8 @@ export const ROUTES = {
     `/explorer/${chain}/txs/${hash}`,
   EXPLORER_BLOCK: (chain: Network, id: string) =>
     `/explorer/${chain}/blocks/${id}`,
+  EXPLORER_TOKEN: (chain: Network, unit: string) =>
+    `/explorer/${chain}/tokens/${unit}`,
   GRAPHER: "/tx/grapher",
   TX: "/tx",
   ADDRESS: "/address",
