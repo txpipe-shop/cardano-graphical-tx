@@ -51,3 +51,17 @@ export function getNetworkConfig(network: Network): NetworkConfig {
 export function isValidChain(chain: string): chain is Network {
   return Object.keys(NETWORK_CONFIGS_BASE).includes(chain);
 }
+
+export const NETWORK_ID: Record<Network, number> = {
+  mainnet: 1,
+  preprod: 0,
+  preview: 0,
+  devnet: 0,
+};
+
+export const NETWORK_MAGIC: Record<Network, number> = {
+  mainnet: 764824073,
+  preprod: 1,
+  preview: 2,
+  devnet: 42,
+};
