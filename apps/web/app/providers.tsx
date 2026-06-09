@@ -1,3 +1,5 @@
+"use client";
+
 import { HeroUIProvider } from "@heroui/react";
 import { ConfigsProvider, GraphicalProvider, UIProvider } from "./_contexts";
 
