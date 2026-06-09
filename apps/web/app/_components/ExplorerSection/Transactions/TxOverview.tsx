@@ -93,11 +93,15 @@ function UtxoList({
   title,
   list,
   mint,
+  chain: chainProp,
 }: {
   title: string;
   list: cardano.UTxO[];
   mint?: Value;
+  chain?: string;
 }) {
+  const params = useParams();
+  const chain = chainProp ?? ((params?.chain as Network) ?? "mainnet");
   if (list.length === 0) return null;
   return (
     <Card className="shadow-none border border-default-200">
@@ -172,6 +176,7 @@ function UtxoList({
                         unit={unit as Unit}
                         amount={amount}
                         mint={mint ?? {}}
+                        chain={chain}
                       />
                     ))}
                   </div>
@@ -256,6 +261,7 @@ function UtxoList({
                           unit={unit as Unit}
                           amount={amount}
                           mint={mint ?? {}}
+                          chain={chain}
                         />
                       ))}
                     </div>
@@ -272,7 +278,9 @@ function UtxoList({
   );
 }
 
-function MintList({ list }: { list: Value }) {
+function MintList({ list, chain: chainProp }: { list: Value; chain?: string }) {
+  const params = useParams();
+  const chain = chainProp ?? ((params?.chain as Network) ?? "mainnet");
   if (Object.keys(list).length === 0) {
     return (
       <Card className="shadow-none border border-border bg-surface">
@@ -296,6 +304,7 @@ function MintList({ list }: { list: Value }) {
               unit={unit as Unit}
               amount={amount}
               mint={list}
+              chain={chain}
             />
           ))}
         </div>
@@ -308,16 +317,19 @@ interface TxOverviewProps {
   tx: cardano.Tx;
 }
 export default function TxOverview({ tx }: TxOverviewProps) {
+  const params = useParams();
+  const chain = (params?.chain as Network) ?? "mainnet";
   return (
     <div className="space-y-6">
       <OverviewStats tx={tx} />
-      <UtxoList title="Inputs" list={tx.inputs} mint={tx.mint} />
-      <UtxoList title="Outputs" list={tx.outputs} mint={tx.mint} />
+      <UtxoList title="Inputs" list={tx.inputs} mint={tx.mint} chain={chain} />
+      <UtxoList title="Outputs" list={tx.outputs} mint={tx.mint} chain={chain} />
       {tx.referenceInputs && tx.referenceInputs.length > 0 ? (
         <UtxoList
           title="Reference Inputs"
           list={tx.referenceInputs}
           mint={tx.mint}
+          chain={chain}
         />
       ) : (
         <Card className="shadow-none border border-border bg-surface">
@@ -326,7 +338,7 @@ export default function TxOverview({ tx }: TxOverviewProps) {
           </CardBody>
         </Card>
       )}
-      <MintList list={tx.mint} />
+      <MintList list={tx.mint} chain={chain} />
     </div>
   );
 }

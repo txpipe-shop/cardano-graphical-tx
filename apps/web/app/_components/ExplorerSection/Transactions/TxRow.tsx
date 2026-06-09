@@ -64,9 +64,10 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
 interface UTxOsColumnProps {
   tx: cardano.Tx;
   column: "inputs" | "outputs";
+  chain: string;
 }
 
-function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
+function UTxOsColumn({ tx, column, chain }: UTxOsColumnProps) {
   const utxos = column === "inputs" ? tx.inputs : tx.outputs;
 
   const title =
@@ -102,6 +103,7 @@ function UTxOsColumn({ tx, column }: UTxOsColumnProps) {
                     unit={unit as Unit}
                     amount={amount}
                     mint={tx.mint}
+                    chain={chain}
                   />
                 ))}
               </div>
@@ -119,8 +121,8 @@ export function TxRow({ tx, chain }: { tx: cardano.Tx; chain: string }) {
       <CardBody className="p-0">
         <TxRowHeader tx={tx} chain={chain} />
         <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-          <UTxOsColumn tx={tx} column="inputs" />
-          <UTxOsColumn tx={tx} column="outputs" />
+          <UTxOsColumn tx={tx} column="inputs" chain={chain} />
+          <UTxOsColumn tx={tx} column="outputs" chain={chain} />
         </div>
       </CardBody>
     </Card>
