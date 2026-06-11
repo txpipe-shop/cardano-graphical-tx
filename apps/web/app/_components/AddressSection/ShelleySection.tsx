@@ -1,5 +1,5 @@
 import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
-import { EmptyBlock, PropBlock, Section } from "~/app/_components";
+import { EmptyBlock, PropBlock, Section } from "~/app/_components/Constructors";
 import { ValidAddr } from "./ValidAddr";
 
 export function ShelleySection({ data }: { data: AddressDiagnostic }) {
