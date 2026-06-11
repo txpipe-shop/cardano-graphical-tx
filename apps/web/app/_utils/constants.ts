@@ -173,3 +173,6 @@ export type TxTab = (typeof TX_TABS)[number];
 
 export const BLOCK_TABS = ["Overview", "Transactions", "CBOR"] as const;
 export type BlockTab = (typeof BLOCK_TABS)[number];
+
+export const TOKEN_TABS = ["Holders", "History", "Transactions"] as const;
+export type TokenTab = (typeof TOKEN_TABS)[number];
