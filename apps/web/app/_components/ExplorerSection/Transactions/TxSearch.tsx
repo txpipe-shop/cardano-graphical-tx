@@ -2,7 +2,7 @@
 
 import { Button, Input } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { ROUTES } from "~/app/_utils";
 import { type Network } from "~/app/_utils/network-config";
 
@@ -12,13 +12,16 @@ interface TxSearchProps {
 
 export function TxSearch({ chain }: TxSearchProps) {
   const [txHash, setTxHash] = useState("");
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   const handleSearch = () => {
     const trimmedHash = txHash.trim();
     if (trimmedHash.length === 0) return;
 
-    router.push(ROUTES.EXPLORER_TX(chain, txHash));
+    startTransition(() => {
+      router.push(ROUTES.EXPLORER_TX(chain, txHash));
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -42,6 +45,7 @@ export function TxSearch({ chain }: TxSearchProps) {
       <Button
         variant="flat"
         className="font-mono shadow-md"
+        isLoading={isPending}
         onPress={handleSearch}
       >
         Search

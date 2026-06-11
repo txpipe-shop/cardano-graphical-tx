@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardBody } from "@heroui/react";
 
 function SkeletonBar({ className = "" }: { className?: string }) {
