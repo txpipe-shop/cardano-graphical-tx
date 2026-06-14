@@ -18,6 +18,7 @@ export const ROUTES = {
   TX: "/tx",
   ADDRESS: "/address",
   DISSECT: "/tx/dissect",
+  CBOR: "/tx/cbor",
 };
 
 export type ROUTES = (typeof ROUTES)[keyof typeof ROUTES];
