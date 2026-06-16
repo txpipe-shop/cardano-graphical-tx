@@ -23,7 +23,7 @@ import {
   type TxsRes
 } from '@laceanatomy/provider-core';
 import { cardano, type Cardano, Hash, HexString, hexToBech32 } from '@laceanatomy/types';
-import { CardanoAddressesApi, CardanoBlocksApi, Configuration } from '@laceanatomy/blockfrost-sdk';
+import { CardanoAddressesApi, CardanoAssetsApi, CardanoBlocksApi, Configuration } from '@laceanatomy/blockfrost-sdk';
 import {
   toBigInt,
   u5cToCardanoBlock,
@@ -58,6 +58,7 @@ export class DolosProvider
   private utxoRpc: UtxoRpcClient;
   private blockApi: CardanoBlocksApi;
   private addrApi: CardanoAddressesApi;
+  private assetsApi: CardanoAssetsApi;
   private addressPrefix: string;
 
   constructor({ transport, blockfrostUrl, blockfrostApiKey, addressPrefix }: DolosProviderParams) {
@@ -70,6 +71,7 @@ export class DolosProvider
     });
     this.blockApi = new CardanoBlocksApi(config);
     this.addrApi = new CardanoAddressesApi(config);
+    this.assetsApi = new CardanoAssetsApi(config);
   }
 
   // ---------------------------------------------------------------------------
@@ -462,5 +464,59 @@ export class DolosProvider
     return body.tx.findIndex(
       (t) => Buffer.from(t.hash).toString('hex') === Buffer.from(tx.hash).toString('hex')
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Assets — Blockfrost
+  // ---------------------------------------------------------------------------
+
+  async getAssetInfo(asset: string) {
+    const resp = await this.assetsApi.assetsAssetGet(asset);
+    return {
+      policyId: resp.data.policy_id,
+      assetName: resp.data.asset_name ?? '',
+      fingerprint: resp.data.fingerprint,
+      totalSupply: resp.data.quantity,
+      mintOrBurnCount: resp.data.mint_or_burn_count,
+      initialMintTxHash: resp.data.initial_mint_tx_hash,
+      metadata: resp.data.metadata,
+      onchainMetadata: resp.data.onchain_metadata as Record<string, unknown> | null,
+      onchainMetadataStandard: resp.data.onchain_metadata_standard ?? null
+    };
+  }
+
+  async getAssetAddresses(asset: string, count: number, page: number) {
+    const resp = await this.assetsApi.assetsAssetAddressesGet(asset, count, page);
+    return resp.data.map((item) => ({
+      address: item.address,
+      quantity: item.quantity
+    }));
+  }
+
+  async getAssetHistory(asset: string, count: number, page: number) {
+    const resp = await this.assetsApi.assetsAssetHistoryGet(asset, count, page);
+    return resp.data.map((item) => ({
+      txHash: item.tx_hash,
+      action: item.action as 'minted' | 'burned',
+      amount: item.amount
+    }));
+  }
+
+  async getAssetTransactions(asset: string, count: number, page: number) {
+    const resp = await this.assetsApi.assetsAssetTransactionsGet(asset, count, page);
+    return resp.data.map((item) => ({
+      txHash: item.tx_hash,
+      txIndex: item.tx_index,
+      blockHeight: item.block_height,
+      blockTime: item.block_time
+    }));
+  }
+
+  async getPolicyAssets(policyId: string, count: number, page: number) {
+    const resp = await this.assetsApi.assetsPolicyPolicyIdGet(policyId, count, page);
+    return resp.data.map((item) => ({
+      asset: item.asset,
+      quantity: item.quantity
+    }));
   }
 }
