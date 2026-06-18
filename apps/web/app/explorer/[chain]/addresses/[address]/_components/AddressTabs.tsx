@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import type { DetailTab } from "~/app/_components/DetailTabs";
 import { DetailTabs } from "~/app/_components/DetailTabs";
 import { buildTabUrl } from "~/app/_utils/tabs";
@@ -18,7 +18,6 @@ export default function AddressTabs({
   activeTab,
   basePath,
 }: Readonly<AddressTabsProps>) {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   return (
@@ -33,7 +32,7 @@ export default function AddressTabs({
           key as string,
           "Dissect",
         );
-        router.push(url);
+        window.history.replaceState(null, "", url);
       }}
       ariaLabel="Address details"
     />

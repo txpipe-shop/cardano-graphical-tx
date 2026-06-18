@@ -95,7 +95,7 @@ export function UtxoList({
   showAddress = true,
   linkTxHash,
 }: {
-  title: string;
+  title?: string;
   list: cardano.UTxO[];
   mint?: Value;
   showAddress?: boolean;
@@ -106,9 +106,11 @@ export function UtxoList({
   if (list.length === 0) return null;
   return (
     <Card className="shadow-none border border-default-200">
-      <div className="border-b px-4 py-2 bg-explorer-row font-semibold text-lg text-p-secondary">
-        {title} ({list.length})
-      </div>
+      {title && (
+        <div className="border-b px-4 py-2 bg-explorer-row font-semibold text-lg text-p-secondary">
+          {title} ({list.length})
+        </div>
+      )}
       <CardBody className="p-0 md:hidden">
         <div className="space-y-4 p-4">
           {list.map((utxo) => (

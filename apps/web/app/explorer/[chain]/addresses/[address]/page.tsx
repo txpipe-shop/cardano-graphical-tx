@@ -334,29 +334,30 @@ export default async function AddressDetailPage({
     </>
   );
 
-  const utxosContent =
-    tab === "UTxOs" ? (
-      <Suspense fallback={<UTxOsSkeleton />}>
-        <AddressUTxOsList
-          address={normalizedAddress}
-          chain={chain}
-          page={page}
-          basePath={basePath}
-        />
-      </Suspense>
-    ) : null;
+  const utxoPage = tab === "UTxOs" ? page : 1;
+  const txPage = tab === "Transactions" ? page : 1;
 
-  const txsContent =
-    tab === "Transactions" ? (
-      <Suspense fallback={<TxTableSkeleton rows={3} />}>
-        <AddressTxList
-          address={normalizedAddress}
-          chain={chain}
-          page={page}
-          basePath={basePath}
-        />
-      </Suspense>
-    ) : null;
+  const utxosContent = (
+    <Suspense fallback={<UTxOsSkeleton />}>
+      <AddressUTxOsList
+        address={normalizedAddress}
+        chain={chain}
+        page={utxoPage}
+        basePath={basePath}
+      />
+    </Suspense>
+  );
+
+  const txsContent = (
+    <Suspense fallback={<TxTableSkeleton rows={3} />}>
+      <AddressTxList
+        address={normalizedAddress}
+        chain={chain}
+        page={txPage}
+        basePath={basePath}
+      />
+    </Suspense>
+  );
 
   const tabs = [
     {
