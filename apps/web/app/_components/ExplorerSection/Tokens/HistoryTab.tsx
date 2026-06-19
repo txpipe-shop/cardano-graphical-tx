@@ -1,19 +1,12 @@
 "use client";
 
-import {
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-} from "@heroui/react";
+import { Card, CardBody, Chip } from "@heroui/react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { ROUTES } from "~/app/_utils/constants";
 import { type Network } from "~/app/_utils/network-config";
 import type { AssetHistory } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
+import CopyButton from "../CopyButton";
 import Pagination from "../Pagination";
 
 const PAGE_SIZE = 30;
@@ -35,47 +28,51 @@ export default function HistoryTab({ history, chain, page }: HistoryTabProps) {
 
   if (history.length === 0) {
     return (
-      <div className="rounded-lg border-2 border-dashed border-border bg-surface p-8 text-center text-p-secondary">
-        No history found.
-      </div>
+      <Card className="border-2 border-dashed border-border shadow-md bg-surface">
+        <CardBody className="py-8 text-center text-p-secondary">
+          No history found.
+        </CardBody>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-4">
-      <Table aria-label="Token history" removeWrapper className="w-full">
-        <TableHeader>
-          <TableColumn>TX HASH</TableColumn>
-          <TableColumn>ACTION</TableColumn>
-          <TableColumn>AMOUNT</TableColumn>
-        </TableHeader>
-        <TableBody>
-          {paginated.map((entry, i) => (
-            <TableRow key={`${entry.txHash}-${i}`}>
-              <TableCell>
+      <div className="flex flex-col gap-3 bg-explorer-row px-4 py-2 md:flex-row md:items-center md:justify-between md:gap-4">
+        <span className="text-xs font-medium text-p-secondary">TX HASH</span>
+        <span className="text-xs font-medium text-p-secondary">ACTION</span>
+        <span className="text-xs font-medium text-p-secondary">AMOUNT</span>
+      </div>
+      {paginated.map((entry, i) => (
+        <Card
+          key={`${entry.txHash}-${i}`}
+          className="mb-4 border-2 border-dashed border-border shadow-md bg-background"
+        >
+          <CardBody className="p-0">
+            <div className="flex flex-col gap-3 bg-explorer-row p-4 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4">
+              <div className="flex items-center gap-2">
                 <Link
                   href={ROUTES.EXPLORER_TX(chain, entry.txHash)}
-                  className="font-mono text-xs text-accent-blue hover:underline"
+                  className="break-all font-mono text-sm text-accent-blue hover:underline"
                 >
-                  {entry.txHash.slice(0, 16)}...{entry.txHash.slice(-8)}
+                  {entry.txHash}
                 </Link>
-              </TableCell>
-              <TableCell>
-                <Chip
-                  size="sm"
-                  variant="flat"
-                  color={entry.action === "minted" ? "success" : "danger"}
-                >
-                  {entry.action === "minted" ? "Mint" : "Burn"}
-                </Chip>
-              </TableCell>
-              <TableCell>
-                <span className="font-mono text-sm">{entry.amount}</span>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                <CopyButton text={entry.txHash} size={14} />
+              </div>
+              <Chip
+                size="sm"
+                variant="flat"
+                color={entry.action === "minted" ? "success" : "danger"}
+              >
+                {entry.action === "minted" ? "Mint" : "Burn"}
+              </Chip>
+              <span className="font-mono text-sm font-medium">
+                {entry.amount}
+              </span>
+            </div>
+          </CardBody>
+        </Card>
+      ))}
       {history.length > PAGE_SIZE && (
         <Pagination
           currentPage={currentPage}
