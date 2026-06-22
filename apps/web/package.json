@@ -6,7 +6,7 @@
   "scripts": {
     "build": "next build --webpack",
     "check": "tsc --noEmit",
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build:docker": "docker build --build-arg NEXT_PUBLIC_CBOR_ENDPOINT='https://laceanatomy.com/tx?_data=routes%2Ftx' -t graphical-tx .",
     "run:docker": "docker run -p 3000:3000 graphical-tx",
     "push:docker": "npm run build:docker && docker tag graphical-tx graphicaltx/cardano-graphical-tx:latest && docker push graphicaltx/cardano-graphical-tx:latest",

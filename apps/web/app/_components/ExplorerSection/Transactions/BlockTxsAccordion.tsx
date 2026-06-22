@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ROUTES } from "~/app/_utils";
 import { formatAda } from "~/app/_utils/explorer";
 import { type Network } from "~/app/_utils/network-config";
+import DateViewer from "../DateViewer";
 import ClockIcon from "../Icons/ClockIcon";
 import { TxTable } from "./TxTable";
 
@@ -64,7 +65,7 @@ export function BlockTxsAccordion({
 
               <span className="flex items-center gap-2 text-sm text-p-secondary">
                 <ClockIcon size={14} />
-                {new Date(block.time).toLocaleString()}
+                <DateViewer timestamp={block.time} unit="milliseconds" />
               </span>
               <span className="text-sm text-p-secondary">
                 {block.txCount.toString()} tx{block.txCount !== 1n ? "s" : ""}

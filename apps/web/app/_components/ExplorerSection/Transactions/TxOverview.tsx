@@ -4,11 +4,20 @@ import { Card, CardBody, Chip, Tooltip } from "@heroui/react";
 import { type cardano, type Unit, type Value } from "@laceanatomy/types";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { formatSeconds, ROUTES } from "~/app/_utils";
-import { type Network } from "~/app/_utils/network-config";
+import { ROUTES } from "~/app/_utils";
+import { isValidChain, type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
+import DateViewer from "../DateViewer";
 import TokenPill from "../TokenPill";
+
+function resolveChain(
+  params: { chain?: string | string[] },
+  prop?: Network,
+): Network {
+  const chain = prop ?? params?.chain;
+  return typeof chain === "string" && isValidChain(chain) ? chain : "mainnet";
+}
 
 function OverviewStats({ tx }: { tx: cardano.Tx }) {
   return (
@@ -16,9 +25,7 @@ function OverviewStats({ tx }: { tx: cardano.Tx }) {
       <CardBody className="flex flex-row flex-wrap justify-around gap-4 p-4">
         <div className="flex gap-2 items-center">
           <p className="font-bold text-p-secondary">Created:</p>
-          <span className="text-p-secondary">
-            {formatSeconds(tx.createdAt)}
-          </span>
+          <DateViewer timestamp={tx.createdAt} className="text-p-secondary" />
         </div>
         <div className="flex gap-2 items-center">
           <p className="font-bold text-p-secondary">Fee:</p>
@@ -53,14 +60,14 @@ function OverviewStats({ tx }: { tx: cardano.Tx }) {
 
 function UtxoRefPill({ hash, index }: { hash: string; index: bigint }) {
   const params = useParams();
-  const chain = (params?.chain as Network) ?? "mainnet";
+  const chain = resolveChain(params);
   const fullRef = `${hash}#${index.toString()}`;
 
   return (
     <Tooltip content={fullRef} placement="top" delay={150}>
       <Link
         href={ROUTES.EXPLORER_TX(chain, hash)}
-        className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-mono text-gray-700 shadow-sm transition-colors hover:bg-gray-100"
+        className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-mono text-gray-700 shadow-sm transition-colors hover:bg-gray-100 whitespace-nowrap"
       >
         <ExternalLinkIcon />
         {hash.slice(0, 8)}…#{index.toString()}
@@ -89,25 +96,32 @@ function ExternalLinkIcon() {
   );
 }
 
-function UtxoList({
+export function UtxoList({
   title,
   list,
   mint,
+  showAddress = true,
+  linkTxHash,
   chain: chainProp,
 }: {
-  title: string;
+  title?: string;
   list: cardano.UTxO[];
   mint?: Value;
-  chain?: string;
+  showAddress?: boolean;
+  linkTxHash?: string;
+  chain?: Network;
 }) {
   const params = useParams();
-  const chain = chainProp ?? ((params?.chain as Network) ?? "mainnet");
+  const chain = resolveChain(params, chainProp);
+
   if (list.length === 0) return null;
   return (
     <Card className="shadow-none border border-default-200">
-      <div className="border-b px-4 py-2 bg-explorer-row font-semibold text-lg text-p-secondary">
-        {title} ({list.length})
-      </div>
+      {title && (
+        <div className="border-b px-4 py-2 bg-explorer-row font-semibold text-lg text-p-secondary">
+          {title} ({list.length})
+        </div>
+      )}
       <CardBody className="p-0 md:hidden">
         <div className="space-y-4 p-4">
           {list.map((utxo) => (
@@ -128,10 +142,12 @@ function UtxoList({
                   />
                 </div>
               </div>
-              <div>
-                <p className="text-xs font-bold text-p-secondary">Address</p>
-                <ColoredAddress address={utxo.address} />
-              </div>
+              {showAddress && (
+                <div>
+                  <p className="text-xs font-bold text-p-secondary">Address</p>
+                  <ColoredAddress address={utxo.address} />
+                </div>
+              )}
               <div>
                 <p className="text-xs font-bold text-p-secondary">Coin</p>
                 <Chip
@@ -145,9 +161,15 @@ function UtxoList({
               <div className="flex items-center gap-2">
                 <p className="text-xs font-bold text-p-secondary">Has Datum</p>
                 {utxo.datum ? (
-                  <Chip size="sm" variant="dot" color="success">
-                    Yes
-                  </Chip>
+                  <Link
+                    href={`${ROUTES.EXPLORER_TX(chain, linkTxHash ?? utxo.outRef.hash)}?tab=Datum&txOutRef=${encodeURIComponent(`${utxo.outRef.hash}#${utxo.outRef.index.toString()}`)}`}
+                    className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-p-secondary shadow-sm transition-colors hover:bg-explorer-row"
+                  >
+                    <span className="text-success">
+                      <ExternalLinkIcon />
+                    </span>
+                    View
+                  </Link>
                 ) : (
                   <Chip size="sm" variant="dot" color="danger">
                     No
@@ -193,7 +215,7 @@ function UtxoList({
           <thead className="text-p-secondary font-medium border-b bg-explorer-row">
             <tr>
               <th className="px-4 py-3">TxOut Ref</th>
-              <th className="px-4 py-3">Address</th>
+              {showAddress && <th className="px-4 py-3">Address</th>}
               <th className="px-4 py-3">Coin</th>
               <th className="px-4 py-3">Has Datum</th>
               <th className="px-4 py-3">Has Script</th>
@@ -215,11 +237,13 @@ function UtxoList({
                     />
                   </div>
                 </td>
-                <td className="px-4 py-3 font-mono align-top bg-surface">
-                  <div className="flex items-center gap-2">
-                    <ColoredAddress address={utxo.address} />
-                  </div>
-                </td>
+                {showAddress && (
+                  <td className="px-4 py-3 font-mono align-top bg-surface">
+                    <div className="flex items-center gap-2">
+                      <ColoredAddress address={utxo.address} />
+                    </div>
+                  </td>
+                )}
                 <td className="px-4 py-3 font-mono align-top bg-surface">
                   <Chip
                     size="sm"
@@ -231,9 +255,15 @@ function UtxoList({
                 </td>
                 <td className="px-4 py-3 align-top bg-surface">
                   {utxo.datum ? (
-                    <Chip size="sm" variant="dot" color="success">
-                      Yes
-                    </Chip>
+                    <Link
+                      href={`${ROUTES.EXPLORER_TX(chain, linkTxHash ?? utxo.outRef.hash)}?tab=Datum&txOutRef=${encodeURIComponent(`${utxo.outRef.hash}#${utxo.outRef.index.toString()}`)}`}
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-p-secondary shadow-sm transition-colors hover:bg-explorer-row"
+                    >
+                      <span className="text-success">
+                        <ExternalLinkIcon />
+                      </span>
+                      View
+                    </Link>
                   ) : (
                     <Chip size="sm" variant="dot" color="danger">
                       No
@@ -278,9 +308,9 @@ function UtxoList({
   );
 }
 
-function MintList({ list, chain: chainProp }: { list: Value; chain?: string }) {
+function MintList({ list, chain: chainProp }: { list: Value; chain?: Network }) {
   const params = useParams();
-  const chain = chainProp ?? ((params?.chain as Network) ?? "mainnet");
+  const chain = resolveChain(params, chainProp);
   if (Object.keys(list).length === 0) {
     return (
       <Card className="shadow-none border border-border bg-surface">
@@ -318,17 +348,30 @@ interface TxOverviewProps {
 }
 export default function TxOverview({ tx }: TxOverviewProps) {
   const params = useParams();
-  const chain = (params?.chain as Network) ?? "mainnet";
+  const chain = resolveChain(params);
   return (
     <div className="space-y-6">
       <OverviewStats tx={tx} />
-      <UtxoList title="Inputs" list={tx.inputs} mint={tx.mint} chain={chain} />
-      <UtxoList title="Outputs" list={tx.outputs} mint={tx.mint} chain={chain} />
+      <UtxoList
+        title="Inputs"
+        list={tx.inputs}
+        mint={tx.mint}
+        linkTxHash={tx.hash}
+        chain={chain}
+      />
+      <UtxoList
+        title="Outputs"
+        list={tx.outputs}
+        mint={tx.mint}
+        linkTxHash={tx.hash}
+        chain={chain}
+      />
       {tx.referenceInputs && tx.referenceInputs.length > 0 ? (
         <UtxoList
           title="Reference Inputs"
           list={tx.referenceInputs}
           mint={tx.mint}
+          linkTxHash={tx.hash}
           chain={chain}
         />
       ) : (

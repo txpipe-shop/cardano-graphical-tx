@@ -3,10 +3,12 @@
 import { Button } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useGraphical } from "~/app/_contexts";
 import { type ITransaction } from "~/app/_interfaces";
 import { type Network, ROUTES, type TxTab } from "~/app/_utils";
+import { buildTabUrl } from "~/app/_utils/tabs";
 import { DetailTabs } from "../../DetailTabs";
 import { DissectSection } from "../../DissectSection/DissectSection";
 import { Playground } from "../../GraphicalSection";
@@ -36,6 +38,9 @@ export default function TxTabs({
 }: TxTabsProps) {
   const [active, setActive] = useState<TxTab>(initialTab);
   const { setTransactionBox, dimensions } = useGraphical();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -127,7 +132,13 @@ export default function TxTabs({
       tabs={tabs}
       defaultTab="Overview"
       activeTab={active}
-      onTabChange={(key) => setActive(key as TxTab)}
+      onTabChange={(key) => {
+        const k = key as TxTab;
+        setActive(k);
+
+        const url = buildTabUrl(pathname ?? "", searchParams, k, "Overview");
+        router.push(url);
+      }}
       ariaLabel="Transaction details"
     />
   );

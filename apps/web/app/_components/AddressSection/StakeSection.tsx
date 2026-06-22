@@ -1,5 +1,5 @@
 import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
-import { PropBlock, Section } from "~/app/_components";
+import { PropBlock, Section } from "~/app/_components/Constructors";
 import { ValidAddr } from "./ValidAddr";
 
 export function StakeSection({ data }: { data: AddressDiagnostic }) {

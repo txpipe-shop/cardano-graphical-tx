@@ -8,6 +8,7 @@ import { formatAda } from "~/app/_utils/explorer";
 import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
+import DateViewer from "../DateViewer";
 import TokenPill from "../TokenPill";
 
 interface BlockOverviewProps {
@@ -112,7 +113,7 @@ export default function BlockOverview({
           </div>
           <div>
             <span className="text-p-secondary">Time:</span>{" "}
-            <span>{new Date(block.time).toLocaleString()}</span>
+            <DateViewer timestamp={block.time} unit="milliseconds" />
           </div>
           {block.confirmations !== undefined && (
             <div>

@@ -3,10 +3,11 @@ import { Button, Card, CardBody } from "@heroui/react";
 import type { cardano, Unit } from "@laceanatomy/types";
 import Link from "next/link";
 import { ROUTES } from "~/app/_utils";
-import { formatAda, formatSeconds } from "~/app/_utils/explorer";
+import { formatAda } from "~/app/_utils/explorer";
 import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
+import DateViewer from "../DateViewer";
 import ClockIcon from "../Icons/ClockIcon";
 import TokenPill from "../TokenPill";
 
@@ -30,7 +31,7 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
 
       <div className="flex items-center gap-2 text-sm text-p-secondary">
         <ClockIcon size={14} />
-        {formatSeconds(tx.createdAt)}
+        <DateViewer timestamp={tx.createdAt} className="text-p-secondary" />
       </div>
 
       <div className="text-sm font-medium">Fee: {formatAda(tx.fee)}</div>
@@ -64,10 +65,16 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
 interface UTxOsColumnProps {
   tx: cardano.Tx;
   column: "inputs" | "outputs";
+  highlightAddress?: cardano.UTxO["address"];
   chain: string;
 }
 
-function UTxOsColumn({ tx, column, chain }: UTxOsColumnProps) {
+function UTxOsColumn({
+  tx,
+  column,
+  highlightAddress,
+  chain,
+}: Readonly<UTxOsColumnProps>) {
   const utxos = column === "inputs" ? tx.inputs : tx.outputs;
 
   const title =
@@ -79,8 +86,16 @@ function UTxOsColumn({ tx, column, chain }: UTxOsColumnProps) {
     <div>
       <h4 className="semibold mb-2 text-sm text-p-secondary">{title}</h4>
       <div className="space-y-2">
-        {utxos.map((utxo, i) => (
-          <div className="rounded-lg bg-explorer-row p-2" key={i}>
+        {utxos.map((utxo) => (
+          <div
+            className={`rounded-lg bg-explorer-row p-2 ${
+              highlightAddress !== undefined &&
+              utxo.address === highlightAddress
+                ? "ring-1 ring-accent-blue"
+                : ""
+            }`}
+            key={`${utxo.outRef.hash}#${utxo.outRef.index.toString()}`}
+          >
             <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center md:justify-between">
               <span className="text-sm font-medium">
                 {formatAda(utxo.coin)}
@@ -115,14 +130,32 @@ function UTxOsColumn({ tx, column, chain }: UTxOsColumnProps) {
   );
 }
 
-export function TxRow({ tx, chain }: { tx: cardano.Tx; chain: string }) {
+export function TxRow({
+  tx,
+  chain,
+  highlightAddress,
+}: Readonly<{
+  tx: cardano.Tx;
+  chain: string;
+  highlightAddress?: cardano.UTxO["address"];
+}>) {
   return (
     <Card className="mb-4 border-2 border-dashed border-border shadow-md bg-background">
       <CardBody className="p-0">
         <TxRowHeader tx={tx} chain={chain} />
         <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
-          <UTxOsColumn tx={tx} column="inputs" chain={chain} />
-          <UTxOsColumn tx={tx} column="outputs" chain={chain} />
+          <UTxOsColumn
+            tx={tx}
+            column="inputs"
+            highlightAddress={highlightAddress}
+            chain={chain}
+          />
+          <UTxOsColumn
+            tx={tx}
+            column="outputs"
+            highlightAddress={highlightAddress}
+            chain={chain}
+          />
         </div>
       </CardBody>
     </Card>
