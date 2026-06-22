@@ -125,7 +125,6 @@ function resolveTypeLabel(
 interface AddressStats {
   funds: AddressFundsRes;
   statsError: string | null;
-  utxoCount: bigint;
   txCount: bigint;
   firstSeen: { timestamp?: number };
   lastSeen: { timestamp?: number };
@@ -134,11 +133,9 @@ interface AddressStats {
 async function loadAddressStats({
   chain,
   normalizedAddress,
-  page,
 }: Readonly<{
   chain: Network;
   normalizedAddress: Address;
-  page: number;
 }>): Promise<AddressStats> {
   const result: AddressStats = {
     funds: {
@@ -146,7 +143,6 @@ async function loadAddressStats({
       txCount: 0n,
     },
     statsError: null,
-    utxoCount: 0n,
     txCount: 0n,
     firstSeen: {},
     lastSeen: {},
@@ -156,18 +152,14 @@ async function loadAddressStats({
     getAddressUTxOsPage({
       chain,
       address: normalizedAddress,
-      page,
     }),
     getAddressTxPage({
       chain,
       address: normalizedAddress,
-      page,
     }),
   ]);
 
   if (utxosRes.status === "fulfilled") {
-    result.utxoCount = BigInt(utxosRes.value.data.length);
-
     let lovelaceSum = 0n;
     for (const utxo of utxosRes.value.data) {
       lovelaceSum += utxo.coin ?? 0n;
@@ -180,7 +172,7 @@ async function loadAddressStats({
   }
 
   if (txsRes.status === "fulfilled") {
-    result.txCount = BigInt(txsRes.value.data.length);
+    result.txCount = txsRes.value.total;
 
     if (txsRes.value.data.length > 0) {
       const newestTx = txsRes.value.data[0];
@@ -261,7 +253,6 @@ export default async function AddressDetailPage({
     : NETWORK.MAINNET;
   const raw = resolvedParams.address;
   const tab = resolveTab(resolvedSearchParams?.tab);
-  const page = Math.max(1, Number(resolvedSearchParams?.page) || 1);
 
   let normalizedAddress: Address;
   try {
@@ -311,8 +302,8 @@ export default async function AddressDetailPage({
 
   const basePath = `/explorer/${chain}/addresses/${encodeURIComponent(raw)}`;
 
-  const { funds, statsError, utxoCount, txCount, firstSeen, lastSeen } =
-    await loadAddressStats({ chain, normalizedAddress, page });
+  const { funds, statsError, txCount, firstSeen, lastSeen } =
+    await loadAddressStats({ chain, normalizedAddress });
 
   const lovelace = funds.value["lovelace" as Unit] ?? 0n;
   const tokenEntries = Object.entries(funds.value).filter(
@@ -334,16 +325,11 @@ export default async function AddressDetailPage({
     </>
   );
 
-  const utxoPage = tab === "UTxOs" ? page : 1;
-  const txPage = tab === "Transactions" ? page : 1;
-
   const utxosContent = (
     <Suspense fallback={<UTxOsSkeleton />}>
       <AddressUTxOsList
         address={normalizedAddress}
         chain={chain}
-        page={utxoPage}
-        basePath={basePath}
       />
     </Suspense>
   );
@@ -353,8 +339,6 @@ export default async function AddressDetailPage({
       <AddressTxList
         address={normalizedAddress}
         chain={chain}
-        page={txPage}
-        basePath={basePath}
       />
     </Suspense>
   );
@@ -367,7 +351,7 @@ export default async function AddressDetailPage({
     },
     {
       key: "UTxOs",
-      title: `UTxOs (${utxoCount.toString()})`,
+      title: "UTxOs",
       content: utxosContent,
     },
     {

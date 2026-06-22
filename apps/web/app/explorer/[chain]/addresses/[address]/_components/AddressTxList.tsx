@@ -1,19 +1,17 @@
-import { type Address } from "@laceanatomy/types";
-import { cache } from "react";
-import Pagination from "~/app/_components/ExplorerSection/Pagination";
-import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
-import { DEFAULT_DEVNET_PORT } from "~/app/_utils/constants";
-import { NETWORK, type Network } from "~/app/_utils/network-config";
-import { getDolosProvider } from "~/server/api/dolos-provider";
-import { getU5CProviderNode } from "~/server/api/u5c-provider";
+import { type Address, type cardano } from '@laceanatomy/types';
+import { cache } from 'react';
+import { DEFAULT_DEVNET_PORT } from '~/app/_utils/constants';
+import { NETWORK, type Network } from '~/app/_utils/network-config';
+import { getDolosProvider } from '~/server/api/dolos-provider';
+import { getU5CProviderNode } from '~/server/api/u5c-provider';
+import { AddressTxListClient } from './AddressTxListClient';
 
 const PAGE_SIZE = 20n;
+const FETCH_SIZE = PAGE_SIZE + 1n;
 
 interface AddressTxListProps {
   chain: Network;
   address: Address;
-  page: number;
-  basePath: string;
 }
 
 function resolveProvider(chain: Network) {
@@ -23,53 +21,44 @@ function resolveProvider(chain: Network) {
   return getDolosProvider(chain);
 }
 
-export const getAddressTxPage = cache(async ({
-  chain,
-  address,
-  page,
-}: Readonly<Pick<AddressTxListProps, "chain" | "address" | "page">>) => {
-  const provider = resolveProvider(chain);
-  const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
-  const offset = BigInt(currentPage - 1) * PAGE_SIZE;
+export const getAddressTxPage = cache(
+  async ({
+    chain,
+    address,
+  }: Readonly<Pick<AddressTxListProps, 'chain' | 'address'>>) => {
+    const provider = resolveProvider(chain);
 
-  return provider.getTxs({
-    query: { address },
-    limit: PAGE_SIZE,
-    offset,
-  });
-});
+    return provider.getTxs({
+      query: { address },
+      limit: FETCH_SIZE,
+      offset: 0n,
+    });
+  },
+);
 
 export async function AddressTxList({
   chain,
   address,
-  page,
-  basePath,
 }: Readonly<AddressTxListProps>) {
-  const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
-  let txs: Awaited<ReturnType<typeof getAddressTxPage>>["data"] = [];
-  let total = 0n;
+  let allTxs: cardano.Tx[] = [];
+  let hasMore = false;
 
   try {
-    const response = await getAddressTxPage({ chain, address, page: currentPage });
-    txs = response.data;
-    total = response.total;
+    const response = await getAddressTxPage({ chain, address });
+    allTxs = response.data;
+    hasMore = allTxs.length > PAGE_SIZE;
   } catch (err) {
     console.error(err);
   }
 
-  const totalPages = Number((total - 1n) / PAGE_SIZE + 1n);
+  const txs = allTxs.slice(0, Number(PAGE_SIZE));
 
   return (
-    <div className="space-y-4">
-      <TxTable transactions={txs} chain={chain} highlightAddress={address} />
-
-      {total > PAGE_SIZE && (
-        <Pagination
-          basePath={basePath}
-          currentPage={currentPage}
-          totalPages={Math.max(totalPages, 1)}
-        />
-      )}
-    </div>
+    <AddressTxListClient
+      chain={chain}
+      address={address}
+      initialTxs={txs}
+      hasMore={hasMore}
+    />
   );
 }
