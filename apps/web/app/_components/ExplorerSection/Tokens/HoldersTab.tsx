@@ -14,7 +14,10 @@ interface HoldersTabProps {
   page: number;
 }
 
-export default function HoldersTab({ addresses, page }: HoldersTabProps) {
+export default function HoldersTab({
+  addresses,
+  page,
+}: HoldersTabProps) {
   const totalPages = Math.max(1, Math.ceil(addresses.length / PAGE_SIZE));
   const currentPage = Math.min(Math.max(1, page), totalPages);
 
@@ -25,40 +28,57 @@ export default function HoldersTab({ addresses, page }: HoldersTabProps) {
 
   if (addresses.length === 0) {
     return (
-      <Card className="border-2 border-dashed border-border shadow-md bg-surface">
-        <CardBody className="py-8 text-center text-p-secondary">
-          No holders found.
-        </CardBody>
-      </Card>
+      <div className="rounded-lg border-2 border-dashed border-border bg-surface p-8 text-center text-p-secondary shadow-md">
+        No holders found.
+      </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 bg-explorer-row px-4 py-2 md:flex-row md:items-center md:justify-between md:gap-4">
-        <span className="text-xs font-medium text-p-secondary">ADDRESS</span>
-        <span className="text-xs font-medium text-p-secondary">QUANTITY</span>
-      </div>
-      {paginated.map((addr, i) => (
-        <Card
-          key={`${addr.address}-${i}`}
-          className="mb-4 border-2 border-border shadow-md bg-surface"
-        >
-          <CardBody className="p-0">
-            <div className="flex flex-col gap-3 bg-explorer-row p-3 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4">
-              <span
-                className="cursor-pointer hover:underline"
-                title="Address details coming soon"
+      <Card className="border border-default-200 shadow-none">
+        <CardBody className="p-0 md:hidden">
+          <div className="space-y-4 p-4">
+            {paginated.map((addr, i) => (
+              <div
+                key={`${addr.address}-${i}`}
+                className="space-y-2 rounded-lg border border-border bg-surface p-3"
               >
-                <ColoredAddress address={Address(addr.address)} />
-              </span>
-              <span className="font-mono text-sm font-medium text-p-primary">
-                {addr.quantity}
-              </span>
-            </div>
-          </CardBody>
-        </Card>
-      ))}
+                <div>
+                  <p className="text-xs font-bold text-p-secondary">Address</p>
+                  <ColoredAddress address={Address(addr.address)} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-p-secondary">Quantity</p>
+                  <span className="font-mono text-sm">{addr.quantity}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardBody>
+        <CardBody className="hidden p-0 md:block overflow-x-auto">
+          <table className="w-full min-w-[600px] text-left text-sm">
+            <thead className="border-b bg-explorer-row text-p-secondary font-medium">
+              <tr>
+                <th className="px-4 py-3">Address</th>
+                <th className="px-4 py-3">Quantity</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {paginated.map((addr, i) => (
+                <tr key={`${addr.address}-${i}`}>
+                  <td className="px-4 py-3 align-top bg-surface">
+                    <ColoredAddress address={Address(addr.address)} />
+                  </td>
+                  <td className="px-4 py-3 align-top bg-surface font-mono text-sm">
+                    {addr.quantity}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </CardBody>
+      </Card>
       {addresses.length > PAGE_SIZE && (
         <Pagination
           currentPage={currentPage}

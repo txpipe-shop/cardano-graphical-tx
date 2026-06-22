@@ -98,8 +98,6 @@ export default function DevnetTokenTabs({
             quantity: qty.toString(),
           })),
           addressesTotal: holderMap.size,
-          history: [],
-          historyTotal: 0,
           transactions: [] as cardano.Tx[],
           transactionsTotal: 0,
         };
