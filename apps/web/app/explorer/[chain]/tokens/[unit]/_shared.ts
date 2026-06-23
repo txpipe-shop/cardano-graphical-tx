@@ -34,8 +34,6 @@ export type TokenPageData = {
   assetInfo: AssetInfo;
   addresses: AssetAddress[];
   addressesTotal: number;
-  history: AssetHistory[];
-  historyTotal: number;
   transactions: cardano.Tx[];
   transactionsTotal: number;
 };
@@ -60,11 +58,10 @@ export async function loadTokenPageData(
 
   const rawInfo = await provider.getAssetInfo(rawUnit);
 
-  const [addressesResp, historyResp, assetTxs] = await Promise.all([
+  const [addressesResp, assetTxs] = await Promise.all([
     provider
       .getAssetAddresses(rawUnit, 100, 1)
       .catch(() => [] as AssetAddress[]),
-    provider.getAssetHistory(rawUnit, 100, 1).catch(() => [] as AssetHistory[]),
     provider.getAssetTransactions(rawUnit, 100, 1).catch(
       () =>
         [] as {
@@ -127,8 +124,6 @@ export async function loadTokenPageData(
     assetInfo,
     addresses: addressesResp,
     addressesTotal: addressesResp.length,
-    history: historyResp,
-    historyTotal: historyResp.length,
     transactions: txs,
     transactionsTotal: assetTxs.length,
   };

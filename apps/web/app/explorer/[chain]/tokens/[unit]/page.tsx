@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import TokenTabs from "~/app/_components/ExplorerSection/Tokens/TokenTabs";
 import { Header } from "~/app/_components/Header";
 import { TOKEN_TABS, type TokenTab } from "~/app/_utils";
@@ -7,6 +8,7 @@ import {
   type Network,
 } from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
+import { AssetHistoryList } from "./_components/AssetHistoryList";
 import { loadTokenPageData } from "./_shared";
 import DevnetTokenTabs from "./DevnetTokenTabs";
 
@@ -73,12 +75,24 @@ export default async function TokenPage({ params, searchParams }: Props) {
     );
   }
 
+  const historyContent = (
+    <Suspense
+      fallback={
+        <div className="rounded-lg border-2 border-dashed border-border bg-surface p-8 text-center text-p-secondary shadow-md">
+          Loading history...
+        </div>
+      }
+    >
+      <AssetHistoryList chain={chain} unit={data.assetInfo.unit} />
+    </Suspense>
+  );
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
       <main className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
         <div className="flex min-h-0 flex-1">
-          <TokenTabs data={data} tab={tab} chain={chain} page={page} />
+          <TokenTabs data={data} tab={tab} chain={chain} page={page} historyContent={historyContent} />
         </div>
       </main>
     </div>
