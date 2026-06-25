@@ -1,21 +1,13 @@
 import { type Address, type cardano } from "@laceanatomy/types";
 import { cache } from "react";
-import { ADDRESS_PAGE_SIZE, DEFAULT_DEVNET_PORT } from "~/app/_utils/constants";
-import { NETWORK, type Network } from "~/app/_utils/network-config";
-import { getDolosProvider } from "~/server/api/dolos-provider";
-import { getU5CProviderNode } from "~/server/api/u5c-provider";
+import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
+import { type Network } from "~/app/_utils/network-config";
 import { AddressUTxOsListClient } from "./AddressUTxOsListClient";
+import { resolveProvider } from "./resolve-provider";
 
 interface AddressUTxOsListProps {
   chain: Network;
   address: Address;
-}
-
-function resolveProvider(chain: Network) {
-  if (chain === NETWORK.DEVNET) {
-    return getU5CProviderNode(Number.parseInt(DEFAULT_DEVNET_PORT, 10));
-  }
-  return getDolosProvider(chain);
 }
 
 export const getAddressUTxOsPage = cache(

@@ -3,8 +3,8 @@
 import { Button } from "@heroui/react";
 import { type Address, type cardano } from "@laceanatomy/types";
 import { useState } from "react";
-import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
 import { UtxoList } from "~/app/_components/ExplorerSection/Transactions/TxOverview";
+import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
 import { type Network } from "~/app/_utils/network-config";
 import { loadMoreUTxOs } from "./actions";
 

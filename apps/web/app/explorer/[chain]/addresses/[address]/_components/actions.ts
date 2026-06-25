@@ -2,17 +2,8 @@
 
 import { type Address } from "@laceanatomy/types";
 import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
-import { DEFAULT_DEVNET_PORT } from "~/app/_utils/constants";
-import { NETWORK, type Network } from "~/app/_utils/network-config";
-import { getDolosProvider } from "~/server/api/dolos-provider";
-import { getU5CProviderNode } from "~/server/api/u5c-provider";
-
-function resolveProvider(chain: Network) {
-  if (chain === NETWORK.DEVNET) {
-    return getU5CProviderNode(Number.parseInt(DEFAULT_DEVNET_PORT, 10));
-  }
-  return getDolosProvider(chain);
-}
+import { type Network } from "~/app/_utils/network-config";
+import { resolveProvider } from "./resolve-provider";
 
 export async function loadMoreUTxOs(
   chain: Network,

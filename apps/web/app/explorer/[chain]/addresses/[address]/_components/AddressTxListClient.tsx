@@ -3,8 +3,8 @@
 import { Button } from "@heroui/react";
 import { type Address, type cardano } from "@laceanatomy/types";
 import { useState } from "react";
-import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
+import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
 import { type Network } from "~/app/_utils/network-config";
 import { loadMoreTxs } from "./actions";
 
