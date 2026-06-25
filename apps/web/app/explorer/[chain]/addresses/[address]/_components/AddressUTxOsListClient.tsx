@@ -3,11 +3,10 @@
 import { Button } from "@heroui/react";
 import { type Address, type cardano } from "@laceanatomy/types";
 import { useState } from "react";
+import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
 import { UtxoList } from "~/app/_components/ExplorerSection/Transactions/TxOverview";
 import { type Network } from "~/app/_utils/network-config";
 import { loadMoreUTxOs } from "./actions";
-
-const PAGE_SIZE = 20n;
 
 interface Props {
   chain: Network;
@@ -25,7 +24,7 @@ export function AddressUTxOsListClient({
   const [utxos, setUtxos] = useState(initialUtxos);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
-  const [currentOffset, setCurrentOffset] = useState(PAGE_SIZE);
+  const [currentOffset, setCurrentOffset] = useState(ADDRESS_PAGE_SIZE);
 
   const onLoadMore = async () => {
     if (loading) return;
@@ -33,10 +32,10 @@ export function AddressUTxOsListClient({
     try {
       const result = await loadMoreUTxOs(chain, address, currentOffset);
       const allItems = result.data;
-      const nextItems = allItems.slice(0, Number(PAGE_SIZE));
+      const nextItems = allItems.slice(0, Number(ADDRESS_PAGE_SIZE));
       setUtxos((prev) => [...prev, ...nextItems]);
-      setHasMore(allItems.length >= PAGE_SIZE);
-      setCurrentOffset((prev) => prev + PAGE_SIZE);
+      setHasMore(allItems.length > ADDRESS_PAGE_SIZE);
+      setCurrentOffset((prev) => prev + ADDRESS_PAGE_SIZE);
     } finally {
       setLoading(false);
     }

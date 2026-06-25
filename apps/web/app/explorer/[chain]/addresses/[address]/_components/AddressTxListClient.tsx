@@ -3,11 +3,10 @@
 import { Button } from "@heroui/react";
 import { type Address, type cardano } from "@laceanatomy/types";
 import { useState } from "react";
+import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { type Network } from "~/app/_utils/network-config";
 import { loadMoreTxs } from "./actions";
-
-const PAGE_SIZE = 20n;
 
 interface Props {
   chain: Network;
@@ -25,7 +24,7 @@ export function AddressTxListClient({
   const [txs, setTxs] = useState(initialTxs);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
-  const [currentOffset, setCurrentOffset] = useState(PAGE_SIZE);
+  const [currentOffset, setCurrentOffset] = useState(ADDRESS_PAGE_SIZE);
 
   const onLoadMore = async () => {
     if (loading) return;
@@ -33,10 +32,10 @@ export function AddressTxListClient({
     try {
       const result = await loadMoreTxs(chain, address, currentOffset);
       const allItems = result.data;
-      const nextItems = allItems.slice(0, Number(PAGE_SIZE));
+      const nextItems = allItems.slice(0, Number(ADDRESS_PAGE_SIZE));
       setTxs((prev) => [...prev, ...nextItems]);
-      setHasMore(allItems.length >= PAGE_SIZE);
-      setCurrentOffset((prev) => prev + PAGE_SIZE);
+      setHasMore(allItems.length > ADDRESS_PAGE_SIZE);
+      setCurrentOffset((prev) => prev + ADDRESS_PAGE_SIZE);
     } finally {
       setLoading(false);
     }
