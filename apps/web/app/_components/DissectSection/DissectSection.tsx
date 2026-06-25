@@ -15,9 +15,10 @@ import type {
 import { Address } from "@laceanatomy/types";
 import { useCallback, useMemo, useState } from "react";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
-import { useUI } from "~/app/_contexts";
+import { useConfigs, useUI } from "~/app/_contexts";
 import type { IGraphicalTransaction, IGraphicalUtxo } from "~/app/_interfaces";
 import { JSONBIG } from "~/app/_utils";
+import { type Network } from "~/app/_utils/network-config";
 import Loading from "~/app/loading";
 import ColoredAddress from "../ExplorerSection/ColoredAddress";
 import TOPICS from "./topics";
@@ -43,8 +44,16 @@ const GROUP_TOPIC_KEY: Record<string, keyof typeof TOPICS | undefined> = {
   "Auxiliary Scripts": "auxiliary_scripts",
 };
 
-export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
+export function DissectSection({
+  tx,
+  chain: chainProp,
+}: {
+  tx: IGraphicalTransaction;
+  chain?: Network;
+}) {
   const { loading } = useUI();
+  const { configs } = useConfigs();
+  const chain = chainProp ?? (configs.net as Network | undefined);
   const [activeKey, setActiveKey] = useState<string>("");
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     new Set(),
@@ -88,7 +97,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         group: "Inputs",
         key: `input-${i}`,
         label: `#${i}  ${utxo.txHash}#${utxo.index}`,
-        content: <UtxoDetail utxo={utxo} />,
+        content: <UtxoDetail utxo={utxo} chain={chain} />,
       });
     });
     tx.outputs.forEach((utxo, i) => {
@@ -96,7 +105,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         group: "Outputs",
         key: `output-${i}`,
         label: `#${i}  ${utxo.txHash}#${utxo.index}`,
-        content: <UtxoDetail utxo={utxo} />,
+        content: <UtxoDetail utxo={utxo} chain={chain} />,
       });
     });
     referenceInputs.forEach((utxo, i) => {
@@ -104,7 +113,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         group: "Ref Inputs",
         key: `ref-${i}`,
         label: `#${i}  ${utxo.txHash}#${utxo.index}`,
-        content: <UtxoDetail utxo={utxo} />,
+        content: <UtxoDetail utxo={utxo} chain={chain} />,
       });
     });
     certs.forEach((cert, i) => {
@@ -120,7 +129,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         group: "Withdrawals",
         key: `wd-${i}`,
         label: `#${i}  ${formatAda(w.amount)} ₳`,
-        content: <WithdrawalDetail w={w} />,
+        content: <WithdrawalDetail w={w} chain={chain} />,
       });
     });
     tx.mints.forEach((mint, i) => {
@@ -150,7 +159,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         group: "Collateral",
         key: "collateral",
         label: "Collateral",
-        content: <CollateralDetail col={col} />,
+        content: <CollateralDetail col={col} chain={chain} />,
       });
     }
     if (wit) {
@@ -260,7 +269,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
         group: "Proposal Procedures",
         key: `proposal-${i}`,
         label: `#${i}  ${pp.govAction.kind}`,
-        content: <ProposalProcedureDetail pp={pp} />,
+        content: <ProposalProcedureDetail pp={pp} chain={chain} />,
       });
     });
 
@@ -290,7 +299,7 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
     }
 
     return result;
-  }, [tx]);
+  }, [tx, chain]);
 
   if (loading) return <Loading />;
 
@@ -420,7 +429,13 @@ export function DissectSection({ tx }: { tx: IGraphicalTransaction }) {
   );
 }
 
-function UtxoDetail({ utxo }: { utxo: IGraphicalUtxo }) {
+function UtxoDetail({
+  utxo,
+  chain,
+}: {
+  utxo: IGraphicalUtxo;
+  chain?: Network;
+}) {
   return (
     <div className="space-y-4">
       <div>
@@ -437,7 +452,11 @@ function UtxoDetail({ utxo }: { utxo: IGraphicalUtxo }) {
         <div>
           <DetailLabel>Address</DetailLabel>
           <div className="flex items-center gap-2 mb-2">
-            <ColoredAddress address={Address(utxo.address.bech32)} full />
+            <ColoredAddress
+              address={Address(utxo.address.bech32)}
+              chain={chain}
+              full
+            />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <SubField label="Header Type" value={utxo.address.headerType} />
@@ -564,12 +583,18 @@ function CertDetail({ cert }: { cert: Certificate }) {
   );
 }
 
-function WithdrawalDetail({ w }: { w: WithdrawalType }) {
+function WithdrawalDetail({
+  w,
+  chain,
+}: {
+  w: WithdrawalType;
+  chain?: Network;
+}) {
   return (
     <div className="space-y-4">
       <div>
         <DetailLabel>Address</DetailLabel>
-        <ColoredAddress address={Address(w.rewardAccount)} full />
+        <ColoredAddress address={Address(w.rewardAccount)} chain={chain} full />
         <div className="font-mono text-sm break-all">{w.rewardAccount}</div>
       </div>
       <div>
@@ -635,7 +660,13 @@ function MetadataDetail({ m }: { m: Metadata }) {
   );
 }
 
-function CollateralDetail({ col }: { col: CollateralType }) {
+function CollateralDetail({
+  col,
+  chain,
+}: {
+  col: CollateralType;
+  chain?: Network;
+}) {
   return (
     <div className="space-y-4">
       {col.total !== undefined && (
@@ -677,7 +708,11 @@ function CollateralDetail({ col }: { col: CollateralType }) {
               >
                 <div>
                   <DetailLabel>Address</DetailLabel>
-                  <ColoredAddress address={Address(ref.address)} full />
+                  <ColoredAddress
+                    address={Address(ref.address)}
+                    chain={chain}
+                    full
+                  />
                 </div>
 
                 <div>
@@ -942,7 +977,13 @@ function VotingProcedureDetail({ vp }: { vp: VotingProcedureEntry }) {
   );
 }
 
-function ProposalProcedureDetail({ pp }: { pp: ProposalProcedure }) {
+function ProposalProcedureDetail({
+  pp,
+  chain,
+}: {
+  pp: ProposalProcedure;
+  chain?: Network;
+}) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -959,7 +1000,11 @@ function ProposalProcedureDetail({ pp }: { pp: ProposalProcedure }) {
 
       <div>
         <DetailLabel>Reward Account</DetailLabel>
-        <ColoredAddress address={Address(pp.rewardAccount)} full />
+        <ColoredAddress
+          address={Address(pp.rewardAccount)}
+          chain={chain}
+          full
+        />
         <div className="font-mono text-sm break-all mt-1">
           {pp.rewardAccount}
         </div>

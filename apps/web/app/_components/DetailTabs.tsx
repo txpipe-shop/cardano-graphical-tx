@@ -1,5 +1,4 @@
 "use client";
-
 import { Tab, Tabs } from "@heroui/react";
 import { useEffect, useState } from "react";
 
@@ -23,7 +22,7 @@ export function DetailTabs({
   activeTab,
   onTabChange,
   ariaLabel = "Detail tabs",
-}: DetailTabsProps) {
+}: Readonly<DetailTabsProps>) {
   const [active, setActive] = useState(activeTab ?? defaultTab);
 
   useEffect(() => {

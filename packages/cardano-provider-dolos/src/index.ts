@@ -129,12 +129,25 @@ export class DolosProvider
     const bech32 = hexToBech32(HexString(addressHex), this.addressPrefix);
     const resp = await this.addrApi.addressesAddressTransactionsGet(bech32, count, page, 'desc');
     const txRefs = resp.data;
-    if (txRefs.length === 0) return { data: [], total: 0n };
+
+    let total = 0n;
+    try {
+      const totalResp = await this.addrApi.addressesAddressTotalGet(bech32);
+      total = BigInt(totalResp.data.tx_count);
+    } catch {
+      total = 0n;
+    }
+
+    if (total === 0n) {
+      total = BigInt(txRefs.length);
+    }
+
+    if (txRefs.length === 0) return { data: [], total };
 
     const data = await this.fetchTxsFromBlocks(
       txRefs.map((t) => ({ hash: t.tx_hash, blockHeight: t.block_height }))
     );
-    return { data, total: 0n };
+    return { data, total };
   }
 
   private async getTxsByBlock(

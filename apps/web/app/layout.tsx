@@ -39,6 +39,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${ibmPlexSans.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
     >
       {process.env.NODE_ENV === "production" &&
         process.env.NEXT_PUBLIC_GA_TRACKING_ID && (
