@@ -6,10 +6,6 @@ type DateViewerProps = Readonly<{
   className?: string;
 }>;
 
-function toDate(timestamp: number, unit: "seconds" | "milliseconds") {
-  return unit === "seconds" ? fromUnixTime(timestamp) : new Date(timestamp);
-}
-
 export default function DateViewer({
   timestamp,
   unit = "seconds",
@@ -19,7 +15,8 @@ export default function DateViewer({
     return <span className={className}>-</span>;
   }
 
-  const date = toDate(timestamp, unit);
+  const date =
+    unit === "seconds" ? fromUnixTime(timestamp) : new Date(timestamp);
 
   return (
     <span
