@@ -62,6 +62,9 @@ export default function DevnetTokenTabs({
           onchainMetadata: null,
           onchainMetadataStandard: null,
           metadataSource: "none",
+          cip68Metadata: null,
+          cip68ReferenceUtxo: null,
+          rawRegistryMetadata: null,
         };
 
         const tx = await provider.getLatestTx();
@@ -91,13 +94,18 @@ export default function DevnetTokenTabs({
 
         if (!isActive) return;
 
-        const pageData: TokenPageData = {
-          assetInfo: { ...info, totalSupply: total },
-          addresses: Array.from(holderMap.entries()).map(([address, qty]) => ({
+        const allAddresses = Array.from(holderMap.entries()).map(([address, qty]) => ({
             address,
             quantity: qty.toString(),
-          })),
-          addressesTotal: holderMap.size,
+          }));
+        const hasMore = allAddresses.length > 20;
+
+        const pageData: TokenPageData = {
+          assetInfo: { ...info, totalSupply: total },
+          addresses: allAddresses.slice(0, 20),
+          addressesTotal: allAddresses.length,
+          hasMoreHolders: hasMore,
+          allHolders: allAddresses,
           transactions: [] as cardano.Tx[],
           transactionsTotal: 0,
         };

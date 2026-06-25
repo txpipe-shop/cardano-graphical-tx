@@ -38,7 +38,15 @@ export class TokenRegistryClient {
         throw new Error(`Failed to fetch metadata for ${subject}: ${response.statusText}`);
       }
 
-      const data = (await response.json()) as TokenRegistryResponse;
+      const text = await response.text();
+      if (!text || !text.trim()) return null;
+
+      let data: TokenRegistryResponse;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        return null;
+      }
 
       return {
         subject: data.subject,

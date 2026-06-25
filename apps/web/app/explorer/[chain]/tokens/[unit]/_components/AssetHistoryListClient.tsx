@@ -7,15 +7,9 @@ import CopyButton from '~/app/_components/ExplorerSection/CopyButton';
 import { ROUTES } from '~/app/_utils/constants';
 import { type Network } from '~/app/_utils/network-config';
 import type { AssetHistory } from '../_shared';
-const PAGE_SIZE = 20;
+import { loadMoreHistory } from './actions';
 
-async function loadMoreHistory(chain: Network, unit: string, page: number) {
-  'use server';
-  const { getDolosProvider } = await import('~/server/api/dolos-provider');
-  const provider = getDolosProvider(chain);
-  const data = await provider.getAssetHistory(unit, PAGE_SIZE, page);
-  return { data };
-}
+const PAGE_SIZE = 20;
 
 interface Props {
   chain: Network;

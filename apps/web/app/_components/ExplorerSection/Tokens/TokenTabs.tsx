@@ -32,8 +32,16 @@ export default function TokenTabs({ data, tab, chain, page, historyContent }: To
   const tabs: DetailTab[] = [
     {
       key: "Holders",
-      title: `Holders (${data.addressesTotal})`,
-      content: <HoldersTab addresses={data.addresses} page={page} />,
+      title: "Holders",
+      content: (
+        <HoldersTab
+          chain={chain}
+          unit={data.assetInfo.unit}
+          initialHolders={data.addresses}
+          hasMore={data.hasMoreHolders}
+          allHolders={data.allHolders}
+        />
+      ),
     },
     {
       key: "History",

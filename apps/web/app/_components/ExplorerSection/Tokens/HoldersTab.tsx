@@ -1,32 +1,58 @@
-"use client";
+'use client';
 
-import { Card, CardBody } from "@heroui/react";
-import { Address } from "@laceanatomy/types";
-import { useMemo } from "react";
-import type { AssetAddress } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
-import ColoredAddress from "../ColoredAddress";
-import Pagination from "../Pagination";
+import { Button, Card, CardBody } from '@heroui/react';
+import { Address } from '@laceanatomy/types';
+import { useState } from 'react';
+import ColoredAddress from '~/app/_components/ExplorerSection/ColoredAddress';
+import { type Network } from '~/app/_utils/network-config';
+import type { AssetAddress } from '~/app/explorer/[chain]/tokens/[unit]/_shared';
+import { loadMoreHolders } from './actions';
 
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 20;
 
 interface HoldersTabProps {
-  addresses: AssetAddress[];
-  page: number;
+  chain: Network;
+  unit: string;
+  initialHolders: AssetAddress[];
+  hasMore: boolean;
+  allHolders?: AssetAddress[];
 }
 
 export default function HoldersTab({
-  addresses,
-  page,
+  chain,
+  unit,
+  initialHolders,
+  hasMore: initialHasMore,
+  allHolders,
 }: HoldersTabProps) {
-  const totalPages = Math.max(1, Math.ceil(addresses.length / PAGE_SIZE));
-  const currentPage = Math.min(Math.max(1, page), totalPages);
+  const [holders, setHolders] = useState(initialHolders);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(2);
+  const [localOffset, setLocalOffset] = useState(PAGE_SIZE);
 
-  const paginated = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return addresses.slice(start, start + PAGE_SIZE);
-  }, [addresses, currentPage]);
+  const onLoadMore = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      if (allHolders) {
+        const nextItems = allHolders.slice(localOffset, localOffset + PAGE_SIZE);
+        setHolders((prev) => [...prev, ...nextItems]);
+        setHasMore(localOffset + PAGE_SIZE < allHolders.length);
+        setLocalOffset((prev) => prev + PAGE_SIZE);
+      } else {
+        const result = await loadMoreHolders(chain, unit, currentPage);
+        const items = result.data;
+        setHolders((prev) => [...prev, ...items]);
+        setHasMore(items.length >= PAGE_SIZE);
+        setCurrentPage((prev) => prev + 1);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (addresses.length === 0) {
+  if (holders.length === 0) {
     return (
       <div className="rounded-lg border-2 border-dashed border-border bg-surface p-8 text-center text-p-secondary shadow-md">
         No holders found.
@@ -39,7 +65,7 @@ export default function HoldersTab({
       <Card className="border border-default-200 shadow-none">
         <CardBody className="p-0 md:hidden">
           <div className="space-y-4 p-4">
-            {paginated.map((addr, i) => (
+            {holders.map((addr, i) => (
               <div
                 key={`${addr.address}-${i}`}
                 className="space-y-2 rounded-lg border border-border bg-surface p-3"
@@ -65,7 +91,7 @@ export default function HoldersTab({
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {paginated.map((addr, i) => (
+              {holders.map((addr, i) => (
                 <tr key={`${addr.address}-${i}`}>
                   <td className="px-4 py-3 align-top bg-surface">
                     <ColoredAddress address={Address(addr.address)} />
@@ -79,12 +105,17 @@ export default function HoldersTab({
           </table>
         </CardBody>
       </Card>
-      {addresses.length > PAGE_SIZE && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          basePath=""
-        />
+      {hasMore && (
+        <div className="flex justify-center">
+          <Button
+            onPress={onLoadMore}
+            isLoading={loading}
+            variant="flat"
+            className="bg-explorer-row text-p-secondary shadow-sm"
+          >
+            Load More
+          </Button>
+        </div>
       )}
     </div>
   );

@@ -95,6 +95,11 @@ export type PoolsQuery = {
   search?: string;
 };
 
+export type Cip68MetadataResult = {
+  metadata: Record<string, unknown>;
+  referenceUtxo: { txHash: string; outputIndex: number };
+};
+
 export type PoolsReq = PaginatedRequest<PoolsQuery | undefined>;
 export type PoolReq = { id: string };
 
@@ -162,6 +167,7 @@ export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends Ba
   readTip(): Promise<TipRes>;
   getPools?(params: PoolsReq): Promise<PoolsRes>;
   getPool?(params: PoolReq): Promise<PoolRes>;
+  getTokenMetadata?(params: { unit: string }): Promise<Cip68MetadataResult | null>;
 }
 
 export interface CursorPaginatedProvider<

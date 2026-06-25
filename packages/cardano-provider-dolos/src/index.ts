@@ -11,6 +11,7 @@ import {
   type BlocksRes,
   type BlocksWithTxsRes,
   type ChainProvider,
+  type Cip68MetadataResult,
   type CursorPaginatedProvider,
   type CursorPaginatedRequest,
   type EpochReq,
@@ -31,6 +32,7 @@ import {
 } from '@laceanatomy/cardano-provider-u5c/mappers';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
+import { parseDatumInfo } from '@laceanatomy/napi-pallas';
 import assert from 'assert';
 import { Buffer } from 'buffer';
 import {
@@ -531,5 +533,67 @@ export class DolosProvider
       asset: item.asset,
       quantity: item.quantity
     }));
+  }
+
+  async getTokenMetadata({ unit }: { unit: string }): Promise<Cip68MetadataResult | null> {
+    if (unit === 'lovelace') return null;
+
+    const policyId = unit.slice(0, 56);
+    const assetName = unit.slice(56);
+    if (!policyId || !assetName) return null;
+
+    const policyIdBuffer = Buffer.from(policyId, 'hex');
+
+    for (const prefix of ['000de140', '000643b0']) {
+      const refAssetNameHex = prefix + assetName;
+      const refAssetNameBuffer = Buffer.from(refAssetNameHex, 'hex');
+
+      try {
+        const response = await this.utxoRpc.query.searchUtxos({
+          predicate: {
+            match: {
+              utxoPattern: {
+                case: 'cardano',
+                value: {
+                  asset: {
+                    policyId: policyIdBuffer,
+                    assetName: refAssetNameBuffer
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        const item = response.items?.[0];
+        if (!item) continue;
+
+        const parsedState = item.parsedState;
+        if (parsedState?.case !== 'cardano') continue;
+
+        const datum = parsedState.value?.datum;
+        if (!datum?.originalCbor || datum.originalCbor.length === 0) continue;
+
+        const datumHex = Buffer.from(datum.originalCbor).toString('hex');
+        const parsed = parseDatumInfo(datumHex);
+        if (!parsed) continue;
+
+        const txHash = item.txoRef
+          ? Buffer.from(item.txoRef.hash).toString('hex')
+          : '';
+
+        return {
+          metadata: JSON.parse(parsed.json) as Record<string, unknown>,
+          referenceUtxo: {
+            txHash,
+            outputIndex: item.txoRef?.index ?? 0
+          }
+        };
+      } catch {
+        continue;
+      }
+    }
+
+    return null;
   }
 }
