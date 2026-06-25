@@ -1,13 +1,10 @@
 import { type Address, type cardano } from "@laceanatomy/types";
 import { cache } from "react";
-import { DEFAULT_DEVNET_PORT } from "~/app/_utils/constants";
+import { ADDRESS_PAGE_SIZE, DEFAULT_DEVNET_PORT } from "~/app/_utils/constants";
 import { NETWORK, type Network } from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { getU5CProviderNode } from "~/server/api/u5c-provider";
 import { AddressTxListClient } from "./AddressTxListClient";
-
-const PAGE_SIZE = 20n;
-const FETCH_SIZE = PAGE_SIZE + 1n;
 
 interface AddressTxListProps {
   chain: Network;
@@ -30,7 +27,7 @@ export const getAddressTxPage = cache(
 
     return provider.getTxs({
       query: { address },
-      limit: FETCH_SIZE,
+      limit: ADDRESS_PAGE_SIZE + 1n,
       offset: 0n,
     });
   },
@@ -46,12 +43,12 @@ export async function AddressTxList({
   try {
     const response = await getAddressTxPage({ chain, address });
     allTxs = response.data;
-    hasMore = allTxs.length > PAGE_SIZE;
+    hasMore = allTxs.length > ADDRESS_PAGE_SIZE;
   } catch (err) {
     console.error(err);
   }
 
-  const txs = allTxs.slice(0, Number(PAGE_SIZE));
+  const txs = allTxs.slice(0, Number(ADDRESS_PAGE_SIZE));
 
   return (
     <AddressTxListClient
