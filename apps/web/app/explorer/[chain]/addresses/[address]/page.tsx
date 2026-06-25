@@ -107,11 +107,11 @@ export default async function AddressDetailPage({
     !!lastSeen;
 
   const dissectContent = (
-    <>
+    <div className="px-4 py-2">
       {addressInfo?.kind === "Shelley" && <ShelleySection data={addressInfo} />}
       {addressInfo?.kind === "Stake" && <StakeSection data={addressInfo} />}
       {addressInfo?.kind === "Byron" && <ByronSection data={addressInfo} />}
-    </>
+    </div>
   );
 
   const tabs = [
