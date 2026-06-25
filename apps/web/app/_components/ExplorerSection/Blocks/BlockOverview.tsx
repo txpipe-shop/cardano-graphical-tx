@@ -4,6 +4,7 @@ import { Card, CardBody, CardHeader } from "@heroui/react";
 import { type BlockRes } from "@laceanatomy/provider-core";
 import { type Address, type cardano, type Unit } from "@laceanatomy/types";
 import { formatAda } from "~/app/_utils/explorer";
+import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
 import DateViewer from "../DateViewer";
@@ -12,11 +13,13 @@ import TokenPill from "../TokenPill";
 interface BlockOverviewProps {
   block: BlockRes;
   transactions: cardano.Tx[];
+  chain: Network;
 }
 
 export default function BlockOverview({
   block,
   transactions,
+  chain,
 }: BlockOverviewProps) {
   const totalFees = block.fees;
   const totalAdaMoved = transactions.reduce(
@@ -155,7 +158,7 @@ export default function BlockOverview({
             ) : (
               topSenders.map(([addr, value]) => (
                 <div key={addr} className="flex justify-between gap-2">
-                  <ColoredAddress address={addr} />
+                  <ColoredAddress address={addr} chain={chain} />
                   <span className="shrink-0 font-mono">{formatAda(value)}</span>
                 </div>
               ))
@@ -173,7 +176,7 @@ export default function BlockOverview({
             ) : (
               topRecipients.map(([addr, value]) => (
                 <div key={addr} className="flex justify-between gap-2">
-                  <ColoredAddress address={addr} />
+                  <ColoredAddress address={addr} chain={chain} />
                   <span className="shrink-0 font-mono">{formatAda(value)}</span>
                 </div>
               ))
