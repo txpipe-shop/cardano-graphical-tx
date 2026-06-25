@@ -307,6 +307,9 @@ importers:
       '@laceanatomy/cardano-provider-u5c':
         specifier: workspace:*
         version: link:../../packages/cardano-provider-u5c
+      '@laceanatomy/cardano-token-registry-sdk':
+        specifier: workspace:*
+        version: link:../../packages/cardano-token-registry-sdk
       '@laceanatomy/napi-pallas':
         specifier: workspace:*
         version: link:../../packages/napi-pallas
@@ -544,6 +547,9 @@ importers:
       '@laceanatomy/cardano-provider-u5c':
         specifier: workspace:*
         version: link:../cardano-provider-u5c
+      '@laceanatomy/napi-pallas':
+        specifier: workspace:*
+        version: link:../napi-pallas
       '@laceanatomy/provider-core':
         specifier: workspace:*
         version: link:../provider-core

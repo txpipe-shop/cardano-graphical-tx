@@ -11,6 +11,7 @@ import {
   type BlocksRes,
   type BlocksWithTxsRes,
   type ChainProvider,
+  type Cip68MetadataResult,
   type CursorPaginatedProvider,
   type CursorPaginatedRequest,
   type EpochReq,
@@ -23,7 +24,7 @@ import {
   type TxsRes
 } from '@laceanatomy/provider-core';
 import { cardano, type Cardano, Hash, HexString, hexToBech32 } from '@laceanatomy/types';
-import { CardanoAddressesApi, CardanoBlocksApi, Configuration } from '@laceanatomy/blockfrost-sdk';
+import { CardanoAddressesApi, CardanoAssetsApi, CardanoBlocksApi, Configuration } from '@laceanatomy/blockfrost-sdk';
 import {
   toBigInt,
   u5cToCardanoBlock,
@@ -31,6 +32,7 @@ import {
 } from '@laceanatomy/cardano-provider-u5c/mappers';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
+import { parseDatumInfo } from '@laceanatomy/napi-pallas';
 import assert from 'assert';
 import { Buffer } from 'buffer';
 import {
@@ -58,6 +60,7 @@ export class DolosProvider
   private utxoRpc: UtxoRpcClient;
   private blockApi: CardanoBlocksApi;
   private addrApi: CardanoAddressesApi;
+  private assetsApi: CardanoAssetsApi;
   private addressPrefix: string;
 
   constructor({ transport, blockfrostUrl, blockfrostApiKey, addressPrefix }: DolosProviderParams) {
@@ -70,6 +73,7 @@ export class DolosProvider
     });
     this.blockApi = new CardanoBlocksApi(config);
     this.addrApi = new CardanoAddressesApi(config);
+    this.assetsApi = new CardanoAssetsApi(config);
   }
 
   // ---------------------------------------------------------------------------
@@ -129,12 +133,25 @@ export class DolosProvider
     const bech32 = hexToBech32(HexString(addressHex), this.addressPrefix);
     const resp = await this.addrApi.addressesAddressTransactionsGet(bech32, count, page, 'desc');
     const txRefs = resp.data;
-    if (txRefs.length === 0) return { data: [], total: 0n };
+
+    let total = 0n;
+    try {
+      const totalResp = await this.addrApi.addressesAddressTotalGet(bech32);
+      total = BigInt(totalResp.data.tx_count);
+    } catch {
+      total = 0n;
+    }
+
+    if (total === 0n) {
+      total = BigInt(txRefs.length);
+    }
+
+    if (txRefs.length === 0) return { data: [], total };
 
     const data = await this.fetchTxsFromBlocks(
       txRefs.map((t) => ({ hash: t.tx_hash, blockHeight: t.block_height }))
     );
-    return { data, total: 0n };
+    return { data, total };
   }
 
   private async getTxsByBlock(
@@ -462,5 +479,121 @@ export class DolosProvider
     return body.tx.findIndex(
       (t) => Buffer.from(t.hash).toString('hex') === Buffer.from(tx.hash).toString('hex')
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Assets — Blockfrost
+  // ---------------------------------------------------------------------------
+
+  async getAssetInfo(asset: string) {
+    const resp = await this.assetsApi.assetsAssetGet(asset);
+    return {
+      policyId: resp.data.policy_id,
+      assetName: resp.data.asset_name ?? '',
+      fingerprint: resp.data.fingerprint,
+      totalSupply: resp.data.quantity,
+      mintOrBurnCount: resp.data.mint_or_burn_count,
+      initialMintTxHash: resp.data.initial_mint_tx_hash,
+      metadata: resp.data.metadata,
+      onchainMetadata: resp.data.onchain_metadata as Record<string, unknown> | null,
+      onchainMetadataStandard: resp.data.onchain_metadata_standard ?? null
+    };
+  }
+
+  async getAssetAddresses(asset: string, count: number, page: number) {
+    const resp = await this.assetsApi.assetsAssetAddressesGet(asset, count, page);
+    return resp.data.map((item) => ({
+      address: item.address,
+      quantity: item.quantity
+    }));
+  }
+
+  async getAssetHistory(asset: string, count: number, page: number) {
+    const resp = await this.assetsApi.assetsAssetHistoryGet(asset, count, page);
+    return resp.data.map((item) => ({
+      txHash: item.tx_hash,
+      action: item.action as 'minted' | 'burned',
+      amount: item.amount
+    }));
+  }
+
+  async getAssetTransactions(asset: string, count: number, page: number) {
+    const resp = await this.assetsApi.assetsAssetTransactionsGet(asset, count, page);
+    return resp.data.map((item) => ({
+      txHash: item.tx_hash,
+      txIndex: item.tx_index,
+      blockHeight: item.block_height,
+      blockTime: item.block_time
+    }));
+  }
+
+  async getPolicyAssets(policyId: string, count: number, page: number) {
+    const resp = await this.assetsApi.assetsPolicyPolicyIdGet(policyId, count, page);
+    return resp.data.map((item) => ({
+      asset: item.asset,
+      quantity: item.quantity
+    }));
+  }
+
+  async getTokenMetadata({ unit }: { unit: string }): Promise<Cip68MetadataResult | null> {
+    if (unit === 'lovelace') return null;
+
+    const policyId = unit.slice(0, 56);
+    const assetName = unit.slice(56);
+    if (!policyId || !assetName) return null;
+
+    const policyIdBuffer = Buffer.from(policyId, 'hex');
+
+    for (const prefix of ['000de140', '000643b0']) {
+      const refAssetNameHex = prefix + assetName;
+      const refAssetNameBuffer = Buffer.from(refAssetNameHex, 'hex');
+
+      try {
+        const response = await this.utxoRpc.query.searchUtxos({
+          predicate: {
+            match: {
+              utxoPattern: {
+                case: 'cardano',
+                value: {
+                  asset: {
+                    policyId: policyIdBuffer,
+                    assetName: refAssetNameBuffer
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        const item = response.items?.[0];
+        if (!item) continue;
+
+        const parsedState = item.parsedState;
+        if (parsedState?.case !== 'cardano') continue;
+
+        const datum = parsedState.value?.datum;
+        if (!datum?.originalCbor || datum.originalCbor.length === 0) continue;
+
+        const datumHex = Buffer.from(datum.originalCbor).toString('hex');
+        const parsed = parseDatumInfo(datumHex);
+        if (!parsed) continue;
+
+        const txHash = item.txoRef
+          ? Buffer.from(item.txoRef.hash).toString('hex')
+          : '';
+
+        return {
+          metadata: JSON.parse(parsed.json) as Record<string, unknown>,
+          referenceUtxo: {
+            txHash,
+            outputIndex: item.txoRef?.index ?? 0
+          }
+        };
+      } catch {
+        continue;
+      }
+    }
+
+    return null;
   }
 }
