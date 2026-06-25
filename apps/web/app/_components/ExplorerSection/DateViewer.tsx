@@ -22,7 +22,10 @@ export default function DateViewer({
   const date = toDate(timestamp, unit);
 
   return (
-    <span className={className} title={formatDistanceToNow(date, { addSuffix: true })}>
+    <span
+      className={className}
+      title={formatDistanceToNow(date, { addSuffix: true })}
+    >
       {format(date, "PPpp")}
     </span>
   );
