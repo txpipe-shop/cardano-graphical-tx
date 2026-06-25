@@ -327,19 +327,13 @@ export default async function AddressDetailPage({
 
   const utxosContent = (
     <Suspense fallback={<UTxOsSkeleton />}>
-      <AddressUTxOsList
-        address={normalizedAddress}
-        chain={chain}
-      />
+      <AddressUTxOsList address={normalizedAddress} chain={chain} />
     </Suspense>
   );
 
   const txsContent = (
     <Suspense fallback={<TxTableSkeleton rows={3} />}>
-      <AddressTxList
-        address={normalizedAddress}
-        chain={chain}
-      />
+      <AddressTxList address={normalizedAddress} chain={chain} />
     </Suspense>
   );
 

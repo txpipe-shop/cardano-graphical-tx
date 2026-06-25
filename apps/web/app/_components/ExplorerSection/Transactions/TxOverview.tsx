@@ -134,7 +134,7 @@ export function UtxoList({
               {showAddress && (
                 <div>
                   <p className="text-xs font-bold text-p-secondary">Address</p>
-                  <ColoredAddress address={utxo.address} />
+                  <ColoredAddress address={utxo.address} chain={chain} />
                 </div>
               )}
               <div>
@@ -228,7 +228,7 @@ export function UtxoList({
                 {showAddress && (
                   <td className="px-4 py-3 font-mono align-top bg-surface">
                     <div className="flex items-center gap-2">
-                      <ColoredAddress address={utxo.address} />
+                      <ColoredAddress address={utxo.address} chain={chain} />
                     </div>
                   </td>
                 )}

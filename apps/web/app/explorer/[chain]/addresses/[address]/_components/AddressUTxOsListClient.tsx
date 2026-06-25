@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { Button } from '@heroui/react';
-import { type cardano, type Address } from '@laceanatomy/types';
-import { useState } from 'react';
-import { UtxoList } from '~/app/_components/ExplorerSection/Transactions/TxOverview';
-import { type Network } from '~/app/_utils/network-config';
-import { loadMoreUTxOs } from './actions';
+import { Button } from "@heroui/react";
+import { type Address, type cardano } from "@laceanatomy/types";
+import { useState } from "react";
+import { UtxoList } from "~/app/_components/ExplorerSection/Transactions/TxOverview";
+import { type Network } from "~/app/_utils/network-config";
+import { loadMoreUTxOs } from "./actions";
 
 const PAGE_SIZE = 20n;
 

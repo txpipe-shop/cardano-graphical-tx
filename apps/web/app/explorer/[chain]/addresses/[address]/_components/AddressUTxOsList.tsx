@@ -1,10 +1,10 @@
-import { type Address, type cardano } from '@laceanatomy/types';
-import { cache } from 'react';
-import { DEFAULT_DEVNET_PORT } from '~/app/_utils/constants';
-import { NETWORK, type Network } from '~/app/_utils/network-config';
-import { getDolosProvider } from '~/server/api/dolos-provider';
-import { getU5CProviderNode } from '~/server/api/u5c-provider';
-import { AddressUTxOsListClient } from './AddressUTxOsListClient';
+import { type Address, type cardano } from "@laceanatomy/types";
+import { cache } from "react";
+import { DEFAULT_DEVNET_PORT } from "~/app/_utils/constants";
+import { NETWORK, type Network } from "~/app/_utils/network-config";
+import { getDolosProvider } from "~/server/api/dolos-provider";
+import { getU5CProviderNode } from "~/server/api/u5c-provider";
+import { AddressUTxOsListClient } from "./AddressUTxOsListClient";
 
 const PAGE_SIZE = 20n;
 const FETCH_SIZE = PAGE_SIZE + 1n;
@@ -25,7 +25,7 @@ export const getAddressUTxOsPage = cache(
   async ({
     chain,
     address,
-  }: Readonly<Pick<AddressUTxOsListProps, 'chain' | 'address'>>) => {
+  }: Readonly<Pick<AddressUTxOsListProps, "chain" | "address">>) => {
     const provider = resolveProvider(chain);
 
     return provider.getAddressUTxOs({

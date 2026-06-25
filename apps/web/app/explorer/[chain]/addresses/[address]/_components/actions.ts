@@ -1,10 +1,10 @@
-'use server';
+"use server";
 
-import { type Address } from '@laceanatomy/types';
-import { DEFAULT_DEVNET_PORT } from '~/app/_utils/constants';
-import { NETWORK, type Network } from '~/app/_utils/network-config';
-import { getDolosProvider } from '~/server/api/dolos-provider';
-import { getU5CProviderNode } from '~/server/api/u5c-provider';
+import { type Address } from "@laceanatomy/types";
+import { DEFAULT_DEVNET_PORT } from "~/app/_utils/constants";
+import { NETWORK, type Network } from "~/app/_utils/network-config";
+import { getDolosProvider } from "~/server/api/dolos-provider";
+import { getU5CProviderNode } from "~/server/api/u5c-provider";
 
 const PAGE_SIZE = 20n;
 
@@ -15,7 +15,11 @@ function resolveProvider(chain: Network) {
   return getDolosProvider(chain);
 }
 
-export async function loadMoreUTxOs(chain: Network, address: Address, offset: bigint) {
+export async function loadMoreUTxOs(
+  chain: Network,
+  address: Address,
+  offset: bigint,
+) {
   const provider = resolveProvider(chain);
   return provider.getAddressUTxOs({
     query: { address },
@@ -24,7 +28,11 @@ export async function loadMoreUTxOs(chain: Network, address: Address, offset: bi
   });
 }
 
-export async function loadMoreTxs(chain: Network, address: Address, offset: bigint) {
+export async function loadMoreTxs(
+  chain: Network,
+  address: Address,
+  offset: bigint,
+) {
   const provider = resolveProvider(chain);
   return provider.getTxs({
     query: { address },
