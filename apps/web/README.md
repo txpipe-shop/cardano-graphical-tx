@@ -30,7 +30,6 @@ It is recommended to use yarn to run this project.
    To ensure that the app works correctly, you need to set the appropriate values in the `.env` file.
 
    ### Steps
-
    1. **Open the .env.example File**:
       Navigate to the root directory of your project and open the `.env.example` file in your preferred text editor.
 
@@ -38,7 +37,6 @@ It is recommended to use yarn to run this project.
       Locate the lines `DATABASE_URL="<Your-DB-URL>"` & `DIRECT_URL="<Your-Direct-URL>"`. Replace `<Your-X-URL>` with your URLs.
 
    3. **Set the Auth Providers keys**
-
       1. Locate the Github token and secret `GITHUB_CLIENT_ID="<Your-Github-Client-ID>"` & `GITHUB_CLIENT_SECRET=<Your-Github-Client-Secret>`. Replace `<Your-Github-X>` with your Client ID and Client Secret. (You must create a [Github OAuth](https://github.com/settings/developers) App to get these values)
 
       2. Locate the Google token and secret `GOOGLE_CLIENT_ID="<Your-Google-Client-ID>"` & `GOOGLE_CLIENT_SECRET=<Your-Google-Client-Secret>`. Replace `<Your-Google-X>` with your Client ID and Client Secret. (You must create a [Google OAuth](https://developers.google.com/identity/protocols/oauth2) App to get these values)
