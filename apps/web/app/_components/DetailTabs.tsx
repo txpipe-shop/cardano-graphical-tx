@@ -31,7 +31,7 @@ export function DetailTabs({
   }, [activeTab]);
 
   return (
-    <div className="flex min-h-0 w-full flex-col space-y-4">
+    <div className="flex flex-1 min-h-0 w-full flex-col space-y-4">
       <Tabs
         aria-label={ariaLabel}
         selectedKey={active}

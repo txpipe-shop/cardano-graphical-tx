@@ -1,6 +1,7 @@
 import type {
   CborResponse,
   SafeAddressResponse,
+  ValidationResponse,
 } from "@laceanatomy/napi-pallas";
 import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
@@ -141,4 +142,18 @@ export const getAddressInfo = async (
     setError((error as Response).statusText);
     throw error;
   }
+};
+
+export const validateTx = async (
+  cbor: string,
+  network: Network,
+  slot?: number,
+): Promise<ValidationResponse> => {
+  const res = await fetch(parseQuery(API_ROUTES.VALIDATE, {}), {
+    method: "POST",
+    body: JSON.stringify({ cbor, network, slot }),
+    headers: { "Content-Type": "application/json" },
+  });
+  if (res.status !== StatusCodes.OK) throw await res.text();
+  return res.json() as Promise<ValidationResponse>;
 };

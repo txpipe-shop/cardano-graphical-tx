@@ -61,3 +61,4 @@ export const cborParseBlock = __napiModule.exports.cborParseBlock
 export const downloadBlock = __napiModule.exports.downloadBlock
 export const parseAddress = __napiModule.exports.parseAddress
 export const parseDatumInfo = __napiModule.exports.parseDatumInfo
+export const validateCborTx = __napiModule.exports.validateCborTx

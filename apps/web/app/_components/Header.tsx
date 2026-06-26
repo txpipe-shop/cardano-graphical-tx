@@ -48,6 +48,14 @@ export const Header = () => {
           >
             Address
           </Button>
+          <Button
+            variant="flat"
+            className="px-2 py-2 font-mono text-sm shadow-md md:p-5 md:text-lg"
+            as={NextLink}
+            href={ROUTES.CBOR}
+          >
+            Cbor
+          </Button>
           <ExplorerButton />
           <ThemeButton />
         </div>

@@ -297,6 +297,20 @@ export interface Utxo {
   scriptRef?: string
 }
 
+export declare function validateCborTx(cbor: string, utxos: Array<Utxo>, pparamsJson: string, slot: number, networkId: number, networkMagic: number): ValidationResponse
+
+export interface ValidationCheck {
+  rule: string
+  passed: boolean
+  error?: string
+}
+
+export interface ValidationResponse {
+  era: string
+  checks: Array<ValidationCheck>
+  valid: boolean
+}
+
 export type Voter =
   | { kind: 'ConstitutionalCommitteeKey', hash: string }
   | { kind: 'ConstitutionalCommitteeScript', hash: string }

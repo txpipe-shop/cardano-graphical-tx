@@ -21,6 +21,7 @@ export const ROUTES = {
   TX: "/tx",
   ADDRESS: "/address",
   DISSECT: "/tx/dissect",
+  CBOR: "/tx/cbor",
 };
 
 export type ROUTES = (typeof ROUTES)[keyof typeof ROUTES];
@@ -30,6 +31,7 @@ export const API_ROUTES = {
   DEVNET_CBOR: "api/cbor/devnet",
   HASH: "api/hash",
   ADDRESS: "api/address",
+  VALIDATE: "api/validate",
 };
 
 export const USER_CONFIGS = {
