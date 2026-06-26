@@ -42,7 +42,7 @@ export default function Index() {
       <AddressInput setAddressInfo={setAddressInfo} />
       {isEmpty(error) ? (
         addressInfo ? (
-          <>
+          <div className="container mx-auto px-4 py-6">
             {addressInfo?.kind == "Shelley" && (
               <ShelleySection data={addressInfo} />
             )}
@@ -52,7 +52,7 @@ export default function Index() {
             {addressInfo?.kind == "Byron" && (
               <ByronSection data={addressInfo} />
             )}
-          </>
+          </div>
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center">
             <div className="w-2/3 text-center">

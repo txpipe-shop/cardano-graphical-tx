@@ -24,7 +24,10 @@ export default function Index() {
       ) : (
         transactions.transactions[0] && (
           <div className="flex flex-col min-h-0 w-full p-5">
-            <DissectSection tx={transactions.transactions[0]} />
+            <DissectSection
+              tx={transactions.transactions[0]}
+              chain={configs.net}
+            />
           </div>
         )
       )}

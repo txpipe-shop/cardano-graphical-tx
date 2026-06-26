@@ -3,6 +3,7 @@
 import { type BlockRes } from "@laceanatomy/provider-core";
 import { type cardano } from "@laceanatomy/types";
 import { type BlockTab } from "~/app/_utils";
+import { type Network } from "~/app/_utils/network-config";
 import { DetailTabs } from "../../DetailTabs";
 import BlockCbor from "./BlockCbor";
 import BlockOverview from "./BlockOverview";
@@ -29,7 +30,13 @@ export default function BlockTabs({
     {
       key: "Overview",
       title: "Overview",
-      content: <BlockOverview block={block} transactions={transactions} />,
+      content: (
+        <BlockOverview
+          block={block}
+          transactions={transactions}
+          chain={chain as Network}
+        />
+      ),
     },
     {
       key: "Transactions",

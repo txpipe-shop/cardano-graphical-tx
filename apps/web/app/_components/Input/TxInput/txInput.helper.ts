@@ -91,7 +91,7 @@ const formatAddress = (address: string): GraphicalAddress | undefined => {
       : address,
     headerType,
     netType,
-    payment: hexAddress.slice(2, POLICY_LENGTH),
+    payment: hexAddress.slice(2, 2 + POLICY_LENGTH),
     kind: Number(headerType) % 2 === 0 ? "key" : "script",
     delegation:
       hexAddress.length > 2 + POLICY_LENGTH

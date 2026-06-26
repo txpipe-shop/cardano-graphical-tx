@@ -7,9 +7,14 @@ import { TxRow } from "./TxRow";
 interface TxTableProps {
   transactions: cardano.Tx[];
   chain: string;
+  highlightAddress?: cardano.UTxO["address"];
 }
 
-export function TxTable({ transactions, chain }: TxTableProps) {
+export function TxTable({
+  transactions,
+  chain,
+  highlightAddress,
+}: Readonly<TxTableProps>) {
   if (transactions.length === 0) {
     return (
       <Card className="border-2 border-dashed border-border shadow-md bg-surface">
@@ -23,7 +28,12 @@ export function TxTable({ transactions, chain }: TxTableProps) {
   return (
     <div className="space-y-4">
       {transactions.map((tx) => (
-        <TxRow key={tx.hash} tx={tx} chain={chain} />
+        <TxRow
+          key={tx.hash}
+          tx={tx}
+          chain={chain}
+          highlightAddress={highlightAddress}
+        />
       ))}
     </div>
   );

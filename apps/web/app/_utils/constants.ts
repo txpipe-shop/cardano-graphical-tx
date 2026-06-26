@@ -2,6 +2,7 @@ import JSONbig from "json-bigint";
 import { NETWORK, type Network } from "./network-config";
 
 export const EXPLORER_PAGE_SIZE = 10n;
+export const ADDRESS_PAGE_SIZE = 20n;
 
 export function getBlockPageSize(network: Network): bigint {
   return network === NETWORK.MAINNET ? 4n : 10n;
@@ -12,6 +13,8 @@ export const ROUTES = {
   EXPLORER_TXS: (chain: Network) => `/explorer/${chain}/txs`,
   EXPLORER_TX: (chain: Network, hash: string) =>
     `/explorer/${chain}/txs/${hash}`,
+  EXPLORER_ADDRESS: (chain: Network, address: string) =>
+    `/explorer/${chain}/addresses/${address}`,
   EXPLORER_BLOCK: (chain: Network, id: string) =>
     `/explorer/${chain}/blocks/${id}`,
   GRAPHER: "/tx/grapher",
