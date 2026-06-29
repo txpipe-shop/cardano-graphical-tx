@@ -7,7 +7,7 @@ import { TxRow } from "./TxRow";
 interface TxTableProps {
   transactions: cardano.Tx[];
   chain: string;
-  highlightAddress?: cardano.UTxO['address'];
+  highlightAddress?: cardano.UTxO["address"];
 }
 
 export function TxTable({

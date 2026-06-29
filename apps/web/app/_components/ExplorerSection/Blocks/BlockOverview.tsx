@@ -14,11 +14,13 @@ import TokenPill from "../TokenPill";
 interface BlockOverviewProps {
   block: BlockRes;
   transactions: cardano.Tx[];
+  chain: Network;
 }
 
 export default function BlockOverview({
   block,
   transactions,
+  chain,
 }: BlockOverviewProps) {
   const params = useParams();
   const chain = (params?.chain as Network) ?? "mainnet";
@@ -159,7 +161,7 @@ export default function BlockOverview({
             ) : (
               topSenders.map(([addr, value]) => (
                 <div key={addr} className="flex justify-between gap-2">
-                  <ColoredAddress address={addr} />
+                  <ColoredAddress address={addr} chain={chain} />
                   <span className="shrink-0 font-mono">{formatAda(value)}</span>
                 </div>
               ))
@@ -177,7 +179,7 @@ export default function BlockOverview({
             ) : (
               topRecipients.map(([addr, value]) => (
                 <div key={addr} className="flex justify-between gap-2">
-                  <ColoredAddress address={addr} />
+                  <ColoredAddress address={addr} chain={chain} />
                   <span className="shrink-0 font-mono">{formatAda(value)}</span>
                 </div>
               ))

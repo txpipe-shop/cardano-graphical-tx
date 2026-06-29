@@ -102,18 +102,15 @@ export function UtxoList({
   mint,
   showAddress = true,
   linkTxHash,
-  chain: chainProp,
 }: {
   title?: string;
   list: cardano.UTxO[];
   mint?: Value;
   showAddress?: boolean;
   linkTxHash?: string;
-  chain?: Network;
 }) {
   const params = useParams();
-  const chain = resolveChain(params, chainProp);
-
+  const chain = (params?.chain as Network) ?? "mainnet";
   if (list.length === 0) return null;
   return (
     <Card className="shadow-none border border-default-200">
@@ -145,7 +142,7 @@ export function UtxoList({
               {showAddress && (
                 <div>
                   <p className="text-xs font-bold text-p-secondary">Address</p>
-                  <ColoredAddress address={utxo.address} />
+                  <ColoredAddress address={utxo.address} chain={chain} />
                 </div>
               )}
               <div>
@@ -240,7 +237,7 @@ export function UtxoList({
                 {showAddress && (
                   <td className="px-4 py-3 font-mono align-top bg-surface">
                     <div className="flex items-center gap-2">
-                      <ColoredAddress address={utxo.address} />
+                      <ColoredAddress address={utxo.address} chain={chain} />
                     </div>
                   </td>
                 )}
@@ -308,7 +305,13 @@ export function UtxoList({
   );
 }
 
-function MintList({ list, chain: chainProp }: { list: Value; chain?: Network }) {
+function MintList({
+  list,
+  chain: chainProp,
+}: Readonly<{
+  list: Value;
+  chain?: Network;
+}>) {
   const params = useParams();
   const chain = resolveChain(params, chainProp);
   if (Object.keys(list).length === 0) {
@@ -357,14 +360,12 @@ export default function TxOverview({ tx }: TxOverviewProps) {
         list={tx.inputs}
         mint={tx.mint}
         linkTxHash={tx.hash}
-        chain={chain}
       />
       <UtxoList
         title="Outputs"
         list={tx.outputs}
         mint={tx.mint}
         linkTxHash={tx.hash}
-        chain={chain}
       />
       {tx.referenceInputs && tx.referenceInputs.length > 0 ? (
         <UtxoList
@@ -372,7 +373,6 @@ export default function TxOverview({ tx }: TxOverviewProps) {
           list={tx.referenceInputs}
           mint={tx.mint}
           linkTxHash={tx.hash}
-          chain={chain}
         />
       ) : (
         <Card className="shadow-none border border-border bg-surface">

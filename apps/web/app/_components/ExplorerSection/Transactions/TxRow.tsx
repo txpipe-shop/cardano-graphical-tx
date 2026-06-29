@@ -65,15 +65,15 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
 interface UTxOsColumnProps {
   tx: cardano.Tx;
   column: "inputs" | "outputs";
-  highlightAddress?: cardano.UTxO["address"];
   chain: string;
+  highlightAddress?: cardano.UTxO["address"];
 }
 
 function UTxOsColumn({
   tx,
   column,
-  highlightAddress,
   chain,
+  highlightAddress,
 }: Readonly<UTxOsColumnProps>) {
   const utxos = column === "inputs" ? tx.inputs : tx.outputs;
 
@@ -100,7 +100,7 @@ function UTxOsColumn({
               <span className="text-sm font-medium">
                 {formatAda(utxo.coin)}
               </span>
-              <ColoredAddress address={utxo.address} />
+              <ColoredAddress address={utxo.address} chain={chain as Network} />
               <div className="flex items-center gap-1 font-mono text-xs text-p-secondary">
                 {utxo.outRef.hash.slice(0, 7)}...{utxo.outRef.hash.slice(-7)}#
                 {utxo.outRef.index.toString()}
@@ -147,14 +147,14 @@ export function TxRow({
           <UTxOsColumn
             tx={tx}
             column="inputs"
-            highlightAddress={highlightAddress}
             chain={chain}
+            highlightAddress={highlightAddress}
           />
           <UTxOsColumn
             tx={tx}
             column="outputs"
-            highlightAddress={highlightAddress}
             chain={chain}
+            highlightAddress={highlightAddress}
           />
         </div>
       </CardBody>

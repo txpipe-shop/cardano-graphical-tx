@@ -1,36 +1,25 @@
-import { type Address, type cardano } from '@laceanatomy/types';
-import { cache } from 'react';
-import { DEFAULT_DEVNET_PORT } from '~/app/_utils/constants';
-import { NETWORK, type Network } from '~/app/_utils/network-config';
-import { getDolosProvider } from '~/server/api/dolos-provider';
-import { getU5CProviderNode } from '~/server/api/u5c-provider';
-import { AddressUTxOsListClient } from './AddressUTxOsListClient';
-
-const PAGE_SIZE = 20n;
-const FETCH_SIZE = PAGE_SIZE + 1n;
+import { type Address, type cardano } from "@laceanatomy/types";
+import { cache } from "react";
+import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
+import { type Network } from "~/app/_utils/network-config";
+import { AddressUTxOsListClient } from "./AddressUTxOsListClient";
+import { resolveProvider } from "./resolve-provider";
 
 interface AddressUTxOsListProps {
   chain: Network;
   address: Address;
 }
 
-function resolveProvider(chain: Network) {
-  if (chain === NETWORK.DEVNET) {
-    return getU5CProviderNode(Number.parseInt(DEFAULT_DEVNET_PORT, 10));
-  }
-  return getDolosProvider(chain);
-}
-
 export const getAddressUTxOsPage = cache(
   async ({
     chain,
     address,
-  }: Readonly<Pick<AddressUTxOsListProps, 'chain' | 'address'>>) => {
+  }: Readonly<Pick<AddressUTxOsListProps, "chain" | "address">>) => {
     const provider = resolveProvider(chain);
 
     return provider.getAddressUTxOs({
       query: { address },
-      limit: FETCH_SIZE,
+      limit: ADDRESS_PAGE_SIZE + 1n,
       offset: 0n,
     });
   },
@@ -46,12 +35,12 @@ export async function AddressUTxOsList({
   try {
     const response = await getAddressUTxOsPage({ chain, address });
     allUtxos = response.data;
-    hasMore = allUtxos.length > PAGE_SIZE;
+    hasMore = allUtxos.length > ADDRESS_PAGE_SIZE;
   } catch (err) {
     console.error(err);
   }
 
-  const utxos = allUtxos.slice(0, Number(PAGE_SIZE));
+  const utxos = allUtxos.slice(0, Number(ADDRESS_PAGE_SIZE));
 
   if (utxos.length === 0) {
     return (

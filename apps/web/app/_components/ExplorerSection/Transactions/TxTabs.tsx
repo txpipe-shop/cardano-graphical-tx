@@ -94,6 +94,7 @@ export default function TxTabs({
         <div className="overflow-visible">
           <DissectSection
             tx={parseTxToGraphical([tx], { transactions: [], utxos: {} })[0]!}
+            chain={chain}
           />
         </div>
       ),
