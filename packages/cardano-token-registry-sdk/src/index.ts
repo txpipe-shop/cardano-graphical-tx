@@ -3,21 +3,20 @@ import { z } from 'zod';
 
 const SignatureSchema = z.object({
   signature: z.string(),
-  publicKey: z.string(),
+  publicKey: z.string()
 });
 
 const EntrySchema = z.object({
   value: z.coerce.string(),
   sequenceNumber: z.number(),
-  signatures: z.array(SignatureSchema).optional(),
+  signatures: z.array(SignatureSchema).optional()
 });
 
-const DecimalsEntrySchema = EntrySchema.refine(
-  (entry) => Number.isFinite(Number(entry.value)),
-  { message: 'Decimals value must be numeric' }
-).transform((entry) => ({
+const DecimalsEntrySchema = EntrySchema.refine((entry) => Number.isFinite(Number(entry.value)), {
+  message: 'Decimals value must be numeric'
+}).transform((entry) => ({
   ...entry,
-  value: Number(entry.value),
+  value: Number(entry.value)
 }));
 
 const ResponseSchema = z.object({
@@ -28,7 +27,7 @@ const ResponseSchema = z.object({
   ticker: EntrySchema.optional(),
   url: EntrySchema.optional(),
   logo: EntrySchema.optional(),
-  decimals: DecimalsEntrySchema.optional(),
+  decimals: DecimalsEntrySchema.optional()
 });
 
 export type TokenRegistryResponse = z.infer<typeof ResponseSchema>;
@@ -48,7 +47,7 @@ export type TokenRegistryNetwork = 'mainnet' | 'preprod';
 
 const BASE_URLS: Record<TokenRegistryNetwork, string> = {
   mainnet: 'https://tokens.cardano.org',
-  preprod: 'https://preprod.tokens.cardano.org',
+  preprod: 'https://preprod.tokens.cardano.org'
 };
 
 export class TokenRegistryClient {
@@ -77,7 +76,7 @@ export class TokenRegistryClient {
         ticker: data.ticker?.value ?? null,
         url: data.url?.value ?? null,
         logo: data.logo?.value ?? null,
-        policy: data.policy ?? null,
+        policy: data.policy ?? null
       };
     } catch (error) {
       console.warn(`Error fetching token metadata for ${subject}`, error);

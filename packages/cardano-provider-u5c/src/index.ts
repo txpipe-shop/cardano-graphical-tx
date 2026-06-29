@@ -15,13 +15,14 @@ import {
   EpochRes,
   EpochsReq,
   EpochsRes,
+  Nullable,
   TipRes,
   TxsRes,
   type ChainProvider,
   type TxReq,
   type TxsReq
 } from '@laceanatomy/provider-core';
-import type { Cardano, cardano } from '@laceanatomy/types';
+import type { Cardano, cardano, Unit } from '@laceanatomy/types';
 import { Hash } from '@laceanatomy/types';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
@@ -34,6 +35,7 @@ import {
   u5cToCardanoUtxo,
   u5cToCardanoValue
 } from './mappers';
+import { TokenMetadata } from '../../types/dist/cardano';
 
 const DUMP_HISTORY_MAX_ITEMS = 100;
 
@@ -46,7 +48,9 @@ export type Params = {
   transport: Transport;
 };
 
-export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano> {
+export class U5CProvider
+  implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano, cardano.TokenMetadata>
+{
   utxoRpc: UtxoRpcClient;
 
   constructor({ transport }: Params) {
@@ -222,6 +226,26 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     if (query.address) return this.getTxsByAddress(query.address, limitValue, offsetValue);
 
     throw new Error('Invalid query');
+  }
+
+  async getTokenMetadata({}: {
+    unit: Unit;
+    type?: keyof cardano.TokenMetadata | 'all';
+  }): Promise<Nullable<cardano.NullableTokenMetadata>> {
+    const metadata = {
+      Cip25v1: null,
+      Cip25v2: null,
+      Cip26: null,
+      Cip60v1: null,
+      Cip60v2: null,
+      Cip60v3: null,
+      Cip68v1: null,
+      Cip68v2: null,
+      Cip68v3: null,
+      Cip68v4: null
+    };
+
+    return metadata;
   }
 
   private async getLatestTxs(

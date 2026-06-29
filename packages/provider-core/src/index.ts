@@ -152,13 +152,15 @@ export type AddressFundsRes = {
 export type AddressUTxOsRes<U extends UTxO> = PaginatedResult<U>;
 export type EpochRes = Epoch;
 
-export type MetadataShapes = Record<string, Record<string, unknown>>;
+export type TokenMetadataShapes = Record<string, Record<string, unknown>>;
+
+export type Nullable<T> = { [K in keyof T]: T[K] | null };
 
 export interface ChainProvider<
   U extends UTxO,
   T extends Tx<U>,
   Chain extends BaseChain<U, T>,
-  Shapes extends MetadataShapes = MetadataShapes
+  Shapes extends TokenMetadataShapes = TokenMetadataShapes
 > {
   getCBOR(params: TxReq): Promise<string>;
   getBlockCBOR?(params: BlockReq): Promise<string>;
@@ -174,10 +176,7 @@ export interface ChainProvider<
   readTip(): Promise<TipRes>;
   getPools?(params: PoolsReq): Promise<PoolsRes>;
   getPool?(params: PoolReq): Promise<PoolRes>;
-  getTokenMetadata<K extends keyof Shapes>(params: {
-    unit: Unit;
-    type: K;
-  }): Promise<Shapes[K] | null>;
+  getTokenMetadata?(params: { unit: Unit; type?: keyof Shapes | 'all' }): Promise<Nullable<Shapes>>;
 }
 
 export interface CursorPaginatedProvider<

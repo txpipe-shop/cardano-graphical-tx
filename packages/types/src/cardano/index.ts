@@ -373,7 +373,10 @@ export type CIP68MetadataRft444 = {
 };
 
 export type CIP68MetadataMapV4 = {
-  '721': Record<string, Record<string, CIP68MetadataNft222 | CIP68MetadataFt333 | CIP68MetadataRft444>>;
+  '721': Record<
+    string,
+    Record<string, CIP68MetadataNft222 | CIP68MetadataFt333 | CIP68MetadataRft444>
+  >;
 };
 
 export type TokenMetadata = {
@@ -389,4 +392,6 @@ export type TokenMetadata = {
   Cip68v4: CIP68MetadataNft222 | CIP68MetadataFt333 | CIP68MetadataRft444 | CIP68MetadataMapV4;
 };
 
-
+export type NullableTokenMetadata = {
+  [K in keyof TokenMetadata]: TokenMetadata[K] | null;
+};

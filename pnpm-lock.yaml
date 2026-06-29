@@ -597,8 +597,8 @@ importers:
         specifier: workspace:*
         version: link:../utxorpc-sdk
       '@utxorpc/spec':
-        specifier: ^0.18.1
-        version: 0.18.1
+        specifier: 0.19.0
+        version: 0.19.0
       assert:
         specifier: ^2.1.0
         version: 2.1.0
@@ -781,8 +781,8 @@ importers:
         specifier: '1.4'
         version: 1.4.0(@bufbuild/protobuf@1.10.1)(@connectrpc/connect@1.4.0(@bufbuild/protobuf@1.10.1))
       '@utxorpc/spec':
-        specifier: ^0.18.1
-        version: 0.18.1
+        specifier: 0.19.0
+        version: 0.19.0
     devDependencies:
       '@laceanatomy/typescript-config':
         specifier: workspace:*
@@ -4443,6 +4443,10 @@ packages:
 
   '@utxorpc/spec@0.18.1':
     resolution: {integrity: sha512-XNUhgYImEQlmYxWzHhtRSHcKU/VhJ2fbZPzjBgtEyU/3iZgAev9JdjZc5GWEBXO8iWifqaqK1TarANwMbOftVQ==}
+    engines: {node: '>=20.0.0'}
+
+  '@utxorpc/spec@0.19.0':
+    resolution: {integrity: sha512-I12nN7W6h3TI19p9SdBQkury+SE/tugU3aJJEM8j7s3vPhS5F1zU6elD2UntiUatAfyZALM+tEz0sM0MPtdEHw==}
     engines: {node: '>=20.0.0'}
 
   '@vercel/nft@0.29.4':
@@ -13034,6 +13038,10 @@ snapshots:
     optional: true
 
   '@utxorpc/spec@0.18.1':
+    dependencies:
+      '@bufbuild/protobuf': 1.10.1
+
+  '@utxorpc/spec@0.19.0':
     dependencies:
       '@bufbuild/protobuf': 1.10.1
 
