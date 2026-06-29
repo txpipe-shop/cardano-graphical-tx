@@ -59,7 +59,7 @@ export type Tx = BaseTx<UTxO> & CardanoTxFields;
 export type Block = BaseBlock<UTxO, Tx> & CardanoBlockFields;
 
 // Token Metadata shapes
-export type CIP25File = {
+export type CIPMetadataFile = {
   name: string;
   mediaType: string;
   src: string | string[];
@@ -70,7 +70,7 @@ export type CIP25MetadataV1 = {
   image: string | string[];
   mediaType?: string;
   description?: string | string[];
-  files?: CIP25File[];
+  files?: CIPMetadataFile[];
 };
 
 export type CIP25MetadataV2 = CIP25MetadataV1;
@@ -345,6 +345,37 @@ export type CIP60MetadataV3 = {
   description?: string | string[];
 };
 
+// CIP-68
+export type CIP68MetadataNft222 = {
+  name: string;
+  image: string | string[];
+  mediaType?: string;
+  description?: string | string[];
+  files?: CIPMetadataFile[];
+};
+
+export type CIP68MetadataFt333 = {
+  name: string;
+  description: string;
+  ticker?: string;
+  url?: string;
+  logo?: string | string[];
+  decimals?: number;
+};
+
+export type CIP68MetadataRft444 = {
+  name: string;
+  image: string | string[];
+  mediaType?: string;
+  description?: string | string[];
+  decimals?: number;
+  files?: CIPMetadataFile[];
+};
+
+export type CIP68MetadataMapV4 = {
+  '721': Record<string, Record<string, CIP68MetadataNft222 | CIP68MetadataFt333 | CIP68MetadataRft444>>;
+};
+
 export type TokenMetadata = {
   Cip25v1: CIP25MetadataV1;
   Cip25v2: CIP25MetadataV2;
@@ -352,6 +383,10 @@ export type TokenMetadata = {
   Cip60v1: CIP60MetadataV1;
   Cip60v2: CIP60MetadataV2;
   Cip60v3: CIP60MetadataV3;
+  Cip68v1: CIP68MetadataNft222 | CIP68MetadataFt333;
+  Cip68v2: CIP68MetadataNft222 | CIP68MetadataFt333;
+  Cip68v3: CIP68MetadataNft222 | CIP68MetadataFt333 | CIP68MetadataRft444;
+  Cip68v4: CIP68MetadataNft222 | CIP68MetadataFt333 | CIP68MetadataRft444 | CIP68MetadataMapV4;
 };
 
 
