@@ -1,15 +1,37 @@
 import fetch from 'cross-fetch';
+import { z } from 'zod';
 
-export type TokenRegistryResponse = {
-  subject: string;
-  name?: { value: string; [key: string]: any };
-  description?: { value: string; [key: string]: any };
-  policy?: string;
-  ticker?: { value: string; [key: string]: any };
-  url?: { value: string; [key: string]: any };
-  logo?: { value: string; [key: string]: any };
-  decimals?: { value: number; [key: string]: any };
-};
+const SignatureSchema = z.object({
+  signature: z.string(),
+  publicKey: z.string(),
+});
+
+const EntrySchema = z.object({
+  value: z.coerce.string(),
+  sequenceNumber: z.number(),
+  signatures: z.array(SignatureSchema).optional(),
+});
+
+const DecimalsEntrySchema = EntrySchema.refine(
+  (entry) => Number.isFinite(Number(entry.value)),
+  { message: 'Decimals value must be numeric' }
+).transform((entry) => ({
+  ...entry,
+  value: Number(entry.value),
+}));
+
+const ResponseSchema = z.object({
+  subject: z.string(),
+  policy: z.string().optional(),
+  name: EntrySchema.optional(),
+  description: EntrySchema.optional(),
+  ticker: EntrySchema.optional(),
+  url: EntrySchema.optional(),
+  logo: EntrySchema.optional(),
+  decimals: DecimalsEntrySchema.optional(),
+});
+
+export type TokenRegistryResponse = z.infer<typeof ResponseSchema>;
 
 export type TokenMetadata = {
   decimals: number | null;
@@ -22,11 +44,18 @@ export type TokenMetadata = {
   subject: string;
 };
 
+export type TokenRegistryNetwork = 'mainnet' | 'preprod';
+
+const BASE_URLS: Record<TokenRegistryNetwork, string> = {
+  mainnet: 'https://tokens.cardano.org',
+  preprod: 'https://preprod.tokens.cardano.org',
+};
+
 export class TokenRegistryClient {
   private baseUrl: string;
 
-  constructor(baseUrl: string = 'https://tokens.cardano.org/metadata') {
-    this.baseUrl = baseUrl.replace(/\/$/, '');
+  constructor(network: TokenRegistryNetwork = 'mainnet') {
+    this.baseUrl = `${BASE_URLS[network]}/metadata`;
   }
 
   async getToken(subject: string): Promise<TokenMetadata | null> {
@@ -38,15 +67,7 @@ export class TokenRegistryClient {
         throw new Error(`Failed to fetch metadata for ${subject}: ${response.statusText}`);
       }
 
-      const text = await response.text();
-      if (!text || !text.trim()) return null;
-
-      let data: TokenRegistryResponse;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        return null;
-      }
+      const data = ResponseSchema.parse(await response.json());
 
       return {
         subject: data.subject,
@@ -56,7 +77,7 @@ export class TokenRegistryClient {
         ticker: data.ticker?.value ?? null,
         url: data.url?.value ?? null,
         logo: data.logo?.value ?? null,
-        policy: data.policy ?? null
+        policy: data.policy ?? null,
       };
     } catch (error) {
       console.warn(`Error fetching token metadata for ${subject}`, error);
@@ -66,7 +87,6 @@ export class TokenRegistryClient {
 
   async getTokens(subjects: string[]): Promise<Map<string, TokenMetadata>> {
     const uniqueSubjects = [...new Set(subjects)];
-    // Fetch in parallel
     const results = await Promise.all(
       uniqueSubjects.map(async (subject) => {
         const metadata = await this.getToken(subject);
