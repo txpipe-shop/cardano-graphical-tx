@@ -24,7 +24,12 @@ import {
   type TxsRes
 } from '@laceanatomy/provider-core';
 import { cardano, type Cardano, Hash, HexString, hexToBech32 } from '@laceanatomy/types';
-import { CardanoAddressesApi, CardanoAssetsApi, CardanoBlocksApi, Configuration } from '@laceanatomy/blockfrost-sdk';
+import {
+  CardanoAddressesApi,
+  CardanoAssetsApi,
+  CardanoBlocksApi,
+  Configuration
+} from '@laceanatomy/blockfrost-sdk';
 import {
   toBigInt,
   u5cToCardanoBlock,
@@ -578,9 +583,7 @@ export class DolosProvider
         const parsed = parseDatumInfo(datumHex);
         if (!parsed) continue;
 
-        const txHash = item.txoRef
-          ? Buffer.from(item.txoRef.hash).toString('hex')
-          : '';
+        const txHash = item.txoRef ? Buffer.from(item.txoRef.hash).toString('hex') : '';
 
         return {
           metadata: JSON.parse(parsed.json) as Record<string, unknown>,

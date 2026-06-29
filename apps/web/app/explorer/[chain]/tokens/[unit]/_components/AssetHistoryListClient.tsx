@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { Button, Card, CardBody, Tooltip } from '@heroui/react';
-import Link from 'next/link';
-import { useState } from 'react';
-import CopyButton from '~/app/_components/ExplorerSection/CopyButton';
-import { ROUTES } from '~/app/_utils/constants';
-import { type Network } from '~/app/_utils/network-config';
-import type { AssetHistory } from '../_shared';
-import { loadMoreHistory } from './actions';
+import { Button, Card, CardBody, Tooltip } from "@heroui/react";
+import Link from "next/link";
+import { useState } from "react";
+import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
+import { ROUTES } from "~/app/_utils/constants";
+import { type Network } from "~/app/_utils/network-config";
+import type { AssetHistory } from "../_shared";
+import { loadMoreHistory } from "./actions";
 
 const PAGE_SIZE = 20;
 
@@ -18,12 +18,12 @@ interface Props {
   hasMore: boolean;
 }
 
-function actionPill(action: AssetHistory['action']) {
+function actionPill(action: AssetHistory["action"]) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium shadow-sm ${action === 'minted' ? 'text-success' : 'text-danger'}`}
+      className={`inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium shadow-sm ${action === "minted" ? "text-success" : "text-danger"}`}
     >
-      {action === 'minted' ? 'Mint' : 'Burn'}
+      {action === "minted" ? "Mint" : "Burn"}
     </span>
   );
 }
@@ -56,8 +56,7 @@ function TxHashPill({ chain, hash }: { chain: Network; hash: string }) {
         className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-mono text-gray-700 shadow-sm transition-colors hover:bg-gray-100 whitespace-nowrap"
       >
         <ExternalLinkIcon />
-        {hash.slice(0, 8)}…
-        {hash.slice(-8)}
+        {hash.slice(0, 8)}…{hash.slice(-8)}
       </Link>
     </Tooltip>
   );

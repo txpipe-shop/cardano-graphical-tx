@@ -27,7 +27,12 @@ export interface TokenPillProps {
   chain?: string;
 }
 
-export default function TokenPill({ unit, amount, mint = {}, chain }: TokenPillProps) {
+export default function TokenPill({
+  unit,
+  amount,
+  mint = {},
+  chain,
+}: TokenPillProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const state =
     mint[unit] === undefined ? "default" : mint[unit] > 0n ? "mint" : "burn";
@@ -43,16 +48,17 @@ export default function TokenPill({ unit, amount, mint = {}, chain }: TokenPillP
     default: "border-gray-200 bg-gray-50 text-gray-700",
   };
 
-  const nameElement = chain && unit !== "lovelace" ? (
-    <Link
-      href={ROUTES.EXPLORER_TOKEN(chain as Network, unit)}
-      className="font-semibold hover:underline"
-    >
-      {displayName}
-    </Link>
-  ) : (
-    <span className="font-semibold">{displayName}</span>
-  );
+  const nameElement =
+    chain && unit !== "lovelace" ? (
+      <Link
+        href={ROUTES.EXPLORER_TOKEN(chain as Network, unit)}
+        className="font-semibold hover:underline"
+      >
+        {displayName}
+      </Link>
+    ) : (
+      <span className="font-semibold">{displayName}</span>
+    );
 
   return (
     <Tooltip content={displayUnit} placement="top" delay={150}>

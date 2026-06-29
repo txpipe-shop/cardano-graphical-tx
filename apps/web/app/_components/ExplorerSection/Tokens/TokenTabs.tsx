@@ -18,7 +18,13 @@ export interface TokenTabsProps {
   historyContent?: React.ReactNode;
 }
 
-export default function TokenTabs({ data, tab, chain, page, historyContent }: TokenTabsProps) {
+export default function TokenTabs({
+  data,
+  tab,
+  chain,
+  page,
+  historyContent,
+}: TokenTabsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

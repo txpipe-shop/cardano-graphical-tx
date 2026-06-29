@@ -87,7 +87,9 @@ function plutusDataToValue(pd: PlutusDataJson): unknown {
   return pd;
 }
 
-function parseCip68Datum(json: Record<string, unknown>): Record<string, unknown> | null {
+function parseCip68Datum(
+  json: Record<string, unknown>,
+): Record<string, unknown> | null {
   try {
     const constructor = json["constructor"] as number | undefined;
     if (constructor !== 0) return null;
@@ -200,17 +202,11 @@ export async function loadTokenPageData(
         ? cip68Metadata.logo
         : null;
   const cip68Decimals =
-    typeof cip68Metadata?.decimals === "number"
-      ? cip68Metadata.decimals
-      : null;
+    typeof cip68Metadata?.decimals === "number" ? cip68Metadata.decimals : null;
 
   const metadata: TokenMetadata = {
     subject: rawUnit,
-    name:
-      registryMetadata?.name ??
-      cip68Name ??
-      rawInfo.metadata?.name ??
-      null,
+    name: registryMetadata?.name ?? cip68Name ?? rawInfo.metadata?.name ?? null,
     description:
       registryMetadata?.description ??
       cip68Description ??
@@ -221,16 +217,8 @@ export async function loadTokenPageData(
       cip68Ticker ??
       rawInfo.metadata?.ticker ??
       null,
-    url:
-      registryMetadata?.url ??
-      cip68Url ??
-      rawInfo.metadata?.url ??
-      null,
-    logo:
-      registryMetadata?.logo ??
-      cip68Logo ??
-      rawInfo.metadata?.logo ??
-      null,
+    url: registryMetadata?.url ?? cip68Url ?? rawInfo.metadata?.url ?? null,
+    logo: registryMetadata?.logo ?? cip68Logo ?? rawInfo.metadata?.logo ?? null,
     decimals:
       registryMetadata?.decimals ??
       cip68Decimals ??

@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense } from "react";
 import TokenTabs from "~/app/_components/ExplorerSection/Tokens/TokenTabs";
 import { Header } from "~/app/_components/Header";
 import { TOKEN_TABS, type TokenTab } from "~/app/_utils";
@@ -92,7 +92,13 @@ export default async function TokenPage({ params, searchParams }: Props) {
       <Header />
       <main className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
         <div className="flex min-h-0 flex-1">
-          <TokenTabs data={data} tab={tab} chain={chain} page={page} historyContent={historyContent} />
+          <TokenTabs
+            data={data}
+            tab={tab}
+            chain={chain}
+            page={page}
+            historyContent={historyContent}
+          />
         </div>
       </main>
     </div>

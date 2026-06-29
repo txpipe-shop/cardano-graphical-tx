@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Button, Card, CardBody } from '@heroui/react';
-import { Address } from '@laceanatomy/types';
-import { useState } from 'react';
-import ColoredAddress from '~/app/_components/ExplorerSection/ColoredAddress';
-import { type Network } from '~/app/_utils/network-config';
-import type { AssetAddress } from '~/app/explorer/[chain]/tokens/[unit]/_shared';
-import { loadMoreHolders } from './actions';
+import { Button, Card, CardBody } from "@heroui/react";
+import { Address } from "@laceanatomy/types";
+import { useState } from "react";
+import ColoredAddress from "~/app/_components/ExplorerSection/ColoredAddress";
+import { type Network } from "~/app/_utils/network-config";
+import type { AssetAddress } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
+import { loadMoreHolders } from "./actions";
 
 const PAGE_SIZE = 20;
 
@@ -36,7 +36,10 @@ export default function HoldersTab({
     setLoading(true);
     try {
       if (allHolders) {
-        const nextItems = allHolders.slice(localOffset, localOffset + PAGE_SIZE);
+        const nextItems = allHolders.slice(
+          localOffset,
+          localOffset + PAGE_SIZE,
+        );
         setHolders((prev) => [...prev, ...nextItems]);
         setHasMore(localOffset + PAGE_SIZE < allHolders.length);
         setLocalOffset((prev) => prev + PAGE_SIZE);

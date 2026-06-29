@@ -3,7 +3,6 @@
 import { Card, CardBody, CardHeader } from "@heroui/react";
 import { type BlockRes } from "@laceanatomy/provider-core";
 import { type Address, type cardano, type Unit } from "@laceanatomy/types";
-import { useParams } from "next/navigation";
 import { formatAda } from "~/app/_utils/explorer";
 import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
@@ -22,8 +21,6 @@ export default function BlockOverview({
   transactions,
   chain,
 }: BlockOverviewProps) {
-  const params = useParams();
-  const chain = (params?.chain as Network) ?? "mainnet";
   const totalFees = block.fees;
   const totalAdaMoved = transactions.reduce(
     (sum, tx) => sum + tx.outputs.reduce((s, o) => s + o.coin, 0n),
@@ -220,7 +217,12 @@ export default function BlockOverview({
           <CardBody>
             <div className="flex flex-wrap gap-2">
               {assets.map(([unit, amount]) => (
-                <TokenPill key={unit} unit={unit} amount={amount} chain={chain} />
+                <TokenPill
+                  key={unit}
+                  unit={unit}
+                  amount={amount}
+                  chain={chain}
+                />
               ))}
             </div>
           </CardBody>

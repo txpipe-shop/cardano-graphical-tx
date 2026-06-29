@@ -174,7 +174,11 @@ export default function TokenOverview({
         <div className="flex flex-col">
           <span className="text-xs text-p-secondary">Holders</span>
           <span className="text-lg font-semibold text-p-primary">
-            {holdersCount === null ? '20+' : holdersCount !== undefined ? holdersCount.toLocaleString() : '—'}
+            {holdersCount === null
+              ? "20+"
+              : holdersCount !== undefined
+                ? holdersCount.toLocaleString()
+                : "—"}
           </span>
         </div>
         <div className="flex flex-col">

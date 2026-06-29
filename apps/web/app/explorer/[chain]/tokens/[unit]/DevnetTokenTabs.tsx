@@ -94,10 +94,12 @@ export default function DevnetTokenTabs({
 
         if (!isActive) return;
 
-        const allAddresses = Array.from(holderMap.entries()).map(([address, qty]) => ({
+        const allAddresses = Array.from(holderMap.entries()).map(
+          ([address, qty]) => ({
             address,
             quantity: qty.toString(),
-          }));
+          }),
+        );
         const hasMore = allAddresses.length > 20;
 
         const pageData: TokenPageData = {

@@ -1,8 +1,8 @@
-import { cache } from 'react';
-import { type Network } from '~/app/_utils/network-config';
-import { getDolosProvider } from '~/server/api/dolos-provider';
-import type { AssetHistory } from '../_shared';
-import { AssetHistoryListClient } from './AssetHistoryListClient';
+import { cache } from "react";
+import { type Network } from "~/app/_utils/network-config";
+import { getDolosProvider } from "~/server/api/dolos-provider";
+import type { AssetHistory } from "../_shared";
+import { AssetHistoryListClient } from "./AssetHistoryListClient";
 
 const PAGE_SIZE = 20;
 const FETCH_SIZE = PAGE_SIZE + 1;
