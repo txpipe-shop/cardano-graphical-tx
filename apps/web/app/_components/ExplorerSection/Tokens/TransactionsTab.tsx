@@ -2,6 +2,7 @@
 
 import { type cardano } from "@laceanatomy/types";
 import { useMemo } from "react";
+import { Network } from "~/app/_utils";
 import Pagination from "../Pagination";
 import { TxTable } from "../Transactions/TxTable";
 
@@ -9,7 +10,7 @@ const PAGE_SIZE = 30;
 
 interface TransactionsTabProps {
   transactions: cardano.Tx[];
-  chain: string;
+  chain: Network;
   page: number;
 }
 

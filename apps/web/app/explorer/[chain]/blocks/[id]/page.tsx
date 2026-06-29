@@ -13,7 +13,7 @@ import { getDolosProvider } from "~/server/api/dolos-provider";
 import DevnetBlockTabs from "./DevnetBlockTabs";
 
 interface Props {
-  params: Promise<{ chain: string; id: string }>;
+  params: Promise<{ chain: Network; id: string }>;
   searchParams?: Promise<{ tab?: string; page?: string }>;
 }
 

@@ -14,7 +14,7 @@ interface PolicyAsset {
 }
 
 interface Props {
-  params: Promise<{ chain: string }>;
+  params: Promise<{ chain: Network }>;
   searchParams?: Promise<{ policy?: string }>;
 }
 

@@ -13,7 +13,7 @@ import { loadTokenPageData } from "./_shared";
 import DevnetTokenTabs from "./DevnetTokenTabs";
 
 interface Props {
-  params: Promise<{ chain: string; unit: string }>;
+  params: Promise<{ chain: Network; unit: string }>;
   searchParams?: Promise<{ tab?: string; page?: string }>;
 }
 

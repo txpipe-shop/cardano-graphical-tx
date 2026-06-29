@@ -12,7 +12,7 @@ import DevnetTxTabs from "./DevnetTxTabs";
 import { loadPageData } from "./_utils";
 
 interface Props {
-  params: Promise<{ chain: string; hash: string }>;
+  params: Promise<{ chain: Network; hash: string }>;
   searchParams?: Promise<{ tab?: string }>;
 }
 

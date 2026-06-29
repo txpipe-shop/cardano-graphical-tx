@@ -23,7 +23,7 @@ import type { Network } from "~/app/_utils/network-config";
 export interface TokenPillProps {
   unit: Unit;
   amount: bigint;
-  chain: string;
+  chain: Network;
   mint?: Value;
 }
 
@@ -49,9 +49,9 @@ export default function TokenPill({
   };
 
   const nameElement =
-    chain && unit !== "lovelace" ? (
+    unit !== "lovelace" ? (
       <Link
-        href={ROUTES.EXPLORER_TOKEN(chain as Network, unit)}
+        href={ROUTES.EXPLORER_TOKEN(chain, unit)}
         className="font-semibold hover:underline"
       >
         {displayName}

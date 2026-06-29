@@ -35,7 +35,7 @@ import {
 export const revalidate = 10;
 
 interface Props {
-  params: Promise<{ chain: string; address: string }>;
+  params: Promise<{ chain: Network; address: string }>;
   searchParams?: Promise<{ tab?: string }>;
 }
 

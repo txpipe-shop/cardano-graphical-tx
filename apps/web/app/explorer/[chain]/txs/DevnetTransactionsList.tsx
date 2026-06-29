@@ -8,13 +8,14 @@ import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { useConfigs } from "~/app/_contexts";
 import {
   getU5CProviderWeb,
+  Network,
   NETWORK,
   resolveDevnetPort,
   ROUTES,
 } from "~/app/_utils";
 
 interface DevnetTransactionsListProps {
-  chain: string;
+  chain: Network;
   page: number;
   pageSize: number;
 }
