@@ -1,4 +1,4 @@
-import type { Address, BaseChain, Hash, Tx, UTxO, Value } from '@laceanatomy/types';
+import type { Address, BaseChain, Hash, Tx, Unit, UTxO, Value } from '@laceanatomy/types';
 
 export type EpochReq = { epochNo: bigint };
 
@@ -152,7 +152,14 @@ export type AddressFundsRes = {
 export type AddressUTxOsRes<U extends UTxO> = PaginatedResult<U>;
 export type EpochRes = Epoch;
 
-export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> {
+export type MetadataShapes = Record<string, Record<string, unknown>>;
+
+export interface ChainProvider<
+  U extends UTxO,
+  T extends Tx<U>,
+  Chain extends BaseChain<U, T>,
+  Shapes extends MetadataShapes = MetadataShapes
+> {
   getCBOR(params: TxReq): Promise<string>;
   getBlockCBOR?(params: BlockReq): Promise<string>;
   getLatestTx(): Promise<LatestTxRes<U, T, Chain>>;
@@ -167,7 +174,10 @@ export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends Ba
   readTip(): Promise<TipRes>;
   getPools?(params: PoolsReq): Promise<PoolsRes>;
   getPool?(params: PoolReq): Promise<PoolRes>;
-  getTokenMetadata?(params: { unit: string }): Promise<Cip68MetadataResult | null>;
+  getTokenMetadata<K extends keyof Shapes>(params: {
+    unit: Unit;
+    type: T;
+  }): Promise<Shapes[K] | null>;
 }
 
 export interface CursorPaginatedProvider<
