@@ -23,8 +23,8 @@ import type { Network } from "~/app/_utils/network-config";
 export interface TokenPillProps {
   unit: Unit;
   amount: bigint;
+  chain: string;
   mint?: Value;
-  chain?: string;
 }
 
 export default function TokenPill({

@@ -179,6 +179,7 @@ export default async function AddressDetailPage({
                           key={unit}
                           unit={unit as Unit}
                           amount={amount}
+                          chain={chain}
                         />
                       ))}
                       {tokenEntries.length > 3 && (
