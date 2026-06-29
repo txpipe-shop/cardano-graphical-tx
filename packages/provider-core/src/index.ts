@@ -176,7 +176,7 @@ export interface ChainProvider<
   getPool?(params: PoolReq): Promise<PoolRes>;
   getTokenMetadata<K extends keyof Shapes>(params: {
     unit: Unit;
-    type: T;
+    type: K;
   }): Promise<Shapes[K] | null>;
 }
 
