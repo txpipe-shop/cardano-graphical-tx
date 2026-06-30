@@ -113,9 +113,9 @@ export function u5cToCardanoUtxo(
     datum:
       output?.datum && output.datum.originalCbor.length > 0
         ? {
-            type: DatumType.INLINE,
-            datumHex: HexString(Buffer.from(output.datum.originalCbor).toString('hex'))
-          }
+          type: DatumType.INLINE,
+          datumHex: HexString(Buffer.from(output.datum.originalCbor).toString('hex'))
+        }
         : undefined,
     referenceScript: output?.script ? getRefScript(output.script) : undefined
   };
