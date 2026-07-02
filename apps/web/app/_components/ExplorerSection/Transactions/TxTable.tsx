@@ -2,7 +2,7 @@
 
 import { Card, CardBody } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
-import { Network } from "~/app/_utils";
+import type { Network } from "~/app/_utils";
 import { TxRow } from "./TxRow";
 
 interface TxTableProps {

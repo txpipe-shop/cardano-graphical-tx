@@ -5,7 +5,7 @@ import {
   assetNameFromUnit,
   fingerprintFromUnit,
   policyFromUnit,
-  Unit,
+  type Unit,
 } from "@laceanatomy/types";
 import { useEffect, useState } from "react";
 import TokenTabs from "~/app/_components/ExplorerSection/Tokens/TokenTabs";

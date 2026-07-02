@@ -759,7 +759,12 @@ export class DolosProvider
   }
 
   private stripCip68Prefix(assetName: string): string | null {
-    for (const prefix of [CIP68_PREFIX_NFT, CIP68_PREFIX_FT, CIP68_PREFIX_FT_NONSTANDARD, CIP68_PREFIX_RFT]) {
+    for (const prefix of [
+      CIP68_PREFIX_NFT,
+      CIP68_PREFIX_FT,
+      CIP68_PREFIX_FT_NONSTANDARD,
+      CIP68_PREFIX_RFT
+    ]) {
       if (assetName.startsWith(prefix)) {
         return assetName.slice(prefix.length);
       }

@@ -8,7 +8,6 @@ import type { AssetInfo } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
 
 interface TokenOverviewProps {
   assetInfo: AssetInfo;
-  chain: string;
   holdersCount?: number | null;
 }
 
@@ -60,7 +59,6 @@ function normalizeLogoUrl(logo: string): string {
 
 export default function TokenOverview({
   assetInfo,
-  chain,
   holdersCount,
 }: TokenOverviewProps) {
   const { metadata } = assetInfo;
@@ -137,13 +135,22 @@ export default function TokenOverview({
               {ticker}
             </Chip>
           ) : null}
-          {sources.length > 0
-            ? sources.map((src) => (
-                <Chip key={src} size="sm" variant="flat" color={metadataSourceColor(src)}>
-                  {metadataSourceLabel(src)}
-                </Chip>
-              ))
-            : <Chip size="sm" variant="flat" color="default">None</Chip>}
+          {sources.length > 0 ? (
+            sources.map((src) => (
+              <Chip
+                key={src}
+                size="sm"
+                variant="flat"
+                color={metadataSourceColor(src)}
+              >
+                {metadataSourceLabel(src)}
+              </Chip>
+            ))
+          ) : (
+            <Chip size="sm" variant="flat" color="default">
+              None
+            </Chip>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-p-secondary">
           <span className="flex items-center gap-1">

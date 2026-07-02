@@ -72,7 +72,7 @@ export async function loadTokenPageData(
     provider
       .getAssetAddresses(rawUnit, HOLDERS_FETCH_SIZE, 1)
       .catch(() => [] as AssetAddress[]),
-    provider.getAssetTransactions(rawUnit, TX_FETCH_SIZE, txPage, 'desc').catch(
+    provider.getAssetTransactions(rawUnit, TX_FETCH_SIZE, txPage, "desc").catch(
       () =>
         [] as {
           txHash: string;

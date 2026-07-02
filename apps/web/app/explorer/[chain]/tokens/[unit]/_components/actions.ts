@@ -1,9 +1,9 @@
 "use server";
 
+import type { cardano } from "@laceanatomy/types";
 import { Hash } from "@laceanatomy/types";
 import { type Network } from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
-import type { cardano } from "@laceanatomy/types";
 
 const HISTORY_PAGE_SIZE = 20;
 const TX_PAGE_SIZE = 5;
@@ -25,7 +25,12 @@ export async function loadMoreTransactions(
   page: number,
 ): Promise<{ data: cardano.Tx[]; hasMore: boolean }> {
   const provider = getDolosProvider(chain);
-  const rawTxs = await provider.getAssetTransactions(unit, TX_FETCH_SIZE, page, 'desc');
+  const rawTxs = await provider.getAssetTransactions(
+    unit,
+    TX_FETCH_SIZE,
+    page,
+    "desc",
+  );
   const hasMore = rawTxs.length > TX_PAGE_SIZE;
   const hashesToFetch = rawTxs.slice(0, TX_PAGE_SIZE).map((t) => t.txHash);
 

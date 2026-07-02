@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Card, CardBody } from "@heroui/react";
-import { Address, Unit } from "@laceanatomy/types";
+import { Address, type Unit } from "@laceanatomy/types";
 import { useState } from "react";
 import ColoredAddress from "~/app/_components/ExplorerSection/ColoredAddress";
 import { type Network } from "~/app/_utils/network-config";
@@ -75,7 +75,10 @@ export default function HoldersTab({
               >
                 <div>
                   <p className="text-xs font-bold text-p-secondary">Address</p>
-                  <ColoredAddress address={Address(addr.address)} />
+                  <ColoredAddress
+                    address={Address(addr.address)}
+                    chain={chain}
+                  />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-p-secondary">Quantity</p>
@@ -97,7 +100,10 @@ export default function HoldersTab({
               {holders.map((addr, i) => (
                 <tr key={`${addr.address}-${i}`}>
                   <td className="px-4 py-3 align-top bg-surface">
-                    <ColoredAddress address={Address(addr.address)} />
+                    <ColoredAddress
+                      address={Address(addr.address)}
+                      chain={chain}
+                    />
                   </td>
                   <td className="px-4 py-3 align-top bg-surface font-mono text-sm">
                     {addr.quantity}

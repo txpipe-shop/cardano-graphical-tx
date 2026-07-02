@@ -27,9 +27,7 @@ export const Header = () => {
           />
         </Link>
         <span className="hidden flex-1 text-center text-4xl font-bold text-p-primary md:block">
-          <Link href={ROUTES.HOME}>
-            Lace Anatomy
-          </Link>
+          <Link href={ROUTES.HOME}>Lace Anatomy</Link>
         </span>
         <div className="flex flex-wrap items-center justify-end gap-2 md:gap-4">
           <Button

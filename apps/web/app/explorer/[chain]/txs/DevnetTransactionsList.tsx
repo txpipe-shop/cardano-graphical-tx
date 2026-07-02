@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { useConfigs } from "~/app/_contexts";
-import { Network, NETWORK, resolveDevnetPort, ROUTES } from "~/app/_utils";
+import { type Network, NETWORK, resolveDevnetPort, ROUTES } from "~/app/_utils";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface DevnetTransactionsListProps {

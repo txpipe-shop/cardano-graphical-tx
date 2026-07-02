@@ -1,4 +1,4 @@
-import { Unit } from "@laceanatomy/types";
+import type { Unit } from "@laceanatomy/types";
 import { Suspense } from "react";
 import TokenTabs from "~/app/_components/ExplorerSection/Tokens/TokenTabs";
 import { Header } from "~/app/_components/Header";
@@ -59,7 +59,10 @@ export default async function TokenPage({ params, searchParams }: Props) {
           Skip to content
         </a>
         <Header />
-        <main id="main-content" className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
+        <main
+          id="main-content"
+          className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6"
+        >
           <div className="flex min-h-0 flex-1">
             <DevnetTokenTabs unit={unit} tab={tab} page={page} />
           </div>
@@ -80,7 +83,10 @@ export default async function TokenPage({ params, searchParams }: Props) {
           Skip to content
         </a>
         <Header />
-        <main id="main-content" className="container mx-auto flex flex-1 flex-col px-4 py-6">
+        <main
+          id="main-content"
+          className="container mx-auto flex flex-1 flex-col px-4 py-6"
+        >
           <div
             role="alert"
             className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2"
@@ -113,7 +119,10 @@ export default async function TokenPage({ params, searchParams }: Props) {
         Skip to content
       </a>
       <Header />
-      <main id="main-content" className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
+      <main
+        id="main-content"
+        className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6"
+      >
         <div className="flex min-h-0 flex-1">
           <TokenTabs
             data={data}

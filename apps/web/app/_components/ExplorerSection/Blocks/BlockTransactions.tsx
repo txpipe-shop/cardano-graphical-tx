@@ -3,7 +3,7 @@
 import { Card, CardBody } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
 import { useMemo } from "react";
-import { Network } from "~/app/_utils";
+import type { Network } from "~/app/_utils";
 import Pagination from "../Pagination";
 import { TxTable } from "../Transactions/TxTable";
 

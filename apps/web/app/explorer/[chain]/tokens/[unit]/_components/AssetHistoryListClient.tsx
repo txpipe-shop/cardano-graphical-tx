@@ -120,9 +120,15 @@ export function AssetHistoryListClient({
           <table className="w-full min-w-[600px] text-left text-sm">
             <thead className="border-b bg-explorer-row text-p-secondary font-medium">
               <tr>
-                <th scope="col" className="px-4 py-3">TX Hash</th>
-                <th scope="col" className="px-4 py-3">Action</th>
-                <th scope="col" className="px-4 py-3">Amount</th>
+                <th scope="col" className="px-4 py-3">
+                  TX Hash
+                </th>
+                <th scope="col" className="px-4 py-3">
+                  Action
+                </th>
+                <th scope="col" className="px-4 py-3">
+                  Amount
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">

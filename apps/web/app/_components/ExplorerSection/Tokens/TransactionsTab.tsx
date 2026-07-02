@@ -4,8 +4,8 @@ import { Button } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
 import { useState } from "react";
 import { type Network } from "~/app/_utils/network-config";
-import { TxTable } from "../Transactions/TxTable";
 import { loadMoreTransactions } from "~/app/explorer/[chain]/tokens/[unit]/_components/actions";
+import { TxTable } from "../Transactions/TxTable";
 
 interface TransactionsTabProps {
   transactions: cardano.Tx[];

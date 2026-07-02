@@ -2,7 +2,7 @@
 
 import { Card, CardBody } from "@heroui/react";
 import { Unit } from "@laceanatomy/types";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { DetailTabs, type DetailTab } from "~/app/_components/DetailTabs";
 import { type TokenTab } from "~/app/_utils/constants";
 import { type Network } from "~/app/_utils/network-config";
@@ -26,15 +26,7 @@ export default function TokenTabs({
   page: _page,
   historyContent,
 }: TokenTabsProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const handleTabChange = (key: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("tab", key);
-    params.delete("page");
-    router.replace(`?${params.toString()}`);
-  };
+  const [activeTab, setActiveTab] = useState(tab);
 
   const tabs: DetailTab[] = [
     {
@@ -80,7 +72,6 @@ export default function TokenTabs({
           <div className="flex flex-col gap-4 p-6">
             <TokenOverview
               assetInfo={data.assetInfo}
-              chain={chain}
               holdersCount={data.addressesTotal}
             />
           </div>
@@ -88,8 +79,8 @@ export default function TokenTabs({
             <DetailTabs
               tabs={tabs}
               defaultTab={"Holders"}
-              activeTab={tab}
-              onTabChange={handleTabChange}
+              activeTab={activeTab}
+              onTabChange={(key) => setActiveTab(key as TokenTab)}
               ariaLabel="Token detail tabs"
             />
           </div>
