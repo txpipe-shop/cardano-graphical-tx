@@ -30,7 +30,7 @@ import {
   CIP68_PREFIX_REF,
   CIP68_PREFIX_RFT,
   parseCip25,
-  parseCip68,
+  parseCip68
 } from '@laceanatomy/types/cardano';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
@@ -42,7 +42,7 @@ import {
   u5cToCardanoTx,
   u5cToCardanoUtxo,
   u5cToCardanoValue,
-  u5cToCardanoMetadata,
+  u5cToCardanoMetadata
 } from './mappers';
 
 const DUMP_HISTORY_MAX_ITEMS = 100;
@@ -57,7 +57,8 @@ export type Params = {
 };
 
 export class U5CProvider
-  implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano, cardano.TokenMetadata> {
+  implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano, cardano.TokenMetadata>
+{
   utxoRpc: UtxoRpcClient;
 
   constructor({ transport }: Params) {
@@ -237,7 +238,7 @@ export class U5CProvider
 
   async getTokenMetadata({
     unit,
-    type,
+    type
   }: {
     unit: Unit;
     type?: keyof cardano.TokenMetadata;
@@ -249,7 +250,7 @@ export class U5CProvider
       Cip68v1: null,
       Cip68v2: null,
       Cip68v3: null,
-      Cip68v4: null,
+      Cip68v4: null
     };
 
     if (unit === 'lovelace') return metadata;
@@ -289,7 +290,7 @@ export class U5CProvider
   private async fetchCip68Metadata(
     policyId: string,
     baseName: string,
-    metadata: cardano.NullableTokenMetadata,
+    metadata: cardano.NullableTokenMetadata
   ): Promise<void> {
     const policyIdBuffer = Buffer.from(policyId, 'hex');
     const refNameBuffer = Buffer.from(CIP68_PREFIX_REF + baseName, 'hex');
@@ -303,12 +304,12 @@ export class U5CProvider
               value: {
                 asset: {
                   policyId: policyIdBuffer,
-                  assetName: refNameBuffer,
-                },
-              },
-            },
-          },
-        },
+                  assetName: refNameBuffer
+                }
+              }
+            }
+          }
+        }
       });
 
       const item = response.items?.[0];
@@ -330,9 +331,19 @@ export class U5CProvider
       if (result.isMapV4) {
         metadata.Cip68v4 = result.metadata;
       } else {
-        if (ver >= 1) metadata.Cip68v1 = result.metadata as cardano.CIP68MetadataNft222 | cardano.CIP68MetadataFt333;
-        if (ver >= 2) metadata.Cip68v2 = result.metadata as cardano.CIP68MetadataNft222 | cardano.CIP68MetadataFt333;
-        if (ver >= 3) metadata.Cip68v3 = result.metadata as cardano.CIP68MetadataNft222 | cardano.CIP68MetadataFt333 | cardano.CIP68MetadataRft444;
+        if (ver >= 1)
+          metadata.Cip68v1 = result.metadata as
+            | cardano.CIP68MetadataNft222
+            | cardano.CIP68MetadataFt333;
+        if (ver >= 2)
+          metadata.Cip68v2 = result.metadata as
+            | cardano.CIP68MetadataNft222
+            | cardano.CIP68MetadataFt333;
+        if (ver >= 3)
+          metadata.Cip68v3 = result.metadata as
+            | cardano.CIP68MetadataNft222
+            | cardano.CIP68MetadataFt333
+            | cardano.CIP68MetadataRft444;
         if (ver >= 4) metadata.Cip68v4 = result.metadata;
       }
     } catch {
@@ -343,14 +354,14 @@ export class U5CProvider
   private async scanChainForCip25(
     policyId: string,
     rawAssetName: string,
-    metadata: cardano.NullableTokenMetadata,
+    metadata: cardano.NullableTokenMetadata
   ): Promise<void> {
     let nextSlot: bigint | undefined = 0n;
 
     do {
       const { block, nextToken: next } = await this.utxoRpc.sync.dumpHistory({
         maxItems: DUMP_HISTORY_MAX_ITEMS,
-        startToken: nextSlot !== undefined ? { slot: nextSlot } : undefined,
+        startToken: nextSlot !== undefined ? { slot: nextSlot } : undefined
       });
       nextSlot = next ? next.slot : undefined;
 
@@ -389,7 +400,7 @@ export class U5CProvider
     tx: cardanoUtxoRpc.Tx,
     policyId: string,
     rawAssetName: string,
-    result: cardano.NullableTokenMetadata,
+    result: cardano.NullableTokenMetadata
   ): void {
     if (!tx.auxiliary?.metadata) return;
 
@@ -412,7 +423,6 @@ export class U5CProvider
     }
     return null;
   }
-
 
   private async getLatestTxs(
     limit: number,
@@ -488,14 +498,14 @@ export class U5CProvider
     const addressHex = query.address;
     const filteredTxs = addressHex
       ? body.tx.filter((tx) => {
-        const addressMatchesInput = tx.inputs.some(
-          (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
-        );
-        const addressMatchesOutput = tx.outputs.some(
-          (output) => Buffer.from(output.address).toString('hex') === addressHex
-        );
-        return addressMatchesInput || addressMatchesOutput;
-      })
+          const addressMatchesInput = tx.inputs.some(
+            (input) => Buffer.from(input.asOutput?.address ?? '').toString('hex') === addressHex
+          );
+          const addressMatchesOutput = tx.outputs.some(
+            (output) => Buffer.from(output.address).toString('hex') === addressHex
+          );
+          return addressMatchesInput || addressMatchesOutput;
+        })
       : body.tx;
 
     const paginatedTxs = filteredTxs.reverse().slice(offset, offset + limit);
@@ -667,10 +677,10 @@ export class U5CProvider
     const { block: blocks } = await this.utxoRpc.sync.dumpHistory({
       startToken: cursor
         ? {
-          ...('slot' in cursor && { slot: cursor.slot }),
-          ...('hash' in cursor && { hash: Buffer.from(cursor.hash, 'hex') }),
-          ...('height' in cursor && { height: cursor.height })
-        }
+            ...('slot' in cursor && { slot: cursor.slot }),
+            ...('hash' in cursor && { hash: Buffer.from(cursor.hash, 'hex') }),
+            ...('height' in cursor && { height: cursor.height })
+          }
         : undefined,
       maxItems: Number(limit)
     });

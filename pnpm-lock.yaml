@@ -563,8 +563,8 @@ importers:
         specifier: workspace:*
         version: link:../utxorpc-sdk
       '@utxorpc/spec':
-        specifier: ^0.18.1
-        version: 0.18.1
+        specifier: 0.19.0
+        version: 0.19.0
       assert:
         specifier: ^2.1.0
         version: 2.1.0

@@ -4,7 +4,7 @@ import type {
   CIP68MetadataMapV4,
   CIP68MetadataNft222,
   CIP68MetadataRft444,
-  CIPMetadataFile,
+  CIPMetadataFile
 } from '../index.js';
 
 export const CIP68_PREFIX_REF = '000643b0';
@@ -12,10 +12,7 @@ export const CIP68_PREFIX_NFT = '000de140';
 export const CIP68_PREFIX_FT = '0014df50';
 export const CIP68_PREFIX_RFT = '001bc280';
 
-type CIP68DirectResult =
-  | CIP68MetadataNft222
-  | CIP68MetadataFt333
-  | CIP68MetadataRft444;
+type CIP68DirectResult = CIP68MetadataNft222 | CIP68MetadataFt333 | CIP68MetadataRft444;
 
 type CIP68Result = CIP68DirectResult | CIP68MetadataMapV4;
 
@@ -47,9 +44,7 @@ export function parseCip68(
     return { metadata, version, isMapV4: true };
   }
 
-  const metadata = version >= 3
-    ? parseCip68DirectV3(mapEntries)
-    : parseCip68Direct(mapEntries);
+  const metadata = version >= 3 ? parseCip68DirectV3(mapEntries) : parseCip68Direct(mapEntries);
 
   if (!metadata) return null;
   return { metadata, version, isMapV4: false };
@@ -66,9 +61,7 @@ function isCip68MapV4(entries: Array<{ k: unknown; v: unknown }>): boolean {
   return false;
 }
 
-function parseCip68MapV4(
-  entries: Array<{ k: unknown; v: unknown }>
-): CIP68MetadataMapV4 | null {
+function parseCip68MapV4(entries: Array<{ k: unknown; v: unknown }>): CIP68MetadataMapV4 | null {
   const result: Record<string, Record<string, CIP68DirectResult>> = {};
   for (const entry of entries) {
     const k = entry.k;
@@ -118,45 +111,35 @@ function parseCip68MapV4(
 function parseCip68Direct(
   entries: Array<{ k: unknown; v: unknown }>
 ): CIP68MetadataNft222 | CIP68MetadataFt333 | null {
-  const name = decodePlutusBytes(entries.find(
-    (e) => plutusBytesValue(e.k) === '6e616d65'
-  )?.v);
+  const name = decodePlutusBytes(entries.find((e) => plutusBytesValue(e.k) === '6e616d65')?.v);
   if (!name) return null;
 
-  const description = decodePlutusBytes(entries.find(
-    (e) => plutusBytesValue(e.k) === '6465736372697074696f6e'
-  )?.v);
+  const description = decodePlutusBytes(
+    entries.find((e) => plutusBytesValue(e.k) === '6465736372697074696f6e')?.v
+  );
 
-  const image = decodePlutusBytes(entries.find(
-    (e) => plutusBytesValue(e.k) === '696d616765'
-  )?.v);
+  const image = decodePlutusBytes(entries.find((e) => plutusBytesValue(e.k) === '696d616765')?.v);
 
-  const mediaType = decodePlutusBytes(entries.find(
-    (e) => plutusBytesValue(e.k) === '6d6564696154797065'
-  )?.v);
+  const mediaType = decodePlutusBytes(
+    entries.find((e) => plutusBytesValue(e.k) === '6d6564696154797065')?.v
+  );
 
-  const ticker = decodePlutusBytes(entries.find(
-    (e) => plutusBytesValue(e.k) === '7469636b6572'
-  )?.v);
+  const ticker = decodePlutusBytes(
+    entries.find((e) => plutusBytesValue(e.k) === '7469636b6572')?.v
+  );
 
-  const url = decodePlutusBytes(entries.find(
-    (e) => plutusBytesValue(e.k) === '75726c'
-  )?.v);
+  const url = decodePlutusBytes(entries.find((e) => plutusBytesValue(e.k) === '75726c')?.v);
 
-  const logo = decodePlutusBytes(entries.find(
-    (e) => plutusBytesValue(e.k) === '6c6f676f'
-  )?.v);
+  const logo = decodePlutusBytes(entries.find((e) => plutusBytesValue(e.k) === '6c6f676f')?.v);
 
-  const decimals = plutusInt(entries.find(
-    (e) => plutusBytesValue(e.k) === '646563696d616c73'
-  )?.v);
+  const decimals = plutusInt(entries.find((e) => plutusBytesValue(e.k) === '646563696d616c73')?.v);
 
   if (image) {
     return {
       name,
       ...(description !== undefined && { description }),
       image,
-      ...(mediaType !== undefined && { mediaType }),
+      ...(mediaType !== undefined && { mediaType })
     } as CIP68MetadataNft222;
   }
 
@@ -166,45 +149,37 @@ function parseCip68Direct(
     ...(ticker !== undefined && { ticker }),
     ...(url !== undefined && { url }),
     ...(logo !== undefined && { logo }),
-    ...(decimals !== undefined && { decimals }),
+    ...(decimals !== undefined && { decimals })
   } as CIP68MetadataFt333;
 }
 
-function parseCip68DirectV3(
-  entries: Array<{ k: unknown; v: unknown }>
-): CIP68DirectResult | null {
-  const name = decodePlutusBytes(entries.find(
-    (e) => plutusBytesValue(e.k) === '6e616d65'
-  )?.v);
+function parseCip68DirectV3(entries: Array<{ k: unknown; v: unknown }>): CIP68DirectResult | null {
+  const name = decodePlutusBytes(entries.find((e) => plutusBytesValue(e.k) === '6e616d65')?.v);
   if (!name) return null;
 
-  const description = decodePlutusBytesOrArray(entries.find(
-    (e) => plutusBytesValue(e.k) === '6465736372697074696f6e'
-  )?.v);
+  const description = decodePlutusBytesOrArray(
+    entries.find((e) => plutusBytesValue(e.k) === '6465736372697074696f6e')?.v
+  );
 
-  const image = decodePlutusBytesOrArray(entries.find(
-    (e) => plutusBytesValue(e.k) === '696d616765'
-  )?.v);
+  const image = decodePlutusBytesOrArray(
+    entries.find((e) => plutusBytesValue(e.k) === '696d616765')?.v
+  );
 
-  const mediaType = decodePlutusBytes(entries.find(
-    (e) => plutusBytesValue(e.k) === '6d6564696154797065'
-  )?.v);
+  const mediaType = decodePlutusBytes(
+    entries.find((e) => plutusBytesValue(e.k) === '6d6564696154797065')?.v
+  );
 
-  const ticker = decodePlutusBytes(entries.find(
-    (e) => plutusBytesValue(e.k) === '7469636b6572'
-  )?.v);
+  const ticker = decodePlutusBytes(
+    entries.find((e) => plutusBytesValue(e.k) === '7469636b6572')?.v
+  );
 
-  const url = decodePlutusBytes(entries.find(
-    (e) => plutusBytesValue(e.k) === '75726c'
-  )?.v);
+  const url = decodePlutusBytes(entries.find((e) => plutusBytesValue(e.k) === '75726c')?.v);
 
-  const logo = decodePlutusBytesOrArray(entries.find(
-    (e) => plutusBytesValue(e.k) === '6c6f676f'
-  )?.v);
+  const logo = decodePlutusBytesOrArray(
+    entries.find((e) => plutusBytesValue(e.k) === '6c6f676f')?.v
+  );
 
-  const decimals = plutusInt(entries.find(
-    (e) => plutusBytesValue(e.k) === '646563696d616c73'
-  )?.v);
+  const decimals = plutusInt(entries.find((e) => plutusBytesValue(e.k) === '646563696d616c73')?.v);
 
   const files = parseCip68Files(entries);
 
@@ -215,7 +190,7 @@ function parseCip68DirectV3(
       image,
       ...(mediaType !== undefined && { mediaType }),
       decimals,
-      ...(files && { files }),
+      ...(files && { files })
     } as CIP68MetadataRft444;
   }
 
@@ -225,7 +200,7 @@ function parseCip68DirectV3(
       ...(description !== undefined && { description }),
       image,
       ...(mediaType !== undefined && { mediaType }),
-      ...(files && { files }),
+      ...(files && { files })
     } as CIP68MetadataNft222;
   }
 
@@ -235,11 +210,13 @@ function parseCip68DirectV3(
     ...(ticker !== undefined && { ticker }),
     ...(url !== undefined && { url }),
     ...(logo !== undefined && { logo }),
-    ...(decimals !== undefined && { decimals }),
+    ...(decimals !== undefined && { decimals })
   } as CIP68MetadataFt333;
 }
 
-function parseCip68Files(entries: Array<{ k: unknown; v: unknown }>): CIPMetadataFile[] | undefined {
+function parseCip68Files(
+  entries: Array<{ k: unknown; v: unknown }>
+): CIPMetadataFile[] | undefined {
   const filesEntry = entries.find((e) => plutusBytesValue(e.k) === '66696c6573');
   if (!filesEntry || !Array.isArray(filesEntry.v)) return undefined;
   const files: CIPMetadataFile[] = [];
@@ -296,7 +273,9 @@ function decodePlutusBytesOrArray(val: unknown): string | string[] | undefined {
     const parts = val.map((v) => {
       if (typeof v === 'object' && v !== null && 'bytes' in (v as Record<string, unknown>)) {
         try {
-          return Buffer.from((v as Record<string, unknown>).bytes as string, 'hex').toString('utf8');
+          return Buffer.from((v as Record<string, unknown>).bytes as string, 'hex').toString(
+            'utf8'
+          );
         } catch {
           return undefined;
         }

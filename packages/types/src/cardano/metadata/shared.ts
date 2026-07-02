@@ -23,10 +23,7 @@ export function getMdNumber(map: MetadatumMap, key: string): number | undefined 
   return undefined;
 }
 
-export function getMdStringOrArray(
-  map: MetadatumMap,
-  key: string
-): string | string[] | undefined {
+export function getMdStringOrArray(map: MetadatumMap, key: string): string | string[] | undefined {
   const val = getMdValue(map, key);
   if (val === undefined) return undefined;
   if (Array.isArray(val)) {
