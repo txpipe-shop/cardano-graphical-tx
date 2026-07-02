@@ -9,11 +9,11 @@ import { useEffect, useState } from "react";
 import { useConfigs, useUI } from "~/app/_contexts";
 import {
   DEFAULT_DEVNET_PORT,
-  getU5CProviderWeb,
   NETWORK,
   type Network,
   USER_CONFIGS,
 } from "~/app/_utils";
+import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface NetSelectorProps {
   network: Network;

@@ -2,15 +2,13 @@
 
 import { Accordion, AccordionItem, Chip, Divider } from "@heroui/react";
 import Image from "next/image";
-import Link from "next/link";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
-import { JSONBIG, ROUTES } from "~/app/_utils/constants";
-import { type Network } from "~/app/_utils/network-config";
+import { JSONBIG } from "~/app/_utils/constants";
 import type { AssetInfo } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
 
 interface TokenOverviewProps {
   assetInfo: AssetInfo;
-  chain: Network;
+  chain: string;
   holdersCount?: number | null;
 }
 
@@ -27,7 +25,7 @@ function formatQuantity(
   return `${integer.toLocaleString()}.${fractionStr}`;
 }
 
-function metadataSourceLabel(source: AssetInfo["metadataSource"]): string {
+function metadataSourceLabel(source: string): string {
   switch (source) {
     case "token-registry":
       return "Cardano Token Registry";
@@ -35,13 +33,13 @@ function metadataSourceLabel(source: AssetInfo["metadataSource"]): string {
       return "CIP-68";
     case "blockfrost-onchain":
       return "On-chain";
-    case "none":
-      return "None";
+    default:
+      return source;
   }
 }
 
 function metadataSourceColor(
-  source: AssetInfo["metadataSource"],
+  source: string,
 ): "success" | "warning" | "default" {
   switch (source) {
     case "token-registry":
@@ -50,16 +48,9 @@ function metadataSourceColor(
       return "success";
     case "blockfrost-onchain":
       return "warning";
-    case "none":
+    default:
       return "default";
   }
-}
-
-function onchainStandardLabel(standard: string | null): string | null {
-  if (!standard) return null;
-  if (standard.startsWith("CIP25")) return "CIP-25";
-  if (standard.startsWith("CIP68")) return "CIP-68";
-  return standard;
 }
 
 function normalizeLogoUrl(logo: string): string {
@@ -72,37 +63,59 @@ export default function TokenOverview({
   chain,
   holdersCount,
 }: TokenOverviewProps) {
+  const { metadata } = assetInfo;
+  const cip26 = metadata.Cip26;
+  const cip25 = metadata.Cip25v1 ?? metadata.Cip25v2;
+  const cip68 =
+    metadata.Cip68v4 ??
+    metadata.Cip68v3 ??
+    metadata.Cip68v2 ??
+    metadata.Cip68v1;
+
   const displayName =
-    assetInfo.metadata?.name ??
+    cip26?.name ??
+    cip25?.name ??
+    (typeof cip68 === "object" && cip68 && "name" in cip68
+      ? cip68.name
+      : null) ??
     (assetInfo.assetNameHex
       ? Buffer.from(assetInfo.assetNameHex, "hex").toString("ascii")
       : null) ??
     "Unknown Token";
 
-  const ticker = assetInfo.metadata?.ticker;
-  const decimals = assetInfo.metadata?.decimals;
-  const description = assetInfo.metadata?.description;
-  const url = assetInfo.metadata?.url;
-  const logo = assetInfo.metadata?.logo
-    ? normalizeLogoUrl(assetInfo.metadata.logo)
-    : null;
+  const ticker =
+    cip26?.ticker ??
+    ("ticker" in (cip68 ?? {}) ? (cip68 as { ticker?: string }).ticker : null);
+  const decimals =
+    cip26?.decimals ??
+    ("decimals" in (cip68 ?? {})
+      ? (cip68 as { decimals?: number }).decimals
+      : null);
+  const description =
+    cip26?.description ??
+    cip25?.description ??
+    ("description" in (cip68 ?? {})
+      ? (cip68 as { description?: string }).description
+      : null);
+  const url =
+    cip26?.url ??
+    ("url" in (cip68 ?? {}) ? (cip68 as { url?: string }).url : null);
+  const logoRaw =
+    cip26?.logo ??
+    (typeof cip25?.image === "string"
+      ? cip25.image
+      : Array.isArray(cip25?.image)
+        ? cip25.image[0]
+        : null) ??
+    ("image" in (cip68 ?? {})
+      ? (cip68 as { image?: string }).image
+      : "logo" in (cip68 ?? {})
+        ? (cip68 as { logo?: string }).logo
+        : null);
+  const logo = logoRaw ? normalizeLogoUrl(logoRaw) : null;
 
-  const source = assetInfo.metadataSource;
-  const onchainStandard = onchainStandardLabel(
-    assetInfo.onchainMetadataStandard,
-  );
-
-  const sourceLink =
-    source === "cip68" && assetInfo.cip68ReferenceUtxo
-      ? ROUTES.EXPLORER_TX(chain, assetInfo.cip68ReferenceUtxo.txHash)
-      : assetInfo.initialMintTxHash
-        ? ROUTES.EXPLORER_TX(chain, assetInfo.initialMintTxHash)
-        : null;
-
-  const hasRawCip68 = assetInfo.cip68Metadata !== null;
-  const hasRawOnchain = assetInfo.onchainMetadata !== null;
-  const hasRawRegistry = assetInfo.rawRegistryMetadata !== null;
-  const hasAnyRaw = hasRawCip68 || hasRawOnchain || hasRawRegistry;
+  const sources = assetInfo.metadataSources;
+  const hasRaw = cip26 || cip25 || cip68;
 
   return (
     <>
@@ -124,20 +137,13 @@ export default function TokenOverview({
               {ticker}
             </Chip>
           ) : null}
-          <Chip size="sm" variant="flat" color={metadataSourceColor(source)}>
-            {metadataSourceLabel(source)}
-            {source !== "none" && onchainStandard
-              ? ` (${onchainStandard})`
-              : ""}
-          </Chip>
-          {sourceLink ? (
-            <Link
-              href={sourceLink}
-              className="text-xs text-accent-blue hover:underline"
-            >
-              {source === "cip68" ? "Reference UTxO" : "Minting tx"}
-            </Link>
-          ) : null}
+          {sources.length > 0
+            ? sources.map((src) => (
+                <Chip key={src} size="sm" variant="flat" color={metadataSourceColor(src)}>
+                  {metadataSourceLabel(src)}
+                </Chip>
+              ))
+            : <Chip size="sm" variant="flat" color="default">None</Chip>}
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-p-secondary">
           <span className="flex items-center gap-1">
@@ -152,6 +158,26 @@ export default function TokenOverview({
             Fingerprint:{" "}
             <span className="font-mono text-xs">{assetInfo.fingerprint}</span>
             <CopyButton text={assetInfo.fingerprint} size={12} />
+          </span>
+          {assetInfo.assetNameHex ? (
+            <span className="flex items-center gap-1">
+              Asset Name:{" "}
+              <span className="font-mono text-xs">
+                {assetInfo.assetNameHex.length > 24
+                  ? `${assetInfo.assetNameHex.slice(0, 12)}...${assetInfo.assetNameHex.slice(-12)}`
+                  : assetInfo.assetNameHex}
+              </span>
+              <CopyButton text={assetInfo.assetNameHex} size={12} />
+            </span>
+          ) : null}
+          <span className="flex items-center gap-1">
+            Unit:{" "}
+            <span className="font-mono text-xs">
+              {assetInfo.unit.length > 32
+                ? `${assetInfo.unit.slice(0, 16)}...${assetInfo.unit.slice(-16)}`
+                : assetInfo.unit}
+            </span>
+            <CopyButton text={assetInfo.unit} size={12} />
           </span>
         </div>
       </div>
@@ -168,7 +194,7 @@ export default function TokenOverview({
         <div className="flex flex-col">
           <span className="text-xs text-p-secondary">Decimals</span>
           <span className="text-lg font-semibold text-p-primary">
-            {decimals !== null ? decimals : "N/A"}
+            {decimals !== null && decimals !== undefined ? decimals : "N/A"}
           </span>
         </div>
         <div className="flex flex-col">
@@ -213,7 +239,7 @@ export default function TokenOverview({
         </>
       ) : null}
 
-      {hasAnyRaw ? (
+      {hasRaw ? (
         <>
           <Divider />
           <div className="flex flex-col gap-2">
@@ -225,63 +251,99 @@ export default function TokenOverview({
               variant="splitted"
               className="px-0"
             >
-              {hasRawCip68 ? (
+              {cip26 ? (
                 <AccordionItem
-                  key="cip68"
-                  aria-label="Raw CIP-68 Metadata"
-                  title="CIP-68 Metadata"
+                  key="cip26"
+                  aria-label="Raw CIP-26 Metadata"
+                  title="CIP-26 (Token Registry)"
                   classNames={{
                     title: "text-xs text-p-secondary",
                     content: "pb-2",
                   }}
                 >
                   <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
-                    {JSONBIG.stringify(assetInfo.cip68Metadata, null, 2)}
+                    {JSONBIG.stringify(cip26, null, 2)}
                   </pre>
                 </AccordionItem>
               ) : null}
-              {hasRawOnchain ? (
+              {cip25 ? (
                 <AccordionItem
-                  key="onchain"
-                  aria-label="Raw On-chain Metadata"
-                  title={`On-chain Metadata${assetInfo.onchainMetadataStandard ? ` (${assetInfo.onchainMetadataStandard})` : ""}`}
+                  key="cip25"
+                  aria-label="Raw CIP-25 Metadata"
+                  title={`CIP-25 (${metadata.Cip25v2 ? "v2" : "v1"})`}
                   classNames={{
                     title: "text-xs text-p-secondary",
                     content: "pb-2",
                   }}
                 >
                   <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
-                    {JSONBIG.stringify(assetInfo.onchainMetadata, null, 2)}
+                    {JSONBIG.stringify(cip25, null, 2)}
                   </pre>
                 </AccordionItem>
               ) : null}
-              {hasRawRegistry ? (
+              {metadata.Cip68v4 ? (
                 <AccordionItem
-                  key="registry"
-                  aria-label="Raw Registry Metadata"
-                  title="Cardano Token Registry"
+                  key="cip68v4"
+                  aria-label="Raw CIP-68v4 Metadata"
+                  title="CIP-68 (v4)"
                   classNames={{
                     title: "text-xs text-p-secondary",
                     content: "pb-2",
                   }}
                 >
                   <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
-                    {JSONBIG.stringify(assetInfo.rawRegistryMetadata, null, 2)}
+                    {JSONBIG.stringify(metadata.Cip68v4, null, 2)}
+                  </pre>
+                </AccordionItem>
+              ) : null}
+              {metadata.Cip68v3 ? (
+                <AccordionItem
+                  key="cip68v3"
+                  aria-label="Raw CIP-68v3 Metadata"
+                  title="CIP-68 (v3)"
+                  classNames={{
+                    title: "text-xs text-p-secondary",
+                    content: "pb-2",
+                  }}
+                >
+                  <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+                    {JSONBIG.stringify(metadata.Cip68v3, null, 2)}
+                  </pre>
+                </AccordionItem>
+              ) : null}
+              {metadata.Cip68v2 ? (
+                <AccordionItem
+                  key="cip68v2"
+                  aria-label="Raw CIP-68v2 Metadata"
+                  title="CIP-68 (v2)"
+                  classNames={{
+                    title: "text-xs text-p-secondary",
+                    content: "pb-2",
+                  }}
+                >
+                  <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+                    {JSONBIG.stringify(metadata.Cip68v2, null, 2)}
+                  </pre>
+                </AccordionItem>
+              ) : null}
+              {metadata.Cip68v1 ? (
+                <AccordionItem
+                  key="cip68v1"
+                  aria-label="Raw CIP-68v1 Metadata"
+                  title="CIP-68 (v1)"
+                  classNames={{
+                    title: "text-xs text-p-secondary",
+                    content: "pb-2",
+                  }}
+                >
+                  <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+                    {JSONBIG.stringify(metadata.Cip68v1, null, 2)}
                   </pre>
                 </AccordionItem>
               ) : null}
             </Accordion>
           </div>
         </>
-      ) : null}
-
-      {assetInfo.onchainMetadataStandard ? (
-        <div className="flex gap-2 text-xs text-p-secondary">
-          <span>On-chain standard:</span>
-          <Chip size="sm" variant="flat">
-            {assetInfo.onchainMetadataStandard}
-          </Chip>
-        </div>
       ) : null}
     </>
   );

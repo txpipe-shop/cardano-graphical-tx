@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Card, CardBody } from "@heroui/react";
-import { Address } from "@laceanatomy/types";
+import { Address, Unit } from "@laceanatomy/types";
 import { useState } from "react";
 import ColoredAddress from "~/app/_components/ExplorerSection/ColoredAddress";
 import { type Network } from "~/app/_utils/network-config";
@@ -12,7 +12,7 @@ const PAGE_SIZE = 20;
 
 interface HoldersTabProps {
   chain: Network;
-  unit: string;
+  unit: Unit;
   initialHolders: AssetAddress[];
   hasMore: boolean;
   allHolders?: AssetAddress[];
@@ -28,7 +28,7 @@ export default function HoldersTab({
   const [holders, setHolders] = useState(initialHolders);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(2);
+  const [nextPage, setNextPage] = useState(2);
   const [localOffset, setLocalOffset] = useState(PAGE_SIZE);
 
   const onLoadMore = async () => {
@@ -44,11 +44,11 @@ export default function HoldersTab({
         setHasMore(localOffset + PAGE_SIZE < allHolders.length);
         setLocalOffset((prev) => prev + PAGE_SIZE);
       } else {
-        const result = await loadMoreHolders(chain, unit, currentPage);
+        const result = await loadMoreHolders(chain, unit, nextPage);
         const items = result.data;
         setHolders((prev) => [...prev, ...items]);
         setHasMore(items.length >= PAGE_SIZE);
-        setCurrentPage((prev) => prev + 1);
+        setNextPage((prev) => prev + 1);
       }
     } finally {
       setLoading(false);

@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardBody } from "@heroui/react";
+import { Unit } from "@laceanatomy/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DetailTabs, type DetailTab } from "~/app/_components/DetailTabs";
 import { type TokenTab } from "~/app/_utils/constants";
@@ -42,7 +43,7 @@ export default function TokenTabs({
       content: (
         <HoldersTab
           chain={chain}
-          unit={data.assetInfo.unit}
+          unit={Unit(data.assetInfo.unit)}
           initialHolders={data.addresses}
           hasMore={data.hasMoreHolders}
           allHolders={data.allHolders}

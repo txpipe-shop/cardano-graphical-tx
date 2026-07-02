@@ -1,20 +1,21 @@
 "use client";
 
 import { Card, CardBody } from "@heroui/react";
-import { type cardano, type Unit } from "@laceanatomy/types";
+import {
+  assetNameFromUnit,
+  fingerprintFromUnit,
+  policyFromUnit,
+  Unit,
+} from "@laceanatomy/types";
 import { useEffect, useState } from "react";
 import TokenTabs from "~/app/_components/ExplorerSection/Tokens/TokenTabs";
 import { useConfigs } from "~/app/_contexts";
-import {
-  getU5CProviderWeb,
-  NETWORK,
-  resolveDevnetPort,
-  type TokenTab,
-} from "~/app/_utils";
+import { NETWORK, resolveDevnetPort, type TokenTab } from "~/app/_utils";
+import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 import type { TokenPageData } from "./_shared";
 
 interface DevnetTokenTabsProps {
-  unit: string;
+  unit: Unit;
   tab: TokenTab;
   page: number;
 }
@@ -39,47 +40,43 @@ export default function DevnetTokenTabs({
         setError(null);
 
         const provider = getU5CProviderWeb(port);
-        const rawUnit = unit.startsWith("0x") ? unit.slice(2) : unit;
 
         const info: TokenPageData["assetInfo"] = {
-          unit: rawUnit,
-          policyId: rawUnit.length >= 56 ? rawUnit.slice(0, 56) : "",
-          assetNameHex: rawUnit.length > 56 ? rawUnit.slice(56) : "",
-          fingerprint: "",
+          unit,
+          policyId: policyFromUnit(unit),
+          assetNameHex: assetNameFromUnit(unit),
+          fingerprint: fingerprintFromUnit(unit),
           totalSupply: "0",
           mintOrBurnCount: 0,
           initialMintTxHash: "",
           metadata: {
-            subject: rawUnit,
-            name: null,
-            description: null,
-            ticker: null,
-            url: null,
-            logo: null,
-            decimals: null,
-            policy: null,
+            Cip25v1: null,
+            Cip25v2: null,
+            Cip26: null,
+            Cip68v1: null,
+            Cip68v2: null,
+            Cip68v3: null,
+            Cip68v4: null,
           },
-          onchainMetadata: null,
-          onchainMetadataStandard: null,
-          metadataSource: "none",
-          cip68Metadata: null,
-          cip68ReferenceUtxo: null,
-          rawRegistryMetadata: null,
+          metadataSources: [],
         };
 
         const tx = await provider.getLatestTx();
         const matchingOutputs: { address: string; amount: bigint }[] = [];
 
         for (const output of tx.outputs) {
-          const amount = output.value[rawUnit as Unit];
+          const amount = output.value[unit];
           if (amount !== undefined && amount > 0n) {
             matchingOutputs.push({ address: output.address, amount });
           }
         }
 
         let totalSupply = 0n;
-        for (const [mintUnit, mintAmount] of Object.entries(tx.mint)) {
-          if (mintUnit === rawUnit) {
+        for (const [mintUnit, mintAmount] of Object.entries(tx.mint) as [
+          Unit,
+          bigint,
+        ][]) {
+          if (mintUnit === unit) {
             totalSupply += mintAmount;
           }
         }
@@ -108,7 +105,7 @@ export default function DevnetTokenTabs({
           addressesTotal: allAddresses.length,
           hasMoreHolders: hasMore,
           allHolders: allAddresses,
-          transactions: [] as cardano.Tx[],
+          transactions: [],
           transactionsTotal: 0,
         };
 

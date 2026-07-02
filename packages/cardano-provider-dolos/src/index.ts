@@ -50,6 +50,7 @@ import { parseDatumInfo } from '@laceanatomy/napi-pallas';
 import { TokenRegistryClient } from '@laceanatomy/cardano-token-registry-sdk';
 import {
   CIP68_PREFIX_FT,
+  CIP68_PREFIX_FT_NONSTANDARD,
   CIP68_PREFIX_NFT,
   CIP68_PREFIX_REF,
   CIP68_PREFIX_RFT,
@@ -758,7 +759,7 @@ export class DolosProvider
   }
 
   private stripCip68Prefix(assetName: string): string | null {
-    for (const prefix of [CIP68_PREFIX_NFT, CIP68_PREFIX_FT, CIP68_PREFIX_RFT]) {
+    for (const prefix of [CIP68_PREFIX_NFT, CIP68_PREFIX_FT, CIP68_PREFIX_FT_NONSTANDARD, CIP68_PREFIX_RFT]) {
       if (assetName.startsWith(prefix)) {
         return assetName.slice(prefix.length);
       }

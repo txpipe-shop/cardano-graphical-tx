@@ -5,12 +5,8 @@ import { Hash } from "@laceanatomy/types";
 import { useEffect, useMemo, useState } from "react";
 import BlockTabs from "~/app/_components/ExplorerSection/Blocks/BlockTabs";
 import { useConfigs } from "~/app/_contexts";
-import {
-  getU5CProviderWeb,
-  NETWORK,
-  resolveDevnetPort,
-  type BlockTab,
-} from "~/app/_utils";
+import { NETWORK, resolveDevnetPort, type BlockTab } from "~/app/_utils";
+import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface DevnetBlockTabsProps {
   id: string;

@@ -32,6 +32,7 @@ export const API_ROUTES = {
   DEVNET_CBOR: "api/cbor/devnet",
   HASH: "api/hash",
   ADDRESS: "api/address",
+  TOKEN_METADATA: "api/token-metadata",
 };
 
 export const USER_CONFIGS = {

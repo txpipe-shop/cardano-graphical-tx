@@ -11,6 +11,7 @@ export const CIP68_PREFIX_REF = '000643b0';
 export const CIP68_PREFIX_NFT = '000de140';
 export const CIP68_PREFIX_FT = '0014df50';
 export const CIP68_PREFIX_RFT = '001bc280';
+export const CIP68_PREFIX_FT_NONSTANDARD = '0014df10';
 
 type CIP68DirectResult = CIP68MetadataNft222 | CIP68MetadataFt333 | CIP68MetadataRft444;
 
