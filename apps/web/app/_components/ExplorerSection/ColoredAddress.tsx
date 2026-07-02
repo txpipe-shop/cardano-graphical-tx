@@ -22,21 +22,28 @@ export default function ColoredAddress({
     ? ROUTES.EXPLORER_ADDRESS(chain, normalizedAddress)
     : null;
 
-  const prefix = full
-    ? isBech32(normalizedAddress)
-      ? normalizedAddress.slice(0, -5)
-      : normalizedAddress
-    : isBech32(normalizedAddress)
-      ? `${normalizedAddress.slice(0, 12)}...${normalizedAddress.slice(-13, -5)}`
-      : "";
+  const isBech = isBech32(normalizedAddress);
 
-  const suffix = full
-    ? isBech32(normalizedAddress)
-      ? normalizedAddress.slice(-5)
-      : ""
-    : isBech32(normalizedAddress)
-      ? normalizedAddress.slice(-5)
-      : `${normalizedAddress.slice(0, 7)}...${normalizedAddress.slice(-7)}`;
+  let prefix: string;
+  let suffix: string;
+
+  if (isBech) {
+    if (full) {
+      prefix = normalizedAddress.slice(0, -5);
+      suffix = normalizedAddress.slice(-5);
+    } else {
+      prefix = `${normalizedAddress.slice(0, 12)}...${normalizedAddress.slice(-13, -5)}`;
+      suffix = normalizedAddress.slice(-5);
+    }
+  } else {
+    if (full) {
+      prefix = normalizedAddress;
+      suffix = "";
+    } else {
+      prefix = "";
+      suffix = `${normalizedAddress.slice(0, 7)}...${normalizedAddress.slice(-7)}`;
+    }
+  }
 
   return (
     <div className="flex items-center">

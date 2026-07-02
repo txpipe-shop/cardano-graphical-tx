@@ -2,10 +2,12 @@ import {
   type Block as BaseBlock,
   type Tx as BaseTx,
   type UTxO as BaseUTxO,
-  HexString
+  HexString,
+  Unit
 } from '../utxo-model.js';
 
 export * from './utils.js';
+export * from './metadata/index.js';
 
 export enum RdmrPurpose {
   Spend = 'spend',

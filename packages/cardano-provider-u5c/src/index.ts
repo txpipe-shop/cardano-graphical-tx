@@ -21,8 +21,17 @@ import {
   type TxReq,
   type TxsReq
 } from '@laceanatomy/provider-core';
-import type { Cardano, cardano } from '@laceanatomy/types';
-import { Hash } from '@laceanatomy/types';
+import type { Cardano, cardano, Unit } from '@laceanatomy/types';
+import { Hash, HexString } from '@laceanatomy/types';
+import { parseDatumInfo } from '@laceanatomy/napi-pallas';
+import {
+  CIP68_PREFIX_FT,
+  CIP68_PREFIX_NFT,
+  CIP68_PREFIX_REF,
+  CIP68_PREFIX_RFT,
+  parseCip25,
+  parseCip68
+} from '@laceanatomy/types/cardano';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
@@ -32,7 +41,8 @@ import {
   u5cToCardanoBlock,
   u5cToCardanoTx,
   u5cToCardanoUtxo,
-  u5cToCardanoValue
+  u5cToCardanoValue,
+  u5cToCardanoMetadata
 } from './mappers';
 
 const DUMP_HISTORY_MAX_ITEMS = 100;
@@ -46,7 +56,9 @@ export type Params = {
   transport: Transport;
 };
 
-export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano> {
+export class U5CProvider
+  implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano, cardano.TokenMetadata>
+{
   utxoRpc: UtxoRpcClient;
 
   constructor({ transport }: Params) {
@@ -222,6 +234,194 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     if (query.address) return this.getTxsByAddress(query.address, limitValue, offsetValue);
 
     throw new Error('Invalid query');
+  }
+
+  async getTokenMetadata({
+    unit,
+    type
+  }: {
+    unit: Unit;
+    type?: keyof cardano.TokenMetadata;
+  }): Promise<cardano.NullableTokenMetadata> {
+    const metadata: cardano.NullableTokenMetadata = {
+      Cip25v1: null,
+      Cip25v2: null,
+      Cip26: null,
+      Cip68v1: null,
+      Cip68v2: null,
+      Cip68v3: null,
+      Cip68v4: null
+    };
+
+    if (unit === 'lovelace') return metadata;
+
+    const policyId = unit.slice(0, 56);
+    const rawAssetName = unit.slice(56);
+    if (!policyId) return metadata;
+
+    const needsCip25 = !type || type.startsWith('Cip25');
+    const needsCip68 = !type || type.startsWith('Cip68');
+
+    // CIP-68 — targeted UTxO lookup for reference NFT
+    if (needsCip68) {
+      const baseName = this.stripCip68Prefix(rawAssetName);
+      if (baseName) {
+        await this.fetchCip68Metadata(policyId, baseName, metadata);
+      }
+    }
+
+    // CIP-25 / CIP-60 — full chain scan for mint tx label 721 metadata
+    if (needsCip25) {
+      await this.scanChainForCip25(policyId, rawAssetName, metadata);
+    }
+
+    // If a specific type was requested, null out the rest
+    if (type) {
+      for (const key of Object.keys(metadata) as (keyof cardano.TokenMetadata)[]) {
+        if (key !== type) {
+          (metadata as Record<string, unknown>)[key] = null;
+        }
+      }
+    }
+
+    return metadata;
+  }
+
+  private async fetchCip68Metadata(
+    policyId: string,
+    baseName: string,
+    metadata: cardano.NullableTokenMetadata
+  ): Promise<void> {
+    const policyIdBuffer = Buffer.from(policyId, 'hex');
+    const refNameBuffer = Buffer.from(CIP68_PREFIX_REF + baseName, 'hex');
+
+    try {
+      const response = await this.utxoRpc.query.searchUtxos({
+        predicate: {
+          match: {
+            utxoPattern: {
+              case: 'cardano',
+              value: {
+                asset: {
+                  policyId: policyIdBuffer,
+                  assetName: refNameBuffer
+                }
+              }
+            }
+          }
+        }
+      });
+
+      const item = response.items?.[0];
+      if (!item) return;
+      if (item.parsedState?.case !== 'cardano') return;
+
+      const datum = item.parsedState.value?.datum;
+      if (!datum?.originalCbor || datum.originalCbor.length === 0) return;
+
+      const datumHex = Buffer.from(datum.originalCbor).toString('hex');
+      const parsed = parseDatumInfo(datumHex);
+      if (!parsed?.json) return;
+
+      const plutusJson = JSON.parse(parsed.json) as Record<string, unknown>;
+      const result = parseCip68(plutusJson);
+      if (!result) return;
+
+      const ver = result.version;
+      if (result.isMapV4) {
+        metadata.Cip68v4 = result.metadata;
+      } else {
+        if (ver >= 1)
+          metadata.Cip68v1 = result.metadata as
+            | cardano.CIP68MetadataNft222
+            | cardano.CIP68MetadataFt333;
+        if (ver >= 2)
+          metadata.Cip68v2 = result.metadata as
+            | cardano.CIP68MetadataNft222
+            | cardano.CIP68MetadataFt333;
+        if (ver >= 3)
+          metadata.Cip68v3 = result.metadata as
+            | cardano.CIP68MetadataNft222
+            | cardano.CIP68MetadataFt333
+            | cardano.CIP68MetadataRft444;
+        if (ver >= 4) metadata.Cip68v4 = result.metadata;
+      }
+    } catch {
+      // Reference NFT not found or datum unparsable
+    }
+  }
+
+  private async scanChainForCip25(
+    policyId: string,
+    rawAssetName: string,
+    metadata: cardano.NullableTokenMetadata
+  ): Promise<void> {
+    let nextSlot: bigint | undefined = 0n;
+
+    do {
+      const { block, nextToken: next } = await this.utxoRpc.sync.dumpHistory({
+        maxItems: DUMP_HISTORY_MAX_ITEMS,
+        startToken: nextSlot !== undefined ? { slot: nextSlot } : undefined
+      });
+      nextSlot = next ? next.slot : undefined;
+
+      for (const blockItem of block) {
+        const { body } = this.validateBlock(blockItem);
+        for (const tx of body.tx) {
+          if (!tx.mint || tx.mint.length === 0) continue;
+
+          const mintsPolicy = this.txMintsPolicy(tx, policyId);
+          if (!mintsPolicy) continue;
+
+          if (tx.auxiliary?.metadata) {
+            this.extractCip25FromTx(tx, policyId, rawAssetName, metadata);
+            if (metadata.Cip25v1 || metadata.Cip25v2) {
+              return;
+            }
+          }
+        }
+      }
+    } while (nextSlot);
+  }
+
+  private txMintsPolicy(tx: cardanoUtxoRpc.Tx, policyId: string): boolean {
+    for (const ma of tx.mint) {
+      const txPolicy = Buffer.from(ma.policyId).toString('hex');
+      if (txPolicy !== policyId) continue;
+      for (const asset of ma.assets) {
+        const qty = toBigInt(asset.quantity.value?.bigInt.value);
+        if (qty > 0n) return true;
+      }
+    }
+    return false;
+  }
+
+  private extractCip25FromTx(
+    tx: cardanoUtxoRpc.Tx,
+    policyId: string,
+    rawAssetName: string,
+    result: cardano.NullableTokenMetadata
+  ): void {
+    if (!tx.auxiliary?.metadata) return;
+
+    const domainMetadata = u5cToCardanoMetadata(tx.auxiliary.metadata);
+    const parsed = parseCip25(domainMetadata, policyId, rawAssetName);
+    if (!parsed) return;
+
+    if (parsed.version === 2) {
+      result.Cip25v2 = parsed.metadata;
+    } else {
+      result.Cip25v1 = parsed.metadata;
+    }
+  }
+
+  private stripCip68Prefix(assetName: string): string | null {
+    for (const prefix of [CIP68_PREFIX_NFT, CIP68_PREFIX_FT, CIP68_PREFIX_RFT]) {
+      if (assetName.startsWith(prefix)) {
+        return assetName.slice(prefix.length);
+      }
+    }
+    return null;
   }
 
   private async getLatestTxs(

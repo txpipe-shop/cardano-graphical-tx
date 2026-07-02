@@ -18,7 +18,7 @@ import { BlocksList } from "./BlocksList";
 import DevnetTransactionsList from "./DevnetTransactionsList";
 
 interface ExplorerPageProps {
-  params: Promise<{ chain: string }>;
+  params: Promise<{ chain: Network }>;
 }
 
 async function TransactionsList({ chain }: { chain: Network }) {

@@ -13,7 +13,7 @@ import { TxTable } from "./TxTable";
 
 interface BlockTxsAccordionProps {
   blocksWithTxs: BlockWithTxs<cardano.UTxO, cardano.Tx, Cardano>[];
-  chain: string;
+  chain: Network;
 }
 
 export function BlockTxsAccordion({

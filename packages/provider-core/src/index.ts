@@ -1,4 +1,4 @@
-import type { Address, BaseChain, Hash, Tx, UTxO, Value } from '@laceanatomy/types';
+import type { Address, BaseChain, Hash, Tx, Unit, UTxO, Value } from '@laceanatomy/types';
 
 export type EpochReq = { epochNo: bigint };
 
@@ -95,6 +95,11 @@ export type PoolsQuery = {
   search?: string;
 };
 
+export type Cip68MetadataResult = {
+  metadata: Record<string, unknown>;
+  referenceUtxo: { txHash: string; outputIndex: number };
+};
+
 export type PoolsReq = PaginatedRequest<PoolsQuery | undefined>;
 export type PoolReq = { id: string };
 
@@ -147,7 +152,16 @@ export type AddressFundsRes = {
 export type AddressUTxOsRes<U extends UTxO> = PaginatedResult<U>;
 export type EpochRes = Epoch;
 
-export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> {
+export type TokenMetadataShapes = Record<string, Record<string, unknown>>;
+
+export type Nullable<T> = { [K in keyof T]: T[K] | null };
+
+export interface ChainProvider<
+  U extends UTxO,
+  T extends Tx<U>,
+  Chain extends BaseChain<U, T>,
+  Shapes extends TokenMetadataShapes = TokenMetadataShapes
+> {
   getCBOR(params: TxReq): Promise<string>;
   getBlockCBOR?(params: BlockReq): Promise<string>;
   getLatestTx(): Promise<LatestTxRes<U, T, Chain>>;
@@ -162,6 +176,7 @@ export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends Ba
   readTip(): Promise<TipRes>;
   getPools?(params: PoolsReq): Promise<PoolsRes>;
   getPool?(params: PoolReq): Promise<PoolRes>;
+  getTokenMetadata?(params: { unit: Unit; type?: keyof Shapes | 'all' }): Promise<Nullable<Shapes>>;
 }
 
 export interface CursorPaginatedProvider<

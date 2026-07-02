@@ -13,7 +13,7 @@ import TokenPill from "../TokenPill";
 
 interface TxRowHeaderProps {
   tx: cardano.Tx;
-  chain: string;
+  chain: Network;
 }
 
 function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
@@ -21,7 +21,7 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
     <div className="flex flex-col gap-3 bg-explorer-row p-4 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-4">
       <div className="flex items-center gap-2">
         <Link
-          href={ROUTES.EXPLORER_TX(chain as Network, tx.hash)}
+          href={ROUTES.EXPLORER_TX(chain, tx.hash)}
           className="break-all font-mono text-sm text-accent-blue hover:underline"
         >
           {tx.hash}
@@ -65,7 +65,7 @@ function TxRowHeader({ tx, chain }: TxRowHeaderProps) {
 interface UTxOsColumnProps {
   tx: cardano.Tx;
   column: "inputs" | "outputs";
-  chain: string;
+  chain: Network;
   highlightAddress?: cardano.UTxO["address"];
 }
 
@@ -100,7 +100,7 @@ function UTxOsColumn({
               <span className="text-sm font-medium">
                 {formatAda(utxo.coin)}
               </span>
-              <ColoredAddress address={utxo.address} chain={chain as Network} />
+              <ColoredAddress address={utxo.address} chain={chain} />
               <div className="flex items-center gap-1 font-mono text-xs text-p-secondary">
                 {utxo.outRef.hash.slice(0, 7)}...{utxo.outRef.hash.slice(-7)}#
                 {utxo.outRef.index.toString()}
@@ -118,6 +118,7 @@ function UTxOsColumn({
                     unit={unit as Unit}
                     amount={amount}
                     mint={tx.mint}
+                    chain={chain}
                   />
                 ))}
               </div>
@@ -135,7 +136,7 @@ export function TxRow({
   highlightAddress,
 }: Readonly<{
   tx: cardano.Tx;
-  chain: string;
+  chain: Network;
   highlightAddress?: cardano.UTxO["address"];
 }>) {
   return (
