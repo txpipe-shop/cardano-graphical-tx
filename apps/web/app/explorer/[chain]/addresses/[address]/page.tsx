@@ -35,7 +35,7 @@ import {
 export const revalidate = 10;
 
 interface Props {
-  params: Promise<{ chain: string; address: string }>;
+  params: Promise<{ chain: Network; address: string }>;
   searchParams?: Promise<{ tab?: string }>;
 }
 
@@ -179,6 +179,7 @@ export default async function AddressDetailPage({
                           key={unit}
                           unit={unit as Unit}
                           amount={amount}
+                          chain={chain}
                         />
                       ))}
                       {tokenEntries.length > 3 && (

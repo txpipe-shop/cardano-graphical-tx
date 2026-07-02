@@ -217,7 +217,12 @@ export default function BlockOverview({
           <CardBody>
             <div className="flex flex-wrap gap-2">
               {assets.map(([unit, amount]) => (
-                <TokenPill key={unit} unit={unit} amount={amount} />
+                <TokenPill
+                  key={unit}
+                  unit={unit}
+                  amount={amount}
+                  chain={chain}
+                />
               ))}
             </div>
           </CardBody>

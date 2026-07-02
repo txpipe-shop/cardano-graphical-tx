@@ -2,11 +2,12 @@
 
 import { Card, CardBody } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
+import type { Network } from "~/app/_utils";
 import { TxRow } from "./TxRow";
 
 interface TxTableProps {
   transactions: cardano.Tx[];
-  chain: string;
+  chain: Network;
   highlightAddress?: cardano.UTxO["address"];
 }
 

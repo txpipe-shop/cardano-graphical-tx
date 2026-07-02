@@ -5,11 +5,19 @@ import { type cardano, type Unit, type Value } from "@laceanatomy/types";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ROUTES } from "~/app/_utils";
-import { type Network } from "~/app/_utils/network-config";
+import { isValidChain, type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
 import DateViewer from "../DateViewer";
 import TokenPill from "../TokenPill";
+
+function resolveChain(
+  params: { chain?: string | string[] },
+  prop?: Network,
+): Network {
+  const chain = prop ?? params?.chain;
+  return typeof chain === "string" && isValidChain(chain) ? chain : "mainnet";
+}
 
 function OverviewStats({ tx }: { tx: cardano.Tx }) {
   return (
@@ -52,7 +60,7 @@ function OverviewStats({ tx }: { tx: cardano.Tx }) {
 
 function UtxoRefPill({ hash, index }: { hash: string; index: bigint }) {
   const params = useParams();
-  const chain = (params?.chain as Network) ?? "mainnet";
+  const chain = resolveChain(params);
   const fullRef = `${hash}#${index.toString()}`;
 
   return (
@@ -187,6 +195,7 @@ export function UtxoList({
                         unit={unit as Unit}
                         amount={amount}
                         mint={mint ?? {}}
+                        chain={chain}
                       />
                     ))}
                   </div>
@@ -279,6 +288,7 @@ export function UtxoList({
                           unit={unit as Unit}
                           amount={amount}
                           mint={mint ?? {}}
+                          chain={chain}
                         />
                       ))}
                     </div>
@@ -295,7 +305,15 @@ export function UtxoList({
   );
 }
 
-function MintList({ list }: { list: Value }) {
+function MintList({
+  list,
+  chain: chainProp,
+}: Readonly<{
+  list: Value;
+  chain?: Network;
+}>) {
+  const params = useParams();
+  const chain = resolveChain(params, chainProp);
   if (Object.keys(list).length === 0) {
     return (
       <Card className="shadow-none border border-border bg-surface">
@@ -319,6 +337,7 @@ function MintList({ list }: { list: Value }) {
               unit={unit as Unit}
               amount={amount}
               mint={list}
+              chain={chain}
             />
           ))}
         </div>
@@ -331,6 +350,8 @@ interface TxOverviewProps {
   tx: cardano.Tx;
 }
 export default function TxOverview({ tx }: TxOverviewProps) {
+  const params = useParams();
+  const chain = resolveChain(params);
   return (
     <div className="space-y-6">
       <OverviewStats tx={tx} />
@@ -360,7 +381,7 @@ export default function TxOverview({ tx }: TxOverviewProps) {
           </CardBody>
         </Card>
       )}
-      <MintList list={tx.mint} />
+      <MintList list={tx.mint} chain={chain} />
     </div>
   );
 }

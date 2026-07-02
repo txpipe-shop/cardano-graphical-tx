@@ -88,18 +88,26 @@ body::-webkit-scrollbar {
 body::-webkit-scrollbar-track {
   margin-top: 6rem;
   border-radius: 5px;
-  background: #f1f1f1;
+  background: var(--color-surface);
 }
 
 body::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--color-text_secondary);
   border-radius: 5px;
 }
 
 body::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--color-text_primary);
 }
 
-input:focus {
-  outline: none;
+@supports not (selector(::-webkit-scrollbar)) {
+  body {
+    scrollbar-color: var(--color-text_secondary) var(--color-surface);
+    scrollbar-width: thin;
+  }
+}
+
+input:focus-visible {
+  outline: 2px solid var(--color-primary_action);
+  outline-offset: 2px;
 }

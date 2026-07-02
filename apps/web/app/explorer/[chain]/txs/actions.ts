@@ -9,7 +9,7 @@ import {
 } from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 
-export async function loadMoreBlocks(chain: string, cursor: BlockCursor) {
+export async function loadMoreBlocks(chain: Network, cursor: BlockCursor) {
   const validChain: Network = isValidChain(chain) ? chain : NETWORK.MAINNET;
   const provider = getDolosProvider(validChain);
   return provider.getBlocksWithTxs({

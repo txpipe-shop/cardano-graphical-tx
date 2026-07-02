@@ -23,7 +23,8 @@ export async function resolveAddress(
   config: NetworkConfig
 ): Promise<AddressSchema> {
   const provider = createProvider(config);
-  const tokenClient = new TokenRegistryClient(config.tokenRegistryUrl);
+  // TODO: use config.tokenRegistryUrl
+  const tokenClient = new TokenRegistryClient('mainnet');
   const address = Address(rawAddress);
 
   const funds = await provider.getAddressFunds({ address });

@@ -14,16 +14,25 @@ import {
   type Unit,
   type Value,
 } from "@laceanatomy/types";
+import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { ROUTES } from "~/app/_utils/constants";
+import type { Network } from "~/app/_utils/network-config";
 
 export interface TokenPillProps {
   unit: Unit;
   amount: bigint;
+  chain: Network;
   mint?: Value;
 }
 
-export default function TokenPill({ unit, amount, mint = {} }: TokenPillProps) {
+export default function TokenPill({
+  unit,
+  amount,
+  mint = {},
+  chain,
+}: TokenPillProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const state =
     mint[unit] === undefined ? "default" : mint[unit] > 0n ? "mint" : "burn";
@@ -34,17 +43,29 @@ export default function TokenPill({ unit, amount, mint = {} }: TokenPillProps) {
   const displayName = Buffer.from(rawName, "hex").toString("ascii");
 
   const stateClasses = {
-    mint: "border-green-200 bg-green-50 text-green-700",
-    burn: "border-red-200 bg-red-50 text-red-700",
-    default: "border-gray-200 bg-gray-50 text-gray-700",
+    mint: "border-success/30 bg-success/10 text-success",
+    burn: "border-danger/30 bg-danger/10 text-danger",
+    default: "border-border bg-surface text-p-primary",
   };
+
+  const nameElement =
+    unit !== "lovelace" ? (
+      <Link
+        href={ROUTES.EXPLORER_TOKEN(chain, unit)}
+        className="font-semibold hover:underline"
+      >
+        {displayName}
+      </Link>
+    ) : (
+      <span className="font-semibold">{displayName}</span>
+    );
 
   return (
     <Tooltip content={displayUnit} placement="top" delay={150}>
       <div
         className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs shadow-sm transition-colors ${stateClasses[state]}`}
       >
-        <span className="font-semibold">{displayName}</span>
+        {nameElement}
         <span className="font-mono text-[11px] opacity-90">
           {String(amount)}
         </span>

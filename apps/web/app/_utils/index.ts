@@ -6,4 +6,3 @@ export * from "./network-config";
 export * from "./schemas/";
 export * from "./string";
 export * from "./txHelpers";
-export * from "./u5c-provider-web";

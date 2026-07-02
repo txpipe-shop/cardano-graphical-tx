@@ -9,7 +9,7 @@ import { getBlockPageSize, type Network } from "~/app/_utils";
 import { loadMoreBlocks } from "./actions";
 
 interface BlocksListProps {
-  chain: string;
+  chain: Network;
   initialData: BlockWithTxs<cardano.UTxO, cardano.Tx, Cardano>[];
   initialNextCursor?: BlockCursor;
 }

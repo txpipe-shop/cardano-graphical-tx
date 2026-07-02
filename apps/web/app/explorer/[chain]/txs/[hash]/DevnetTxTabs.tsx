@@ -7,11 +7,11 @@ import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { useConfigs } from "~/app/_contexts";
 import {
   getTxFromDevnetCBOR,
-  getU5CProviderWeb,
   NETWORK,
   resolveDevnetPort,
   type TxTab,
 } from "~/app/_utils";
+import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 import { loadTxPageData } from "./_shared";
 
 interface DevnetTxTabsProps {
