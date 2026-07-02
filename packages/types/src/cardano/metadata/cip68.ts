@@ -5,7 +5,7 @@ import type {
   CIP68MetadataNft222,
   CIP68MetadataRft444,
   CIPMetadataFile
-} from '../index.js';
+} from './types.js';
 
 export const CIP68_PREFIX_REF = '000643b0';
 export const CIP68_PREFIX_NFT = '000de140';

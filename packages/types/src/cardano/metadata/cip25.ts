@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import { MetadatumMap, type Metadata, type Metadatum } from '../../utxo-model.js';
-import type { CIP25MetadataV1, CIPMetadataFile } from '../index.js';
+import type { CIP25MetadataV1, CIPMetadataFile } from './types.js';
 import { getMdString, getMdStringOrArray, getMdValue, metadatumToUri } from './shared.js';
 
 export function parseCip25(

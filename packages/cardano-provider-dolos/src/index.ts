@@ -47,6 +47,7 @@ import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 
 import { parseDatumInfo } from '@laceanatomy/napi-pallas';
+import { TokenRegistryClient } from '@laceanatomy/cardano-token-registry-sdk';
 import {
   CIP68_PREFIX_FT,
   CIP68_PREFIX_NFT,
@@ -566,10 +567,12 @@ export class DolosProvider
 
   async getTokenMetadata({
     unit,
-    type
+    type,
+    network
   }: {
     unit: Unit;
     type?: keyof cardano.TokenMetadata;
+    network: 'mainnet' | 'preprod';
   }): Promise<cardano.NullableTokenMetadata> {
     const metadata: cardano.NullableTokenMetadata = {
       Cip25v1: null,
@@ -597,6 +600,11 @@ export class DolosProvider
       if (policyId && baseName) {
         await this.fetchCip68Metadata(policyId, baseName, metadata);
       }
+    }
+
+    // CIP-26: token registry (offchain)
+    if (!type || type === 'Cip26') {
+      await this.fetchCip26Metadata(unit, network, metadata);
     }
 
     if (type) {
@@ -722,6 +730,31 @@ export class DolosProvider
       if (validated.success) return { key, data: validated.data };
     }
     return null;
+  }
+
+  private async fetchCip26Metadata(
+    unit: string,
+    network: 'mainnet' | 'preprod',
+    metadata: cardano.NullableTokenMetadata
+  ): Promise<void> {
+    try {
+      const client = new TokenRegistryClient(network);
+      const result = await client.getToken(unit);
+      if (!result) return;
+
+      metadata.Cip26 = {
+        subject: Unit(result.subject),
+        policy: result.policy ? HexString(result.policy) : undefined,
+        name: result.name ?? undefined,
+        description: result.description ?? undefined,
+        ticker: result.ticker ?? undefined,
+        decimals: result.decimals ?? undefined,
+        url: result.url ?? undefined,
+        logo: result.logo ?? undefined
+      };
+    } catch {
+      // registry not available
+    }
   }
 
   private stripCip68Prefix(assetName: string): string | null {
