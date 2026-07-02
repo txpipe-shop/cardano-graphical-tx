@@ -24,12 +24,7 @@ import {
 import type { Cardano, cardano, Unit } from '@laceanatomy/types';
 import { Hash, HexString } from '@laceanatomy/types';
 import {
-  CIP68_PREFIX_FT,
-  CIP68_PREFIX_NFT,
-  CIP68_PREFIX_REF,
-  CIP68_PREFIX_RFT,
   parseCip25,
-  parseCip68
 } from '@laceanatomy/types/cardano';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
@@ -259,18 +254,8 @@ export class U5CProvider
     if (!policyId) return metadata;
 
     const needsCip25 = !type || type.startsWith('Cip25');
-    // const needsCip68 = !type || type.startsWith('Cip68');
 
-    // CIP-68 — requires napi-pallas (not available in browser)
-    // const needsCip68 = !type || type.startsWith('Cip68');
-    // if (needsCip68) {
-    //   const baseName = this.stripCip68Prefix(rawAssetName);
-    //   if (baseName) {
-    //     await this.fetchCip68Metadata(policyId, baseName, metadata);
-    //   }
-    // }
-
-    // CIP-25 / CIP-60 — full chain scan for mint tx label 721 metadata
+    // CIP-25 — full chain scan for mint tx label 721 metadata
     if (needsCip25) {
       await this.scanChainForCip25(policyId, rawAssetName, metadata);
     }
@@ -286,72 +271,6 @@ export class U5CProvider
 
     return metadata;
   }
-
-  // CIP-68 — requires napi-pallas (not available in browser)
-  // private async fetchCip68Metadata(
-  //   policyId: string,
-  //   baseName: string,
-  //   metadata: cardano.NullableTokenMetadata
-  // ): Promise<void> {
-  //   const policyIdBuffer = Buffer.from(policyId, 'hex');
-  //   const refNameBuffer = Buffer.from(CIP68_PREFIX_REF + baseName, 'hex');
-  //
-  //   try {
-  //     const response = await this.utxoRpc.query.searchUtxos({
-  //       predicate: {
-  //         match: {
-  //           utxoPattern: {
-  //             case: 'cardano',
-  //             value: {
-  //               asset: {
-  //                 policyId: policyIdBuffer,
-  //                 assetName: refNameBuffer
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //     });
-  //
-  //     const item = response.items?.[0];
-  //     if (!item) return;
-  //     if (item.parsedState?.case !== 'cardano') return;
-  //
-  //     const datum = item.parsedState.value?.datum;
-  //     if (!datum?.originalCbor || datum.originalCbor.length === 0) return;
-  //
-  //     const datumHex = Buffer.from(datum.originalCbor).toString('hex');
-  //     const { parseDatumInfo } = await import('@laceanatomy/napi-pallas');
-  //     const parsed = parseDatumInfo(datumHex);
-  //     if (!parsed?.json) return;
-  //
-  //     const plutusJson = JSON.parse(parsed.json) as Record<string, unknown>;
-  //     const result = parseCip68(plutusJson);
-  //     if (!result) return;
-  //
-  //     const ver = result.version;
-  //     if (result.isMapV4) {
-  //       metadata.Cip68v4 = result.metadata;
-  //     } else {
-  //       if (ver >= 1)
-  //         metadata.Cip68v1 = result.metadata as
-  //           | cardano.CIP68MetadataNft222
-  //           | cardano.CIP68MetadataFt333;
-  //       if (ver >= 2)
-  //         metadata.Cip68v2 = result.metadata as
-  //           | cardano.CIP68MetadataNft222
-  //           | cardano.CIP68MetadataFt333;
-  //       if (ver >= 3)
-  //         metadata.Cip68v3 = result.metadata as
-  //           | cardano.CIP68MetadataNft222
-  //           | cardano.CIP68MetadataFt333
-  //           | cardano.CIP68MetadataRft444;
-  //       if (ver >= 4) metadata.Cip68v4 = result.metadata;
-  //     }
-  //   } catch {
-  //     // Reference NFT not found or datum unparsable
-  //   }
-  // }
 
   private async scanChainForCip25(
     policyId: string,
@@ -416,15 +335,6 @@ export class U5CProvider
       result.Cip25v1 = parsed.metadata;
     }
   }
-
-  // private stripCip68Prefix(assetName: string): string | null {
-  //   for (const prefix of [CIP68_PREFIX_NFT, CIP68_PREFIX_FT, CIP68_PREFIX_RFT]) {
-  //     if (assetName.startsWith(prefix)) {
-  //       return assetName.slice(prefix.length);
-  //     }
-  //   }
-  //   return null;
-  // }
 
   private async getLatestTxs(
     limit: number,

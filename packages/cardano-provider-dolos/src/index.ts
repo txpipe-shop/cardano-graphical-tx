@@ -23,6 +23,7 @@ import {
   type TxsRes
 } from '@laceanatomy/provider-core';
 import {
+  Address,
   assetNameFromUnit,
   cardano,
   type Cardano,
@@ -519,12 +520,12 @@ export class DolosProvider
   async getAssetInfo(asset: string) {
     const resp = await this.assetsApi.assetsAssetGet(asset);
     return {
-      policyId: resp.data.policy_id,
-      assetName: resp.data.asset_name ?? '',
+      policyId: HexString(resp.data.policy_id),
+      assetName: HexString(resp.data.asset_name ?? ''),
       fingerprint: resp.data.fingerprint,
       totalSupply: resp.data.quantity,
       mintOrBurnCount: resp.data.mint_or_burn_count,
-      initialMintTxHash: resp.data.initial_mint_tx_hash,
+      initialMintTxHash: Hash(resp.data.initial_mint_tx_hash),
       metadata: resp.data.metadata,
       onchainMetadata: resp.data.onchain_metadata as Record<string, unknown> | null,
       onchainMetadataStandard: resp.data.onchain_metadata_standard ?? null
@@ -534,7 +535,7 @@ export class DolosProvider
   async getAssetAddresses(asset: string, count: number, page: number) {
     const resp = await this.assetsApi.assetsAssetAddressesGet(asset, count, page);
     return resp.data.map((item) => ({
-      address: item.address,
+      address: Address(item.address),
       quantity: item.quantity
     }));
   }
@@ -542,7 +543,7 @@ export class DolosProvider
   async getAssetHistory(asset: string, count: number, page: number) {
     const resp = await this.assetsApi.assetsAssetHistoryGet(asset, count, page);
     return resp.data.map((item) => ({
-      txHash: item.tx_hash,
+      txHash: Hash(item.tx_hash),
       action: item.action as 'minted' | 'burned',
       amount: item.amount
     }));
@@ -551,29 +552,21 @@ export class DolosProvider
   async getAssetTransactions(asset: string, count: number, page: number, order?: 'asc' | 'desc') {
     const resp = await this.assetsApi.assetsAssetTransactionsGet(asset, count, page, order);
     return resp.data.map((item) => ({
-      txHash: item.tx_hash,
+      txHash: Hash(item.tx_hash),
       txIndex: item.tx_index,
       blockHeight: item.block_height,
       blockTime: item.block_time
     }));
   }
 
-  async getPolicyAssets(policyId: string, count: number, page: number) {
-    const resp = await this.assetsApi.assetsPolicyPolicyIdGet(policyId, count, page);
-    return resp.data.map((item) => ({
-      asset: item.asset,
-      quantity: item.quantity
-    }));
-  }
-
   async getTokenMetadata({
     unit,
     type,
-    network
+    network = 'preprod'
   }: {
     unit: Unit;
     type?: keyof cardano.TokenMetadata;
-    network: 'mainnet' | 'preprod';
+    network?: 'mainnet' | 'preprod';
   }): Promise<cardano.NullableTokenMetadata> {
     const metadata: cardano.NullableTokenMetadata = {
       Cip25v1: null,
