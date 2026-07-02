@@ -147,9 +147,7 @@ export default function TokenOverview({
               </Chip>
             ))
           ) : (
-            <Chip size="sm" variant="flat" color="default">
-              None
-            </Chip>
+            <></>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-p-secondary">
