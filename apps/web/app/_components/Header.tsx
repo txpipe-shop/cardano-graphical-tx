@@ -26,11 +26,11 @@ export const Header = () => {
             className="h-10 w-10 md:h-[50px] md:w-[50px]"
           />
         </Link>
-        <h3 className="hidden flex-1 text-center text-4xl text-p-primary md:block">
+        <span className="hidden flex-1 text-center text-4xl font-bold text-p-primary md:block">
           <Link href={ROUTES.HOME}>
-            <span>Lace Anatomy</span>
+            Lace Anatomy
           </Link>
-        </h3>
+        </span>
         <div className="flex flex-wrap items-center justify-end gap-2 md:gap-4">
           <Button
             variant="flat"

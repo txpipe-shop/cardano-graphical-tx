@@ -52,8 +52,14 @@ export default async function TokenPage({ params, searchParams }: Props) {
   if (chain === NETWORK.DEVNET) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-primary-action focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
+        >
+          Skip to content
+        </a>
         <Header />
-        <main className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
+        <main id="main-content" className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
           <div className="flex min-h-0 flex-1">
             <DevnetTokenTabs unit={unit} tab={tab} page={page} />
           </div>
@@ -67,9 +73,18 @@ export default async function TokenPage({ params, searchParams }: Props) {
   if (error || !data) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-primary-action focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
+        >
+          Skip to content
+        </a>
         <Header />
-        <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-          <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
+        <main id="main-content" className="container mx-auto flex flex-1 flex-col px-4 py-6">
+          <div
+            role="alert"
+            className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2"
+          >
             Token not found or could not be loaded.
           </div>
         </main>
@@ -91,8 +106,14 @@ export default async function TokenPage({ params, searchParams }: Props) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-primary-action focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
+      >
+        Skip to content
+      </a>
       <Header />
-      <main className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
+      <main id="main-content" className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6">
         <div className="flex min-h-0 flex-1">
           <TokenTabs
             data={data}

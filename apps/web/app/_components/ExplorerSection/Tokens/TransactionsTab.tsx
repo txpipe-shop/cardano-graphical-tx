@@ -1,41 +1,58 @@
 "use client";
 
+import { Button } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
-import { useMemo } from "react";
-import { Network } from "~/app/_utils";
-import Pagination from "../Pagination";
+import { useState } from "react";
+import { type Network } from "~/app/_utils/network-config";
 import { TxTable } from "../Transactions/TxTable";
-
-const PAGE_SIZE = 30;
+import { loadMoreTransactions } from "~/app/explorer/[chain]/tokens/[unit]/_components/actions";
 
 interface TransactionsTabProps {
   transactions: cardano.Tx[];
   chain: Network;
-  page: number;
+  unit: string;
+  hasMoreTransactions: boolean;
 }
 
 export default function TransactionsTab({
-  transactions,
+  transactions: initialTransactions,
   chain,
-  page,
+  unit,
+  hasMoreTransactions: initialHasMore,
 }: TransactionsTabProps) {
-  const totalPages = Math.max(1, Math.ceil(transactions.length / PAGE_SIZE));
-  const currentPage = Math.min(Math.max(1, page), totalPages);
+  const [transactions, setTransactions] = useState(initialTransactions);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(2);
 
-  const paginated = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return transactions.slice(start, start + PAGE_SIZE);
-  }, [transactions, currentPage]);
+  const onLoadMore = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const result = await loadMoreTransactions(chain, unit, currentPage);
+      setTransactions((prev) => [...prev, ...result.data]);
+      setHasMore(result.hasMore);
+      setCurrentPage((prev) => prev + 1);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
-      <TxTable transactions={paginated} chain={chain} />
-      {transactions.length > PAGE_SIZE && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          basePath=""
-        />
+      <TxTable transactions={transactions} chain={chain} />
+      {hasMore && (
+        <div className="flex justify-center">
+          <Button
+            onPress={onLoadMore}
+            isLoading={loading}
+            variant="flat"
+            aria-busy={loading}
+            className="bg-explorer-row text-p-secondary shadow-sm"
+          >
+            Load More
+          </Button>
+        </div>
       )}
     </div>
   );

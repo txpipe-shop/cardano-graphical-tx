@@ -53,7 +53,7 @@ function TxHashPill({ chain, hash }: { chain: Network; hash: string }) {
     <Tooltip content={hash} placement="top" delay={150}>
       <Link
         href={ROUTES.EXPLORER_TX(chain, hash)}
-        className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-mono text-gray-700 shadow-sm transition-colors hover:bg-gray-100 whitespace-nowrap"
+        className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-xs font-mono text-p-primary shadow-sm transition-colors hover:bg-surface/80 whitespace-nowrap"
       >
         <ExternalLinkIcon />
         {hash.slice(0, 8)}…{hash.slice(-8)}
@@ -120,9 +120,9 @@ export function AssetHistoryListClient({
           <table className="w-full min-w-[600px] text-left text-sm">
             <thead className="border-b bg-explorer-row text-p-secondary font-medium">
               <tr>
-                <th className="px-4 py-3">TX Hash</th>
-                <th className="px-4 py-3">Action</th>
-                <th className="px-4 py-3">Amount</th>
+                <th scope="col" className="px-4 py-3">TX Hash</th>
+                <th scope="col" className="px-4 py-3">Action</th>
+                <th scope="col" className="px-4 py-3">Amount</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -152,6 +152,7 @@ export function AssetHistoryListClient({
             onPress={onLoadMore}
             isLoading={loading}
             variant="flat"
+            aria-busy={loading}
             className="bg-explorer-row text-p-secondary shadow-sm"
           >
             Load More

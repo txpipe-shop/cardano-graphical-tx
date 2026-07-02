@@ -107,6 +107,7 @@ export default function DevnetTokenTabs({
           allHolders: allAddresses,
           transactions: [],
           transactionsTotal: 0,
+          hasMoreTransactions: false,
         };
 
         setData(pageData);
@@ -138,7 +139,10 @@ export default function DevnetTokenTabs({
 
   if (error || !data) {
     return (
-      <div className="w-full rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
+      <div
+        role="alert"
+        className="w-full rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2"
+      >
         <p className="font-semibold">Token not found or could not be loaded.</p>
         {error ? <p className="mt-2 text-sm">{error}</p> : null}
       </div>

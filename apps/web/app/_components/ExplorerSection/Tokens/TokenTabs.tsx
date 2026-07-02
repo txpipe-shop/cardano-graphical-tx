@@ -23,7 +23,7 @@ export default function TokenTabs({
   data,
   tab,
   chain,
-  page,
+  page: _page,
   historyContent,
 }: TokenTabsProps) {
   const router = useRouter();
@@ -66,7 +66,8 @@ export default function TokenTabs({
         <TransactionsTab
           transactions={data.transactions}
           chain={chain}
-          page={page}
+          unit={Unit(data.assetInfo.unit)}
+          hasMoreTransactions={data.hasMoreTransactions}
         />
       ),
     },

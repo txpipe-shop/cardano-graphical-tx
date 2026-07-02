@@ -32,9 +32,11 @@ export type TokenPageData = {
   allHolders?: AssetAddress[];
   transactions: cardano.Tx[];
   transactionsTotal: number;
+  hasMoreTransactions: boolean;
 };
 
-const TX_PAGE_SIZE = 30;
+const TX_PAGE_SIZE = 5;
+const TX_FETCH_SIZE = TX_PAGE_SIZE + 1;
 const HOLDERS_PAGE_SIZE = 20;
 const HOLDERS_FETCH_SIZE = HOLDERS_PAGE_SIZE + 1;
 
@@ -66,11 +68,11 @@ export async function loadTokenPageData(
   const rawInfo = await provider.getAssetInfo(rawUnit);
   const network = chain === "mainnet" ? "mainnet" : "preprod";
 
-  const [addressesResp, assetTxs, cipResult] = await Promise.all([
+  const [addressesResp, rawTxs, cipResult] = await Promise.all([
     provider
       .getAssetAddresses(rawUnit, HOLDERS_FETCH_SIZE, 1)
       .catch(() => [] as AssetAddress[]),
-    provider.getAssetTransactions(rawUnit, 100, 1).catch(
+    provider.getAssetTransactions(rawUnit, TX_FETCH_SIZE, txPage, 'desc').catch(
       () =>
         [] as {
           txHash: string;
@@ -84,9 +86,9 @@ export async function loadTokenPageData(
       .catch(() => null),
   ]);
 
-  const txHashes = assetTxs.map((t) => t.txHash);
-  const startIndex = (txPage - 1) * TX_PAGE_SIZE;
-  const hashesToFetch = txHashes.slice(startIndex, startIndex + TX_PAGE_SIZE);
+  const hasMoreTransactions = rawTxs.length > TX_PAGE_SIZE;
+  const pageTxs = rawTxs.slice(0, TX_PAGE_SIZE);
+  const hashesToFetch = pageTxs.map((t) => t.txHash);
 
   const txResults = await Promise.allSettled(
     hashesToFetch.map((hash) => provider.getTx({ hash: Hash(hash) })),
@@ -137,7 +139,8 @@ export async function loadTokenPageData(
     addressesTotal: hasMoreHolders ? null : addressesResp.length,
     hasMoreHolders,
     transactions: txs,
-    transactionsTotal: assetTxs.length,
+    transactionsTotal: rawTxs.length,
+    hasMoreTransactions,
   };
 }
 

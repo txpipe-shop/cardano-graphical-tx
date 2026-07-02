@@ -548,8 +548,8 @@ export class DolosProvider
     }));
   }
 
-  async getAssetTransactions(asset: string, count: number, page: number) {
-    const resp = await this.assetsApi.assetsAssetTransactionsGet(asset, count, page);
+  async getAssetTransactions(asset: string, count: number, page: number, order?: 'asc' | 'desc') {
+    const resp = await this.assetsApi.assetsAssetTransactionsGet(asset, count, page, order);
     return resp.data.map((item) => ({
       txHash: item.tx_hash,
       txIndex: item.tx_index,
