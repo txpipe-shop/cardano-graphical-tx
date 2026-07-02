@@ -2,11 +2,13 @@
 
 import type { cardano } from "@laceanatomy/types";
 import { Hash } from "@laceanatomy/types";
-import { type Network } from "~/app/_utils/network-config";
+import { type Network, isValidChain } from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
+import {
+  HISTORY_PAGE_SIZE,
+  TX_PAGE_SIZE,
+} from "~/app/_components/ExplorerSection/Tokens/constants";
 
-const HISTORY_PAGE_SIZE = 20;
-const TX_PAGE_SIZE = 5;
 const TX_FETCH_SIZE = TX_PAGE_SIZE + 1;
 
 export async function loadMoreHistory(
@@ -14,6 +16,9 @@ export async function loadMoreHistory(
   unit: string,
   page: number,
 ) {
+  if (!isValidChain(chain)) {
+    throw new Error(`Invalid chain: ${chain}`);
+  }
   const provider = getDolosProvider(chain);
   const data = await provider.getAssetHistory(unit, HISTORY_PAGE_SIZE, page);
   return { data };
@@ -24,6 +29,9 @@ export async function loadMoreTransactions(
   unit: string,
   page: number,
 ): Promise<{ data: cardano.Tx[]; hasMore: boolean }> {
+  if (!isValidChain(chain)) {
+    throw new Error(`Invalid chain: ${chain}`);
+  }
   const provider = getDolosProvider(chain);
   const rawTxs = await provider.getAssetTransactions(
     unit,

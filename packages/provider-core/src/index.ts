@@ -95,11 +95,6 @@ export type PoolsQuery = {
   search?: string;
 };
 
-export type Cip68MetadataResult = {
-  metadata: Record<string, unknown>;
-  referenceUtxo: { txHash: string; outputIndex: number };
-};
-
 export type PoolsReq = PaginatedRequest<PoolsQuery | undefined>;
 export type PoolReq = { id: string };
 

@@ -3,13 +3,13 @@
 import { Button, Card, CardBody, Tooltip } from "@heroui/react";
 import Link from "next/link";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { ROUTES } from "~/app/_utils/constants";
 import { type Network } from "~/app/_utils/network-config";
 import type { AssetHistory } from "../_shared";
 import { loadMoreHistory } from "./actions";
-
-const PAGE_SIZE = 20;
+import { HISTORY_PAGE_SIZE as PAGE_SIZE } from "~/app/_components/ExplorerSection/Tokens/constants";
 
 interface Props {
   chain: Network;
@@ -82,6 +82,8 @@ export function AssetHistoryListClient({
       setHistory((prev) => [...prev, ...allItems]);
       setHasMore(allItems.length >= PAGE_SIZE);
       setCurrentPage((prev) => prev + 1);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to load history");
     } finally {
       setLoading(false);
     }
@@ -92,9 +94,9 @@ export function AssetHistoryListClient({
       <Card className="border border-default-200 shadow-none">
         <CardBody className="p-0 md:hidden">
           <div className="space-y-4 p-4">
-            {history.map((entry, i) => (
+            {history.map((entry) => (
               <div
-                key={`${entry.txHash}-${i}`}
+                key={entry.txHash}
                 className="space-y-2 rounded-lg border border-border bg-surface p-3"
               >
                 <div>
@@ -132,8 +134,8 @@ export function AssetHistoryListClient({
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {history.map((entry, i) => (
-                <tr key={`${entry.txHash}-${i}`}>
+              {history.map((entry) => (
+                <tr key={entry.txHash}>
                   <td className="px-4 py-3 align-top bg-surface">
                     <div className="flex items-center gap-2">
                       <TxHashPill chain={chain} hash={entry.txHash} />

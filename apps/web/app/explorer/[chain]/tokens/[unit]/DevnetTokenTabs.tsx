@@ -17,13 +17,11 @@ import type { TokenPageData } from "./_shared";
 interface DevnetTokenTabsProps {
   unit: Unit;
   tab: TokenTab;
-  page: number;
 }
 
 export default function DevnetTokenTabs({
   unit,
   tab,
-  page,
 }: DevnetTokenTabsProps) {
   const { configs } = useConfigs();
   const port = resolveDevnetPort(configs.port);
@@ -106,7 +104,6 @@ export default function DevnetTokenTabs({
           hasMoreHolders: hasMore,
           allHolders: allAddresses,
           transactions: [],
-          transactionsTotal: 0,
           hasMoreTransactions: false,
         };
 
@@ -149,5 +146,5 @@ export default function DevnetTokenTabs({
     );
   }
 
-  return <TokenTabs data={data} tab={tab} chain={NETWORK.DEVNET} page={page} />;
+  return <TokenTabs data={data} tab={tab} chain={NETWORK.DEVNET} />;
 }

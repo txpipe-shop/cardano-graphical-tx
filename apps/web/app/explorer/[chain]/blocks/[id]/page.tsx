@@ -1,9 +1,9 @@
-import { Hash } from "@laceanatomy/types";
 import assert from "assert";
 import BlockTabs from "~/app/_components/ExplorerSection/Blocks/BlockTabs";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { Header } from "~/app/_components/Header";
 import { BLOCK_TABS, type BlockTab } from "~/app/_utils";
+import { resolveBlockReq } from "~/app/_utils/block";
 import {
   isValidChain,
   NETWORK,
@@ -24,18 +24,6 @@ function resolveTab(tab?: string): BlockTab {
     (candidate) => candidate.toLowerCase() === normalized,
   );
   return match ?? "Overview";
-}
-
-function resolveBlockReq(
-  id: string,
-): { hash: Hash } | { height: bigint } | null {
-  if (/^[0-9a-fA-F]{64}$/.test(id)) {
-    return { hash: Hash(id) };
-  }
-  if (/^\d+$/.test(id)) {
-    return { height: BigInt(id) };
-  }
-  return null;
 }
 
 export default async function BlockPage({ params, searchParams }: Props) {

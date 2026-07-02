@@ -1,29 +1,17 @@
 "use client";
 
 import { Card, CardBody } from "@heroui/react";
-import { Hash } from "@laceanatomy/types";
 import { useEffect, useMemo, useState } from "react";
 import BlockTabs from "~/app/_components/ExplorerSection/Blocks/BlockTabs";
 import { useConfigs } from "~/app/_contexts";
 import { NETWORK, resolveDevnetPort, type BlockTab } from "~/app/_utils";
+import { resolveBlockReq } from "~/app/_utils/block";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface DevnetBlockTabsProps {
   id: string;
   tab: BlockTab;
   txPage: number;
-}
-
-function resolveBlockReq(
-  id: string,
-): { hash: Hash } | { height: bigint } | null {
-  if (/^[0-9a-fA-F]{64}$/.test(id)) {
-    return { hash: Hash(id) };
-  }
-  if (/^\d+$/.test(id)) {
-    return { height: BigInt(id) };
-  }
-  return null;
 }
 
 export default function DevnetBlockTabs({

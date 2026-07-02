@@ -1,5 +1,9 @@
 import { type DolosProvider } from "@laceanatomy/cardano-provider-dolos";
 import { Hash, Unit, type cardano } from "@laceanatomy/types";
+import {
+  HOLDERS_PAGE_SIZE,
+  TX_PAGE_SIZE,
+} from "~/app/_components/ExplorerSection/Tokens/constants";
 
 export type AssetInfo = {
   unit: string;
@@ -31,13 +35,10 @@ export type TokenPageData = {
   hasMoreHolders: boolean;
   allHolders?: AssetAddress[];
   transactions: cardano.Tx[];
-  transactionsTotal: number;
   hasMoreTransactions: boolean;
 };
 
-const TX_PAGE_SIZE = 5;
 const TX_FETCH_SIZE = TX_PAGE_SIZE + 1;
-const HOLDERS_PAGE_SIZE = 20;
 const HOLDERS_FETCH_SIZE = HOLDERS_PAGE_SIZE + 1;
 
 function deriveMetadataSource(
@@ -139,15 +140,6 @@ export async function loadTokenPageData(
     addressesTotal: hasMoreHolders ? null : addressesResp.length,
     hasMoreHolders,
     transactions: txs,
-    transactionsTotal: rawTxs.length,
     hasMoreTransactions,
   };
-}
-
-export function resolveUnit(unit: string): string {
-  if (unit.startsWith("asset")) {
-    return unit;
-  }
-  const cleaned = unit.startsWith("0x") ? unit.slice(2) : unit;
-  return cleaned;
 }

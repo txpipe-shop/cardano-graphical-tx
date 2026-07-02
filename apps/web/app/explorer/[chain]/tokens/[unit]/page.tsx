@@ -1,7 +1,6 @@
 import type { Unit } from "@laceanatomy/types";
 import { Suspense } from "react";
 import TokenTabs from "~/app/_components/ExplorerSection/Tokens/TokenTabs";
-import { Header } from "~/app/_components/Header";
 import { TOKEN_TABS, type TokenTab } from "~/app/_utils";
 import {
   isValidChain,
@@ -10,6 +9,7 @@ import {
 } from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { AssetHistoryList } from "./_components/AssetHistoryList";
+import { TokenPageLayout } from "./_components/TokenPageLayout";
 import { loadTokenPageData } from "./_shared";
 import DevnetTokenTabs from "./DevnetTokenTabs";
 
@@ -51,23 +51,9 @@ export default async function TokenPage({ params, searchParams }: Props) {
 
   if (chain === NETWORK.DEVNET) {
     return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-primary-action focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
-        >
-          Skip to content
-        </a>
-        <Header />
-        <main
-          id="main-content"
-          className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6"
-        >
-          <div className="flex min-h-0 flex-1">
-            <DevnetTokenTabs unit={unit} tab={tab} page={page} />
-          </div>
-        </main>
-      </div>
+      <TokenPageLayout>
+        <DevnetTokenTabs unit={unit} tab={tab} />
+      </TokenPageLayout>
     );
   }
 
@@ -75,26 +61,14 @@ export default async function TokenPage({ params, searchParams }: Props) {
 
   if (error || !data) {
     return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-primary-action focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
+      <TokenPageLayout>
+        <div
+          role="alert"
+          className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2"
         >
-          Skip to content
-        </a>
-        <Header />
-        <main
-          id="main-content"
-          className="container mx-auto flex flex-1 flex-col px-4 py-6"
-        >
-          <div
-            role="alert"
-            className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2"
-          >
-            Token not found or could not be loaded.
-          </div>
-        </main>
-      </div>
+          Token not found or could not be loaded.
+        </div>
+      </TokenPageLayout>
     );
   }
 
@@ -111,28 +85,13 @@ export default async function TokenPage({ params, searchParams }: Props) {
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-primary-action focus:px-4 focus:py-2 focus:text-white focus:shadow-lg"
-      >
-        Skip to content
-      </a>
-      <Header />
-      <main
-        id="main-content"
-        className="container mx-auto flex min-h-0 flex-1 flex-col px-4 py-6"
-      >
-        <div className="flex min-h-0 flex-1">
-          <TokenTabs
-            data={data}
-            tab={tab}
-            chain={chain}
-            page={page}
-            historyContent={historyContent}
-          />
-        </div>
-      </main>
-    </div>
+    <TokenPageLayout>
+      <TokenTabs
+        data={data}
+        tab={tab}
+        chain={chain}
+        historyContent={historyContent}
+      />
+    </TokenPageLayout>
   );
 }

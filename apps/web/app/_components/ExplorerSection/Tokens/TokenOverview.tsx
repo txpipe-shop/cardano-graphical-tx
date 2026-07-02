@@ -57,6 +57,53 @@ function normalizeLogoUrl(logo: string): string {
   return `data:image/png;base64,${logo}`;
 }
 
+function getCip68Field(
+  cip68: Record<string, unknown> | null | undefined,
+  field: string,
+): unknown {
+  if (!cip68 || !(field in cip68)) return undefined;
+  return cip68[field];
+}
+
+interface RawMetadataEntry {
+  key: string;
+  title: string;
+  data: unknown;
+}
+
+function getRawMetadataEntries(
+  assetInfo: AssetInfo,
+): RawMetadataEntry[] {
+  const { metadata } = assetInfo;
+  const entries: RawMetadataEntry[] = [];
+
+  if (metadata.Cip26) {
+    entries.push({ key: "cip26", title: "CIP-26 (Token Registry)", data: metadata.Cip26 });
+  }
+  if (metadata.Cip25v1 ?? metadata.Cip25v2) {
+    const cip25 = metadata.Cip25v1 ?? metadata.Cip25v2;
+    entries.push({
+      key: "cip25",
+      title: `CIP-25 (${metadata.Cip25v2 ? "v2" : "v1"})`,
+      data: cip25,
+    });
+  }
+  if (metadata.Cip68v4) {
+    entries.push({ key: "cip68v4", title: "CIP-68 (v4)", data: metadata.Cip68v4 });
+  }
+  if (metadata.Cip68v3) {
+    entries.push({ key: "cip68v3", title: "CIP-68 (v3)", data: metadata.Cip68v3 });
+  }
+  if (metadata.Cip68v2) {
+    entries.push({ key: "cip68v2", title: "CIP-68 (v2)", data: metadata.Cip68v2 });
+  }
+  if (metadata.Cip68v1) {
+    entries.push({ key: "cip68v1", title: "CIP-68 (v1)", data: metadata.Cip68v1 });
+  }
+
+  return entries;
+}
+
 export default function TokenOverview({
   assetInfo,
   holdersCount,
@@ -70,34 +117,22 @@ export default function TokenOverview({
     metadata.Cip68v2 ??
     metadata.Cip68v1;
 
+  const cip68Obj = typeof cip68 === "object" ? cip68 : null;
+
   const displayName =
     cip26?.name ??
     cip25?.name ??
-    (typeof cip68 === "object" && cip68 && "name" in cip68
-      ? cip68.name
-      : null) ??
+    getCip68Field(cip68Obj, "name") as string ??
     (assetInfo.assetNameHex
       ? Buffer.from(assetInfo.assetNameHex, "hex").toString("ascii")
       : null) ??
     "Unknown Token";
 
-  const ticker =
-    cip26?.ticker ??
-    ("ticker" in (cip68 ?? {}) ? (cip68 as { ticker?: string }).ticker : null);
-  const decimals =
-    cip26?.decimals ??
-    ("decimals" in (cip68 ?? {})
-      ? (cip68 as { decimals?: number }).decimals
-      : null);
-  const description =
-    cip26?.description ??
-    cip25?.description ??
-    ("description" in (cip68 ?? {})
-      ? (cip68 as { description?: string }).description
-      : null);
-  const url =
-    cip26?.url ??
-    ("url" in (cip68 ?? {}) ? (cip68 as { url?: string }).url : null);
+  const ticker = cip26?.ticker ?? (getCip68Field(cip68Obj, "ticker") as string | undefined);
+  const decimals = cip26?.decimals ?? (getCip68Field(cip68Obj, "decimals") as number | undefined);
+  const description = cip26?.description ?? cip25?.description ?? (getCip68Field(cip68Obj, "description") as string | undefined);
+  const url = cip26?.url ?? (getCip68Field(cip68Obj, "url") as string | undefined);
+
   const logoRaw =
     cip26?.logo ??
     (typeof cip25?.image === "string"
@@ -105,15 +140,13 @@ export default function TokenOverview({
       : Array.isArray(cip25?.image)
         ? cip25.image[0]
         : null) ??
-    ("image" in (cip68 ?? {})
-      ? (cip68 as { image?: string }).image
-      : "logo" in (cip68 ?? {})
-        ? (cip68 as { logo?: string }).logo
-        : null);
+    (getCip68Field(cip68Obj, "image") as string | undefined) ??
+    (getCip68Field(cip68Obj, "logo") as string | undefined);
   const logo = logoRaw ? normalizeLogoUrl(logoRaw) : null;
 
   const sources = assetInfo.metadataSources;
   const hasRaw = cip26 || cip25 || cip68;
+  const rawEntries = hasRaw ? getRawMetadataEntries(assetInfo) : [];
 
   return (
     <>
@@ -244,7 +277,7 @@ export default function TokenOverview({
         </>
       ) : null}
 
-      {hasRaw ? (
+      {rawEntries.length > 0 ? (
         <>
           <Divider />
           <div className="flex flex-col gap-2">
@@ -256,96 +289,21 @@ export default function TokenOverview({
               variant="splitted"
               className="px-0"
             >
-              {cip26 ? (
+              {rawEntries.map((entry) => (
                 <AccordionItem
-                  key="cip26"
-                  aria-label="Raw CIP-26 Metadata"
-                  title="CIP-26 (Token Registry)"
+                  key={entry.key}
+                  aria-label={`Raw ${entry.title} Metadata`}
+                  title={entry.title}
                   classNames={{
                     title: "text-xs text-p-secondary",
                     content: "pb-2",
                   }}
                 >
                   <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
-                    {JSONBIG.stringify(cip26, null, 2)}
+                    {JSONBIG.stringify(entry.data, null, 2)}
                   </pre>
                 </AccordionItem>
-              ) : null}
-              {cip25 ? (
-                <AccordionItem
-                  key="cip25"
-                  aria-label="Raw CIP-25 Metadata"
-                  title={`CIP-25 (${metadata.Cip25v2 ? "v2" : "v1"})`}
-                  classNames={{
-                    title: "text-xs text-p-secondary",
-                    content: "pb-2",
-                  }}
-                >
-                  <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
-                    {JSONBIG.stringify(cip25, null, 2)}
-                  </pre>
-                </AccordionItem>
-              ) : null}
-              {metadata.Cip68v4 ? (
-                <AccordionItem
-                  key="cip68v4"
-                  aria-label="Raw CIP-68v4 Metadata"
-                  title="CIP-68 (v4)"
-                  classNames={{
-                    title: "text-xs text-p-secondary",
-                    content: "pb-2",
-                  }}
-                >
-                  <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
-                    {JSONBIG.stringify(metadata.Cip68v4, null, 2)}
-                  </pre>
-                </AccordionItem>
-              ) : null}
-              {metadata.Cip68v3 ? (
-                <AccordionItem
-                  key="cip68v3"
-                  aria-label="Raw CIP-68v3 Metadata"
-                  title="CIP-68 (v3)"
-                  classNames={{
-                    title: "text-xs text-p-secondary",
-                    content: "pb-2",
-                  }}
-                >
-                  <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
-                    {JSONBIG.stringify(metadata.Cip68v3, null, 2)}
-                  </pre>
-                </AccordionItem>
-              ) : null}
-              {metadata.Cip68v2 ? (
-                <AccordionItem
-                  key="cip68v2"
-                  aria-label="Raw CIP-68v2 Metadata"
-                  title="CIP-68 (v2)"
-                  classNames={{
-                    title: "text-xs text-p-secondary",
-                    content: "pb-2",
-                  }}
-                >
-                  <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
-                    {JSONBIG.stringify(metadata.Cip68v2, null, 2)}
-                  </pre>
-                </AccordionItem>
-              ) : null}
-              {metadata.Cip68v1 ? (
-                <AccordionItem
-                  key="cip68v1"
-                  aria-label="Raw CIP-68v1 Metadata"
-                  title="CIP-68 (v1)"
-                  classNames={{
-                    title: "text-xs text-p-secondary",
-                    content: "pb-2",
-                  }}
-                >
-                  <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
-                    {JSONBIG.stringify(metadata.Cip68v1, null, 2)}
-                  </pre>
-                </AccordionItem>
-              ) : null}
+              ))}
             </Accordion>
           </div>
         </>

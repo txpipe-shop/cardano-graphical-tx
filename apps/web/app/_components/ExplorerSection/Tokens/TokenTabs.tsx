@@ -15,7 +15,6 @@ export interface TokenTabsProps {
   data: TokenPageData;
   tab: TokenTab;
   chain: Network;
-  page: number;
   historyContent?: React.ReactNode;
 }
 
@@ -23,7 +22,6 @@ export default function TokenTabs({
   data,
   tab,
   chain,
-  page: _page,
   historyContent,
 }: TokenTabsProps) {
   const [activeTab, setActiveTab] = useState(tab);

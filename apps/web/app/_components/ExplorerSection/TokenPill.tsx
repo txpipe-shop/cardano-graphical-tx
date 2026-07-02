@@ -43,9 +43,9 @@ export default function TokenPill({
   const displayName = Buffer.from(rawName, "hex").toString("ascii");
 
   const stateClasses = {
-    mint: "border-green-200 bg-green-50 text-green-700",
-    burn: "border-red-200 bg-red-50 text-red-700",
-    default: "border-gray-200 bg-gray-50 text-gray-700",
+    mint: "border-success/30 bg-success/10 text-success",
+    burn: "border-danger/30 bg-danger/10 text-danger",
+    default: "border-border bg-surface text-p-primary",
   };
 
   const nameElement =

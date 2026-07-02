@@ -36,7 +36,9 @@ import {
   u5cToCardanoTx,
   u5cToCardanoUtxo,
   u5cToCardanoValue,
-  u5cToCardanoMetadata
+  u5cToCardanoMetadata,
+  validateBlock,
+  findTxIndexInBlock
 } from './mappers';
 
 const DUMP_HISTORY_MAX_ITEMS = 100;
@@ -108,7 +110,7 @@ export class U5CProvider
       blockHash,
       foundHeader.height,
       foundHeader.slot,
-      this.findTxIndexInBlock(foundBody, latestTx)
+      findTxIndexInBlock(foundBody, latestTx)
     );
   }
 
@@ -207,7 +209,7 @@ export class U5CProvider
       Hash(blockHash),
       block.height,
       block.slot,
-      this.findTxIndexInBlock(fullBlockBody, tx)
+      findTxIndexInBlock(fullBlockBody, tx)
     );
   }
 
@@ -287,7 +289,7 @@ export class U5CProvider
       nextSlot = next ? next.slot : undefined;
 
       for (const blockItem of block) {
-        const { body } = this.validateBlock(blockItem);
+        const { body } = validateBlock(blockItem);
         for (const tx of body.tx) {
           if (!tx.mint || tx.mint.length === 0) continue;
 
@@ -350,8 +352,8 @@ export class U5CProvider
       });
       nextSlot = next ? next.slot : undefined;
       block.forEach((blockItem) => {
-        const { block, body } = this.validateBlock(blockItem);
-        if (body.tx.length > 0) blocksAndTxs.push({ block: block, txs: body.tx.reverse() });
+        const { block, body } = validateBlock(blockItem);
+        if (body.tx.length > 0) blocksAndTxs.push({ block: block, txs: [...body.tx].reverse() });
       });
     } while (nextSlot);
     const total = blocksAndTxs.reduce((acc, block) => acc + block.txs.length, 0);
@@ -389,7 +391,7 @@ export class U5CProvider
           blockHash,
           blockHeight,
           blockSlot,
-          this.findTxIndexInBlock(blockBody, tx)
+          findTxIndexInBlock(blockBody, tx)
         )
       );
     });
@@ -420,7 +422,7 @@ export class U5CProvider
         })
       : body.tx;
 
-    const paginatedTxs = filteredTxs.reverse().slice(offset, offset + limit);
+    const paginatedTxs = [...filteredTxs].reverse().slice(offset, offset + limit);
 
     const blockHash = Hash(Buffer.from(header.hash).toString('hex'));
     const data = paginatedTxs.map((tx) =>
@@ -430,7 +432,7 @@ export class U5CProvider
         blockHash,
         header.height,
         header.slot,
-        this.findTxIndexInBlock(body, tx)
+        findTxIndexInBlock(body, tx)
       )
     );
 
@@ -535,7 +537,7 @@ export class U5CProvider
       const blockResponse = await this.utxoRpc.sync.fetchBlock({
         ref: [{ hash: Buffer.from(blockHashHex, 'hex') }]
       });
-      const { block, body, header } = this.validateBlock(blockResponse);
+      const { block, body, header } = validateBlock(blockResponse);
 
       return txs.map((tx) =>
         u5cToCardanoTx(
@@ -544,7 +546,7 @@ export class U5CProvider
           Hash(blockHashHex),
           header.height,
           header.slot,
-          this.findTxIndexInBlock(body, tx)
+          findTxIndexInBlock(body, tx)
         )
       );
     });
@@ -598,7 +600,7 @@ export class U5CProvider
     });
 
     const data = blocks.map((anyChainBlock) => {
-      const { block, header, body } = this.validateBlock(anyChainBlock);
+      const { block, header, body } = validateBlock(anyChainBlock);
       const blockHash = Hash(Buffer.from(header.hash).toString('hex'));
       const blockHeight = toBigInt(header.height);
       const blockSlot = toBigInt(header.slot);
@@ -610,7 +612,7 @@ export class U5CProvider
           blockHash,
           blockHeight,
           blockSlot,
-          this.findTxIndexInBlock(body, tx)
+          findTxIndexInBlock(body, tx)
         )
       );
 
@@ -670,10 +672,11 @@ export class U5CProvider
 
   async readTip(): Promise<TipRes> {
     const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
+    assert(tip.tip, 'Cannot read tip');
     return {
-      hash: Hash(Buffer.from(tip.tip!.hash).toString('hex')),
-      slot: BigInt(tip.tip?.slot || 0),
-      height: BigInt(tip.tip?.height ?? 0)
+      hash: Hash(Buffer.from(tip.tip.hash).toString('hex')),
+      slot: BigInt(tip.tip.slot || 0),
+      height: BigInt(tip.tip.height ?? 0)
     };
   }
 
@@ -695,7 +698,7 @@ export class U5CProvider
       throw new Error('Invalid block query');
     }
 
-    return this.validateBlock(blockResponse);
+    return validateBlock(blockResponse);
   }
 
   private processBlockForTxs(
@@ -717,29 +720,6 @@ export class U5CProvider
     }
   }
 
-  private validateBlock(block: sync.FetchBlockResponse | sync.AnyChainBlock): {
-    block: cardanoUtxoRpc.Block;
-    header: cardanoUtxoRpc.BlockHeader;
-    body: cardanoUtxoRpc.BlockBody;
-  } {
-    let thisBlock: sync.AnyChainBlock;
-    if ('block' in block) {
-      assert(block.block[0], 'Block not found');
-      thisBlock = block.block[0];
-    } else {
-      thisBlock = block;
-    }
-
-    assert(thisBlock.chain.case === 'cardano', 'Block is not a Cardano block');
-    assert(thisBlock.chain.value.body, 'Block body is undefined');
-    assert(thisBlock.chain.value.header, 'Header body is undefined');
-    return {
-      block: thisBlock.chain.value,
-      header: thisBlock.chain.value.header,
-      body: thisBlock.chain.value.body
-    };
-  }
-
   private validateTx(tx: query.ReadTxResponse): {
     tx: cardanoUtxoRpc.Tx;
     block: query.ChainPoint;
@@ -751,13 +731,6 @@ export class U5CProvider
     return { tx: tx.tx.chain.value, block: tx.tx.blockRef, cbor: tx.tx.nativeBytes };
   }
 
-  private findTxIndexInBlock(blockBody: cardanoUtxoRpc.BlockBody, tx: cardanoUtxoRpc.Tx): number {
-    return blockBody.tx.findIndex((t) => {
-      const hashInBlock = Buffer.from(t.hash).toString('hex');
-      const hashToFind = Buffer.from(tx.hash).toString('hex');
-      return hashInBlock === hashToFind;
-    });
-  }
 }
 
 export * as mappers from './mappers';

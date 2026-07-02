@@ -42,7 +42,9 @@ import {
 import {
   toBigInt,
   u5cToCardanoBlock,
-  u5cToCardanoTx
+  u5cToCardanoTx,
+  validateBlock,
+  findTxIndexInBlock
 } from '@laceanatomy/cardano-provider-u5c/mappers';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
@@ -94,6 +96,7 @@ export class DolosProvider
   private addrApi: CardanoAddressesApi;
   private assetsApi: CardanoAssetsApi;
   private addressPrefix: string;
+  private tokenClient: TokenRegistryClient;
 
   constructor({ transport, blockfrostUrl, blockfrostApiKey, addressPrefix }: DolosProviderParams) {
     this.utxoRpc = new UtxoRpcClient({ transport });
@@ -106,6 +109,7 @@ export class DolosProvider
     this.blockApi = new CardanoBlocksApi(config);
     this.addrApi = new CardanoAddressesApi(config);
     this.assetsApi = new CardanoAssetsApi(config);
+    this.tokenClient = new TokenRegistryClient('preprod');
   }
 
   // ---------------------------------------------------------------------------
@@ -119,9 +123,7 @@ export class DolosProvider
       return this.getLatestTxs(count);
     }
     if (q.block) {
-      const tx = this.getTxsByBlock(q.block, count, page);
-      console.log(tx);
-      return tx;
+      return this.getTxsByBlock(q.block, count, page);
     }
     if (q.address) {
       return this.getTxsByAddress(q.address, count, page);
@@ -202,7 +204,7 @@ export class DolosProvider
       const blockResp = await this.utxoRpc.sync.fetchBlock({
         ref: [{ slot: blockQuery.slot }]
       });
-      const { header } = this.validateBlock(blockResp);
+      const { header } = validateBlock(blockResp);
       blockId = Buffer.from(header.hash).toString('hex');
     }
 
@@ -222,7 +224,7 @@ export class DolosProvider
     const txHashSet = new Set(hashesResp.data);
     if (txHashSet.size === 0) return { data: [], total: 0n };
 
-    const { block, header, body } = this.validateBlock(blockResp);
+    const { block, header, body } = validateBlock(blockResp);
     const blockHash = Hash(Buffer.from(header.hash).toString('hex'));
 
     const data = body.tx
@@ -234,7 +236,7 @@ export class DolosProvider
           blockHash,
           header.height,
           header.slot,
-          this.findTxIndexInBlock(body, tx)
+          findTxIndexInBlock(body, tx)
         )
       );
 
@@ -261,7 +263,7 @@ export class DolosProvider
     await Promise.all(
       uniqueHeights.map(async (h) => {
         const resp = await this.utxoRpc.sync.fetchBlock({ ref: [{ height: BigInt(h) }] });
-        blocksByHeight.set(h, this.validateBlock(resp));
+        blocksByHeight.set(h, validateBlock(resp));
       })
     );
 
@@ -279,7 +281,7 @@ export class DolosProvider
             blockHash,
             header.height,
             header.slot,
-            this.findTxIndexInBlock(body, tx)
+            findTxIndexInBlock(body, tx)
           )
         );
       }
@@ -303,7 +305,7 @@ export class DolosProvider
     const blockResp = await this.utxoRpc.sync.fetchBlock({
       ref: [{ hash: Buffer.from(block.hash) }]
     });
-    const { body } = this.validateBlock(blockResp);
+    const { body } = validateBlock(blockResp);
 
     return u5cToCardanoTx(
       tx,
@@ -311,7 +313,7 @@ export class DolosProvider
       blockHash,
       block.height,
       block.slot,
-      this.findTxIndexInBlock(body, tx)
+      findTxIndexInBlock(body, tx)
     );
   }
 
@@ -352,7 +354,7 @@ export class DolosProvider
         this.utxoRpc.sync.fetchBlock({ ref: [{ slot: params.slot }] }),
         this.blockApi.blocksLatestGet()
       ]);
-      const { block } = this.validateBlock(blockResp);
+      const { block } = validateBlock(blockResp);
       const tipHeight = BigInt(latestResp.data.height ?? 0);
       return u5cToCardanoBlock(block, tipHeight);
     }
@@ -387,7 +389,7 @@ export class DolosProvider
     });
 
     return {
-      data: blocks.block.map(this.validateBlock).map((b) => u5cToCardanoBlock(b.block, tip.height)),
+      data: blocks.block.map(validateBlock).map((b) => u5cToCardanoBlock(b.block, tip.height)),
       total: 0n
     };
   }
@@ -409,7 +411,7 @@ export class DolosProvider
     });
 
     const data = blocks.map((anyChainBlock) => {
-      const { block, header, body } = this.validateBlock(anyChainBlock);
+      const { block, header, body } = validateBlock(anyChainBlock);
       const blockHash = Hash(Buffer.from(header.hash).toString('hex'));
       const blockHeight = toBigInt(header.height);
       const blockSlot = toBigInt(header.slot);
@@ -421,7 +423,7 @@ export class DolosProvider
           blockHash,
           blockHeight,
           blockSlot,
-          this.findTxIndexInBlock(body, tx)
+          findTxIndexInBlock(body, tx)
         )
       );
 
@@ -483,34 +485,6 @@ export class DolosProvider
 
   async getEpochs(_params: EpochsReq): Promise<EpochsRes> {
     throw new Error('DolosProvider does not support epoch queries');
-  }
-
-  private validateBlock(block: sync.FetchBlockResponse | sync.AnyChainBlock): {
-    block: cardanoUtxoRpc.Block;
-    header: cardanoUtxoRpc.BlockHeader;
-    body: cardanoUtxoRpc.BlockBody;
-  } {
-    let thisBlock: sync.AnyChainBlock;
-    if ('block' in block) {
-      assert(block.block[0], 'Block not found');
-      thisBlock = block.block[0];
-    } else {
-      thisBlock = block;
-    }
-    assert(thisBlock.chain.case === 'cardano', 'Block is not a Cardano block');
-    assert(thisBlock.chain.value.body, 'Block body is undefined');
-    assert(thisBlock.chain.value.header, 'Block header is undefined');
-    return {
-      block: thisBlock.chain.value,
-      header: thisBlock.chain.value.header,
-      body: thisBlock.chain.value.body
-    };
-  }
-
-  private findTxIndexInBlock(body: cardanoUtxoRpc.BlockBody, tx: cardanoUtxoRpc.Tx): number {
-    return body.tx.findIndex(
-      (t) => Buffer.from(t.hash).toString('hex') === Buffer.from(tx.hash).toString('hex')
-    );
   }
 
   // ---------------------------------------------------------------------------
@@ -732,8 +706,7 @@ export class DolosProvider
     metadata: cardano.NullableTokenMetadata
   ): Promise<void> {
     try {
-      const client = new TokenRegistryClient(network);
-      const result = await client.getToken(unit);
+      const result = await this.tokenClient.getToken(unit);
       if (!result) return;
 
       metadata.Cip26 = {

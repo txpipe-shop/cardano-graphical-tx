@@ -3,6 +3,7 @@
 import { Button } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { type Network } from "~/app/_utils/network-config";
 import { loadMoreTransactions } from "~/app/explorer/[chain]/tokens/[unit]/_components/actions";
 import { TxTable } from "../Transactions/TxTable";
@@ -33,6 +34,8 @@ export default function TransactionsTab({
       setTransactions((prev) => [...prev, ...result.data]);
       setHasMore(result.hasMore);
       setCurrentPage((prev) => prev + 1);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to load transactions");
     } finally {
       setLoading(false);
     }
