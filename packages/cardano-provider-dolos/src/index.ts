@@ -11,7 +11,6 @@ import {
   type BlocksRes,
   type BlocksWithTxsRes,
   type ChainProvider,
-  type Cip68MetadataResult,
   type CursorPaginatedProvider,
   type CursorPaginatedRequest,
   type EpochReq,
@@ -23,7 +22,16 @@ import {
   type TxsReq,
   type TxsRes
 } from '@laceanatomy/provider-core';
-import { cardano, type Cardano, Hash, HexString, hexToBech32 } from '@laceanatomy/types';
+import {
+  assetNameFromUnit,
+  cardano,
+  type Cardano,
+  Hash,
+  HexString,
+  hexToBech32,
+  policyFromUnit,
+  Unit
+} from '@laceanatomy/types';
 import {
   CardanoAddressesApi,
   CardanoAssetsApi,
@@ -37,7 +45,15 @@ import {
 } from '@laceanatomy/cardano-provider-u5c/mappers';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
+
 import { parseDatumInfo } from '@laceanatomy/napi-pallas';
+import {
+  CIP68_PREFIX_FT,
+  CIP68_PREFIX_NFT,
+  CIP68_PREFIX_REF,
+  CIP68_PREFIX_RFT,
+  parseCip68
+} from '@laceanatomy/types/cardano';
 import assert from 'assert';
 import { Buffer } from 'buffer';
 import {
@@ -45,6 +61,14 @@ import {
   blockfrostBlockToBlockRes,
   blockfrostUtxoToCardanoUtxo
 } from './mappers.js';
+import {
+  Cip25MetadataSchema,
+  Cip68Ft333Schema,
+  Cip68MapV4Schema,
+  Cip68Nft222Schema,
+  Cip68Rft444Schema,
+  OnchainMetadataStandardSchema
+} from './schemas.js';
 
 export type DolosProviderParams = {
   /** UTxORPC gRPC transport pointing at a Dolos node */
@@ -57,7 +81,7 @@ export type DolosProviderParams = {
 
 export class DolosProvider
   implements
-    ChainProvider<cardano.UTxO, cardano.Tx, Cardano>,
+    ChainProvider<cardano.UTxO, cardano.Tx, Cardano, cardano.TokenMetadata>,
     CursorPaginatedProvider<cardano.UTxO, cardano.Tx, Cardano, BlockCursor>
 {
   private static readonly MAX_BLOCKS_LOOKBACK = 100;
@@ -540,63 +564,172 @@ export class DolosProvider
     }));
   }
 
-  async getTokenMetadata({ unit }: { unit: string }): Promise<Cip68MetadataResult | null> {
-    if (unit === 'lovelace') return null;
+  async getTokenMetadata({
+    unit,
+    type
+  }: {
+    unit: Unit;
+    type?: keyof cardano.TokenMetadata;
+  }): Promise<cardano.NullableTokenMetadata> {
+    const metadata: cardano.NullableTokenMetadata = {
+      Cip25v1: null,
+      Cip25v2: null,
+      Cip26: null,
+      Cip68v1: null,
+      Cip68v2: null,
+      Cip68v3: null,
+      Cip68v4: null
+    };
 
-    const policyId = unit.slice(0, 56);
-    const assetName = unit.slice(56);
-    if (!policyId || !assetName) return null;
+    if (unit === 'lovelace') return metadata;
 
-    const policyIdBuffer = Buffer.from(policyId, 'hex');
+    const needsCip25 = !type || type.startsWith('Cip25');
+    const needsCip68 = !type || type.startsWith('Cip68');
 
-    for (const prefix of ['000de140', '000643b0']) {
-      const refAssetNameHex = prefix + assetName;
-      const refAssetNameBuffer = Buffer.from(refAssetNameHex, 'hex');
+    if (needsCip25) {
+      await this.fetchCip25Metadata(unit, metadata);
+    }
 
-      try {
-        const response = await this.utxoRpc.query.searchUtxos({
-          predicate: {
-            match: {
-              utxoPattern: {
-                case: 'cardano',
-                value: {
-                  asset: {
-                    policyId: policyIdBuffer,
-                    assetName: refAssetNameBuffer
-                  }
+    if (needsCip68) {
+      const policyId = policyFromUnit(unit);
+      const rawAssetName = assetNameFromUnit(unit);
+      const baseName = this.stripCip68Prefix(rawAssetName);
+      if (policyId && baseName) {
+        await this.fetchCip68Metadata(policyId, baseName, metadata);
+      }
+    }
+
+    if (type) {
+      for (const key of Object.keys(metadata) as (keyof cardano.TokenMetadata)[]) {
+        if (key !== type) {
+          (metadata as Record<string, unknown>)[key] = null;
+        }
+      }
+    }
+
+    return metadata;
+  }
+
+  private async fetchCip25Metadata(
+    unit: string,
+    metadata: cardano.NullableTokenMetadata
+  ): Promise<void> {
+    try {
+      const resp = await this.assetsApi.assetsAssetGet(unit);
+      const standard = resp.data.onchain_metadata_standard;
+      const data = resp.data.onchain_metadata;
+      if (!data || !standard) return;
+
+      const parsedStandard = OnchainMetadataStandardSchema.safeParse(standard);
+      if (!parsedStandard.success) return;
+
+      const validated = Cip25MetadataSchema.safeParse(data);
+      if (!validated.success) return;
+
+      if (parsedStandard.data === 'CIP25v1') metadata.Cip25v1 = validated.data;
+      else if (parsedStandard.data === 'CIP25v2') metadata.Cip25v2 = validated.data;
+    } catch {
+      // asset not found
+    }
+  }
+
+  private async fetchCip68Metadata(
+    policyId: string,
+    baseName: string,
+    metadata: cardano.NullableTokenMetadata
+  ): Promise<void> {
+    try {
+      const response = await this.utxoRpc.query.searchUtxos({
+        predicate: {
+          match: {
+            utxoPattern: {
+              case: 'cardano',
+              value: {
+                asset: {
+                  policyId: Buffer.from(policyId, 'hex'),
+                  assetName: Buffer.from(CIP68_PREFIX_REF + baseName, 'hex')
                 }
               }
             }
           }
-        });
+        }
+      });
 
-        const item = response.items?.[0];
-        if (!item) continue;
+      const item = response.items?.[0];
+      if (!item?.parsedState || item.parsedState.case !== 'cardano') return;
 
-        const parsedState = item.parsedState;
-        if (parsedState?.case !== 'cardano') continue;
+      const datum = item.parsedState.value?.datum;
+      if (!datum?.originalCbor || datum.originalCbor.length === 0) return;
 
-        const datum = parsedState.value?.datum;
-        if (!datum?.originalCbor || datum.originalCbor.length === 0) continue;
+      const datumHex = Buffer.from(datum.originalCbor).toString('hex');
+      const parsed = parseDatumInfo(datumHex);
+      if (!parsed?.json) return;
 
-        const datumHex = Buffer.from(datum.originalCbor).toString('hex');
-        const parsed = parseDatumInfo(datumHex);
-        if (!parsed) continue;
+      const plutusJson = JSON.parse(parsed.json) as Record<string, unknown>;
+      const result = parseCip68(plutusJson);
+      if (!result) return;
 
-        const txHash = item.txoRef ? Buffer.from(item.txoRef.hash).toString('hex') : '';
+      const validated = this.validateCip68Metadata(result);
+      if (!validated) return;
 
-        return {
-          metadata: JSON.parse(parsed.json) as Record<string, unknown>,
-          referenceUtxo: {
-            txHash,
-            outputIndex: item.txoRef?.index ?? 0
-          }
-        };
-      } catch {
-        continue;
-      }
+      (metadata as Record<string, unknown>)[validated.key] = validated.data;
+    } catch {
+      // reference NFT not found or datum unparsable
+    }
+  }
+
+  private validateCip68Metadata(result: {
+    metadata: unknown;
+    version: number;
+    isMapV4: boolean;
+  }): { key: keyof cardano.TokenMetadata; data: unknown } | null {
+    if (result.isMapV4) {
+      const validated = Cip68MapV4Schema.safeParse(result.metadata);
+      return validated.success ? { key: 'Cip68v4', data: validated.data } : null;
     }
 
+    const schemas: Array<{
+      schema: { safeParse: (data: unknown) => { success: boolean; data?: unknown } };
+      key: keyof cardano.TokenMetadata;
+    }> = [];
+
+    const ver = result.version;
+    if (ver >= 1)
+      schemas.push(
+        { schema: Cip68Nft222Schema, key: 'Cip68v1' },
+        { schema: Cip68Ft333Schema, key: 'Cip68v1' }
+      );
+    if (ver >= 2)
+      schemas.push(
+        { schema: Cip68Nft222Schema, key: 'Cip68v2' },
+        { schema: Cip68Ft333Schema, key: 'Cip68v2' }
+      );
+    if (ver >= 3)
+      schemas.push(
+        { schema: Cip68Nft222Schema, key: 'Cip68v3' },
+        { schema: Cip68Ft333Schema, key: 'Cip68v3' },
+        { schema: Cip68Rft444Schema, key: 'Cip68v3' }
+      );
+    if (ver >= 4)
+      schemas.push(
+        { schema: Cip68Nft222Schema, key: 'Cip68v4' },
+        { schema: Cip68Ft333Schema, key: 'Cip68v4' },
+        { schema: Cip68Rft444Schema, key: 'Cip68v4' }
+      );
+
+    for (const { schema, key } of schemas) {
+      const validated = schema.safeParse(result.metadata);
+      if (validated.success) return { key, data: validated.data };
+    }
+    return null;
+  }
+
+  private stripCip68Prefix(assetName: string): string | null {
+    for (const prefix of [CIP68_PREFIX_NFT, CIP68_PREFIX_FT, CIP68_PREFIX_RFT]) {
+      if (assetName.startsWith(prefix)) {
+        return assetName.slice(prefix.length);
+      }
+    }
     return null;
   }
 }
