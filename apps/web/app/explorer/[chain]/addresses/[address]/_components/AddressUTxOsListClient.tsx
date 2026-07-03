@@ -2,8 +2,8 @@
 
 import { type Address, type cardano } from "@laceanatomy/types";
 import { useState } from "react";
-import { UtxoList } from "~/app/_components/ExplorerSection/Transactions/TxOverview";
 import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
+import { UtxoList } from "~/app/_components/ExplorerSection/Transactions/TxOverview";
 import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
 import { type Network } from "~/app/_utils/network-config";
 import { loadMoreUTxOs } from "./actions";
@@ -46,10 +46,7 @@ export function AddressUTxOsListClient({
       <UtxoList list={utxos} mint={{}} showAddress={false} />
       {hasMore && (
         <div className="flex justify-center">
-          <PaginationButton
-            onClick={onLoadMore}
-            isLoading={loading}
-          >
+          <PaginationButton onClick={onLoadMore} isLoading={loading}>
             Load More
           </PaginationButton>
         </div>

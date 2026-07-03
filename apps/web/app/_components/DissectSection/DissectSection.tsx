@@ -2,17 +2,17 @@
 
 import { Button, Card, CardBody, Tooltip } from "@heroui/react";
 import { DetailLabel } from "~/app/_components/DetailLabel";
+import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { MonoText } from "~/app/_components/MonoText";
 import { SubLabel } from "~/app/_components/SubLabel";
-import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { useConfigs, useUI } from "~/app/_contexts";
 import type { IGraphicalTransaction } from "~/app/_interfaces";
 import { type Network } from "~/app/_utils/network-config";
 import Loading from "~/app/loading";
 import TOPICS from "./topics";
-import { formatAda } from "./utils";
-import { GROUP_TOPIC_KEY, useDissectSidebar } from "./useDissectSidebar";
 import { Stat } from "./TransactionDetails";
+import { GROUP_TOPIC_KEY, useDissectSidebar } from "./useDissectSidebar";
+import { formatAda } from "./utils";
 
 export function DissectSection({
   tx,

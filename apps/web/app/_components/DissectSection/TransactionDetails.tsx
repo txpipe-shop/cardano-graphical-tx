@@ -8,12 +8,12 @@ import type {
 import { Address } from "@laceanatomy/types";
 import { CodeBlock } from "~/app/_components/CodeBlock";
 import { DetailLabel } from "~/app/_components/DetailLabel";
+import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { FieldBlock } from "~/app/_components/FieldBlock";
 import { MonoText } from "~/app/_components/MonoText";
 import { SubField } from "~/app/_components/SubField";
-import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
-import { type Network } from "~/app/_utils/network-config";
 import { JSONBIG } from "~/app/_utils";
+import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ExplorerSection/ColoredAddress";
 import { formatAda } from "./utils";
 
@@ -21,9 +21,7 @@ export function CertDetail({ cert }: { cert: Certificate }) {
   return (
     <div className="space-y-3">
       <DetailLabel>{cert.kind}</DetailLabel>
-      <CodeBlock>
-        {JSON.stringify(cert, null, 2)}
-      </CodeBlock>
+      <CodeBlock>{JSON.stringify(cert, null, 2)}</CodeBlock>
     </div>
   );
 }
@@ -53,7 +51,13 @@ export function WithdrawalDetail({
   );
 }
 
-export function MintDetail({ mint, isMint }: { mint: Assets; isMint: boolean }) {
+export function MintDetail({
+  mint,
+  isMint,
+}: {
+  mint: Assets;
+  isMint: boolean;
+}) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -96,9 +100,7 @@ export function MetadataDetail({ m }: { m: Metadata }) {
   return (
     <div className="space-y-3">
       <DetailLabel>Label: {m.label}</DetailLabel>
-      <CodeBlock>
-        {JSONBIG.stringify(m.jsonMetadata, null, 2)}
-      </CodeBlock>
+      <CodeBlock>{JSONBIG.stringify(m.jsonMetadata, null, 2)}</CodeBlock>
     </div>
   );
 }
@@ -176,9 +178,7 @@ export function CollateralDetail({
                 {ref.scriptRef && (
                   <div>
                     <DetailLabel>Script Reference</DetailLabel>
-                    <MonoText>
-                      {ref.scriptRef}
-                    </MonoText>
+                    <MonoText>{ref.scriptRef}</MonoText>
                   </div>
                 )}
               </FieldBlock>

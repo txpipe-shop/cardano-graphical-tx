@@ -1,10 +1,5 @@
 "use client";
-import {
-  Accordion,
-  AccordionItem,
-  Chip,
-  useDisclosure,
-} from "@heroui/react";
+import { Accordion, AccordionItem, Chip, useDisclosure } from "@heroui/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useGraphical } from "~/app/_contexts";

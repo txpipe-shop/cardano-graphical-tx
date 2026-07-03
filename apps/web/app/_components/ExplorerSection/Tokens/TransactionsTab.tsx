@@ -48,10 +48,7 @@ export default function TransactionsTab({
       <TxTable transactions={transactions} chain={chain} />
       {hasMore && (
         <div className="flex justify-center">
-          <PaginationButton
-            onClick={onLoadMore}
-            isLoading={loading}
-          >
+          <PaginationButton onClick={onLoadMore} isLoading={loading}>
             Load More
           </PaginationButton>
         </div>

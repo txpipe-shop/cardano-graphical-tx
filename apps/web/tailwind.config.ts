@@ -33,9 +33,9 @@ export default {
       },
       spacing: {
         "section-y": "1.5rem",
-        "card": "1rem",
+        card: "1rem",
         "card-lg": "1.5rem",
-        "field": "0.625rem 0.75rem",
+        field: "0.625rem 0.75rem",
         "page-x": "1rem",
       },
     },

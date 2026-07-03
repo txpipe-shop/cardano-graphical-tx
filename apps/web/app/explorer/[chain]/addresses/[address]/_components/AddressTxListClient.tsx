@@ -2,8 +2,8 @@
 
 import { type Address, type cardano } from "@laceanatomy/types";
 import { useState } from "react";
-import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
+import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
 import { type Network } from "~/app/_utils/network-config";
 import { loadMoreTxs } from "./actions";
@@ -46,10 +46,7 @@ export function AddressTxListClient({
       <TxTable transactions={txs} chain={chain} highlightAddress={address} />
       {hasMore && (
         <div className="flex justify-center">
-          <PaginationButton
-            onClick={onLoadMore}
-            isLoading={loading}
-          >
+          <PaginationButton onClick={onLoadMore} isLoading={loading}>
             Load More
           </PaginationButton>
         </div>

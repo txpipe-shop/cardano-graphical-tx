@@ -6,27 +6,30 @@ import type {
 import { useCallback, useMemo, useState } from "react";
 import type { IGraphicalTransaction } from "~/app/_interfaces";
 import { type Network } from "~/app/_utils/network-config";
+import {
+  ProposalProcedureDetail,
+  VotingProcedureDetail,
+} from "./GovernanceDetails";
 import type TOPICS from "./topics";
+import {
+  CertDetail,
+  CollateralDetail,
+  MetadataDetail,
+  MintDetail,
+  RequiredSignersDetail,
+  TreasuryDetail,
+  ValidityRangeDetail,
+  WithdrawalDetail,
+} from "./TransactionDetails";
 import { formatAda } from "./utils";
 import { UtxoDetail } from "./UtxoDetail";
 import {
-  VKeyDetail,
-  RedeemerDetail,
-  ScriptList,
   BootstrapDetail,
   PlutusDetail,
+  RedeemerDetail,
+  ScriptList,
+  VKeyDetail,
 } from "./WitnessDetails";
-import { VotingProcedureDetail, ProposalProcedureDetail } from "./GovernanceDetails";
-import {
-  CertDetail,
-  WithdrawalDetail,
-  MintDetail,
-  MetadataDetail,
-  CollateralDetail,
-  RequiredSignersDetail,
-  ValidityRangeDetail,
-  TreasuryDetail,
-} from "./TransactionDetails";
 
 export type SidebarItem = {
   group: string;

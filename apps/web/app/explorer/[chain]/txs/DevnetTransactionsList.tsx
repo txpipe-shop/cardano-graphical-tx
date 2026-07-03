@@ -86,10 +86,7 @@ export default function DevnetTransactionsList({
 
   if (error) {
     return (
-      <DevnetError
-        title="Failed to load devnet transactions"
-        error={error}
-      />
+      <DevnetError title="Failed to load devnet transactions" error={error} />
     );
   }
 

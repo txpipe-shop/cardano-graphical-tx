@@ -1,11 +1,14 @@
-import type { ProposalProcedure, VotingProcedureEntry } from "@laceanatomy/napi-pallas";
+import type {
+  ProposalProcedure,
+  VotingProcedureEntry,
+} from "@laceanatomy/napi-pallas";
 import { Address } from "@laceanatomy/types";
 import { CodeBlock } from "~/app/_components/CodeBlock";
 import { DetailLabel } from "~/app/_components/DetailLabel";
+import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { FieldBlock } from "~/app/_components/FieldBlock";
 import { MonoText } from "~/app/_components/MonoText";
 import { SubLabel } from "~/app/_components/SubLabel";
-import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { JSONBIG } from "~/app/_utils";
 import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ExplorerSection/ColoredAddress";
@@ -89,9 +92,7 @@ export function ProposalProcedureDetail({
           chain={chain}
           full
         />
-        <MonoText className="mt-1">
-          {pp.rewardAccount}
-        </MonoText>
+        <MonoText className="mt-1">{pp.rewardAccount}</MonoText>
       </div>
 
       <div>

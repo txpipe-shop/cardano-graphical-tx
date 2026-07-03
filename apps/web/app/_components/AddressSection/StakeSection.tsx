@@ -1,10 +1,10 @@
 import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
 import { DetailLabel } from "~/app/_components/DetailLabel";
+import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { FieldBlock } from "~/app/_components/FieldBlock";
 import { MonoText } from "~/app/_components/MonoText";
 import { SubField } from "~/app/_components/SubField";
 import { SubLabel } from "~/app/_components/SubLabel";
-import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 
 export function StakeSection({ data }: { data: AddressDiagnostic }) {
   return (

@@ -1,9 +1,9 @@
 "use client";
 
 import { Button, Textarea } from "@heroui/react";
+import { useCborDiagnostic } from "~/app/_hooks/useCborDiagnostic";
 import { EmptyState } from "./EmptyState";
 import { InfoCard } from "./InfoCard";
-import { useCborDiagnostic } from "~/app/_hooks/useCborDiagnostic";
 
 interface CborViewProps {
   cbor: string | null;

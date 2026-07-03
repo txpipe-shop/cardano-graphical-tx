@@ -5,9 +5,14 @@ export interface DevnetLoadingCardProps {
   className?: string;
 }
 
-export function DevnetLoadingCard({ message, className = "" }: DevnetLoadingCardProps) {
+export function DevnetLoadingCard({
+  message,
+  className = "",
+}: DevnetLoadingCardProps) {
   return (
-    <Card className={`w-full border-2 border-dashed border-border shadow-md bg-surface ${className}`}>
+    <Card
+      className={`w-full border-2 border-dashed border-border shadow-md bg-surface ${className}`}
+    >
       <CardBody className="py-8 text-center text-p-secondary">
         {message}
       </CardBody>

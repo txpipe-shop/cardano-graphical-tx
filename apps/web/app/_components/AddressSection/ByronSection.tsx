@@ -1,10 +1,10 @@
 import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
 import { CodeBlock } from "~/app/_components/CodeBlock";
 import { DetailLabel } from "~/app/_components/DetailLabel";
+import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { FieldBlock } from "~/app/_components/FieldBlock";
 import { MonoText } from "~/app/_components/MonoText";
 import { SubLabel } from "~/app/_components/SubLabel";
-import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 
 export function ByronSection({ data }: { data: AddressDiagnostic }) {
   return (
@@ -52,9 +52,7 @@ export function ByronSection({ data }: { data: AddressDiagnostic }) {
             decoder.
           </SubLabel>
           {data?.byronCbor && (
-            <CodeBlock maxHeight="60">
-              {data.byronCbor}
-            </CodeBlock>
+            <CodeBlock maxHeight="60">{data.byronCbor}</CodeBlock>
           )}
         </FieldBlock>
       </FieldBlock>

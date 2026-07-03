@@ -161,7 +161,10 @@ export default async function AddressDetailPage({
         )}
 
         {!hasAnyActivity && (
-          <EmptyState message="No activity for this address." className="mb-4" />
+          <EmptyState
+            message="No activity for this address."
+            className="mb-4"
+          />
         )}
 
         <div className="rounded-lg border-2 border-dashed border-border bg-surface shadow-md">

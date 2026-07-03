@@ -159,10 +159,7 @@ export function AssetHistoryListClient({
       </Card>
       {hasMore && (
         <div className="flex justify-center">
-          <PaginationButton
-            onClick={onLoadMore}
-            isLoading={loading}
-          >
+          <PaginationButton onClick={onLoadMore} isLoading={loading}>
             Load More
           </PaginationButton>
         </div>

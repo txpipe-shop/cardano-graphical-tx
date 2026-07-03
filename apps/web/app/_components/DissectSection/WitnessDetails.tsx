@@ -1,9 +1,9 @@
 import type { Bootstrap, Witnesses } from "@laceanatomy/napi-pallas";
 import { CodeBlock } from "~/app/_components/CodeBlock";
 import { DetailLabel } from "~/app/_components/DetailLabel";
+import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { MonoText } from "~/app/_components/MonoText";
 import { SubLabel } from "~/app/_components/SubLabel";
-import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { JSONBIG } from "~/app/_utils";
 
 export function VKeyDetail({ items }: { items: Witnesses["vkeyWitnesses"] }) {
@@ -41,9 +41,7 @@ export function RedeemerDetail({ r }: { r: Witnesses["redeemers"][number] }) {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <MonoText className="font-bold">{r.tag}</MonoText>
-        <SubLabel className="font-mono">
-          index {r.index}
-        </SubLabel>
+        <SubLabel className="font-mono">index {r.index}</SubLabel>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -52,9 +50,7 @@ export function RedeemerDetail({ r }: { r: Witnesses["redeemers"][number] }) {
         </div>
         <div>
           <DetailLabel>Ex Steps</DetailLabel>
-          <MonoText>
-            {r.exUnits.steps.toFixed(0)}
-          </MonoText>
+          <MonoText>{r.exUnits.steps.toFixed(0)}</MonoText>
         </div>
       </div>
       <div>
@@ -67,7 +63,13 @@ export function RedeemerDetail({ r }: { r: Witnesses["redeemers"][number] }) {
   );
 }
 
-export function ScriptList({ items, label }: { items: string[]; label: string }) {
+export function ScriptList({
+  items,
+  label,
+}: {
+  items: string[];
+  label: string;
+}) {
   if (items.length === 0) return null;
   return (
     <div className="space-y-2">
@@ -83,7 +85,10 @@ export function ScriptList({ items, label }: { items: string[]; label: string })
           </div>
           <div className="p-4">
             <div className="flex items-start gap-2">
-              <MonoText size="xs" className="break-all flex-1 min-w-0 leading-relaxed">
+              <MonoText
+                size="xs"
+                className="break-all flex-1 min-w-0 leading-relaxed"
+              >
                 {script}
               </MonoText>
               <CopyButton text={script} size={14} />
@@ -143,17 +148,13 @@ export function PlutusDetail({ d }: { d: Witnesses["plutusData"][number] }) {
       {d.bytes && (
         <div>
           <DetailLabel>Bytes</DetailLabel>
-          <CodeBlock maxHeight="60">
-            {d.bytes}
-          </CodeBlock>
+          <CodeBlock maxHeight="60">{d.bytes}</CodeBlock>
         </div>
       )}
       {d.json && (
         <div>
           <DetailLabel>JSON</DetailLabel>
-          <CodeBlock>
-            {d.json}
-          </CodeBlock>
+          <CodeBlock>{d.json}</CodeBlock>
         </div>
       )}
     </div>

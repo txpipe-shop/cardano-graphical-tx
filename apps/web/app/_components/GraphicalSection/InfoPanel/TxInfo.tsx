@@ -6,7 +6,6 @@ import { type ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Button, Input } from "~/app/_components";
 import { useGraphical } from "~/app/_contexts";
-import { InfoPanelRow } from "./InfoPanelRow";
 import {
   JSONBIG,
   TX_URL_PARAM,
@@ -17,6 +16,7 @@ import {
 import CopyIcon from "~/public/copy.svg";
 import FullScreen from "~/public/fullscreen.svg";
 import { AssetCard } from "./AssetCard";
+import { InfoPanelRow } from "./InfoPanelRow";
 import { JSONModal } from "./JSONModal";
 
 export const TxInfo = () => {
@@ -151,9 +151,7 @@ export const TxInfo = () => {
         </InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="4" title="Size">
-        <InfoPanelRow justify="between">
-          {size ?? "Unknown"}
-        </InfoPanelRow>
+        <InfoPanelRow justify="between">{size ?? "Unknown"}</InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="5" title="Invalid Before (Start)">
         <InfoPanelRow justify="between">
@@ -161,14 +159,10 @@ export const TxInfo = () => {
         </InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="6" title="Invalid Hereafter (TTL)">
-        <InfoPanelRow justify="between">
-          {ttl ?? "Unknown"}
-        </InfoPanelRow>
+        <InfoPanelRow justify="between">{ttl ?? "Unknown"}</InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="7" title="Outputs Count">
-        <InfoPanelRow justify="between">
-          {outputs.length}
-        </InfoPanelRow>
+        <InfoPanelRow justify="between">{outputs.length}</InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="8" title="Total Output Sum">
         <div className="flex flex-col gap-2">
@@ -179,17 +173,12 @@ export const TxInfo = () => {
         </div>
       </AccordionItem>
       <AccordionItem key="9" title="Inputs Count">
-        <InfoPanelRow justify="between">
-          {inputs.length}
-        </InfoPanelRow>
+        <InfoPanelRow justify="between">{inputs.length}</InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="10" title="Withdrawals">
         <div className="flex flex-col gap-2">
           {withdrawals?.map((withdrawal, index) => (
-            <InfoPanelRow
-              key={index}
-              direction="col"
-            >
+            <InfoPanelRow key={index} direction="col">
               <div className="mb-2 flex items-center justify-between">
                 <b>Reward Account:</b>&nbsp;
                 <div className="flex">
@@ -213,9 +202,7 @@ export const TxInfo = () => {
         </div>
       </AccordionItem>
       <AccordionItem key="11" title="Metadata">
-        <InfoPanelRow justify="between">
-          {msg}
-        </InfoPanelRow>
+        <InfoPanelRow justify="between">{msg}</InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="12" title="Certificates">
         <JSONModal

@@ -70,9 +70,7 @@ export default async function TokenPage({ params, searchParams }: Props) {
   }
 
   const historyContent = (
-    <Suspense
-      fallback={<EmptyState message="Loading history..." />}
-    >
+    <Suspense fallback={<EmptyState message="Loading history..." />}>
       <AssetHistoryList chain={chain} unit={data.assetInfo.unit} />
     </Suspense>
   );

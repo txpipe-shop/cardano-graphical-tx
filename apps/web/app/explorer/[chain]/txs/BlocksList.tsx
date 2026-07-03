@@ -3,8 +3,8 @@
 import type { BlockCursor, BlockWithTxs } from "@laceanatomy/provider-core";
 import type { Cardano, cardano } from "@laceanatomy/types";
 import { useState } from "react";
-import { BlockTxsAccordion } from "~/app/_components/ExplorerSection/Transactions/BlockTxsAccordion";
 import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
+import { BlockTxsAccordion } from "~/app/_components/ExplorerSection/Transactions/BlockTxsAccordion";
 import { getBlockPageSize, type Network } from "~/app/_utils";
 import { loadMoreBlocks } from "./actions";
 
@@ -49,10 +49,7 @@ export function BlocksList({
       <BlockTxsAccordion blocksWithTxs={blocks} chain={chain} />
       {nextCursor && (
         <div className="flex justify-center">
-          <PaginationButton
-            onClick={onLoadMore}
-            isLoading={loading}
-          >
+          <PaginationButton onClick={onLoadMore} isLoading={loading}>
             Load More
           </PaginationButton>
         </div>

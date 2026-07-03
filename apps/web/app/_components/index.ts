@@ -1,8 +1,8 @@
 export { ByronSection, ShelleySection, StakeSection } from "./AddressSection";
 export { Button } from "./Button";
+export { default as CborView } from "./CborView";
 export { CodeBlock } from "./CodeBlock";
 export * from "./Constructors";
-export { default as CborView } from "./CborView";
 export { DashedCard } from "./DashedCard";
 export { DetailLabel } from "./DetailLabel";
 export { DevnetError } from "./DevnetError";

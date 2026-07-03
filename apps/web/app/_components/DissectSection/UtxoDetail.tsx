@@ -2,10 +2,10 @@ import type { Assets } from "@laceanatomy/napi-pallas";
 import { Address } from "@laceanatomy/types";
 import { CodeBlock } from "~/app/_components/CodeBlock";
 import { DetailLabel } from "~/app/_components/DetailLabel";
+import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { FieldBlock } from "~/app/_components/FieldBlock";
 import { MonoText } from "~/app/_components/MonoText";
 import { SubField } from "~/app/_components/SubField";
-import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import type { IGraphicalUtxo } from "~/app/_interfaces";
 import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ExplorerSection/ColoredAddress";
@@ -65,9 +65,7 @@ export function UtxoDetail({
       {utxo.datum && (
         <div>
           <DetailLabel>Datum</DetailLabel>
-          <MonoText className="text-p-primary">
-            {utxo.datum.hash}
-          </MonoText>
+          <MonoText className="text-p-primary">{utxo.datum.hash}</MonoText>
           {utxo.datum.bytes && (
             <CodeBlock size="xs" maxHeight="60" className="mt-2">
               {utxo.datum.bytes}
@@ -130,7 +128,10 @@ function AssetsList({ assets }: { assets: Assets[] }) {
                   </div>
                   <div className="flex items-center gap-2 mb-2">
                     <DetailLabel>Amount</DetailLabel>
-                    <MonoText size="xs" className="font-bold flex-shrink-0 w-36 text-right">
+                    <MonoText
+                      size="xs"
+                      className="font-bold flex-shrink-0 w-36 text-right"
+                    >
                       {a.amount?.toFixed(0) ?? 0}
                     </MonoText>
                   </div>
