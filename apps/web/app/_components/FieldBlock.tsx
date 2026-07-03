@@ -10,7 +10,7 @@ export function FieldBlock({
 }: PropsWithChildren<FieldBlockProps>) {
   return (
     <div
-      className={`rounded border border-border/50 bg-explorer-row/30 px-field py-field ${className}`}
+      className={`rounded border border-border/50 bg-explorer-row/30 p-2 ${className}`}
     >
       {children}
     </div>
