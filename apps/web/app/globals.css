@@ -19,6 +19,7 @@
     --color-explorer_row: #f5f3ff;
     --color-border: #e5e7eb;
     --color-canvas-bg-image: radial-gradient(#222222 1px, transparent 0);
+    --color-toploader: #7c3aed;
   }
 
   .dark {
@@ -37,6 +38,7 @@
     --color-explorer_row: #2d3748;
     --color-border: #374151;
     --color-canvas-bg-image: radial-gradient(#44484f 1px, transparent 0);
+    --color-toploader: #7c3aed;
   }
 }
 

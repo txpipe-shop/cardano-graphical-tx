@@ -4,6 +4,7 @@ import { Card, CardBody } from "@heroui/react";
 import { Unit } from "@laceanatomy/types";
 import { useState } from "react";
 import { DetailTabs, type DetailTab } from "~/app/_components/DetailTabs";
+import { EmptyState } from "~/app/_components/EmptyState";
 import { type TokenTab } from "~/app/_utils/constants";
 import { type Network } from "~/app/_utils/network-config";
 import type { TokenPageData } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
@@ -43,11 +44,7 @@ export default function TokenTabs({
     {
       key: "History",
       title: "History",
-      content: historyContent ?? (
-        <div className="rounded-lg border-2 border-dashed border-border bg-surface p-8 text-center text-p-secondary shadow-md">
-          No history found.
-        </div>
-      ),
+      content: historyContent ?? <EmptyState message="No history found." />,
     },
     {
       key: "Transactions",

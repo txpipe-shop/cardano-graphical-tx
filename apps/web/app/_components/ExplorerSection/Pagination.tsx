@@ -3,6 +3,7 @@
 import { Button } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { DashedCard } from "~/app/_components/DashedCard";
 
 export interface PaginationControlsProps {
   currentPage: number;
@@ -48,7 +49,7 @@ export default function Pagination({
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-between rounded-lg border-2 border-dashed border-border p-3 shadow-md bg-surface">
+    <DashedCard className="flex flex-wrap items-center justify-between p-3">
       <div className="text-sm text-p-secondary">
         Page {currentPage} of {totalPages}
       </div>
@@ -116,6 +117,6 @@ export default function Pagination({
           Next
         </Button>
       </div>
-    </div>
+    </DashedCard>
   );
 }

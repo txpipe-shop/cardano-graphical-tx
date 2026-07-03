@@ -1,15 +1,16 @@
 "use client";
 
-import { Button, Card, CardBody, Tooltip } from "@heroui/react";
+import { Card, CardBody, Tooltip } from "@heroui/react";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
+import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
+import { HISTORY_PAGE_SIZE as PAGE_SIZE } from "~/app/_components/ExplorerSection/Tokens/constants";
 import { ROUTES } from "~/app/_utils/constants";
 import { type Network } from "~/app/_utils/network-config";
 import type { AssetHistory } from "../_shared";
 import { loadMoreHistory } from "./actions";
-import { HISTORY_PAGE_SIZE as PAGE_SIZE } from "~/app/_components/ExplorerSection/Tokens/constants";
 
 interface Props {
   chain: Network;
@@ -83,7 +84,9 @@ export function AssetHistoryListClient({
       setHasMore(allItems.length >= PAGE_SIZE);
       setCurrentPage((prev) => prev + 1);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to load history");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to load history",
+      );
     } finally {
       setLoading(false);
     }
@@ -156,15 +159,9 @@ export function AssetHistoryListClient({
       </Card>
       {hasMore && (
         <div className="flex justify-center">
-          <Button
-            onPress={onLoadMore}
-            isLoading={loading}
-            variant="flat"
-            aria-busy={loading}
-            className="bg-explorer-row text-p-secondary shadow-sm"
-          >
+          <PaginationButton onClick={onLoadMore} isLoading={loading}>
             Load More
-          </Button>
+          </PaginationButton>
         </div>
       )}
     </div>

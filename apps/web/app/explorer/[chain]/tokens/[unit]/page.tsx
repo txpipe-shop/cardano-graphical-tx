@@ -1,5 +1,7 @@
 import type { Unit } from "@laceanatomy/types";
 import { Suspense } from "react";
+import { DevnetError } from "~/app/_components/DevnetError";
+import { EmptyState } from "~/app/_components/EmptyState";
 import TokenTabs from "~/app/_components/ExplorerSection/Tokens/TokenTabs";
 import { TOKEN_TABS, type TokenTab } from "~/app/_utils";
 import {
@@ -62,24 +64,13 @@ export default async function TokenPage({ params, searchParams }: Props) {
   if (error || !data) {
     return (
       <TokenPageLayout>
-        <div
-          role="alert"
-          className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2"
-        >
-          Token not found or could not be loaded.
-        </div>
+        <DevnetError title="Token not found or could not be loaded." />
       </TokenPageLayout>
     );
   }
 
   const historyContent = (
-    <Suspense
-      fallback={
-        <div className="rounded-lg border-2 border-dashed border-border bg-surface p-8 text-center text-p-secondary shadow-md">
-          Loading history...
-        </div>
-      }
-    >
+    <Suspense fallback={<EmptyState message="Loading history..." />}>
       <AssetHistoryList chain={chain} unit={data.assetInfo.unit} />
     </Suspense>
   );

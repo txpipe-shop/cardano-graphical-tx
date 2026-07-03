@@ -8,6 +8,8 @@ import {
   ShelleySection,
   StakeSection,
 } from "~/app/_components/AddressSection";
+import { DevnetError } from "~/app/_components/DevnetError";
+import { EmptyState } from "~/app/_components/EmptyState";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import DateViewer from "~/app/_components/ExplorerSection/DateViewer";
 import TokenPill from "~/app/_components/ExplorerSection/TokenPill";
@@ -44,9 +46,7 @@ function AddressError() {
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
       <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-        <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
-          Invalid Cardano address.
-        </div>
+        <DevnetError title="Invalid Cardano address." />
       </main>
     </div>
   );
@@ -161,9 +161,10 @@ export default async function AddressDetailPage({
         )}
 
         {!hasAnyActivity && (
-          <div className="mb-4 rounded-lg border-2 border-dashed border-border bg-surface p-8 text-center text-p-secondary shadow-md">
-            No activity for this address.
-          </div>
+          <EmptyState
+            message="No activity for this address."
+            className="mb-4"
+          />
         )}
 
         <div className="rounded-lg border-2 border-dashed border-border bg-surface shadow-md">

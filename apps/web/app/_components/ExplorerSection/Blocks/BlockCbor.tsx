@@ -1,6 +1,6 @@
 "use client";
 
-import CborView from "../../shared/CborView";
+import CborView from "../../CborView";
 
 export default function BlockCbor({ cbor }: { cbor: string | null }) {
   return (

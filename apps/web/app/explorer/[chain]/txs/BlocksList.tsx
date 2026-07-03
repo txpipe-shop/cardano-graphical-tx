@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@heroui/react";
 import type { BlockCursor, BlockWithTxs } from "@laceanatomy/provider-core";
 import type { Cardano, cardano } from "@laceanatomy/types";
 import { useState } from "react";
+import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
 import { BlockTxsAccordion } from "~/app/_components/ExplorerSection/Transactions/BlockTxsAccordion";
 import { getBlockPageSize, type Network } from "~/app/_utils";
 import { loadMoreBlocks } from "./actions";
@@ -49,14 +49,9 @@ export function BlocksList({
       <BlockTxsAccordion blocksWithTxs={blocks} chain={chain} />
       {nextCursor && (
         <div className="flex justify-center">
-          <Button
-            onPress={onLoadMore}
-            isLoading={loading}
-            variant="flat"
-            className="bg-explorer-row text-p-secondary shadow-sm"
-          >
+          <PaginationButton onClick={onLoadMore} isLoading={loading}>
             Load More
-          </Button>
+          </PaginationButton>
         </div>
       )}
     </div>

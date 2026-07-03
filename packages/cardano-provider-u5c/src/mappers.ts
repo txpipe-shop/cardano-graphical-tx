@@ -249,7 +249,7 @@ export function u5cToCardanoTx(
     mint,
     outputs,
     referenceInputs,
-    createdAt: Number(time),
+    createdAt: Number(time) / 1000,
     witnesses: { scripts, redeemers: redeemers.length > 0 ? redeemers : undefined },
     block: { hash: blockHash, height: blockHeight, epochNo: 0n, slot: blockSlot },
     treasuryDonation: 0n,
@@ -279,10 +279,7 @@ export function validateBlock(block: sync.FetchBlockResponse | sync.AnyChainBloc
   };
 }
 
-export function findTxIndexInBlock(
-  body: cardanoUtxoRpc.BlockBody,
-  tx: cardanoUtxoRpc.Tx
-): number {
+export function findTxIndexInBlock(body: cardanoUtxoRpc.BlockBody, tx: cardanoUtxoRpc.Tx): number {
   return body.tx.findIndex(
     (t) => Buffer.from(t.hash).toString('hex') === Buffer.from(tx.hash).toString('hex')
   );

@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardBody } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
+import { EmptyState } from "~/app/_components/EmptyState";
 import type { Network } from "~/app/_utils";
 import { TxRow } from "./TxRow";
 
@@ -17,13 +17,7 @@ export function TxTable({
   highlightAddress,
 }: Readonly<TxTableProps>) {
   if (transactions.length === 0) {
-    return (
-      <Card className="border-2 border-dashed border-border shadow-md bg-surface">
-        <CardBody className="py-8 text-center text-p-secondary">
-          No transactions found for this network.
-        </CardBody>
-      </Card>
-    );
+    return <EmptyState message="No transactions found for this network." />;
   }
 
   return (

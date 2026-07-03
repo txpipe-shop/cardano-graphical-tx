@@ -1,4 +1,5 @@
 import assert from "assert";
+import { DevnetError } from "~/app/_components/DevnetError";
 import BlockTabs from "~/app/_components/ExplorerSection/Blocks/BlockTabs";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { Header } from "~/app/_components/Header";
@@ -43,9 +44,7 @@ export default async function BlockPage({ params, searchParams }: Props) {
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
         <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-          <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
-            Invalid block identifier.
-          </div>
+          <DevnetError title="Invalid block identifier." />
         </main>
       </div>
     );
@@ -116,9 +115,7 @@ export default async function BlockPage({ params, searchParams }: Props) {
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
         <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-          <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
-            Block not found or could not be loaded.
-          </div>
+          <DevnetError title="Block not found or could not be loaded." />
         </main>
       </div>
     );

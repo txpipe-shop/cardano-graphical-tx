@@ -2,7 +2,9 @@
 
 import { Accordion, AccordionItem, Chip, Divider } from "@heroui/react";
 import Image from "next/image";
+import { CodeBlock } from "~/app/_components/CodeBlock";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
+import { SubLabel } from "~/app/_components/SubLabel";
 import { JSONBIG } from "~/app/_utils/constants";
 import type { AssetInfo } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
 
@@ -71,14 +73,16 @@ interface RawMetadataEntry {
   data: unknown;
 }
 
-function getRawMetadataEntries(
-  assetInfo: AssetInfo,
-): RawMetadataEntry[] {
+function getRawMetadataEntries(assetInfo: AssetInfo): RawMetadataEntry[] {
   const { metadata } = assetInfo;
   const entries: RawMetadataEntry[] = [];
 
   if (metadata.Cip26) {
-    entries.push({ key: "cip26", title: "CIP-26 (Token Registry)", data: metadata.Cip26 });
+    entries.push({
+      key: "cip26",
+      title: "CIP-26 (Token Registry)",
+      data: metadata.Cip26,
+    });
   }
   if (metadata.Cip25v1 ?? metadata.Cip25v2) {
     const cip25 = metadata.Cip25v1 ?? metadata.Cip25v2;
@@ -89,16 +93,32 @@ function getRawMetadataEntries(
     });
   }
   if (metadata.Cip68v4) {
-    entries.push({ key: "cip68v4", title: "CIP-68 (v4)", data: metadata.Cip68v4 });
+    entries.push({
+      key: "cip68v4",
+      title: "CIP-68 (v4)",
+      data: metadata.Cip68v4,
+    });
   }
   if (metadata.Cip68v3) {
-    entries.push({ key: "cip68v3", title: "CIP-68 (v3)", data: metadata.Cip68v3 });
+    entries.push({
+      key: "cip68v3",
+      title: "CIP-68 (v3)",
+      data: metadata.Cip68v3,
+    });
   }
   if (metadata.Cip68v2) {
-    entries.push({ key: "cip68v2", title: "CIP-68 (v2)", data: metadata.Cip68v2 });
+    entries.push({
+      key: "cip68v2",
+      title: "CIP-68 (v2)",
+      data: metadata.Cip68v2,
+    });
   }
   if (metadata.Cip68v1) {
-    entries.push({ key: "cip68v1", title: "CIP-68 (v1)", data: metadata.Cip68v1 });
+    entries.push({
+      key: "cip68v1",
+      title: "CIP-68 (v1)",
+      data: metadata.Cip68v1,
+    });
   }
 
   return entries;
@@ -122,16 +142,23 @@ export default function TokenOverview({
   const displayName =
     cip26?.name ??
     cip25?.name ??
-    getCip68Field(cip68Obj, "name") as string ??
+    (getCip68Field(cip68Obj, "name") as string) ??
     (assetInfo.assetNameHex
       ? Buffer.from(assetInfo.assetNameHex, "hex").toString("ascii")
       : null) ??
     "Unknown Token";
 
-  const ticker = cip26?.ticker ?? (getCip68Field(cip68Obj, "ticker") as string | undefined);
-  const decimals = cip26?.decimals ?? (getCip68Field(cip68Obj, "decimals") as number | undefined);
-  const description = cip26?.description ?? cip25?.description ?? (getCip68Field(cip68Obj, "description") as string | undefined);
-  const url = cip26?.url ?? (getCip68Field(cip68Obj, "url") as string | undefined);
+  const ticker =
+    cip26?.ticker ?? (getCip68Field(cip68Obj, "ticker") as string | undefined);
+  const decimals =
+    cip26?.decimals ??
+    (getCip68Field(cip68Obj, "decimals") as number | undefined);
+  const description =
+    cip26?.description ??
+    cip25?.description ??
+    (getCip68Field(cip68Obj, "description") as string | undefined);
+  const url =
+    cip26?.url ?? (getCip68Field(cip68Obj, "url") as string | undefined);
 
   const logoRaw =
     cip26?.logo ??
@@ -224,19 +251,19 @@ export default function TokenOverview({
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="flex flex-col">
-          <span className="text-xs text-p-secondary">Total Supply</span>
+          <SubLabel>Total Supply</SubLabel>
           <span className="text-lg font-semibold text-p-primary">
             {formatQuantity(assetInfo.totalSupply, decimals)}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-p-secondary">Decimals</span>
+          <SubLabel>Decimals</SubLabel>
           <span className="text-lg font-semibold text-p-primary">
             {decimals !== null && decimals !== undefined ? decimals : "N/A"}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-p-secondary">Holders</span>
+          <SubLabel>Holders</SubLabel>
           <span className="text-lg font-semibold text-p-primary">
             {holdersCount === null
               ? "20+"
@@ -246,7 +273,7 @@ export default function TokenOverview({
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-p-secondary">Mint/Burn Events</span>
+          <SubLabel>Mint/Burn Events</SubLabel>
           <span className="text-lg font-semibold text-p-primary">
             {assetInfo.mintOrBurnCount}
           </span>
@@ -299,9 +326,9 @@ export default function TokenOverview({
                     content: "pb-2",
                   }}
                 >
-                  <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+                  <CodeBlock>
                     {JSONBIG.stringify(entry.data, null, 2)}
-                  </pre>
+                  </CodeBlock>
                 </AccordionItem>
               ))}
             </Accordion>

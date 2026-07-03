@@ -1,4 +1,5 @@
 import { Hash } from "@laceanatomy/types";
+import { DevnetError } from "~/app/_components/DevnetError";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { Header } from "~/app/_components/Header";
@@ -91,9 +92,7 @@ export default async function TxPage({ params, searchParams }: Props) {
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
         <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-          <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
-            Transaction not found or could not be loaded.
-          </div>
+          <DevnetError title="Transaction not found or could not be loaded." />
         </main>
       </div>
     );

@@ -1,8 +1,9 @@
 "use client";
 
-import { Card, CardBody } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
 import { useEffect, useMemo, useState } from "react";
+import { DevnetError } from "~/app/_components/DevnetError";
+import { DevnetLoadingCard } from "~/app/_components/DevnetLoadingCard";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { useConfigs } from "~/app/_contexts";
@@ -80,21 +81,12 @@ export default function DevnetTransactionsList({
   }, [currentPage, pageSize, total, transactions.length]);
 
   if (loading) {
-    return (
-      <Card className="border-2 border-dashed border-border shadow-md bg-surface">
-        <CardBody className="py-8 text-center text-p-secondary">
-          Loading devnet transactions...
-        </CardBody>
-      </Card>
-    );
+    return <DevnetLoadingCard message="Loading devnet transactions..." />;
   }
 
   if (error) {
     return (
-      <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
-        <p className="font-semibold">Failed to load devnet transactions</p>
-        <p className="mt-2 text-sm">{error}</p>
-      </div>
+      <DevnetError title="Failed to load devnet transactions" error={error} />
     );
   }
 

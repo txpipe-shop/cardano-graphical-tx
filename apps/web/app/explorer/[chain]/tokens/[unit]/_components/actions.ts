@@ -2,12 +2,12 @@
 
 import type { cardano } from "@laceanatomy/types";
 import { Hash } from "@laceanatomy/types";
-import { type Network, isValidChain } from "~/app/_utils/network-config";
-import { getDolosProvider } from "~/server/api/dolos-provider";
 import {
   HISTORY_PAGE_SIZE,
   TX_PAGE_SIZE,
 } from "~/app/_components/ExplorerSection/Tokens/constants";
+import { type Network, isValidChain } from "~/app/_utils/network-config";
+import { getDolosProvider } from "~/server/api/dolos-provider";
 
 const TX_FETCH_SIZE = TX_PAGE_SIZE + 1;
 

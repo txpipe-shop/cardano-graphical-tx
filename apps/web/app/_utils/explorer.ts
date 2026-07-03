@@ -12,11 +12,6 @@ export function normalizeAddress(address: Address | undefined): string {
   return prefix ? hexToBech32(HexString(address), prefix) : address;
 }
 
-export function formatSeconds(s?: number): string {
-  if (!s) return "-";
-  return new Date(s * 1000).toLocaleString();
-}
-
 export function resolveDevnetPort(port: string | undefined) {
   const fallback = Number.parseInt(DEFAULT_DEVNET_PORT, 10);
   if (!port) return fallback;

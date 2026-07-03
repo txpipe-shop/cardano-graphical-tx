@@ -1,10 +1,12 @@
 "use client";
 
-import { Button, Card, CardBody } from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
 import { Address, type Unit } from "@laceanatomy/types";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { EmptyState } from "~/app/_components/EmptyState";
 import ColoredAddress from "~/app/_components/ExplorerSection/ColoredAddress";
+import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
 import { type Network } from "~/app/_utils/network-config";
 import type { AssetAddress } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
 import { loadMoreHolders } from "./actions";
@@ -51,18 +53,16 @@ export default function HoldersTab({
         setNextPage((prev) => prev + 1);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to load holders");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to load holders",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   if (holders.length === 0) {
-    return (
-      <div className="rounded-lg border-2 border-dashed border-border bg-surface p-8 text-center text-p-secondary shadow-md">
-        No holders found.
-      </div>
-    );
+    return <EmptyState message="No holders found." />;
   }
 
   return (
@@ -118,14 +118,9 @@ export default function HoldersTab({
       </Card>
       {hasMore && (
         <div className="flex justify-center">
-          <Button
-            onPress={onLoadMore}
-            isLoading={loading}
-            variant="flat"
-            className="bg-explorer-row text-p-secondary shadow-sm"
-          >
+          <PaginationButton onClick={onLoadMore} isLoading={loading}>
             Load More
-          </Button>
+          </PaginationButton>
         </div>
       )}
     </div>

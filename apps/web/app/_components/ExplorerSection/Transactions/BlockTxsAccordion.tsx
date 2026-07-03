@@ -4,6 +4,7 @@ import { Accordion, AccordionItem } from "@heroui/react";
 import type { BlockWithTxs } from "@laceanatomy/provider-core";
 import type { Cardano, cardano } from "@laceanatomy/types";
 import Link from "next/link";
+import { EmptyState } from "~/app/_components/EmptyState";
 import { ROUTES } from "~/app/_utils";
 import { formatAda } from "~/app/_utils/explorer";
 import { type Network } from "~/app/_utils/network-config";
@@ -21,11 +22,7 @@ export function BlockTxsAccordion({
   chain,
 }: BlockTxsAccordionProps) {
   if (blocksWithTxs.length === 0) {
-    return (
-      <div className="rounded-lg border-2 border-dashed border-border shadow-md bg-surface p-8 text-center text-p-secondary">
-        No blocks found for this network.
-      </div>
-    );
+    return <EmptyState message="No blocks found for this network." />;
   }
 
   const allKeys = blocksWithTxs.map((b) => b.block.hash);
