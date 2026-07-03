@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
 import { Unit } from "@laceanatomy/types";
+import type { Meta, StoryObj } from "@storybook/react";
 import TokenPill from "./TokenPill";
 
 const meta = {
