@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
 import { type Network } from "~/app/_utils/network-config";
 import { loadMoreTransactions } from "~/app/explorer/[chain]/tokens/[unit]/_components/actions";
 import { TxTable } from "../Transactions/TxTable";
@@ -48,15 +48,12 @@ export default function TransactionsTab({
       <TxTable transactions={transactions} chain={chain} />
       {hasMore && (
         <div className="flex justify-center">
-          <Button
-            onPress={onLoadMore}
+          <PaginationButton
+            onClick={onLoadMore}
             isLoading={loading}
-            variant="flat"
-            aria-busy={loading}
-            className="bg-explorer-row text-p-secondary shadow-sm"
           >
             Load More
-          </Button>
+          </PaginationButton>
         </div>
       )}
     </div>

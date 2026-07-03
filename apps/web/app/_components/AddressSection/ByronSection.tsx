@@ -1,21 +1,7 @@
 import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
+import { CodeBlock } from "~/app/_components/CodeBlock";
+import { DetailLabel } from "~/app/_components/DetailLabel";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
-
-function DetailLabel({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <p
-      className={`text-xs font-semibold uppercase tracking-wide text-p-secondary mb-1.5 ${className ?? ""}`}
-    >
-      {children}
-    </p>
-  );
-}
 
 export function ByronSection({ data }: { data: AddressDiagnostic }) {
   return (
@@ -63,9 +49,9 @@ export function ByronSection({ data }: { data: AddressDiagnostic }) {
             decoder.
           </p>
           {data?.byronCbor && (
-            <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-60 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+            <CodeBlock maxHeight="60">
               {data.byronCbor}
-            </pre>
+            </CodeBlock>
           )}
         </div>
       </div>

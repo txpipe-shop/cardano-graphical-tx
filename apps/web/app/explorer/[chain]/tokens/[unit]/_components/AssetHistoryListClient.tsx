@@ -1,10 +1,11 @@
 "use client";
 
-import { Button, Card, CardBody, Tooltip } from "@heroui/react";
+import { Card, CardBody, Tooltip } from "@heroui/react";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
+import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
 import { HISTORY_PAGE_SIZE as PAGE_SIZE } from "~/app/_components/ExplorerSection/Tokens/constants";
 import { ROUTES } from "~/app/_utils/constants";
 import { type Network } from "~/app/_utils/network-config";
@@ -158,15 +159,12 @@ export function AssetHistoryListClient({
       </Card>
       {hasMore && (
         <div className="flex justify-center">
-          <Button
-            onPress={onLoadMore}
+          <PaginationButton
+            onClick={onLoadMore}
             isLoading={loading}
-            variant="flat"
-            aria-busy={loading}
-            className="bg-explorer-row text-p-secondary shadow-sm"
           >
             Load More
-          </Button>
+          </PaginationButton>
         </div>
       )}
     </div>

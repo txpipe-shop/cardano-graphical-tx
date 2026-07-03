@@ -2,6 +2,7 @@
 
 import { Accordion, AccordionItem, Chip, Divider } from "@heroui/react";
 import Image from "next/image";
+import { CodeBlock } from "~/app/_components/CodeBlock";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { JSONBIG } from "~/app/_utils/constants";
 import type { AssetInfo } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
@@ -324,9 +325,9 @@ export default function TokenOverview({
                     content: "pb-2",
                   }}
                 >
-                  <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+                  <CodeBlock>
                     {JSONBIG.stringify(entry.data, null, 2)}
-                  </pre>
+                  </CodeBlock>
                 </AccordionItem>
               ))}
             </Accordion>

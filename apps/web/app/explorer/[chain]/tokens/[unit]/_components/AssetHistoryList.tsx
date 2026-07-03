@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { EmptyState } from "~/app/_components/EmptyState";
 import { HOLDERS_PAGE_SIZE as PAGE_SIZE } from "~/app/_components/ExplorerSection/Tokens/constants";
 import { type Network } from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
@@ -36,11 +37,7 @@ export async function AssetHistoryList({
   const history = allHistory.slice(0, PAGE_SIZE);
 
   if (history.length === 0) {
-    return (
-      <div className="rounded-lg border-2 border-dashed border-border bg-surface p-8 text-center text-p-secondary shadow-md">
-        No history found.
-      </div>
-    );
+    return <EmptyState message="No history found." />;
   }
 
   return (

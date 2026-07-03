@@ -1,7 +1,8 @@
 "use client";
 
-import { Card, CardBody } from "@heroui/react";
 import { useEffect, useMemo, useState } from "react";
+import { DevnetError } from "~/app/_components/DevnetError";
+import { DevnetLoadingCard } from "~/app/_components/DevnetLoadingCard";
 import BlockTabs from "~/app/_components/ExplorerSection/Blocks/BlockTabs";
 import { useConfigs } from "~/app/_contexts";
 import { NETWORK, resolveDevnetPort, type BlockTab } from "~/app/_utils";
@@ -80,21 +81,16 @@ export default function DevnetBlockTabs({
   }, [blockReq, port]);
 
   if (loading) {
-    return (
-      <Card className="w-full border-2 border-dashed border-border shadow-md bg-surface">
-        <CardBody className="py-8 text-center text-p-secondary">
-          Loading block...
-        </CardBody>
-      </Card>
-    );
+    return <DevnetLoadingCard message="Loading block..." />;
   }
 
   if (error || !data) {
     return (
-      <div className="w-full rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
-        <p className="font-semibold">Block not found or could not be loaded.</p>
-        {error ? <p className="mt-2 text-sm">{error}</p> : null}
-      </div>
+      <DevnetError
+        className="w-full"
+        title="Block not found or could not be loaded."
+        error={error}
+      />
     );
   }
 

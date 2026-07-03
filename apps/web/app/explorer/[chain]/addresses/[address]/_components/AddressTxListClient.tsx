@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@heroui/react";
 import { type Address, type cardano } from "@laceanatomy/types";
 import { useState } from "react";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
+import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
 import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
 import { type Network } from "~/app/_utils/network-config";
 import { loadMoreTxs } from "./actions";
@@ -46,14 +46,12 @@ export function AddressTxListClient({
       <TxTable transactions={txs} chain={chain} highlightAddress={address} />
       {hasMore && (
         <div className="flex justify-center">
-          <Button
-            onPress={onLoadMore}
+          <PaginationButton
+            onClick={onLoadMore}
             isLoading={loading}
-            variant="flat"
-            className="bg-explorer-row text-p-secondary shadow-sm"
           >
             Load More
-          </Button>
+          </PaginationButton>
         </div>
       )}
     </div>

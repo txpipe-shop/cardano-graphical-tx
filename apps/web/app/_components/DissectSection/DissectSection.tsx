@@ -14,6 +14,9 @@ import type {
 } from "@laceanatomy/napi-pallas";
 import { Address } from "@laceanatomy/types";
 import { useCallback, useMemo, useState } from "react";
+import { CodeBlock } from "~/app/_components/CodeBlock";
+import { DetailLabel } from "~/app/_components/DetailLabel";
+import { SubField } from "~/app/_components/SubField";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { useConfigs, useUI } from "~/app/_contexts";
 import type { IGraphicalTransaction, IGraphicalUtxo } from "~/app/_interfaces";
@@ -488,9 +491,9 @@ function UtxoDetail({
             {utxo.datum.hash}
           </div>
           {utxo.datum.bytes && (
-            <pre className="mt-2 text-xs font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-60 overflow-y-auto border border-border bg-explorer-row/30 p-3 rounded">
+            <CodeBlock size="xs" maxHeight="60" className="mt-2">
               {utxo.datum.bytes}
-            </pre>
+            </CodeBlock>
           )}
         </div>
       )}
@@ -576,9 +579,9 @@ function CertDetail({ cert }: { cert: Certificate }) {
   return (
     <div className="space-y-3">
       <DetailLabel>{cert.kind}</DetailLabel>
-      <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+      <CodeBlock>
         {JSON.stringify(cert, null, 2)}
-      </pre>
+      </CodeBlock>
     </div>
   );
 }
@@ -653,9 +656,9 @@ function MetadataDetail({ m }: { m: Metadata }) {
   return (
     <div className="space-y-3">
       <DetailLabel>Label: {m.label}</DetailLabel>
-      <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+      <CodeBlock>
         {JSONBIG.stringify(m.jsonMetadata, null, 2)}
-      </pre>
+      </CodeBlock>
     </div>
   );
 }
@@ -729,9 +732,9 @@ function CollateralDetail({
                       {ref.datum.hash}
                     </div>
                     {ref.datum.bytes && (
-                      <pre className="mt-2 text-xs font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-60 overflow-y-auto border border-border bg-explorer-row/30 p-3 rounded">
+                      <CodeBlock size="xs" maxHeight="60" className="mt-2">
                         {ref.datum.bytes}
-                      </pre>
+                      </CodeBlock>
                     )}
                   </div>
                 )}
@@ -808,9 +811,9 @@ function RedeemerDetail({ r }: { r: Witnesses["redeemers"][number] }) {
       </div>
       <div>
         <DetailLabel>Data</DetailLabel>
-        <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+        <CodeBlock>
           {JSONBIG.stringify(JSON.parse(r.dataJson), null, 2)}
-        </pre>
+        </CodeBlock>
       </div>
     </div>
   );
@@ -894,17 +897,17 @@ function PlutusDetail({ d }: { d: Witnesses["plutusData"][number] }) {
       {d.bytes && (
         <div>
           <DetailLabel>Bytes</DetailLabel>
-          <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-60 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+          <CodeBlock maxHeight="60">
             {d.bytes}
-          </pre>
+          </CodeBlock>
         </div>
       )}
       {d.json && (
         <div>
           <DetailLabel>JSON</DetailLabel>
-          <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+          <CodeBlock>
             {d.json}
-          </pre>
+          </CodeBlock>
         </div>
       )}
     </div>
@@ -1012,9 +1015,9 @@ function ProposalProcedureDetail({
 
       <div>
         <DetailLabel>Gov Action Details</DetailLabel>
-        <pre className="mt-1 text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-96 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
+        <CodeBlock className="mt-1">
           {JSONBIG.stringify(pp.govAction, null, 2)}
-        </pre>
+        </CodeBlock>
       </div>
 
       <div className="space-y-2 border border-border bg-explorer-row/30 rounded p-3">
@@ -1082,47 +1085,6 @@ function TreasuryDetail({
           </span>
         </div>
       )}
-    </div>
-  );
-}
-
-function DetailLabel({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  if (className) {
-    return (
-      <p
-        className={`text-xs font-semibold uppercase tracking-wide text-p-secondary ${className}`}
-      >
-        {children}
-      </p>
-    );
-  }
-  return (
-    <p className="text-xs font-semibold uppercase tracking-wide text-p-secondary mb-1.5">
-      {children}
-    </p>
-  );
-}
-
-function SubField({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value?: string;
-  mono?: boolean;
-}) {
-  if (!value) return null;
-  return (
-    <div>
-      <p className="text-xs text-p-secondary">{label}</p>
-      <p className={`text-sm break-all ${mono ? "font-mono" : ""}`}>{value}</p>
     </div>
   );
 }

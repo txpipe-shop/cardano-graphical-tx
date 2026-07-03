@@ -59,7 +59,7 @@ function UtxoRefPill({ hash, index }: { hash: string; index: bigint }) {
     <Tooltip content={fullRef} placement="top" delay={150}>
       <Link
         href={ROUTES.EXPLORER_TX(chain, hash)}
-        className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-mono text-gray-700 shadow-sm transition-colors hover:bg-gray-100 whitespace-nowrap"
+        className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-3 py-1 text-xs font-mono text-p-primary shadow-sm transition-colors hover:bg-surface whitespace-nowrap"
       >
         <ExternalLinkIcon />
         {hash.slice(0, 8)}…#{index.toString()}

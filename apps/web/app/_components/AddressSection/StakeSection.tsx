@@ -1,39 +1,7 @@
 import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
+import { DetailLabel } from "~/app/_components/DetailLabel";
+import { SubField } from "~/app/_components/SubField";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
-
-function DetailLabel({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <p
-      className={`text-xs font-semibold uppercase tracking-wide text-p-secondary mb-1.5 ${className ?? ""}`}
-    >
-      {children}
-    </p>
-  );
-}
-
-function SubField({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value?: string;
-  mono?: boolean;
-}) {
-  if (!value) return null;
-  return (
-    <div>
-      <p className="text-xs text-p-secondary">{label}</p>
-      <p className={`text-sm break-all ${mono ? "font-mono" : ""}`}>{value}</p>
-    </div>
-  );
-}
 
 export function StakeSection({ data }: { data: AddressDiagnostic }) {
   return (
