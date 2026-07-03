@@ -26,5 +26,8 @@ vite.config.ts.timestamp-*
 # Turbo
 .turbo
 
+# Storybook
+storybook-static
+
 # Test Coverage
 coverage
