@@ -1,9 +1,10 @@
-import { Hash } from "@laceanatomy/types";
 import assert from "assert";
+import { DevnetError } from "~/app/_components/DevnetError";
 import BlockTabs from "~/app/_components/ExplorerSection/Blocks/BlockTabs";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { Header } from "~/app/_components/Header";
 import { BLOCK_TABS, type BlockTab } from "~/app/_utils";
+import { resolveBlockReq } from "~/app/_utils/block";
 import {
   isValidChain,
   NETWORK,
@@ -13,7 +14,7 @@ import { getDolosProvider } from "~/server/api/dolos-provider";
 import DevnetBlockTabs from "./DevnetBlockTabs";
 
 interface Props {
-  params: Promise<{ chain: string; id: string }>;
+  params: Promise<{ chain: Network; id: string }>;
   searchParams?: Promise<{ tab?: string; page?: string }>;
 }
 
@@ -24,18 +25,6 @@ function resolveTab(tab?: string): BlockTab {
     (candidate) => candidate.toLowerCase() === normalized,
   );
   return match ?? "Overview";
-}
-
-function resolveBlockReq(
-  id: string,
-): { hash: Hash } | { height: bigint } | null {
-  if (/^[0-9a-fA-F]{64}$/.test(id)) {
-    return { hash: Hash(id) };
-  }
-  if (/^\d+$/.test(id)) {
-    return { height: BigInt(id) };
-  }
-  return null;
 }
 
 export default async function BlockPage({ params, searchParams }: Props) {
@@ -55,9 +44,7 @@ export default async function BlockPage({ params, searchParams }: Props) {
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
         <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-          <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
-            Invalid block identifier.
-          </div>
+          <DevnetError title="Invalid block identifier." />
         </main>
       </div>
     );
@@ -128,9 +115,7 @@ export default async function BlockPage({ params, searchParams }: Props) {
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
         <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-          <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
-            Block not found or could not be loaded.
-          </div>
+          <DevnetError title="Block not found or could not be loaded." />
         </main>
       </div>
     );

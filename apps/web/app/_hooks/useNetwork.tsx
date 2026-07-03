@@ -3,13 +3,14 @@
 import { type U5CProvider } from "@laceanatomy/cardano-provider-u5c";
 import { useMemo } from "react";
 import { useConfigs } from "~/app/_contexts";
-import { getU5CProviderWeb, resolveDevnetPort } from "~/app/_utils";
+import { resolveDevnetPort } from "~/app/_utils";
 import {
   getNetworkConfig,
   NETWORK,
   type Network,
   type NetworkConfig,
 } from "~/app/_utils/network-config";
+import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 export interface UseNetworkReturn {
   config: NetworkConfig;

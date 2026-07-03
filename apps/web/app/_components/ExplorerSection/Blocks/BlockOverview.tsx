@@ -1,14 +1,15 @@
 "use client";
 
-import { Card, CardBody, CardHeader } from "@heroui/react";
-import { type BlockRes } from "@laceanatomy/provider-core";
-import { type Address, type cardano, type Unit } from "@laceanatomy/types";
+import type { BlockRes } from "@laceanatomy/provider-core";
+import type { Address, cardano, Unit } from "@laceanatomy/types";
+import ColoredAddress from "~/app/_components/ExplorerSection/ColoredAddress";
+import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
+import DateViewer from "~/app/_components/ExplorerSection/DateViewer";
+import TokenPill from "~/app/_components/ExplorerSection/TokenPill";
+import { InfoCard } from "~/app/_components/InfoCard";
+import { KeyValue } from "~/app/_components/KeyValue";
 import { formatAda } from "~/app/_utils/explorer";
-import { type Network } from "~/app/_utils/network-config";
-import ColoredAddress from "../ColoredAddress";
-import CopyButton from "../CopyButton";
-import DateViewer from "../DateViewer";
-import TokenPill from "../TokenPill";
+import type { Network } from "~/app/_utils/network-config";
 
 interface BlockOverviewProps {
   block: BlockRes;
@@ -84,75 +85,56 @@ export default function BlockOverview({
 
   return (
     <div className="space-y-4">
-      <Card className="border-2 border-dashed border-border shadow-md bg-surface">
-        <CardHeader className="pb-2 text-p-primary font-semibold">
-          Block Metadata
-        </CardHeader>
-        <CardBody className="space-y-2 text-sm">
+      <InfoCard header="Block Metadata">
+        <div className="space-y-2 text-sm">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-p-secondary">Hash:</span>
             <span className="break-all font-mono">{block.hash}</span>
             <CopyButton text={block.hash} size={14} />
           </div>
           <div className="flex flex-wrap gap-4">
-            <div>
-              <span className="text-p-secondary">Height:</span>{" "}
-              <span className="font-mono">{block.height.toString()}</span>
-            </div>
-            <div>
-              <span className="text-p-secondary">Slot:</span>{" "}
-              <span className="font-mono">{block.slot.toString()}</span>
-            </div>
+            <KeyValue label="Height" mono>
+              {block.height.toString()}
+            </KeyValue>
+            <KeyValue label="Slot" mono>
+              {block.slot.toString()}
+            </KeyValue>
             {block.epoch !== undefined && (
-              <div>
-                <span className="text-p-secondary">Epoch:</span>{" "}
-                <span className="font-mono">{block.epoch.toString()}</span>
-              </div>
+              <KeyValue label="Epoch" mono>
+                {block.epoch.toString()}
+              </KeyValue>
             )}
           </div>
-          <div>
-            <span className="text-p-secondary">Time:</span>{" "}
+          <KeyValue label="Time">
             <DateViewer timestamp={block.time} unit="milliseconds" />
-          </div>
+          </KeyValue>
           {block.confirmations !== undefined && (
-            <div>
-              <span className="text-p-secondary">Confirmations:</span>{" "}
-              <span className="font-mono">
-                {block.confirmations.toString()}
-              </span>
-            </div>
+            <KeyValue label="Confirmations" mono>
+              {block.confirmations.toString()}
+            </KeyValue>
           )}
           {block.size !== undefined && (
-            <div>
-              <span className="text-p-secondary">Size:</span>{" "}
-              <span className="font-mono">{block.size.toString()} bytes</span>
-            </div>
+            <KeyValue label="Size" mono>
+              {block.size.toString()} bytes
+            </KeyValue>
           )}
-        </CardBody>
-      </Card>
+        </div>
+      </InfoCard>
 
-      <Card className="border-2 border-dashed border-border shadow-md bg-surface">
-        <CardHeader className="pb-2 text-p-primary font-semibold">
-          ADA Movement
-        </CardHeader>
-        <CardBody className="space-y-2 text-sm">
-          <div>
-            <span className="text-p-secondary">Total ADA In:</span>{" "}
-            <span className="font-mono">{formatAda(totalIn)}</span>
-          </div>
-          <div>
-            <span className="text-p-secondary">Total ADA Out:</span>{" "}
-            <span className="font-mono">{formatAda(totalOut)}</span>
-          </div>
-        </CardBody>
-      </Card>
+      <InfoCard header="ADA Movement">
+        <div className="space-y-2 text-sm">
+          <KeyValue label="Total ADA In" mono>
+            {formatAda(totalIn)}
+          </KeyValue>
+          <KeyValue label="Total ADA Out" mono>
+            {formatAda(totalOut)}
+          </KeyValue>
+        </div>
+      </InfoCard>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Card className="border-2 border-dashed border-border shadow-md bg-surface">
-          <CardHeader className="pb-2 text-p-primary font-semibold">
-            Top Senders
-          </CardHeader>
-          <CardBody className="space-y-2 text-sm">
+        <InfoCard header="Top Senders">
+          <div className="space-y-2 text-sm">
             {topSenders.length === 0 ? (
               <span className="text-p-secondary">No inputs</span>
             ) : (
@@ -163,14 +145,11 @@ export default function BlockOverview({
                 </div>
               ))
             )}
-          </CardBody>
-        </Card>
+          </div>
+        </InfoCard>
 
-        <Card className="border-2 border-dashed border-border shadow-md bg-surface">
-          <CardHeader className="pb-2 text-p-primary font-semibold">
-            Top Recipients
-          </CardHeader>
-          <CardBody className="space-y-2 text-sm">
+        <InfoCard header="Top Recipients">
+          <div className="space-y-2 text-sm">
             {topRecipients.length === 0 ? (
               <span className="text-p-secondary">No outputs</span>
             ) : (
@@ -181,47 +160,35 @@ export default function BlockOverview({
                 </div>
               ))
             )}
-          </CardBody>
-        </Card>
+          </div>
+        </InfoCard>
       </div>
 
-      <Card className="border-2 border-dashed border-border shadow-md bg-surface">
-        <CardHeader className="pb-2 text-p-primary font-semibold">
-          Aggregate Stats
-        </CardHeader>
-        <CardBody className="space-y-2 text-sm">
-          <div>
-            <span className="text-p-secondary">Total Transactions:</span>{" "}
-            <span className="font-mono">{block.txCount.toString()}</span>
-          </div>
-          <div>
-            <span className="text-p-secondary">Total Fees:</span>{" "}
-            <span className="font-mono">{formatAda(totalFees)}</span>
-          </div>
-          <div>
-            <span className="text-p-secondary">Total ADA Moved:</span>{" "}
-            <span className="font-mono">{formatAda(totalAdaMoved)}</span>
-          </div>
-          <div>
-            <span className="text-p-secondary">Unique Addresses:</span>{" "}
-            <span className="font-mono">{uniqueAddresses.size}</span>
-          </div>
-        </CardBody>
-      </Card>
+      <InfoCard header="Aggregate Stats">
+        <div className="space-y-2 text-sm">
+          <KeyValue label="Total Transactions" mono>
+            {block.txCount.toString()}
+          </KeyValue>
+          <KeyValue label="Total Fees" mono>
+            {formatAda(totalFees)}
+          </KeyValue>
+          <KeyValue label="Total ADA Moved" mono>
+            {formatAda(totalAdaMoved)}
+          </KeyValue>
+          <KeyValue label="Unique Addresses" mono>
+            {uniqueAddresses.size}
+          </KeyValue>
+        </div>
+      </InfoCard>
 
       {assets.length > 0 && (
-        <Card className="border-2 border-dashed border-border shadow-md bg-surface">
-          <CardHeader className="pb-2 text-p-primary font-semibold">
-            Asset Movement
-          </CardHeader>
-          <CardBody>
-            <div className="flex flex-wrap gap-2">
-              {assets.map(([unit, amount]) => (
-                <TokenPill key={unit} unit={unit} amount={amount} />
-              ))}
-            </div>
-          </CardBody>
-        </Card>
+        <InfoCard header="Asset Movement">
+          <div className="flex flex-wrap gap-2">
+            {assets.map(([unit, amount]) => (
+              <TokenPill key={unit} unit={unit} amount={amount} chain={chain} />
+            ))}
+          </div>
+        </InfoCard>
       )}
     </div>
   );

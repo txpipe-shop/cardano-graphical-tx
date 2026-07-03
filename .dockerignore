@@ -10,3 +10,21 @@ Dockerfile
 **/dist
 *.md
 !.github/workflows/README.md
+
+# Development artifacts
+.changeset/
+**/.svelte-kit
+**/coverage
+**/tests
+**/test
+**/*.test.*
+**/*.spec.*
+.vscode/
+.idea/
+
+# Configuration files not needed at build time
+.editorconfig
+.gitattributes
+.gitignore
+.npmrc
+.nvmrc

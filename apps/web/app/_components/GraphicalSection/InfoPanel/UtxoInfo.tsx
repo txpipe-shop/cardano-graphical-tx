@@ -1,11 +1,5 @@
 "use client";
-import {
-  Accordion,
-  AccordionItem,
-  Card,
-  Chip,
-  useDisclosure,
-} from "@heroui/react";
+import { Accordion, AccordionItem, Chip, useDisclosure } from "@heroui/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useGraphical } from "~/app/_contexts";
@@ -20,6 +14,7 @@ import {
 import CopyIcon from "~/public/copy.svg";
 import FullScreen from "~/public/fullscreen.svg";
 import { AssetCard } from "./AssetCard";
+import { InfoPanelRow } from "./InfoPanelRow";
 import { JSONModal } from "./JSONModal";
 
 export const UtxoInfo = () => {
@@ -93,7 +88,7 @@ export const UtxoInfo = () => {
             )
           }
         >
-          <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
+          <InfoPanelRow justify="between">
             <p>{address ? addrTrim : "No address found"}</p>
             <Image
               src={CopyIcon}
@@ -101,18 +96,18 @@ export const UtxoInfo = () => {
               onClick={handleCopy(address?.bech32 || "")}
               className="cursor-pointer"
             />
-          </Card>
+          </InfoPanelRow>
           <Accordion selectionMode="multiple">
             <AccordionItem key="1" title="More info">
-              <Card className="m-1 flex flex-row bg-surface px-5 py-2 shadow-none">
+              <InfoPanelRow className="m-1">
                 <b>Header type:</b>&nbsp;
                 <p>{address?.headerType}</p>
-              </Card>
-              <Card className="m-1 flex flex-row bg-surface px-5 py-2 shadow-none">
+              </InfoPanelRow>
+              <InfoPanelRow className="m-1">
                 <b>Network type:</b>&nbsp;
                 <p>{address?.netType}</p>
-              </Card>
-              <Card className="m-1 flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
+              </InfoPanelRow>
+              <InfoPanelRow className="m-1" justify="between">
                 <div className="flex">
                   <b>Payment:</b>&nbsp;
                   <p>{trimString(address?.payment ?? "", 14)}</p>
@@ -123,7 +118,7 @@ export const UtxoInfo = () => {
                   onClick={handleCopy(address?.payment || "")}
                   className="cursor-pointer"
                 />
-              </Card>
+              </InfoPanelRow>
             </AccordionItem>
           </Accordion>
         </AccordionItem>
@@ -146,7 +141,7 @@ export const UtxoInfo = () => {
         </AccordionItem>
 
         <AccordionItem key="3" title="TxHash & index">
-          <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
+          <InfoPanelRow justify="between">
             <p>{txTrim}</p>
             <Image
               src={CopyIcon}
@@ -154,7 +149,7 @@ export const UtxoInfo = () => {
               onClick={handleCopy(txHash)}
               className="cursor-pointer"
             />
-          </Card>
+          </InfoPanelRow>
         </AccordionItem>
 
         <AccordionItem key="4" title="Datum">
@@ -168,7 +163,7 @@ export const UtxoInfo = () => {
             </pre>
           </JSONModal>
           {datum && (
-            <Card className="gap-2 overflow-x-hidden bg-surface px-5 py-2 shadow-none">
+            <InfoPanelRow gap className="overflow-x-hidden">
               <div className="absolute right-4">
                 <Image
                   src={FullScreen}
@@ -180,12 +175,12 @@ export const UtxoInfo = () => {
               <pre className="font-code overflow-x-auto">
                 {JSONBIG.stringify(datum, null, 2)}
               </pre>
-            </Card>
+            </InfoPanelRow>
           )}
         </AccordionItem>
 
         <AccordionItem key="5" title="Script Reference">
-          <Card className="flex h-16 w-full flex-row justify-between bg-surface px-5 py-2 shadow-none">
+          <InfoPanelRow className="h-16 w-full" justify="between">
             <p className="overflow-hidden text-ellipsis whitespace-normal break-words">
               {scriptRef || ""}
             </p>
@@ -195,7 +190,7 @@ export const UtxoInfo = () => {
               onClick={handleCopy(scriptRef ?? "")}
               className="ml-2 cursor-pointer"
             />
-          </Card>
+          </InfoPanelRow>
         </AccordionItem>
 
         <AccordionItem key="6" title="Redeemer">
@@ -214,7 +209,7 @@ export const UtxoInfo = () => {
                   )}
                 </pre>
               </JSONModal>
-              <Card className="gap-2 overflow-x-hidden bg-surface px-5 py-2 shadow-none">
+              <InfoPanelRow gap className="overflow-x-hidden">
                 <div className="absolute right-4">
                   <Image
                     src={FullScreen}
@@ -230,15 +225,15 @@ export const UtxoInfo = () => {
                     2,
                   )}
                 </pre>
-              </Card>
-              <Card className="mt-1 flex flex-row gap-2 overflow-x-hidden bg-surface px-5 py-2 shadow-none">
+              </InfoPanelRow>
+              <InfoPanelRow gap className="mt-1 overflow-x-hidden">
                 <b>Memory:</b>
                 <p>{redeemerInfo.exUnits.mem}</p>
-              </Card>
-              <Card className="mt-1 flex flex-row gap-2 overflow-x-hidden bg-surface px-5 py-2 shadow-none">
+              </InfoPanelRow>
+              <InfoPanelRow gap className="mt-1 overflow-x-hidden">
                 <b>Steps:</b>
                 <p>{redeemerInfo.exUnits.steps}</p>
-              </Card>
+              </InfoPanelRow>
             </>
           )}
         </AccordionItem>

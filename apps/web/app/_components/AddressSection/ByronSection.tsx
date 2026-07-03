@@ -1,26 +1,15 @@
 import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
+import { CodeBlock } from "~/app/_components/CodeBlock";
+import { DetailLabel } from "~/app/_components/DetailLabel";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
-
-function DetailLabel({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <p
-      className={`text-xs font-semibold uppercase tracking-wide text-p-secondary mb-1.5 ${className ?? ""}`}
-    >
-      {children}
-    </p>
-  );
-}
+import { FieldBlock } from "~/app/_components/FieldBlock";
+import { MonoText } from "~/app/_components/MonoText";
+import { SubLabel } from "~/app/_components/SubLabel";
 
 export function ByronSection({ data }: { data: AddressDiagnostic }) {
   return (
     <div className="space-y-4">
-      <p className="text-xs text-p-secondary leading-relaxed">
+      <SubLabel className="leading-relaxed">
         Your address is a valid base58 address value. By decoding the base58
         content we obtain a bytestring that can be interpreted according
         to&nbsp;
@@ -34,41 +23,39 @@ export function ByronSection({ data }: { data: AddressDiagnostic }) {
         </a>
         . There are 3 types of possible address, each following a different
         encoding format: Shelley, Stake, or Byron.
-      </p>
+      </SubLabel>
 
       {data?.bytes && (
-        <div className="border border-border/50 bg-explorer-row/30 px-3 py-2 rounded">
+        <FieldBlock>
           <DetailLabel>Address Bytes (Hex)</DetailLabel>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-sm text-p-primary break-all flex-1 min-w-0">
+            <MonoText className="text-p-primary flex-1 min-w-0">
               {data.bytes}
-            </span>
+            </MonoText>
             <CopyButton text={data.bytes} size={14} />
           </div>
-        </div>
+        </FieldBlock>
       )}
 
-      <div className="border border-border/50 bg-explorer-row/30 px-3 py-2 rounded space-y-3">
+      <FieldBlock className="space-y-3">
         <DetailLabel>Parsed Address</DetailLabel>
         <div>
-          <p className="text-xs text-p-secondary">Type</p>
+          <SubLabel>Type</SubLabel>
           <p className="text-sm break-all">{data?.kind}</p>
         </div>
 
-        <div className="border border-border/50 bg-explorer-row/30 px-3 py-2 rounded space-y-2">
+        <FieldBlock className="space-y-2">
           <DetailLabel>CBOR</DetailLabel>
-          <p className="text-xs text-p-secondary leading-relaxed">
+          <SubLabel className="leading-relaxed">
             The following bytes are CBOR-encoded structures. You can continue
             your decoding journey using these (hex-encoded) bytes and a CBOR
             decoder.
-          </p>
+          </SubLabel>
           {data?.byronCbor && (
-            <pre className="text-sm font-mono text-p-primary whitespace-pre-wrap break-all overflow-x-auto max-h-60 overflow-y-auto border border-border bg-explorer-row/30 p-4 rounded">
-              {data.byronCbor}
-            </pre>
+            <CodeBlock maxHeight="60">{data.byronCbor}</CodeBlock>
           )}
-        </div>
-      </div>
+        </FieldBlock>
+      </FieldBlock>
     </div>
   );
 }

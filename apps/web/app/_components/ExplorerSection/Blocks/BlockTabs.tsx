@@ -13,7 +13,7 @@ interface BlockTabsProps {
   block: BlockRes;
   transactions: cardano.Tx[];
   cbor: string | null;
-  chain: string;
+  chain: Network;
   tab: BlockTab;
   txPage: number;
 }

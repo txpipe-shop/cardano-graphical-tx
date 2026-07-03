@@ -1,5 +1,5 @@
 "use client";
-import { Accordion, AccordionItem, Card, useDisclosure } from "@heroui/react";
+import { Accordion, AccordionItem, useDisclosure } from "@heroui/react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { type ChangeEvent, useEffect, useState } from "react";
@@ -16,6 +16,7 @@ import {
 import CopyIcon from "~/public/copy.svg";
 import FullScreen from "~/public/fullscreen.svg";
 import { AssetCard } from "./AssetCard";
+import { InfoPanelRow } from "./InfoPanelRow";
 import { JSONModal } from "./JSONModal";
 
 export const TxInfo = () => {
@@ -103,7 +104,7 @@ export const TxInfo = () => {
   return (
     <Accordion selectionMode="multiple" disabledKeys={disabledKeys}>
       <AccordionItem key="1" title="TxHash">
-        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
+        <InfoPanelRow justify="between">
           {txTrim}
           <Image
             src={CopyIcon}
@@ -111,7 +112,7 @@ export const TxInfo = () => {
             onClick={handleCopy(txHash)}
             className="cursor-pointer"
           />
-        </Card>
+        </InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="2" title="Fee">
         <div className="flex flex-col gap-2">
@@ -122,16 +123,16 @@ export const TxInfo = () => {
         </div>
       </AccordionItem>
       <AccordionItem key="3" title="Block">
-        <Card className="m-1 flex flex-row bg-surface px-5 py-2 shadow-none">
+        <InfoPanelRow className="m-1">
           <b>Slot:</b>&nbsp;
           <p>{blockAbsoluteSlot ?? "Unknown"}</p>
-        </Card>
-        <Card className="m-1 flex flex-row bg-surface px-5 py-2 shadow-none">
+        </InfoPanelRow>
+        <InfoPanelRow className="m-1">
           <b>Height:</b>&nbsp;
           <p>{blockHeight ?? "Unknown"}</p>
-        </Card>
+        </InfoPanelRow>
         {blockHash && (
-          <Card className="m-1 flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
+          <InfoPanelRow className="m-1" justify="between">
             <div className="flex">
               <b>Hash:</b>&nbsp;
               <p>{trimString(blockHash, 14)}</p>
@@ -142,32 +143,26 @@ export const TxInfo = () => {
               onClick={handleCopy(blockHash)}
               className="cursor-pointer"
             />
-          </Card>
+          </InfoPanelRow>
         )}
-        <Card className="m-1 flex flex-row bg-surface px-5 py-2 shadow-none">
+        <InfoPanelRow className="m-1">
           <b>Index:</b>&nbsp;
           <p>{blockTxIndex ?? "Unknown"}</p>
-        </Card>
+        </InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="4" title="Size">
-        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
-          {size ?? "Unknown"}
-        </Card>
+        <InfoPanelRow justify="between">{size ?? "Unknown"}</InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="5" title="Invalid Before (Start)">
-        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
+        <InfoPanelRow justify="between">
           {validityStart ?? "Unknown"}
-        </Card>
+        </InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="6" title="Invalid Hereafter (TTL)">
-        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
-          {ttl ?? "Unknown"}
-        </Card>
+        <InfoPanelRow justify="between">{ttl ?? "Unknown"}</InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="7" title="Outputs Count">
-        <Card className="fl ex-row flex justify-between bg-surface px-5 py-2 shadow-none">
-          {outputs.length}
-        </Card>
+        <InfoPanelRow justify="between">{outputs.length}</InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="8" title="Total Output Sum">
         <div className="flex flex-col gap-2">
@@ -178,17 +173,12 @@ export const TxInfo = () => {
         </div>
       </AccordionItem>
       <AccordionItem key="9" title="Inputs Count">
-        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
-          {inputs.length}
-        </Card>
+        <InfoPanelRow justify="between">{inputs.length}</InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="10" title="Withdrawals">
         <div className="flex flex-col gap-2">
           {withdrawals?.map((withdrawal, index) => (
-            <Card
-              key={index}
-              className="flex flex-col bg-surface px-5 py-2 shadow-none"
-            >
+            <InfoPanelRow key={index} direction="col">
               <div className="mb-2 flex items-center justify-between">
                 <b>Reward Account:</b>&nbsp;
                 <div className="flex">
@@ -207,14 +197,12 @@ export const TxInfo = () => {
                 <b>Amount:</b>&nbsp;
                 <span>{withdrawal.amount}</span>
               </div>
-            </Card>
+            </InfoPanelRow>
           ))}
         </div>
       </AccordionItem>
       <AccordionItem key="11" title="Metadata">
-        <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
-          {msg}
-        </Card>
+        <InfoPanelRow justify="between">{msg}</InfoPanelRow>
       </AccordionItem>
       <AccordionItem key="12" title="Certificates">
         <JSONModal
@@ -229,7 +217,7 @@ export const TxInfo = () => {
           </pre>
         </JSONModal>
         {certificates && (
-          <Card className="gap-2 overflow-x-hidden bg-surface px-5 py-2 shadow-none">
+          <InfoPanelRow gap className="overflow-x-hidden">
             <div className="absolute right-4">
               <Image
                 src={FullScreen}
@@ -243,7 +231,7 @@ export const TxInfo = () => {
                 .replace(/"json":/g, "")
                 .replace(/\\/g, "")}
             </pre>
-          </Card>
+          </InfoPanelRow>
         )}
       </AccordionItem>
       <AccordionItem key="13" title="Minting & Burning">
@@ -262,9 +250,9 @@ export const TxInfo = () => {
       </AccordionItem>
       <AccordionItem key="14" title="Scripts Successful">
         <div className="flex flex-col gap-2">
-          <Card className="flex flex-row justify-between bg-surface px-5 py-2 shadow-none">
+          <InfoPanelRow justify="between">
             {scriptsSuccessful ? "True" : "False"}
-          </Card>
+          </InfoPanelRow>
         </div>
       </AccordionItem>
       <AccordionItem key="15" title="Alias" className="m-0">

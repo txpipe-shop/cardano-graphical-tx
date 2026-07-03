@@ -21,8 +21,9 @@ import {
   type TxReq,
   type TxsReq
 } from '@laceanatomy/provider-core';
-import type { Cardano, cardano } from '@laceanatomy/types';
-import { Hash } from '@laceanatomy/types';
+import type { Cardano, cardano, Unit } from '@laceanatomy/types';
+import { Hash, HexString } from '@laceanatomy/types';
+import { parseCip25 } from '@laceanatomy/types/cardano';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
@@ -32,7 +33,10 @@ import {
   u5cToCardanoBlock,
   u5cToCardanoTx,
   u5cToCardanoUtxo,
-  u5cToCardanoValue
+  u5cToCardanoValue,
+  u5cToCardanoMetadata,
+  validateBlock,
+  findTxIndexInBlock
 } from './mappers';
 
 const DUMP_HISTORY_MAX_ITEMS = 100;
@@ -46,7 +50,9 @@ export type Params = {
   transport: Transport;
 };
 
-export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano> {
+export class U5CProvider
+  implements ChainProvider<cardano.UTxO, cardano.Tx, Cardano, cardano.TokenMetadata>
+{
   utxoRpc: UtxoRpcClient;
 
   constructor({ transport }: Params) {
@@ -102,7 +108,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       blockHash,
       foundHeader.height,
       foundHeader.slot,
-      this.findTxIndexInBlock(foundBody, latestTx)
+      findTxIndexInBlock(foundBody, latestTx)
     );
   }
 
@@ -201,7 +207,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       Hash(blockHash),
       block.height,
       block.slot,
-      this.findTxIndexInBlock(fullBlockBody, tx)
+      findTxIndexInBlock(fullBlockBody, tx)
     );
   }
 
@@ -224,6 +230,112 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     throw new Error('Invalid query');
   }
 
+  async getTokenMetadata({
+    unit,
+    type
+  }: {
+    unit: Unit;
+    type?: keyof cardano.TokenMetadata;
+  }): Promise<cardano.NullableTokenMetadata> {
+    const metadata: cardano.NullableTokenMetadata = {
+      Cip25v1: null,
+      Cip25v2: null,
+      Cip26: null,
+      Cip68v1: null,
+      Cip68v2: null,
+      Cip68v3: null,
+      Cip68v4: null
+    };
+
+    if (unit === 'lovelace') return metadata;
+
+    const policyId = unit.slice(0, 56);
+    const rawAssetName = unit.slice(56);
+    if (!policyId) return metadata;
+
+    const needsCip25 = !type || type.startsWith('Cip25');
+
+    // CIP-25 — full chain scan for mint tx label 721 metadata
+    if (needsCip25) {
+      await this.scanChainForCip25(policyId, rawAssetName, metadata);
+    }
+
+    // If a specific type was requested, null out the rest
+    if (type) {
+      for (const key of Object.keys(metadata) as (keyof cardano.TokenMetadata)[]) {
+        if (key !== type) {
+          (metadata as Record<string, unknown>)[key] = null;
+        }
+      }
+    }
+
+    return metadata;
+  }
+
+  private async scanChainForCip25(
+    policyId: string,
+    rawAssetName: string,
+    metadata: cardano.NullableTokenMetadata
+  ): Promise<void> {
+    let nextSlot: bigint | undefined = 0n;
+
+    do {
+      const { block, nextToken: next } = await this.utxoRpc.sync.dumpHistory({
+        maxItems: DUMP_HISTORY_MAX_ITEMS,
+        startToken: nextSlot !== undefined ? { slot: nextSlot } : undefined
+      });
+      nextSlot = next ? next.slot : undefined;
+
+      for (const blockItem of block) {
+        const { body } = validateBlock(blockItem);
+        for (const tx of body.tx) {
+          if (!tx.mint || tx.mint.length === 0) continue;
+
+          const mintsPolicy = this.txMintsPolicy(tx, policyId);
+          if (!mintsPolicy) continue;
+
+          if (tx.auxiliary?.metadata) {
+            this.extractCip25FromTx(tx, policyId, rawAssetName, metadata);
+            if (metadata.Cip25v1 || metadata.Cip25v2) {
+              return;
+            }
+          }
+        }
+      }
+    } while (nextSlot);
+  }
+
+  private txMintsPolicy(tx: cardanoUtxoRpc.Tx, policyId: string): boolean {
+    for (const ma of tx.mint) {
+      const txPolicy = Buffer.from(ma.policyId).toString('hex');
+      if (txPolicy !== policyId) continue;
+      for (const asset of ma.assets) {
+        const qty = toBigInt(asset.quantity.value?.bigInt.value);
+        if (qty > 0n) return true;
+      }
+    }
+    return false;
+  }
+
+  private extractCip25FromTx(
+    tx: cardanoUtxoRpc.Tx,
+    policyId: string,
+    rawAssetName: string,
+    result: cardano.NullableTokenMetadata
+  ): void {
+    if (!tx.auxiliary?.metadata) return;
+
+    const domainMetadata = u5cToCardanoMetadata(tx.auxiliary.metadata);
+    const parsed = parseCip25(domainMetadata, policyId, rawAssetName);
+    if (!parsed) return;
+
+    if (parsed.version === 2) {
+      result.Cip25v2 = parsed.metadata;
+    } else {
+      result.Cip25v1 = parsed.metadata;
+    }
+  }
+
   private async getLatestTxs(
     limit: number,
     offset: number
@@ -238,8 +350,8 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       });
       nextSlot = next ? next.slot : undefined;
       block.forEach((blockItem) => {
-        const { block, body } = this.validateBlock(blockItem);
-        if (body.tx.length > 0) blocksAndTxs.push({ block: block, txs: body.tx.reverse() });
+        const { block, body } = validateBlock(blockItem);
+        if (body.tx.length > 0) blocksAndTxs.push({ block: block, txs: [...body.tx].reverse() });
       });
     } while (nextSlot);
     const total = blocksAndTxs.reduce((acc, block) => acc + block.txs.length, 0);
@@ -277,7 +389,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
           blockHash,
           blockHeight,
           blockSlot,
-          this.findTxIndexInBlock(blockBody, tx)
+          findTxIndexInBlock(blockBody, tx)
         )
       );
     });
@@ -308,7 +420,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
         })
       : body.tx;
 
-    const paginatedTxs = filteredTxs.reverse().slice(offset, offset + limit);
+    const paginatedTxs = [...filteredTxs].reverse().slice(offset, offset + limit);
 
     const blockHash = Hash(Buffer.from(header.hash).toString('hex'));
     const data = paginatedTxs.map((tx) =>
@@ -318,7 +430,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
         blockHash,
         header.height,
         header.slot,
-        this.findTxIndexInBlock(body, tx)
+        findTxIndexInBlock(body, tx)
       )
     );
 
@@ -423,7 +535,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       const blockResponse = await this.utxoRpc.sync.fetchBlock({
         ref: [{ hash: Buffer.from(blockHashHex, 'hex') }]
       });
-      const { block, body, header } = this.validateBlock(blockResponse);
+      const { block, body, header } = validateBlock(blockResponse);
 
       return txs.map((tx) =>
         u5cToCardanoTx(
@@ -432,7 +544,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
           Hash(blockHashHex),
           header.height,
           header.slot,
-          this.findTxIndexInBlock(body, tx)
+          findTxIndexInBlock(body, tx)
         )
       );
     });
@@ -486,7 +598,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     });
 
     const data = blocks.map((anyChainBlock) => {
-      const { block, header, body } = this.validateBlock(anyChainBlock);
+      const { block, header, body } = validateBlock(anyChainBlock);
       const blockHash = Hash(Buffer.from(header.hash).toString('hex'));
       const blockHeight = toBigInt(header.height);
       const blockSlot = toBigInt(header.slot);
@@ -498,7 +610,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
           blockHash,
           blockHeight,
           blockSlot,
-          this.findTxIndexInBlock(body, tx)
+          findTxIndexInBlock(body, tx)
         )
       );
 
@@ -558,10 +670,11 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
 
   async readTip(): Promise<TipRes> {
     const tip = await this.utxoRpc.sync.readTip(new sync.ReadTipRequest());
+    assert(tip.tip, 'Cannot read tip');
     return {
-      hash: Hash(Buffer.from(tip.tip!.hash).toString('hex')),
-      slot: BigInt(tip.tip?.slot || 0),
-      height: BigInt(tip.tip?.height ?? 0)
+      hash: Hash(Buffer.from(tip.tip.hash).toString('hex')),
+      slot: BigInt(tip.tip.slot || 0),
+      height: BigInt(tip.tip.height ?? 0)
     };
   }
 
@@ -583,7 +696,7 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
       throw new Error('Invalid block query');
     }
 
-    return this.validateBlock(blockResponse);
+    return validateBlock(blockResponse);
   }
 
   private processBlockForTxs(
@@ -605,29 +718,6 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     }
   }
 
-  private validateBlock(block: sync.FetchBlockResponse | sync.AnyChainBlock): {
-    block: cardanoUtxoRpc.Block;
-    header: cardanoUtxoRpc.BlockHeader;
-    body: cardanoUtxoRpc.BlockBody;
-  } {
-    let thisBlock: sync.AnyChainBlock;
-    if ('block' in block) {
-      assert(block.block[0], 'Block not found');
-      thisBlock = block.block[0];
-    } else {
-      thisBlock = block;
-    }
-
-    assert(thisBlock.chain.case === 'cardano', 'Block is not a Cardano block');
-    assert(thisBlock.chain.value.body, 'Block body is undefined');
-    assert(thisBlock.chain.value.header, 'Header body is undefined');
-    return {
-      block: thisBlock.chain.value,
-      header: thisBlock.chain.value.header,
-      body: thisBlock.chain.value.body
-    };
-  }
-
   private validateTx(tx: query.ReadTxResponse): {
     tx: cardanoUtxoRpc.Tx;
     block: query.ChainPoint;
@@ -637,14 +727,6 @@ export class U5CProvider implements ChainProvider<cardano.UTxO, cardano.Tx, Card
     assert(tx.tx.blockRef, 'Block reference of transaction empty');
 
     return { tx: tx.tx.chain.value, block: tx.tx.blockRef, cbor: tx.tx.nativeBytes };
-  }
-
-  private findTxIndexInBlock(blockBody: cardanoUtxoRpc.BlockBody, tx: cardanoUtxoRpc.Tx): number {
-    return blockBody.tx.findIndex((t) => {
-      const hashInBlock = Buffer.from(t.hash).toString('hex');
-      const hashToFind = Buffer.from(tx.hash).toString('hex');
-      return hashInBlock === hashToFind;
-    });
   }
 }
 

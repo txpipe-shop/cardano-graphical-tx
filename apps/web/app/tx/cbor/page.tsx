@@ -14,7 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 import { DissectSection, Header } from "~/app/_components";
 import { DetailTabs } from "~/app/_components/DetailTabs";
 import { parseTxToGraphical } from "~/app/_components/Input/TxInput/txInput.helper";
-import CborView from "~/app/_components/shared/CborView";
+import CborView from "~/app/_components/CborView";
 import ValidationView from "~/app/_components/ValidationView";
 import { type IGraphicalTransaction } from "~/app/_interfaces";
 import { getTxFromCbor, validateTx } from "~/app/_utils";
@@ -64,7 +64,6 @@ export default function CborPage() {
   const [network, setNetwork] = useState<Network>(NETWORK.MAINNET);
   const [devnetPort, setDevnetPort] = useState("5164");
   const [initialCbor, setInitialCbor] = useState<string | null>(null);
-  const [currentCbor, setCurrentCbor] = useState("");
   const [parsedTx, setParsedTx] = useState<IGraphicalTransaction | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -191,11 +190,11 @@ export default function CborPage() {
   );
 
   const handleReParse = useCallback(async () => {
-    if (!currentCbor) return;
+    if (!initialCbor) return;
     setIsLoading(true);
     setParseError(null);
     try {
-      const tx = await getTxFromCbor(currentCbor, network);
+      const tx = await getTxFromCbor(initialCbor, network);
       const gtx = parseTxToGraphical([tx], { transactions: [], utxos: {} });
       setParsedTx(gtx[0]!);
     } catch (e) {
@@ -209,22 +208,22 @@ export default function CborPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentCbor, network]);
+  }, [initialCbor, network]);
 
   const handleValidate = useCallback(async () => {
-    if (!currentCbor) return;
+    if (!initialCbor) return;
     setValidationLoading(true);
     setValidationError(null);
     setValidationResult(null);
     try {
-      const result = await validateTx(currentCbor, network);
+      const result = await validateTx(initialCbor, network);
       setValidationResult(result);
     } catch (e) {
       setValidationError(e instanceof Error ? e.message : "Validation failed");
     } finally {
       setValidationLoading(false);
     }
-  }, [currentCbor, network]);
+  }, [initialCbor, network]);
 
   const tabs = [
     {
@@ -278,7 +277,7 @@ export default function CborPage() {
             className="font-mono shadow-md"
             onPress={handleValidate}
             isLoading={validationLoading}
-            isDisabled={!currentCbor}
+            isDisabled={!initialCbor}
           >
             Run Validation
           </Button>
@@ -329,22 +328,17 @@ export default function CborPage() {
 
         <div className="flex flex-1 flex-col gap-4 overflow-hidden md:min-h-0 md:flex-row">
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <CborView
-              cbor={initialCbor}
-              variant="single"
-              alwaysShowEditor
-              onCborTextChange={setCurrentCbor}
-              actions={
-                <Button
-                  size="sm"
-                  variant="flat"
-                  className="font-mono shadow-md"
-                  onPress={handleReParse}
-                >
-                  CBOR → Transaction
-                </Button>
-              }
-            />
+            <CborView cbor={initialCbor} />
+            <div className="flex shrink-0 justify-center pt-2">
+              <Button
+                size="sm"
+                variant="flat"
+                className="font-mono shadow-md"
+                onPress={handleReParse}
+              >
+                CBOR → Transaction
+              </Button>
+            </div>
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface p-4">

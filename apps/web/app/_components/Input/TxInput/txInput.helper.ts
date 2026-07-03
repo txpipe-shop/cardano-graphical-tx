@@ -36,7 +36,6 @@ import {
   getTransaction,
   getTxFromCbor,
   getTxFromDevnetCBOR,
-  getU5CProviderWeb,
   getUtxo,
   isEmpty,
   isHexa,
@@ -50,6 +49,7 @@ import {
   utxoKey,
   type Network,
 } from "~/app/_utils";
+import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface IGenerateUTXO extends Utxo {
   existingTxs: TransactionsBox;

@@ -1,4 +1,13 @@
-import type { Address, BaseChain, Hash, Tx, UTxO, Value } from '@laceanatomy/types';
+import type {
+  Address,
+  BaseChain,
+  Hash,
+  HexString,
+  Tx,
+  Unit,
+  UTxO,
+  Value
+} from '@laceanatomy/types';
 
 export type EpochReq = { epochNo: bigint };
 
@@ -147,7 +156,48 @@ export type AddressFundsRes = {
 export type AddressUTxOsRes<U extends UTxO> = PaginatedResult<U>;
 export type EpochRes = Epoch;
 
-export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> {
+export type TokenMetadataShapes = Record<string, Record<string, unknown>>;
+
+export type Nullable<T> = { [K in keyof T]: T[K] | null };
+
+export type AssetMetadata = {
+  name: string;
+  description: string;
+  ticker: string | null;
+  url: string | null;
+  logo: string | null;
+  decimals: number | null;
+};
+
+export type AssetInfoRes = {
+  policyId: HexString;
+  assetName: HexString;
+  fingerprint: string;
+  totalSupply: string;
+  mintOrBurnCount: number;
+  initialMintTxHash: Hash;
+  metadata: AssetMetadata | null;
+  onchainMetadata: Record<string, unknown> | null;
+  onchainMetadataStandard: string | null;
+};
+
+export type AssetAddressesRes = Array<{ address: Address; quantity: string }>;
+
+export type AssetHistoryRes = Array<{ txHash: Hash; action: 'minted' | 'burned'; amount: string }>;
+
+export type AssetTransactionsRes = Array<{
+  txHash: Hash;
+  txIndex: number;
+  blockHeight: number;
+  blockTime: number;
+}>;
+
+export interface ChainProvider<
+  U extends UTxO,
+  T extends Tx<U>,
+  Chain extends BaseChain<U, T>,
+  Shapes extends TokenMetadataShapes = TokenMetadataShapes
+> {
   getCBOR(params: TxReq): Promise<string>;
   getBlockCBOR?(params: BlockReq): Promise<string>;
   getLatestTx(): Promise<LatestTxRes<U, T, Chain>>;
@@ -162,6 +212,20 @@ export interface ChainProvider<U extends UTxO, T extends Tx<U>, Chain extends Ba
   readTip(): Promise<TipRes>;
   getPools?(params: PoolsReq): Promise<PoolsRes>;
   getPool?(params: PoolReq): Promise<PoolRes>;
+  getTokenMetadata?(params: {
+    unit: Unit;
+    type?: keyof Shapes | 'all';
+    network?: 'mainnet' | 'preprod';
+  }): Promise<Nullable<Shapes>>;
+  getAssetInfo?(asset: Unit): Promise<AssetInfoRes>;
+  getAssetAddresses?(asset: Unit, count: number, page: number): Promise<AssetAddressesRes>;
+  getAssetHistory?(asset: Unit, count: number, page: number): Promise<AssetHistoryRes>;
+  getAssetTransactions?(
+    asset: Unit,
+    count: number,
+    page: number,
+    order?: 'asc' | 'desc'
+  ): Promise<AssetTransactionsRes>;
 }
 
 export interface CursorPaginatedProvider<

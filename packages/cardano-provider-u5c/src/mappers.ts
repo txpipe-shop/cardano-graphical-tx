@@ -14,7 +14,7 @@ import {
   type Metadata,
   type Metadatum
 } from '@laceanatomy/types';
-import { cardano as cardanoUtxoRpc } from '@utxorpc/spec';
+import { cardano as cardanoUtxoRpc, sync } from '@utxorpc/spec';
 import assert from 'assert';
 import { Buffer } from 'buffer';
 
@@ -249,10 +249,38 @@ export function u5cToCardanoTx(
     mint,
     outputs,
     referenceInputs,
-    createdAt: Number(time),
+    createdAt: Number(time) / 1000,
     witnesses: { scripts, redeemers: redeemers.length > 0 ? redeemers : undefined },
     block: { hash: blockHash, height: blockHeight, epochNo: 0n, slot: blockSlot },
     treasuryDonation: 0n,
     indexInBlock: BigInt(indexInBlock)
   };
+}
+
+export function validateBlock(block: sync.FetchBlockResponse | sync.AnyChainBlock): {
+  block: cardanoUtxoRpc.Block;
+  header: cardanoUtxoRpc.BlockHeader;
+  body: cardanoUtxoRpc.BlockBody;
+} {
+  let thisBlock: sync.AnyChainBlock;
+  if ('block' in block) {
+    assert(block.block[0], 'Block not found');
+    thisBlock = block.block[0];
+  } else {
+    thisBlock = block;
+  }
+  assert(thisBlock.chain.case === 'cardano', 'Block is not a Cardano block');
+  assert(thisBlock.chain.value.body, 'Block body is undefined');
+  assert(thisBlock.chain.value.header, 'Block header is undefined');
+  return {
+    block: thisBlock.chain.value,
+    header: thisBlock.chain.value.header,
+    body: thisBlock.chain.value.body
+  };
+}
+
+export function findTxIndexInBlock(body: cardanoUtxoRpc.BlockBody, tx: cardanoUtxoRpc.Tx): number {
+  return body.tx.findIndex(
+    (t) => Buffer.from(t.hash).toString('hex') === Buffer.from(tx.hash).toString('hex')
+  );
 }

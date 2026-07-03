@@ -17,6 +17,8 @@ export const ROUTES = {
     `/explorer/${chain}/addresses/${address}`,
   EXPLORER_BLOCK: (chain: Network, id: string) =>
     `/explorer/${chain}/blocks/${id}`,
+  EXPLORER_TOKEN: (chain: Network, unit: string) =>
+    `/explorer/${chain}/tokens/${unit}`,
   GRAPHER: "/tx/grapher",
   TX: "/tx",
   ADDRESS: "/address",
@@ -32,6 +34,7 @@ export const API_ROUTES = {
   HASH: "api/hash",
   ADDRESS: "api/address",
   VALIDATE: "api/validate",
+  TOKEN_METADATA: "api/token-metadata",
 };
 
 export const USER_CONFIGS = {
@@ -80,15 +83,6 @@ export const JSONBIG = JSONbig({
   constructorAction: "preserve",
   protoAction: "preserve",
 });
-
-export const DATE_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
-  year: "numeric",
-  month: "long",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false,
-};
 
 export const DEFAULT_DEVNET_PORT = "5164";
 
@@ -176,3 +170,6 @@ export type TxTab = (typeof TX_TABS)[number];
 
 export const BLOCK_TABS = ["Overview", "Transactions", "CBOR"] as const;
 export type BlockTab = (typeof BLOCK_TABS)[number];
+
+export const TOKEN_TABS = ["Holders", "History", "Transactions"] as const;
+export type TokenTab = (typeof TOKEN_TABS)[number];

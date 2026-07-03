@@ -4,12 +4,69 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build-napi-pallas:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Cache built napi-pallas binary
+        id: napi-cache
+        uses: actions/cache@v5
+        with:
+          path: packages/napi-pallas/*.node
+          key: napi-pallas-${{ runner.os }}-${{ hashFiles('packages/napi-pallas/**') }}
+
+      - name: Setup Rust
+        if: steps.napi-cache.outputs.cache-hit != 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        if: steps.napi-cache.outputs.cache-hit != 'true'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/napi-pallas
+
+      - name: Setup pnpm
+        if: steps.napi-cache.outputs.cache-hit != 'true'
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        if: steps.napi-cache.outputs.cache-hit != 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        if: steps.napi-cache.outputs.cache-hit != 'true'
+        run: pnpm install
+
+      - name: Build napi-pallas
+        if: steps.napi-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @laceanatomy/napi-pallas build
+
+      - name: Upload napi-pallas binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: napi-pallas-binary
+          path: packages/napi-pallas/*.node
+          if-no-files-found: error
+
+  build-and-deploy:
+    needs: build-napi-pallas
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download napi-pallas binary
+        uses: actions/download-artifact@v4
+        with:
+          name: napi-pallas-binary
+          path: packages/napi-pallas/
 
       - name: Get commit hash
         run: echo "COMMIT_HASH=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_ENV
@@ -29,11 +86,15 @@ jobs:
           file: Dockerfile
           context: .
           push: true
+          provenance: false
+          sbom: false
           build-args: |
             NEXT_PUBLIC_CBOR_ENDPOINT=${{ vars.NEXT_PUBLIC_CBOR_ENDPOINT }}
             NEXT_PUBLIC_GA_TRACKING_ID=${{ vars.NEXT_PUBLIC_GA_TRACKING_ID }}
           tags: |
             nicolasluduenatxpipe/cardano-graphical-tx:ui-${{ env.COMMIT_HASH }}
             nicolasluduenatxpipe/cardano-graphical-tx:ui-${{ github.ref_name }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: |
+            type=registry,ref=nicolasluduenatxpipe/cardano-graphical-tx:buildcache
+          cache-to: |
+            type=registry,ref=nicolasluduenatxpipe/cardano-graphical-tx:buildcache,mode=max

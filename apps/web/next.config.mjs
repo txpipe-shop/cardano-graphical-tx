@@ -2,6 +2,7 @@ await import("./app/env.mjs");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   serverExternalPackages: ["@laceanatomy/napi-pallas"],
   reactStrictMode: true,
   webpack: (config, { isServer }) => {

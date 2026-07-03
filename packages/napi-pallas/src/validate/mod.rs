@@ -76,7 +76,7 @@ pub fn validate_cbor_tx(
       let mut cbor_list = Vec::with_capacity(utxos.len());
       let utxos_map = match build_utxos_for_era(&era, &utxos, &mut cbor_list) {
         Ok(u) => u,
-        Err(e) => return err("conway", "decode", e),
+        Err(e) => return err("conway", "decode", e.to_string()),
       };
 
       let pparams: NapiConwayProtParams = match serde_json::from_str(&pparams_json) {
@@ -92,7 +92,7 @@ pub fn validate_cbor_tx(
       let mut cbor_list = Vec::with_capacity(utxos.len());
       let utxos_map = match build_utxos_for_era(&era, &utxos, &mut cbor_list) {
         Ok(u) => u,
-        Err(e) => return err("babbage", "decode", e),
+        Err(e) => return err("babbage", "decode", e.to_string()),
       };
 
       let pparams: NapiBabbageProtParams = match serde_json::from_str(&pparams_json) {
@@ -118,7 +118,7 @@ pub fn validate_cbor_tx(
       let mut cbor_list = Vec::with_capacity(utxos.len());
       let utxos_map = match build_utxos_for_era(&alonzo_era, &utxos, &mut cbor_list) {
         Ok(u) => u,
-        Err(e) => return err("alonzo", "decode", e),
+        Err(e) => return err("alonzo", "decode", e.to_string()),
       };
 
       let pparams: NapiAlonzoProtParams = match serde_json::from_str(&pparams_json) {

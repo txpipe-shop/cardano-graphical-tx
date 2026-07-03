@@ -1,6 +1,7 @@
 export const revalidate = 10;
 
 import { Suspense } from "react";
+import { DevnetError } from "~/app/_components/DevnetError";
 import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
 import {
   BlockTxsSkeleton,
@@ -18,7 +19,7 @@ import { BlocksList } from "./BlocksList";
 import DevnetTransactionsList from "./DevnetTransactionsList";
 
 interface ExplorerPageProps {
-  params: Promise<{ chain: string }>;
+  params: Promise<{ chain: Network }>;
 }
 
 async function TransactionsList({ chain }: { chain: Network }) {
@@ -58,14 +59,10 @@ async function TransactionsList({ chain }: { chain: Network }) {
   } catch (error) {
     console.error("Failed to fetch transactions:", error);
     return (
-      <div className="rounded-lg border-2 border-dashed border-red-3 bg-red-50 p-8 text-center text-red-2">
-        <p className="font-semibold">
-          We&apos;re having trouble loading transactions
-        </p>
-        <p className="mt-2 text-sm">
-          This is likely on our end. Please try again in a moment.
-        </p>
-      </div>
+      <DevnetError
+        title="We're having trouble loading transactions"
+        error="This is likely on our end. Please try again in a moment."
+      />
     );
   }
 }

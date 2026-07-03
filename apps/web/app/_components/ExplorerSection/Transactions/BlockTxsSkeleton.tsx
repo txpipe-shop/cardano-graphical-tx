@@ -1,10 +1,7 @@
 "use client";
 
 import { Card, CardBody } from "@heroui/react";
-
-function SkeletonBar({ className = "" }: { className?: string }) {
-  return <div className={`rounded bg-explorer-row ${className}`} aria-hidden />;
-}
+import { SkeletonBar } from "~/app/_components/SkeletonBar";
 
 function BlockHeaderSkeleton() {
   return (

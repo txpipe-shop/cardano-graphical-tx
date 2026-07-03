@@ -47,7 +47,7 @@ export default function RootLayout({
         )}
       <body className="bg-surface font-sans">
         <ThemeProvider>
-          <NextTopLoader color="#7c3aed" showSpinner={false} />
+          <NextTopLoader color="var(--color-toploader)" showSpinner={false} />
           <Providers>
             <div className="bg-surface m-auto flex w-full flex-col">
               {children}

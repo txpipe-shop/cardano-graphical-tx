@@ -23,8 +23,8 @@ export function PropBlock({
         <div
           className={`
             mt-4 break-words rounded-lg border-2
-            border-gray-700 bg-background p-4 
-            text-xl shadow shadow-shadow 
+            border-gray-700 bg-background p-4
+            text-xl shadow shadow-shadow
             ${color ? `bg-${color}-1 border-${color}-3` : "bg-background"}
           `}
         >
