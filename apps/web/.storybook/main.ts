@@ -1,8 +1,11 @@
 import type { StorybookConfig } from "@storybook/nextjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import webpack from "webpack";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(dirname, "..");
+const envStub = path.resolve(dirname, "env-stub.ts");
 
 const config: StorybookConfig = {
   stories: ["../app/**/*.mdx", "../app/**/*.stories.@(js|jsx|ts|tsx)"],
@@ -15,11 +18,19 @@ const config: StorybookConfig = {
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...config.resolve.alias,
-      "~": path.resolve(dirname, ".."),
+      "~": projectRoot,
       "@laceanatomy/napi-pallas": path.resolve(dirname, "napi-pallas-stub.ts"),
     };
 
-    const existingExternals = Array.isArray(config.externals) ? config.externals : [];
+    // Stub app/env.mjs — env validation crashes in browser without real env vars
+    config.plugins = config.plugins || [];
+    config.plugins.push(
+      new webpack.NormalModuleReplacementPlugin(/app\/env\.mjs$/, envStub),
+    );
+
+    const existingExternals = Array.isArray(config.externals)
+      ? config.externals
+      : [];
     config.externals = [...existingExternals, { canvas: "canvas" }];
 
     return config;

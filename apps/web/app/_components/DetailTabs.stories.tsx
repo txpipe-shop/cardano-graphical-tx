@@ -15,9 +15,17 @@ const meta = {
   tags: ["autodocs"],
   args: {
     tabs: [
-      { key: "overview", title: "Overview", content: <DummyContent label="Overview" /> },
+      {
+        key: "overview",
+        title: "Overview",
+        content: <DummyContent label="Overview" />,
+      },
       { key: "cbor", title: "CBOR", content: <DummyContent label="CBOR" /> },
-      { key: "scripts", title: "Scripts", content: <DummyContent label="Scripts" /> },
+      {
+        key: "scripts",
+        title: "Scripts",
+        content: <DummyContent label="Scripts" />,
+      },
     ],
     defaultTab: "overview",
   },
