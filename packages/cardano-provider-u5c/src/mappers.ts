@@ -249,7 +249,7 @@ export function u5cToCardanoTx(
     mint,
     outputs,
     referenceInputs,
-    createdAt: Number(time),
+    createdAt: Number(time) / 1000,
     witnesses: { scripts, redeemers: redeemers.length > 0 ? redeemers : undefined },
     block: { hash: blockHash, height: blockHeight, epochNo: 0n, slot: blockSlot },
     treasuryDonation: 0n,
