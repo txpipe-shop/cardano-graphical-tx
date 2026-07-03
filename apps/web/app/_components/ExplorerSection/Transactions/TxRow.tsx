@@ -10,6 +10,7 @@ import CopyButton from "../CopyButton";
 import DateViewer from "../DateViewer";
 import ClockIcon from "../Icons/ClockIcon";
 import TokenPill from "../TokenPill";
+import { SubLabel } from "~/app/_components/SubLabel";
 
 interface TxRowHeaderProps {
   tx: cardano.Tx;
@@ -101,9 +102,11 @@ function UTxOsColumn({
                 {formatAda(utxo.coin)}
               </span>
               <ColoredAddress address={utxo.address} chain={chain} />
-              <div className="flex items-center gap-1 font-mono text-xs text-p-secondary">
-                {utxo.outRef.hash.slice(0, 7)}...{utxo.outRef.hash.slice(-7)}#
-                {utxo.outRef.index.toString()}
+              <div className="flex items-center gap-1">
+                <SubLabel className="font-mono">
+                  {utxo.outRef.hash.slice(0, 7)}...{utxo.outRef.hash.slice(-7)}#
+                  {utxo.outRef.index.toString()}
+                </SubLabel>
                 <CopyButton
                   size={12}
                   text={`${utxo.outRef.hash}#${utxo.outRef.index}`}

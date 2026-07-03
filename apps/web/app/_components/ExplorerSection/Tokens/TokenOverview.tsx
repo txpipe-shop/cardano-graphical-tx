@@ -4,6 +4,7 @@ import { Accordion, AccordionItem, Chip, Divider } from "@heroui/react";
 import Image from "next/image";
 import { CodeBlock } from "~/app/_components/CodeBlock";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
+import { SubLabel } from "~/app/_components/SubLabel";
 import { JSONBIG } from "~/app/_utils/constants";
 import type { AssetInfo } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
 
@@ -250,19 +251,19 @@ export default function TokenOverview({
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="flex flex-col">
-          <span className="text-xs text-p-secondary">Total Supply</span>
+          <SubLabel>Total Supply</SubLabel>
           <span className="text-lg font-semibold text-p-primary">
             {formatQuantity(assetInfo.totalSupply, decimals)}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-p-secondary">Decimals</span>
+          <SubLabel>Decimals</SubLabel>
           <span className="text-lg font-semibold text-p-primary">
             {decimals !== null && decimals !== undefined ? decimals : "N/A"}
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-p-secondary">Holders</span>
+          <SubLabel>Holders</SubLabel>
           <span className="text-lg font-semibold text-p-primary">
             {holdersCount === null
               ? "20+"
@@ -272,7 +273,7 @@ export default function TokenOverview({
           </span>
         </div>
         <div className="flex flex-col">
-          <span className="text-xs text-p-secondary">Mint/Burn Events</span>
+          <SubLabel>Mint/Burn Events</SubLabel>
           <span className="text-lg font-semibold text-p-primary">
             {assetInfo.mintOrBurnCount}
           </span>
