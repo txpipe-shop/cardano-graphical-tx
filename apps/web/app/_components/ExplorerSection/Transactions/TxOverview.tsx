@@ -1,15 +1,18 @@
 "use client";
 
-import { Card, CardBody, Chip, Tooltip } from "@heroui/react";
-import { type cardano, type Unit, type Value } from "@laceanatomy/types";
+import { Chip, Tooltip } from "@heroui/react";
+import type { cardano, Unit, Value } from "@laceanatomy/types";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { EmptyState } from "~/app/_components/EmptyState";
+import ColoredAddress from "~/app/_components/ExplorerSection/ColoredAddress";
+import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
+import DateViewer from "~/app/_components/ExplorerSection/DateViewer";
+import TokenPill from "~/app/_components/ExplorerSection/TokenPill";
+import { InfoCard } from "~/app/_components/InfoCard";
+import { KeyValue } from "~/app/_components/KeyValue";
 import { ROUTES } from "~/app/_utils";
 import { isValidChain, type Network } from "~/app/_utils/network-config";
-import ColoredAddress from "../ColoredAddress";
-import CopyButton from "../CopyButton";
-import DateViewer from "../DateViewer";
-import TokenPill from "../TokenPill";
 
 function resolveChain(
   params: { chain?: string | string[] },
@@ -21,40 +24,29 @@ function resolveChain(
 
 function OverviewStats({ tx }: { tx: cardano.Tx }) {
   return (
-    <Card className="shadow-none border border-border bg-surface">
-      <CardBody className="flex flex-row flex-wrap justify-around gap-4 p-4">
-        <div className="flex gap-2 items-center">
-          <p className="font-bold text-p-secondary">Created:</p>
+    <InfoCard shadow={false} border="solid" bg="background">
+      <div className="flex flex-row flex-wrap justify-around gap-4">
+        <KeyValue label="Created">
           <DateViewer timestamp={tx.createdAt} className="text-p-secondary" />
-        </div>
-        <div className="flex gap-2 items-center">
-          <p className="font-bold text-p-secondary">Fee:</p>
-          <span className="text-p-secondary">{Number(tx.fee)}</span>
-        </div>
-        <div className="flex gap-2 items-center">
-          <p className="font-bold text-p-secondary">Block Height:</p>
-          <span className="text-p-secondary">
-            {tx.block?.height?.toString() ?? "-"}
-          </span>
-        </div>
+        </KeyValue>
+        <KeyValue label="Fee" mono>
+          {Number(tx.fee)}
+        </KeyValue>
+        <KeyValue label="Block Height" mono>
+          {tx.block?.height?.toString() ?? "-"}
+        </KeyValue>
         {tx.validityInterval && (
           <>
-            <div className="flex gap-2 items-center">
-              <p className="font-bold text-p-secondary">Invalid Before:</p>
-              <span className="text-p-secondary">
-                {tx.validityInterval.invalidBefore ?? "-"}
-              </span>
-            </div>
-            <div className="flex gap-2 items-center">
-              <p className="font-bold text-p-secondary">Invalid Hereafter:</p>
-              <span className="text-p-secondary">
-                {tx.validityInterval.invalidHereafter ?? "-"}
-              </span>
-            </div>
+            <KeyValue label="Invalid Before" mono>
+              {tx.validityInterval.invalidBefore ?? "-"}
+            </KeyValue>
+            <KeyValue label="Invalid Hereafter" mono>
+              {tx.validityInterval.invalidHereafter ?? "-"}
+            </KeyValue>
           </>
         )}
-      </CardBody>
-    </Card>
+      </div>
+    </InfoCard>
   );
 }
 
@@ -113,14 +105,13 @@ export function UtxoList({
   const chain = (params?.chain as Network) ?? "mainnet";
   if (list.length === 0) return null;
   return (
-    <Card className="shadow-none border border-default-200">
-      {title && (
-        <div className="border-b px-4 py-2 bg-explorer-row font-semibold text-lg text-p-secondary">
-          {title} ({list.length})
-        </div>
-      )}
-      <CardBody className="p-0 md:hidden">
-        <div className="space-y-4 p-4">
+    <InfoCard
+      header={title ? `${title} (${list.length})` : undefined}
+      shadow={false}
+      border="solid"
+    >
+      <div className="p-0 md:hidden">
+        <div className="space-y-4">
           {list.map((utxo) => (
             <div
               key={`${utxo.outRef.hash}#${utxo.outRef.index}`}
@@ -206,8 +197,8 @@ export function UtxoList({
             </div>
           ))}
         </div>
-      </CardBody>
-      <CardBody className="hidden p-0 md:block overflow-x-auto">
+      </div>
+      <div className="hidden p-0 md:block overflow-x-auto">
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="text-p-secondary font-medium border-b bg-explorer-row">
             <tr>
@@ -300,8 +291,8 @@ export function UtxoList({
             ))}
           </tbody>
         </table>
-      </CardBody>
-    </Card>
+      </div>
+    </InfoCard>
   );
 }
 
@@ -315,34 +306,28 @@ function MintList({
   const params = useParams();
   const chain = resolveChain(params, chainProp);
   if (Object.keys(list).length === 0) {
-    return (
-      <Card className="shadow-none border border-border bg-surface">
-        <CardBody className="text-center text-p-secondary text-sm py-8">
-          No minted assets in this transaction.
-        </CardBody>
-      </Card>
-    );
+    return <EmptyState message="No minted assets in this transaction." />;
   }
 
   return (
-    <Card className="shadow-none border border-border bg-surface">
-      <div className="border-b px-4 py-2 bg-background font-semibold text-lg text-p-primary">
-        Minted Assets
+    <InfoCard
+      header="Minted Assets"
+      shadow={false}
+      border="solid"
+      bg="background"
+    >
+      <div className="flex flex-wrap gap-2">
+        {Object.entries(list).map(([unit, amount]) => (
+          <TokenPill
+            key={unit}
+            unit={unit as Unit}
+            amount={amount}
+            mint={list}
+            chain={chain}
+          />
+        ))}
       </div>
-      <CardBody className="p-4">
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(list).map(([unit, amount]) => (
-            <TokenPill
-              key={unit}
-              unit={unit as Unit}
-              amount={amount}
-              mint={list}
-              chain={chain}
-            />
-          ))}
-        </div>
-      </CardBody>
-    </Card>
+    </InfoCard>
   );
 }
 
@@ -375,11 +360,7 @@ export default function TxOverview({ tx }: TxOverviewProps) {
           linkTxHash={tx.hash}
         />
       ) : (
-        <Card className="shadow-none border border-border bg-surface">
-          <CardBody className="text-center text-p-secondary text-sm py-2">
-            No reference inputs in this transaction.
-          </CardBody>
-        </Card>
+        <EmptyState message="No reference inputs in this transaction." />
       )}
       <MintList list={tx.mint} chain={chain} />
     </div>

@@ -19,10 +19,7 @@ interface DevnetTokenTabsProps {
   tab: TokenTab;
 }
 
-export default function DevnetTokenTabs({
-  unit,
-  tab,
-}: DevnetTokenTabsProps) {
+export default function DevnetTokenTabs({ unit, tab }: DevnetTokenTabsProps) {
   const { configs } = useConfigs();
   const port = resolveDevnetPort(configs.port);
   const [loading, setLoading] = useState(true);

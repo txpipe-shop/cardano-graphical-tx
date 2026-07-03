@@ -23,9 +23,7 @@ import {
 } from '@laceanatomy/provider-core';
 import type { Cardano, cardano, Unit } from '@laceanatomy/types';
 import { Hash, HexString } from '@laceanatomy/types';
-import {
-  parseCip25,
-} from '@laceanatomy/types/cardano';
+import { parseCip25 } from '@laceanatomy/types/cardano';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
 import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import assert from 'assert';
@@ -730,7 +728,6 @@ export class U5CProvider
 
     return { tx: tx.tx.chain.value, block: tx.tx.blockRef, cbor: tx.tx.nativeBytes };
   }
-
 }
 
 export * as mappers from './mappers';

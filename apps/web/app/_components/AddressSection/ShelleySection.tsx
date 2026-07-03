@@ -1,5 +1,5 @@
 import type { AddressDiagnostic } from "@laceanatomy/napi-pallas";
-import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
+import { HashDisplay } from "~/app/_components/HashDisplay";
 
 function DetailLabel({
   children,
@@ -56,12 +56,7 @@ export function ShelleySection({ data }: { data: AddressDiagnostic }) {
       {data?.bytes && (
         <div className="border border-border/50 bg-explorer-row/30 px-3 py-2 rounded">
           <DetailLabel>Address Bytes (Hex)</DetailLabel>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-sm text-p-primary break-all flex-1 min-w-0">
-              {data.bytes}
-            </span>
-            <CopyButton text={data.bytes} size={14} />
-          </div>
+          <HashDisplay hash={data.bytes} length={24} />
         </div>
       )}
 
@@ -93,12 +88,7 @@ export function ShelleySection({ data }: { data: AddressDiagnostic }) {
             {data.paymentPart.hash && (
               <div>
                 <DetailLabel>Hash</DetailLabel>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm text-p-primary break-all flex-1 min-w-0">
-                    {data.paymentPart.hash}
-                  </span>
-                  <CopyButton text={data.paymentPart.hash} size={14} />
-                </div>
+                <HashDisplay hash={data.paymentPart.hash} length={16} />
               </div>
             )}
           </div>
@@ -121,12 +111,7 @@ export function ShelleySection({ data }: { data: AddressDiagnostic }) {
             {data.delegationPart!.hash && (
               <div>
                 <DetailLabel>Hash</DetailLabel>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm text-p-primary break-all flex-1 min-w-0">
-                    {data.delegationPart!.hash}
-                  </span>
-                  <CopyButton text={data.delegationPart!.hash} size={14} />
-                </div>
+                <HashDisplay hash={data.delegationPart!.hash} length={16} />
               </div>
             )}
             {data.delegationPart!.pointer && (

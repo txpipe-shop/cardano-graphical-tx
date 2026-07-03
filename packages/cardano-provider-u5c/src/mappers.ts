@@ -279,10 +279,7 @@ export function validateBlock(block: sync.FetchBlockResponse | sync.AnyChainBloc
   };
 }
 
-export function findTxIndexInBlock(
-  body: cardanoUtxoRpc.BlockBody,
-  tx: cardanoUtxoRpc.Tx
-): number {
+export function findTxIndexInBlock(body: cardanoUtxoRpc.BlockBody, tx: cardanoUtxoRpc.Tx): number {
   return body.tx.findIndex(
     (t) => Buffer.from(t.hash).toString('hex') === Buffer.from(tx.hash).toString('hex')
   );

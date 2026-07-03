@@ -1,6 +1,8 @@
 "use client";
 
-import { Button, Card, CardBody, Textarea } from "@heroui/react";
+import { Button, Textarea } from "@heroui/react";
+import { EmptyState } from "~/app/_components/EmptyState";
+import { InfoCard } from "~/app/_components/InfoCard";
 import { useCborDiagnostic } from "~/app/_hooks/useCborDiagnostic";
 
 interface CborViewProps {
@@ -32,18 +34,12 @@ export default function CborView({
   } = useCborDiagnostic(cbor);
 
   if (!cbor) {
-    return (
-      <Card className="border-2 border-dashed border-border shadow-md bg-surface">
-        <CardBody className="py-8 text-center text-p-secondary">
-          {emptyMessage}
-        </CardBody>
-      </Card>
-    );
+    return <EmptyState message={emptyMessage} />;
   }
 
   return (
-    <Card className="h-full min-h-0 border border-border bg-surface shadow-none">
-      <CardBody className="flex h-full min-h-0 flex-col gap-4 p-4">
+    <InfoCard border="solid" shadow={false} className="h-full min-h-0">
+      <div className="flex h-full min-h-0 flex-col gap-4 p-0">
         <div className="flex min-h-0 flex-1 flex-col gap-4 md:flex-row">
           <div className="flex min-h-0 flex-1 flex-col gap-2">
             <div className="font-medium text-p-secondary">Decoded</div>
@@ -94,7 +90,7 @@ export default function CborView({
             CBOR → Diagnostic
           </Button>
         </div>
-      </CardBody>
-    </Card>
+      </div>
+    </InfoCard>
   );
 }

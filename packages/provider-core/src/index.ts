@@ -1,4 +1,13 @@
-import type { Address, BaseChain, Hash, HexString, Tx, Unit, UTxO, Value } from '@laceanatomy/types';
+import type {
+  Address,
+  BaseChain,
+  Hash,
+  HexString,
+  Tx,
+  Unit,
+  UTxO,
+  Value
+} from '@laceanatomy/types';
 
 export type EpochReq = { epochNo: bigint };
 
@@ -203,11 +212,20 @@ export interface ChainProvider<
   readTip(): Promise<TipRes>;
   getPools?(params: PoolsReq): Promise<PoolsRes>;
   getPool?(params: PoolReq): Promise<PoolRes>;
-  getTokenMetadata?(params: { unit: Unit; type?: keyof Shapes | 'all'; network?: 'mainnet' | 'preprod' }): Promise<Nullable<Shapes>>;
+  getTokenMetadata?(params: {
+    unit: Unit;
+    type?: keyof Shapes | 'all';
+    network?: 'mainnet' | 'preprod';
+  }): Promise<Nullable<Shapes>>;
   getAssetInfo?(asset: Unit): Promise<AssetInfoRes>;
   getAssetAddresses?(asset: Unit, count: number, page: number): Promise<AssetAddressesRes>;
   getAssetHistory?(asset: Unit, count: number, page: number): Promise<AssetHistoryRes>;
-  getAssetTransactions?(asset: Unit, count: number, page: number, order?: 'asc' | 'desc'): Promise<AssetTransactionsRes>;
+  getAssetTransactions?(
+    asset: Unit,
+    count: number,
+    page: number,
+    order?: 'asc' | 'desc'
+  ): Promise<AssetTransactionsRes>;
 }
 
 export interface CursorPaginatedProvider<

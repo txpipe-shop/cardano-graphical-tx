@@ -51,7 +51,9 @@ export default function HoldersTab({
         setNextPage((prev) => prev + 1);
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to load holders");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to load holders",
+      );
     } finally {
       setLoading(false);
     }

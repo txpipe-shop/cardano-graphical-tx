@@ -35,7 +35,9 @@ export default function TransactionsTab({
       setHasMore(result.hasMore);
       setCurrentPage((prev) => prev + 1);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to load transactions");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to load transactions",
+      );
     } finally {
       setLoading(false);
     }
