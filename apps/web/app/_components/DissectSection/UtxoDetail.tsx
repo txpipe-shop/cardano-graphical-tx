@@ -95,7 +95,7 @@ function AssetsList({ assets }: { assets: Assets[] }) {
       </DetailLabel>
       <div className="space-y-2 mt-1">
         {assets.map(({ policyId, assetsPolicy }, j) => (
-          <FieldBlock key={j}>
+          <FieldBlock key={j} className="p-2">
             <div className="flex items-center gap-2 mb-2">
               <DetailLabel>Policy</DetailLabel>
               <MonoText size="xs" className="break-all">
