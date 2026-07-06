@@ -1,7 +1,7 @@
 "use client";
 
-import type { ValidationResponse } from "@laceanatomy/napi-pallas";
 import { Chip } from "@heroui/react";
+import type { ValidationResponse } from "@laceanatomy/napi-pallas";
 
 function StatusIcon({ status }: { status: "passed" | "failed" | "skipped" }) {
   if (status === "passed") {
@@ -38,7 +38,11 @@ function StatusIcon({ status }: { status: "passed" | "failed" | "skipped" }) {
       stroke="currentColor"
       strokeWidth={3}
     >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M6 18L18 6M6 6l12 12"
+      />
     </svg>
   );
 }

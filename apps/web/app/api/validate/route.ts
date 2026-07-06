@@ -1,13 +1,13 @@
 import { cborParse, validateCborTx, type Utxo } from "@laceanatomy/napi-pallas";
-import { UtxoRpcClient, TxoRef } from "@laceanatomy/utxorpc-sdk";
+import { cardano, query, UtxoRpcClient } from "@laceanatomy/utxorpc-sdk";
 import { createGrpcTransport } from "@laceanatomy/utxorpc-sdk/transport/node";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import {
   getApiKey,
   NETWORK_ID,
   NETWORK_MAGIC,
-  type Network,
   validateTxSchema,
+  type Network,
 } from "~/app/_utils";
 import { getNetworkConfigServer } from "~/server/api/server-network-config";
 
@@ -41,7 +41,7 @@ function getUtxoRpcClient(network: Network): UtxoRpcClient | null {
       baseUrl: config.dolosUtxorpcUrl,
       interceptors: headers
         ? [
-            (next: any) => async (req: any) => {
+            (next) => async (req) => {
               for (const [key, value] of Object.entries(headers)) {
                 req.header.set(key, value);
               }
@@ -63,8 +63,8 @@ function uint8ToHex(bytes: Uint8Array): string {
   return Buffer.from(bytes).toString("hex");
 }
 
-function bigIntToNumber(bi: { bigInt?: { value: bigint } } | undefined): number {
-  if (!bi?.bigInt?.value) return 0;
+function bigIntToNumber(bi: cardano.BigInt | undefined): number {
+  if (bi?.bigInt?.case !== "int") return 0;
   return Number(bi.bigInt.value);
 }
 
@@ -73,7 +73,8 @@ async function resolveUtxos(
   client: UtxoRpcClient,
 ): Promise<{ resolved: Utxo[]; errors: UtxoResolutionError[] }> {
   const keys = inputHashes.map(
-    ({ txHash, index }) => new TxoRef({ hash: Buffer.from(txHash, "hex"), index }),
+    ({ txHash, index }) =>
+      new query.TxoRef({ hash: Buffer.from(txHash, "hex"), index }),
   );
 
   const response = await client.query.readUtxos({ keys });
@@ -100,7 +101,9 @@ async function resolveUtxos(
         assetsPolicy: [
           {
             assetName: uint8ToHex(a.name),
-            amount: bigIntToNumber(a.quantity?.case === "outputCoin" ? a.quantity.value?.bigInt : undefined),
+            amount: bigIntToNumber(
+              a.quantity?.case === "outputCoin" ? a.quantity.value : undefined,
+            ),
           },
         ],
       })),
@@ -111,7 +114,7 @@ async function resolveUtxos(
       index: input.index,
       bytes: uint8ToHex(item.nativeBytes),
       address: uint8ToHex(output.address),
-      lovelace: bigIntToNumber(output.coin?.bigInt),
+      lovelace: bigIntToNumber(output.coin),
       datum:
         output.datum && output.datum.originalCbor.length > 0
           ? {
@@ -138,10 +141,19 @@ async function fetchProtocolParams(network: Network, apiKey: string) {
     blockfrostFetch(`${base}/epochs/latest/parameters`, apiKey),
   ]);
 
-  const costModelsPL = epochParams.cost_models as Record<string, Record<string, number>>;
-  const plutusV1 = costModelsPL?.PlutusV1 ? Object.values(costModelsPL.PlutusV1) : null;
-  const plutusV2 = costModelsPL?.PlutusV2 ? Object.values(costModelsPL.PlutusV2) : null;
-  const plutusV3 = costModelsPL?.PlutusV3 ? Object.values(costModelsPL.PlutusV3) : null;
+  const costModelsPL = epochParams.cost_models as Record<
+    string,
+    Record<string, number>
+  >;
+  const plutusV1 = costModelsPL?.PlutusV1
+    ? Object.values(costModelsPL.PlutusV1)
+    : null;
+  const plutusV2 = costModelsPL?.PlutusV2
+    ? Object.values(costModelsPL.PlutusV2)
+    : null;
+  const plutusV3 = costModelsPL?.PlutusV3
+    ? Object.values(costModelsPL.PlutusV3)
+    : null;
 
   const poolVoting = epochParams.pool_voting_thresholds;
   const drepVoting = epochParams.drep_voting_thresholds;
@@ -194,7 +206,9 @@ async function fetchProtocolParams(network: Network, apiKey: string) {
     poolPledgeInfluence: floatToRational(
       epochParams.pool_pledge_influence ?? genesis.pool_pledge_influence ?? 0,
     ),
-    decentralizationConstant: floatToRational(epochParams.decentralisation_param ?? 0),
+    decentralizationConstant: floatToRational(
+      epochParams.decentralisation_param ?? 0,
+    ),
     extraEntropy:
       epochParams.extra_entropy != null
         ? { variant: 1, hash: epochParams.extra_entropy }
@@ -202,10 +216,16 @@ async function fetchProtocolParams(network: Network, apiKey: string) {
     ...(poolVoting
       ? {
           poolVotingThresholds: {
-            motionNoConfidence: floatToRational(poolVoting.motion_no_confidence),
+            motionNoConfidence: floatToRational(
+              poolVoting.motion_no_confidence,
+            ),
             committeeNormal: floatToRational(poolVoting.committee_normal),
-            committeeNoConfidence: floatToRational(poolVoting.committee_no_confidence),
-            hardForkInitiation: floatToRational(poolVoting.hard_fork_initiation),
+            committeeNoConfidence: floatToRational(
+              poolVoting.committee_no_confidence,
+            ),
+            hardForkInitiation: floatToRational(
+              poolVoting.hard_fork_initiation,
+            ),
             securityVotingThreshold: floatToRational(
               poolVoting.security_relevant_param_voting_threshold ?? 0,
             ),
@@ -223,11 +243,19 @@ async function fetchProtocolParams(network: Network, apiKey: string) {
     ...(drepVoting
       ? {
           drepVotingThresholds: {
-            motionNoConfidence: floatToRational(drepVoting.motion_no_confidence),
+            motionNoConfidence: floatToRational(
+              drepVoting.motion_no_confidence,
+            ),
             committeeNormal: floatToRational(drepVoting.committee_normal),
-            committeeNoConfidence: floatToRational(drepVoting.committee_no_confidence),
-            updateConstitution: floatToRational(drepVoting.update_to_constitution),
-            hardForkInitiation: floatToRational(drepVoting.hard_fork_initiation),
+            committeeNoConfidence: floatToRational(
+              drepVoting.committee_no_confidence,
+            ),
+            updateConstitution: floatToRational(
+              drepVoting.update_to_constitution,
+            ),
+            hardForkInitiation: floatToRational(
+              drepVoting.hard_fork_initiation,
+            ),
             ppNetworkGroup: floatToRational(drepVoting.pp_network_group),
             ppEconomicGroup: floatToRational(drepVoting.pp_economic_group),
             ppTechnicalGroup: floatToRational(drepVoting.pp_technical_group),
@@ -256,10 +284,17 @@ async function fetchProtocolParams(network: Network, apiKey: string) {
       ? { committeeTermLimit: epochParams.committee_term_limit }
       : { committeeTermLimit: 0 }),
     ...(epochParams.governance_action_validity_period != null
-      ? { governanceActionValidityPeriod: epochParams.governance_action_validity_period }
+      ? {
+          governanceActionValidityPeriod:
+            epochParams.governance_action_validity_period,
+        }
       : { governanceActionValidityPeriod: 0 }),
     ...(epochParams.governance_action_deposit != null
-      ? { governanceActionDeposit: Number(epochParams.governance_action_deposit) }
+      ? {
+          governanceActionDeposit: Number(
+            epochParams.governance_action_deposit,
+          ),
+        }
       : { governanceActionDeposit: 0 }),
     ...(epochParams.drep_deposit != null
       ? { drepDeposit: Number(epochParams.drep_deposit) }
@@ -296,7 +331,11 @@ export async function POST(req: Request) {
       return Response.json({
         era: "unknown",
         checks: [
-          { rule: "unsupported", passed: false, error: "Devnet validation not available" },
+          {
+            rule: "unsupported",
+            passed: false,
+            error: "Devnet validation not available",
+          },
         ],
         valid: false,
       });
@@ -307,7 +346,11 @@ export async function POST(req: Request) {
       return Response.json({
         era: "unknown",
         checks: [
-          { rule: "decode", passed: false, error: parsed.error || "Failed to parse CBOR" },
+          {
+            rule: "decode",
+            passed: false,
+            error: parsed.error || "Failed to parse CBOR",
+          },
         ],
         valid: false,
       });
@@ -317,18 +360,32 @@ export async function POST(req: Request) {
 
     const allInputHashes = [
       ...tx.inputs.map((i) => ({ txHash: i.txHash, index: i.index })),
-      ...(tx.referenceInputs ?? []).map((i) => ({ txHash: i.txHash, index: i.index })),
-      ...(tx.collateral?.inputs ?? []).map((i) => ({ txHash: i.txHash, index: i.index })),
+      ...(tx.referenceInputs ?? []).map((i) => ({
+        txHash: i.txHash,
+        index: i.index,
+      })),
+      ...(tx.collateral?.inputs ?? []).map((i) => ({
+        txHash: i.txHash,
+        index: i.index,
+      })),
     ];
 
     const utxoClient = getUtxoRpcClient(network);
     if (!utxoClient) {
       return new Response(
-        JSON.stringify({ error: "UTxORPC endpoint not configured for this network" }),
-        { status: StatusCodes.INTERNAL_SERVER_ERROR, headers: { "Content-Type": "application/json" } },
+        JSON.stringify({
+          error: "UTxORPC endpoint not configured for this network",
+        }),
+        {
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
-    const { resolved: resolvedUtxos, errors: utxoErrors } = await resolveUtxos(allInputHashes, utxoClient);
+    const { resolved: resolvedUtxos, errors: utxoErrors } = await resolveUtxos(
+      allInputHashes,
+      utxoClient,
+    );
 
     const pparams = await fetchProtocolParams(network, apiKey);
     const pparamsJson = JSON.stringify(pparams);
@@ -336,7 +393,10 @@ export async function POST(req: Request) {
     const networkMagic = NETWORK_MAGIC[network];
 
     const nowSec = Date.now() / 1000;
-    const currentSlot = Math.max(0, Math.floor((nowSec - pparams.systemStart) / pparams.slotLength));
+    const currentSlot = Math.max(
+      0,
+      Math.floor((nowSec - pparams.systemStart) / pparams.slotLength),
+    );
     const slot = providedSlot ?? currentSlot;
 
     const result = validateCborTx(
@@ -364,13 +424,18 @@ export async function POST(req: Request) {
   } catch (err: any) {
     console.error("Validation error:", err);
     if (err?.issues) {
-      return new Response(JSON.stringify({ error: err.issues.map((i: any) => i.message) }), {
-        status: StatusCodes.BAD_REQUEST,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: err.issues.map((i: any) => i.message) }),
+        {
+          status: StatusCodes.BAD_REQUEST,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
     return new Response(
-      JSON.stringify({ error: err?.message ?? ReasonPhrases.INTERNAL_SERVER_ERROR }),
+      JSON.stringify({
+        error: err?.message ?? ReasonPhrases.INTERNAL_SERVER_ERROR,
+      }),
       {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
         headers: { "Content-Type": "application/json" },
