@@ -3,7 +3,6 @@ import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import {
   getApiKey,
   getBlockfrostURL,
-  getTransactionURL,
   NETWORK_ID,
   NETWORK_MAGIC,
   type Network,
@@ -261,16 +260,6 @@ async function fetchProtocolParams(network: Network, apiKey: string) {
   };
 }
 
-async function fetchSlot(network: Network, apiKey: string, txHash: string): Promise<number | null> {
-  try {
-    const url = getTransactionURL(network, txHash);
-    const txInfo = await blockfrostFetch(url, apiKey);
-    return txInfo.slot ?? null;
-  } catch {
-    return null;
-  }
-}
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -307,9 +296,6 @@ export async function POST(req: Request) {
 
     const tx = parsed.cborRes;
 
-    let slot = providedSlot ?? (await fetchSlot(network, apiKey, tx.txHash)) ?? 0;
-    if (slot > 0xFFFFFFFF) slot = 0xFFFFFFFF;
-
     const allInputHashes = [
       ...tx.inputs.map((i) => ({ txHash: i.txHash, index: i.index })),
       ...(tx.referenceInputs ?? []).map((i) => ({ txHash: i.txHash, index: i.index })),
@@ -321,6 +307,10 @@ export async function POST(req: Request) {
     const pparamsJson = JSON.stringify(pparams);
     const networkId = NETWORK_ID[network];
     const networkMagic = NETWORK_MAGIC[network];
+
+    const nowSec = Date.now() / 1000;
+    const currentSlot = Math.max(0, Math.floor((nowSec - pparams.systemStart) / pparams.slotLength));
+    const slot = providedSlot ?? currentSlot;
 
     const result = validateCborTx(
       cbor,
