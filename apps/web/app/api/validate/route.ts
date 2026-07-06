@@ -1,13 +1,15 @@
 import { cborParse, validateCborTx, type Utxo } from "@laceanatomy/napi-pallas";
+import { UtxoRpcClient, TxoRef } from "@laceanatomy/utxorpc-sdk";
+import { createGrpcTransport } from "@laceanatomy/utxorpc-sdk/transport/node";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import {
   getApiKey,
-  getBlockfrostURL,
   NETWORK_ID,
   NETWORK_MAGIC,
   type Network,
   validateTxSchema,
 } from "~/app/_utils";
+import { getNetworkConfigServer } from "~/server/api/server-network-config";
 
 function floatToRational(value: number) {
   if (value === 0) return { numerator: 0, denominator: 1 };
@@ -27,18 +29,28 @@ async function blockfrostFetch(url: string, apiKey: string) {
   return res.json();
 }
 
-async function fetchInputCbor(
-  network: Network,
-  apiKey: string,
-  txHash: string,
-): Promise<string | null> {
-  try {
-    const url = getBlockfrostURL(network, txHash);
-    const data = (await blockfrostFetch(url, apiKey)) as { cbor: string };
-    return data.cbor;
-  } catch {
-    return null;
-  }
+function getUtxoRpcClient(network: Network): UtxoRpcClient | null {
+  const config = getNetworkConfigServer(network);
+  if (!config.dolosUtxorpcUrl) return null;
+  const headers = config.dolosUtxorpcApiKey
+    ? { "api-key": config.dolosUtxorpcApiKey }
+    : undefined;
+  return new UtxoRpcClient({
+    transport: createGrpcTransport({
+      httpVersion: "2",
+      baseUrl: config.dolosUtxorpcUrl,
+      interceptors: headers
+        ? [
+            (next: any) => async (req: any) => {
+              for (const [key, value] of Object.entries(headers)) {
+                req.header.set(key, value);
+              }
+              return next(req);
+            },
+          ]
+        : [],
+    }),
+  });
 }
 
 type UtxoResolutionError = {
@@ -47,65 +59,72 @@ type UtxoResolutionError = {
   reason: string;
 };
 
+function uint8ToHex(bytes: Uint8Array): string {
+  return Buffer.from(bytes).toString("hex");
+}
+
+function bigIntToNumber(bi: { bigInt?: { value: bigint } } | undefined): number {
+  if (!bi?.bigInt?.value) return 0;
+  return Number(bi.bigInt.value);
+}
+
 async function resolveUtxos(
   inputHashes: { txHash: string; index: number }[],
-  network: Network,
-  apiKey: string,
+  client: UtxoRpcClient,
 ): Promise<{ resolved: Utxo[]; errors: UtxoResolutionError[] }> {
-  const uniqueHashes = [...new Set(inputHashes.map((i) => i.txHash))];
-  const cborMap = new Map<string, string>();
+  const keys = inputHashes.map(
+    ({ txHash, index }) => new TxoRef({ hash: Buffer.from(txHash, "hex"), index }),
+  );
+
+  const response = await client.query.readUtxos({ keys });
+  const resolved: Utxo[] = [];
   const errors: UtxoResolutionError[] = [];
 
-  const cbors = await Promise.all(
-    uniqueHashes.map((hash) => fetchInputCbor(network, apiKey, hash)),
-  );
-  uniqueHashes.forEach((hash, i) => {
-    const cbor = cbors[i];
-    if (cbor) cborMap.set(hash, cbor);
-  });
+  for (let i = 0; i < inputHashes.length; i++) {
+    const input = inputHashes[i]!;
+    const item = response.items[i];
 
-  const resolved: Utxo[] = [];
-
-  for (const input of inputHashes) {
-    const parentCbor = cborMap.get(input.txHash);
-    if (!parentCbor) {
+    if (!item || item.parsedState.case !== "cardano") {
       errors.push({
         txHash: input.txHash,
         index: input.index,
-        reason: "Failed to fetch parent transaction CBOR from Blockfrost",
+        reason: "UTxO not found via UTxORPC",
       });
       continue;
     }
 
-    const parsed = cborParse(parentCbor);
-    if (parsed.error || !parsed.cborRes) {
-      errors.push({
-        txHash: input.txHash,
-        index: input.index,
-        reason: `Failed to parse parent transaction: ${parsed.error || "unknown error"}`,
-      });
-      continue;
-    }
-
-    const output = parsed.cborRes.outputs[input.index];
-    if (!output) {
-      errors.push({
-        txHash: input.txHash,
-        index: input.index,
-        reason: `Output index ${input.index} not found in parent transaction (has ${parsed.cborRes.outputs.length} outputs)`,
-      });
-      continue;
-    }
+    const output = item.parsedState.value;
+    const assets = (output.assets ?? []).flatMap((ma) =>
+      ma.assets.map((a) => ({
+        policyId: uint8ToHex(ma.policyId),
+        assetsPolicy: [
+          {
+            assetName: uint8ToHex(a.name),
+            amount: bigIntToNumber(a.quantity?.case === "outputCoin" ? a.quantity.value?.bigInt : undefined),
+          },
+        ],
+      })),
+    );
 
     resolved.push({
       txHash: input.txHash,
       index: input.index,
-      bytes: output.bytes,
-      address: output.address,
-      lovelace: output.lovelace,
-      datum: output.datum,
-      assets: output.assets,
-      scriptRef: output.scriptRef,
+      bytes: uint8ToHex(item.nativeBytes),
+      address: uint8ToHex(output.address),
+      lovelace: bigIntToNumber(output.coin?.bigInt),
+      datum:
+        output.datum && output.datum.originalCbor.length > 0
+          ? {
+              hash: uint8ToHex(output.datum.hash),
+              bytes: uint8ToHex(output.datum.originalCbor),
+              json: "",
+            }
+          : undefined,
+      assets,
+      scriptRef:
+        output.script?.script.case && output.script.script.case !== "native"
+          ? uint8ToHex(output.script.script.value as Uint8Array)
+          : undefined,
     });
   }
 
@@ -301,7 +320,15 @@ export async function POST(req: Request) {
       ...(tx.referenceInputs ?? []).map((i) => ({ txHash: i.txHash, index: i.index })),
       ...(tx.collateral?.inputs ?? []).map((i) => ({ txHash: i.txHash, index: i.index })),
     ];
-    const { resolved: resolvedUtxos, errors: utxoErrors } = await resolveUtxos(allInputHashes, network, apiKey);
+
+    const utxoClient = getUtxoRpcClient(network);
+    if (!utxoClient) {
+      return new Response(
+        JSON.stringify({ error: "UTxORPC endpoint not configured for this network" }),
+        { status: StatusCodes.INTERNAL_SERVER_ERROR, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    const { resolved: resolvedUtxos, errors: utxoErrors } = await resolveUtxos(allInputHashes, utxoClient);
 
     const pparams = await fetchProtocolParams(network, apiKey);
     const pparamsJson = JSON.stringify(pparams);
