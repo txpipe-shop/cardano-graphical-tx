@@ -11,6 +11,10 @@ use pallas_primitives::conway::{
 };
 use serde::Deserialize;
 
+fn default_unit_interval() -> NapiUnitInterval {
+  NapiUnitInterval { numerator: 0, denominator: 1 }
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NapiUnitInterval {
@@ -100,6 +104,7 @@ pub struct NapiAlonzoBabbageProtParams {
   pub treasury_growth_rate: NapiUnitInterval,
   pub maximum_epoch: u64,
   pub pool_pledge_influence: NapiUnitInterval,
+  #[serde(default = "default_unit_interval")]
   pub decentralization_constant: NapiUnitInterval,
   #[serde(default)]
   pub extra_entropy: Option<NapiNonce>,

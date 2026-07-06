@@ -144,6 +144,11 @@ async function fetchProtocolParams(network: Network, apiKey: string) {
     poolPledgeInfluence: floatToRational(
       epochParams.pool_pledge_influence ?? genesis.pool_pledge_influence ?? 0,
     ),
+    decentralizationConstant: floatToRational(epochParams.decentralisation_param ?? 0),
+    extraEntropy:
+      epochParams.extra_entropy != null
+        ? { variant: 1, hash: epochParams.extra_entropy }
+        : undefined,
     ...(poolVoting
       ? {
           poolVotingThresholds: {
