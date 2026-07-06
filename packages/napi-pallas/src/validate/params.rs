@@ -12,7 +12,10 @@ use pallas_primitives::conway::{
 use serde::Deserialize;
 
 fn default_unit_interval() -> NapiUnitInterval {
-  NapiUnitInterval { numerator: 0, denominator: 1 }
+  NapiUnitInterval {
+    numerator: 0,
+    denominator: 1,
+  }
 }
 
 #[derive(Deserialize)]

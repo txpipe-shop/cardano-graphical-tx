@@ -403,7 +403,7 @@ export async function POST(req: Request) {
       cbor,
       resolvedUtxos,
       pparamsJson,
-      slot,
+      BigInt(slot),
       networkId!,
       networkMagic!,
     );

@@ -3,20 +3,21 @@ mod params;
 mod types;
 mod utxos;
 
+use napi::bindgen_prelude::BigInt;
 use pallas::ledger::traverse::{Era, MultiEraTx};
 use pallas::ledger::validate::phase1::alonzo::validate_alonzo_tx;
 use pallas::ledger::validate::phase1::babbage::validate_babbage_tx;
 use pallas::ledger::validate::phase1::conway::validate_conway_tx;
 use pallas::ledger::validate::utils::ValidationError;
 
-use crate::Utxo;
 use self::checks::{
-  build_all_passed, build_checks_from_error, unsupported_era_response, ALONZO_CHECKS,
-  BABBAGE_CHECKS, CONWAY_CHECKS, ErrorMatcher,
+  build_all_passed, build_checks_from_error, unsupported_era_response, ErrorMatcher, ALONZO_CHECKS,
+  BABBAGE_CHECKS, CONWAY_CHECKS,
 };
 use self::params::{NapiAlonzoProtParams, NapiBabbageProtParams, NapiConwayProtParams};
 pub use self::types::{ValidationCheck, ValidationResponse};
 use self::utxos::build_utxos_for_era;
+use crate::Utxo;
 
 fn err(era: &str, rule: &str, msg: String) -> ValidationResponse {
   ValidationResponse {
@@ -55,11 +56,18 @@ pub fn validate_cbor_tx(
   cbor: String,
   utxos: Vec<Utxo>,
   pparams_json: String,
-  slot: u32,
+  slot: BigInt,
   network_id: u8,
   network_magic: u32,
 ) -> ValidationResponse {
-  let slot_u64 = slot as u64;
+  let (_signed, slot_u64, lost_precision) = slot.get_u64();
+  if lost_precision {
+    return err(
+      "unknown",
+      "params",
+      "Slot value exceeds u64 range".to_string(),
+    );
+  }
   let cbor_bytes = match hex::decode(&cbor) {
     Ok(b) => b,
     Err(e) => return err("unknown", "decode", format!("Failed to decode CBOR: {}", e)),
@@ -67,7 +75,13 @@ pub fn validate_cbor_tx(
 
   let metx = match MultiEraTx::decode(&cbor_bytes) {
     Ok(tx) => tx,
-    Err(e) => return err("unknown", "decode", format!("Failed to decode transaction: {}", e)),
+    Err(e) => {
+      return err(
+        "unknown",
+        "decode",
+        format!("Failed to decode transaction: {}", e),
+      )
+    }
   };
 
   match &metx {
@@ -81,11 +95,21 @@ pub fn validate_cbor_tx(
 
       let pparams: NapiConwayProtParams = match serde_json::from_str(&pparams_json) {
         Ok(p) => p,
-        Err(e) => return err("conway", "params", format!("Failed to parse Conway params: {}", e)),
+        Err(e) => {
+          return err(
+            "conway",
+            "params",
+            format!("Failed to parse Conway params: {}", e),
+          )
+        }
       };
       let conway_pps = pparams.into();
 
-      validate_result("conway", CONWAY_CHECKS, validate_conway_tx(&***x, &utxos_map, &conway_pps, &slot_u64, &network_id))
+      validate_result(
+        "conway",
+        CONWAY_CHECKS,
+        validate_conway_tx(&***x, &utxos_map, &conway_pps, &slot_u64, &network_id),
+      )
     }
     MultiEraTx::Babbage(x) => {
       let era = Era::Babbage;
@@ -97,11 +121,28 @@ pub fn validate_cbor_tx(
 
       let pparams: NapiBabbageProtParams = match serde_json::from_str(&pparams_json) {
         Ok(p) => p,
-        Err(e) => return err("babbage", "params", format!("Failed to parse Babbage params: {}", e)),
+        Err(e) => {
+          return err(
+            "babbage",
+            "params",
+            format!("Failed to parse Babbage params: {}", e),
+          )
+        }
       };
       let babbage_pps = pparams.into();
 
-      validate_result("babbage", BABBAGE_CHECKS, validate_babbage_tx(&***x, &utxos_map, &babbage_pps, &slot_u64, &network_magic, &network_id))
+      validate_result(
+        "babbage",
+        BABBAGE_CHECKS,
+        validate_babbage_tx(
+          &***x,
+          &utxos_map,
+          &babbage_pps,
+          &slot_u64,
+          &network_magic,
+          &network_id,
+        ),
+      )
     }
     MultiEraTx::AlonzoCompatible(x, era) => {
       if !matches!(era, Era::Alonzo) {
@@ -123,11 +164,21 @@ pub fn validate_cbor_tx(
 
       let pparams: NapiAlonzoProtParams = match serde_json::from_str(&pparams_json) {
         Ok(p) => p,
-        Err(e) => return err("alonzo", "params", format!("Failed to parse Alonzo params: {}", e)),
+        Err(e) => {
+          return err(
+            "alonzo",
+            "params",
+            format!("Failed to parse Alonzo params: {}", e),
+          )
+        }
       };
       let alonzo_pps = pparams.into();
 
-      validate_result("alonzo", ALONZO_CHECKS, validate_alonzo_tx(&***x, &utxos_map, &alonzo_pps, &slot_u64, &network_id))
+      validate_result(
+        "alonzo",
+        ALONZO_CHECKS,
+        validate_alonzo_tx(&***x, &utxos_map, &alonzo_pps, &slot_u64, &network_id),
+      )
     }
     MultiEraTx::Byron(_) => unsupported_era_response("byron"),
     _ => unsupported_era_response("unknown"),
