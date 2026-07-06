@@ -60,9 +60,18 @@ function NetworkSelector({
 
 export default function CborPage() {
   const searchParams = useSearchParams();
-  const [hashInput, setHashInput] = useState("");
-  const [network, setNetwork] = useState<Network>(NETWORK.MAINNET);
-  const [devnetPort, setDevnetPort] = useState("5164");
+  const [hashInput, setHashInput] = useState(
+    () => searchParams?.get("hash") ?? "",
+  );
+  const [network, setNetwork] = useState<Network>(() => {
+    const netParam = searchParams?.get("net");
+    return netParam && NETWORKS.includes(netParam as Network)
+      ? (netParam as Network)
+      : NETWORK.MAINNET;
+  });
+  const [devnetPort, setDevnetPort] = useState(
+    () => searchParams?.get("port") ?? "5164",
+  );
   const [initialCbor, setInitialCbor] = useState<string | null>(null);
   const [currentCbor, setCurrentCbor] = useState<string>("");
   const [parsedTx, setParsedTx] = useState<IGraphicalTransaction | null>(null);
@@ -73,56 +82,6 @@ export default function CborPage() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [validationResult, setValidationResult] =
     useState<ValidationResponse | null>(null);
-
-  useEffect(() => {
-    const hashParam = searchParams.get("hash");
-    const netParam = searchParams.get("net");
-    const portParam = searchParams.get("port");
-
-    if (hashParam) setHashInput(hashParam);
-    if (netParam && NETWORKS.includes(netParam as Network))
-      setNetwork(netParam as Network);
-    if (portParam) setDevnetPort(portParam);
-
-    if (hashParam && netParam && NETWORKS.includes(netParam as Network)) {
-      setIsLoading(true);
-      const net = netParam as Network;
-
-      const fetchUrl = new URL("/api/cbor/fetch", window.location.origin);
-      fetchUrl.searchParams.set("hash", hashParam);
-      fetchUrl.searchParams.set("net", net);
-      if (net === NETWORK.DEVNET)
-        fetchUrl.searchParams.set("port", portParam || "5164");
-
-      fetch(fetchUrl.toString())
-        .then(async (res) => {
-          if (!res.ok) {
-            const text = await res.text().catch(() => res.statusText);
-            throw new Error(text);
-          }
-          return res.json() as Promise<{ cbor: string }>;
-        })
-        .then(({ cbor }) => {
-          setInitialCbor(cbor);
-          setCurrentCbor(cbor);
-          return getTxFromCbor(cbor, net);
-        })
-        .then((tx) => {
-          const gtx = parseTxToGraphical([tx], { transactions: [], utxos: {} });
-          setParsedTx(gtx[0]!);
-        })
-        .catch((e) => {
-          const msg =
-            e instanceof Response
-              ? e.statusText
-              : e instanceof Error
-                ? e.message
-                : "Failed to fetch and parse";
-          setParseError(msg);
-        })
-        .finally(() => setIsLoading(false));
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateUrl = useCallback(
     (hash: string, net: Network) => {
@@ -177,6 +136,16 @@ export default function CborPage() {
     },
     [devnetPort],
   );
+
+  useEffect(() => {
+    const hashParam = searchParams?.get("hash");
+    const netParam = searchParams?.get("net");
+
+    if (hashParam && netParam && NETWORKS.includes(netParam as Network)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchAndParse(hashParam, netParam as Network);
+    }
+  }, [searchParams, fetchAndParse]);
 
   const handleFetch = useCallback(() => {
     if (!hashInput.trim()) return;

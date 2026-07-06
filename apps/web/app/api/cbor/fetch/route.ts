@@ -1,6 +1,7 @@
 import { Hash } from "@laceanatomy/types";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { type NextRequest } from "next/server";
+import { isValidChain } from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { getU5CProviderNode } from "~/server/api/u5c-provider";
 
@@ -25,9 +26,14 @@ export async function GET(req: NextRequest) {
       const portNumber = parseInt(port || "5164", 10);
       const provider = getU5CProviderNode(portNumber);
       cbor = await provider.getCBOR({ hash });
-    } else {
-      const provider = getDolosProvider(network as any);
+    } else if (isValidChain(network)) {
+      const provider = getDolosProvider(network);
       cbor = await provider.getCBOR({ hash });
+    } else {
+      return new Response(null, {
+        status: StatusCodes.BAD_REQUEST,
+        statusText: `Unsupported network: ${network}`,
+      });
     }
 
     return Response.json({ cbor });

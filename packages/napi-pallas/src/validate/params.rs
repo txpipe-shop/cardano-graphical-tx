@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
+use std::fmt;
 
+use napi::bindgen_prelude::BigInt;
 use pallas::ledger::validate::utils::{AlonzoProtParams, BabbageProtParams, ConwayProtParams};
 use pallas_crypto::hash::Hash;
 use pallas_primitives::alonzo::{
@@ -9,53 +11,190 @@ use pallas_primitives::babbage::CostModels as BabbageCostModels;
 use pallas_primitives::conway::{
   CostModels as ConwayCostModels, DRepVotingThresholds, PoolVotingThresholds,
 };
-use serde::Deserialize;
 
-fn default_unit_interval() -> NapiUnitInterval {
-  NapiUnitInterval {
-    numerator: 0,
-    denominator: 1,
+#[derive(Debug)]
+pub enum PParamsError {
+  InvalidU64 { field: String },
+  InvalidSystemStart { field: String, value: i64 },
+  InvalidNonceHash { field: String, reason: String },
+  InvalidProtocolVersion { field: String, reason: String },
+}
+
+impl fmt::Display for PParamsError {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    match self {
+      Self::InvalidU64 { field } => write!(f, "Invalid u64 value for pparams field: {field}"),
+      Self::InvalidSystemStart { field, value } => {
+        write!(f, "Invalid system_start value {value} for field {field}")
+      }
+      Self::InvalidNonceHash { field, reason } => {
+        write!(f, "Invalid extra_entropy hash for field {field}: {reason}")
+      }
+      Self::InvalidProtocolVersion { field, reason } => {
+        write!(f, "Invalid protocol_version for field {field}: {reason}")
+      }
+    }
   }
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
+impl std::error::Error for PParamsError {}
+
+fn to_u64(field: &str, b: BigInt) -> Result<u64, PParamsError> {
+  let (positive, value, lossless) = b.get_u64();
+  if !lossless || !positive {
+    return Err(PParamsError::InvalidU64 {
+      field: field.to_string(),
+    });
+  }
+  Ok(value)
+}
+
+fn system_start(
+  field: &str,
+  ts: i64,
+) -> Result<chrono::DateTime<chrono::FixedOffset>, PParamsError> {
+  chrono::DateTime::from_timestamp(ts, 0)
+    .map(|dt| dt.fixed_offset())
+    .ok_or_else(|| PParamsError::InvalidSystemStart {
+      field: field.to_string(),
+      value: ts,
+    })
+}
+
+fn to_nonce(field: &str, n: Option<NapiNonce>) -> Result<Nonce, PParamsError> {
+  match n {
+    None => Ok(Nonce {
+      variant: NonceVariant::NeutralNonce,
+      hash: None,
+    }),
+    Some(n) if n.variant != 1 => Ok(Nonce {
+      variant: NonceVariant::NeutralNonce,
+      hash: None,
+    }),
+    Some(n) => {
+      let hash_str = n.hash.ok_or_else(|| PParamsError::InvalidNonceHash {
+        field: field.to_string(),
+        reason: "variant is Nonce (1) but hash is missing".to_string(),
+      })?;
+      let bytes = hex::decode(&hash_str).map_err(|e| PParamsError::InvalidNonceHash {
+        field: field.to_string(),
+        reason: format!("invalid hex: {e}"),
+      })?;
+      if bytes.len() != 32 {
+        return Err(PParamsError::InvalidNonceHash {
+          field: field.to_string(),
+          reason: format!("expected 32 bytes, got {}", bytes.len()),
+        });
+      }
+      let mut arr = [0u8; 32];
+      arr.copy_from_slice(&bytes);
+      Ok(Nonce {
+        variant: NonceVariant::Nonce,
+        hash: Some(Hash::<32>::new(arr)),
+      })
+    }
+  }
+}
+
+fn protocol_version(field: &str, p: Vec<BigInt>) -> Result<(u64, u64), PParamsError> {
+  if p.len() != 2 {
+    return Err(PParamsError::InvalidProtocolVersion {
+      field: field.to_string(),
+      reason: format!("expected 2 elements, got {}", p.len()),
+    });
+  }
+  let mut iter = p.into_iter();
+  Ok((
+    to_u64(&format!("{field}.major"), iter.next().unwrap())?,
+    to_u64(&format!("{field}.minor"), iter.next().unwrap())?,
+  ))
+}
+
+#[napi(object)]
 pub struct NapiUnitInterval {
-  pub numerator: u64,
-  pub denominator: u64,
+  pub numerator: BigInt,
+  pub denominator: BigInt,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
+impl NapiUnitInterval {
+  fn try_into_rational(self, field: &str) -> Result<RationalNumber, PParamsError> {
+    Ok(RationalNumber {
+      numerator: to_u64(&format!("{field}.numerator"), self.numerator)?,
+      denominator: to_u64(&format!("{field}.denominator"), self.denominator)?,
+    })
+  }
+}
+
+#[napi(object)]
 pub struct NapiExUnits {
-  pub mem: u64,
-  pub steps: u64,
+  pub mem: BigInt,
+  pub steps: BigInt,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
+impl NapiExUnits {
+  fn try_into_ex_units(self, field: &str) -> Result<ExUnits, PParamsError> {
+    Ok(ExUnits {
+      mem: to_u64(&format!("{field}.mem"), self.mem)?,
+      steps: to_u64(&format!("{field}.steps"), self.steps)?,
+    })
+  }
+}
+
+#[napi(object)]
 pub struct NapiExUnitPrices {
   pub mem_price: NapiUnitInterval,
   pub step_price: NapiUnitInterval,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
+impl NapiExUnitPrices {
+  fn try_into_ex_unit_prices(self, field: &str) -> Result<ExUnitPrices, PParamsError> {
+    Ok(ExUnitPrices {
+      mem_price: self.mem_price.try_into_rational(&format!("{field}.memPrice"))?,
+      step_price: self.step_price.try_into_rational(&format!("{field}.stepPrice"))?,
+    })
+  }
+}
+
+#[napi(object)]
 pub struct NapiCostModels {
   pub plutus_v1: Option<Vec<i64>>,
   pub plutus_v2: Option<Vec<i64>>,
   pub plutus_v3: Option<Vec<i64>>,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
+impl NapiCostModels {
+  fn into_alonzo(self) -> BTreeMap<AlonzoLanguage, Vec<i64>> {
+    let mut out = BTreeMap::new();
+    if let Some(v1) = self.plutus_v1 {
+      out.insert(AlonzoLanguage::PlutusV1, v1);
+    }
+    out
+  }
+
+  fn into_babbage(self) -> BabbageCostModels {
+    BabbageCostModels {
+      plutus_v1: self.plutus_v1,
+      plutus_v2: self.plutus_v2,
+    }
+  }
+
+  fn into_conway(self) -> ConwayCostModels {
+    ConwayCostModels {
+      plutus_v1: self.plutus_v1,
+      plutus_v2: self.plutus_v2,
+      plutus_v3: self.plutus_v3,
+      unknown: BTreeMap::new(),
+    }
+  }
+}
+
+#[napi(object)]
 pub struct NapiNonce {
   pub variant: u8,
   pub hash: Option<String>,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[napi(object)]
 pub struct NapiPoolVotingThresholds {
   pub motion_no_confidence: NapiUnitInterval,
   pub committee_normal: NapiUnitInterval,
@@ -64,8 +203,32 @@ pub struct NapiPoolVotingThresholds {
   pub security_voting_threshold: NapiUnitInterval,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
+impl NapiPoolVotingThresholds {
+  fn try_into_pool_voting_thresholds(
+    self,
+    field: &str,
+  ) -> Result<PoolVotingThresholds, PParamsError> {
+    Ok(PoolVotingThresholds {
+      motion_no_confidence: self
+        .motion_no_confidence
+        .try_into_rational(&format!("{field}.motionNoConfidence"))?,
+      committee_normal: self
+        .committee_normal
+        .try_into_rational(&format!("{field}.committeeNormal"))?,
+      committee_no_confidence: self
+        .committee_no_confidence
+        .try_into_rational(&format!("{field}.committeeNoConfidence"))?,
+      hard_fork_initiation: self
+        .hard_fork_initiation
+        .try_into_rational(&format!("{field}.hardForkInitiation"))?,
+      security_voting_threshold: self
+        .security_voting_threshold
+        .try_into_rational(&format!("{field}.securityVotingThreshold"))?,
+    })
+  }
+}
+
+#[napi(object)]
 pub struct NapiDRepVotingThresholds {
   pub motion_no_confidence: NapiUnitInterval,
   pub committee_normal: NapiUnitInterval,
@@ -79,60 +242,64 @@ pub struct NapiDRepVotingThresholds {
   pub treasury_withdrawal: NapiUnitInterval,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NapiAlonzoBabbageProtParams {
-  pub system_start: i64,
-  pub epoch_length: u64,
-  pub slot_length: u64,
-  pub minfee_a: u32,
-  pub minfee_b: u32,
-  pub max_block_body_size: u32,
-  pub max_transaction_size: u32,
-  pub max_block_header_size: u32,
-  pub key_deposit: u64,
-  pub pool_deposit: u64,
-  pub desired_number_of_stake_pools: u32,
-  pub protocol_version: [u64; 2],
-  pub min_pool_cost: u64,
-  pub ada_per_utxo_byte: u64,
-  pub cost_models_for_script_languages: NapiCostModels,
-  pub execution_costs: NapiExUnitPrices,
-  pub max_tx_ex_units: NapiExUnits,
-  pub max_block_ex_units: NapiExUnits,
-  pub max_value_size: u32,
-  pub collateral_percentage: u32,
-  pub max_collateral_inputs: u32,
-  pub expansion_rate: NapiUnitInterval,
-  pub treasury_growth_rate: NapiUnitInterval,
-  pub maximum_epoch: u64,
-  pub pool_pledge_influence: NapiUnitInterval,
-  #[serde(default = "default_unit_interval")]
-  pub decentralization_constant: NapiUnitInterval,
-  #[serde(default)]
-  pub extra_entropy: Option<NapiNonce>,
+impl NapiDRepVotingThresholds {
+  fn try_into_drep_voting_thresholds(
+    self,
+    field: &str,
+  ) -> Result<DRepVotingThresholds, PParamsError> {
+    Ok(DRepVotingThresholds {
+      motion_no_confidence: self
+        .motion_no_confidence
+        .try_into_rational(&format!("{field}.motionNoConfidence"))?,
+      committee_normal: self
+        .committee_normal
+        .try_into_rational(&format!("{field}.committeeNormal"))?,
+      committee_no_confidence: self
+        .committee_no_confidence
+        .try_into_rational(&format!("{field}.committeeNoConfidence"))?,
+      update_constitution: self
+        .update_constitution
+        .try_into_rational(&format!("{field}.updateConstitution"))?,
+      hard_fork_initiation: self
+        .hard_fork_initiation
+        .try_into_rational(&format!("{field}.hardForkInitiation"))?,
+      pp_network_group: self
+        .pp_network_group
+        .try_into_rational(&format!("{field}.ppNetworkGroup"))?,
+      pp_economic_group: self
+        .pp_economic_group
+        .try_into_rational(&format!("{field}.ppEconomicGroup"))?,
+      pp_technical_group: self
+        .pp_technical_group
+        .try_into_rational(&format!("{field}.ppTechnicalGroup"))?,
+      pp_governance_group: self
+        .pp_governance_group
+        .try_into_rational(&format!("{field}.ppGovernanceGroup"))?,
+      treasury_withdrawal: self
+        .treasury_withdrawal
+        .try_into_rational(&format!("{field}.treasuryWithdrawal"))?,
+    })
+  }
 }
 
-pub type NapiAlonzoProtParams = NapiAlonzoBabbageProtParams;
-pub type NapiBabbageProtParams = NapiAlonzoBabbageProtParams;
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NapiConwayProtParams {
+/// Union of all protocol-parameter fields for Alonzo, Babbage, and Conway.
+/// Pre-Conway eras ignore the Conway-only fields.
+#[napi(object)]
+pub struct NapiPParams {
   pub system_start: i64,
-  pub epoch_length: u64,
-  pub slot_length: u64,
+  pub epoch_length: BigInt,
+  pub slot_length: BigInt,
   pub minfee_a: u32,
   pub minfee_b: u32,
   pub max_block_body_size: u32,
   pub max_transaction_size: u32,
   pub max_block_header_size: u32,
-  pub key_deposit: u64,
-  pub pool_deposit: u64,
+  pub key_deposit: BigInt,
+  pub pool_deposit: BigInt,
   pub desired_number_of_stake_pools: u32,
-  pub protocol_version: [u64; 2],
-  pub min_pool_cost: u64,
-  pub ada_per_utxo_byte: u64,
+  pub protocol_version: Vec<BigInt>,
+  pub min_pool_cost: BigInt,
+  pub ada_per_utxo_byte: BigInt,
   pub cost_models_for_script_languages: NapiCostModels,
   pub execution_costs: NapiExUnitPrices,
   pub max_tx_ex_units: NapiExUnits,
@@ -142,218 +309,157 @@ pub struct NapiConwayProtParams {
   pub max_collateral_inputs: u32,
   pub expansion_rate: NapiUnitInterval,
   pub treasury_growth_rate: NapiUnitInterval,
-  pub maximum_epoch: u64,
+  pub maximum_epoch: BigInt,
   pub pool_pledge_influence: NapiUnitInterval,
+  pub decentralization_constant: NapiUnitInterval,
+  pub extra_entropy: Option<NapiNonce>,
   pub pool_voting_thresholds: NapiPoolVotingThresholds,
   pub drep_voting_thresholds: NapiDRepVotingThresholds,
-  pub min_committee_size: u64,
-  pub committee_term_limit: u64,
-  pub governance_action_validity_period: u64,
-  pub governance_action_deposit: u64,
-  pub drep_deposit: u64,
-  pub drep_inactivity_period: u64,
+  pub min_committee_size: BigInt,
+  pub committee_term_limit: BigInt,
+  pub governance_action_validity_period: BigInt,
+  pub governance_action_deposit: BigInt,
+  pub drep_deposit: BigInt,
+  pub drep_inactivity_period: BigInt,
   pub minfee_refscript_cost_per_byte: NapiUnitInterval,
 }
 
-impl From<NapiUnitInterval> for RationalNumber {
-  fn from(r: NapiUnitInterval) -> Self {
-    RationalNumber {
-      numerator: r.numerator,
-      denominator: r.denominator,
-    }
-  }
-}
-
-impl From<NapiExUnits> for ExUnits {
-  fn from(u: NapiExUnits) -> Self {
-    ExUnits {
-      mem: u.mem,
-      steps: u.steps,
-    }
-  }
-}
-
-impl From<NapiExUnitPrices> for ExUnitPrices {
-  fn from(p: NapiExUnitPrices) -> Self {
-    ExUnitPrices {
-      mem_price: p.mem_price.into(),
-      step_price: p.step_price.into(),
-    }
-  }
-}
-
-fn system_start(ts: i64) -> chrono::DateTime<chrono::FixedOffset> {
-  chrono::DateTime::from_timestamp(ts, 0)
-    .map(|dt| dt.fixed_offset())
-    .unwrap_or_else(|| chrono::DateTime::UNIX_EPOCH.fixed_offset())
-}
-
-fn to_nonce(n: Option<NapiNonce>) -> Nonce {
-  match n {
-    Some(n) => {
-      let hash = n.hash.and_then(|h| {
-        let bytes = hex::decode(h).ok()?;
-        (bytes.len() == 32).then(|| {
-          let mut arr = [0u8; 32];
-          arr.copy_from_slice(&bytes);
-          Hash::<32>::new(arr)
-        })
-      });
-      Nonce {
-        variant: match n.variant {
-          1 => NonceVariant::Nonce,
-          _ => NonceVariant::NeutralNonce,
-        },
-        hash,
-      }
-    }
-    None => Nonce {
-      variant: NonceVariant::NeutralNonce,
-      hash: None,
-    },
-  }
-}
-
-impl From<NapiAlonzoBabbageProtParams> for AlonzoProtParams {
-  fn from(p: NapiAlonzoBabbageProtParams) -> Self {
-    let mut cost_models = BTreeMap::new();
-    if let Some(v1) = p.cost_models_for_script_languages.plutus_v1 {
-      cost_models.insert(AlonzoLanguage::PlutusV1, v1);
-    }
-
-    let (extra_entropy, protocol_version) = (
-      to_nonce(p.extra_entropy),
-      (p.protocol_version[0], p.protocol_version[1]),
-    );
-
-    AlonzoProtParams {
-      system_start: system_start(p.system_start),
-      epoch_length: p.epoch_length,
-      slot_length: p.slot_length,
+impl TryFrom<NapiPParams> for AlonzoProtParams {
+  type Error = PParamsError;
+  fn try_from(p: NapiPParams) -> Result<Self, Self::Error> {
+    Ok(AlonzoProtParams {
+      system_start: system_start("systemStart", p.system_start)?,
+      epoch_length: to_u64("epochLength", p.epoch_length)?,
+      slot_length: to_u64("slotLength", p.slot_length)?,
       minfee_a: p.minfee_a,
       minfee_b: p.minfee_b,
       max_block_body_size: p.max_block_body_size,
       max_transaction_size: p.max_transaction_size,
       max_block_header_size: p.max_block_header_size,
-      key_deposit: p.key_deposit,
-      pool_deposit: p.pool_deposit,
+      key_deposit: to_u64("keyDeposit", p.key_deposit)?,
+      pool_deposit: to_u64("poolDeposit", p.pool_deposit)?,
       desired_number_of_stake_pools: p.desired_number_of_stake_pools,
-      protocol_version,
-      min_pool_cost: p.min_pool_cost,
-      ada_per_utxo_byte: p.ada_per_utxo_byte,
-      cost_models_for_script_languages: cost_models,
-      execution_costs: p.execution_costs.into(),
-      max_tx_ex_units: p.max_tx_ex_units.into(),
-      max_block_ex_units: p.max_block_ex_units.into(),
+      protocol_version: protocol_version("protocolVersion", p.protocol_version)?,
+      min_pool_cost: to_u64("minPoolCost", p.min_pool_cost)?,
+      ada_per_utxo_byte: to_u64("adaPerUtxoByte", p.ada_per_utxo_byte)?,
+      cost_models_for_script_languages: p.cost_models_for_script_languages.into_alonzo(),
+      execution_costs: p.execution_costs.try_into_ex_unit_prices("executionCosts")?,
+      max_tx_ex_units: p.max_tx_ex_units.try_into_ex_units("maxTxExUnits")?,
+      max_block_ex_units: p.max_block_ex_units.try_into_ex_units("maxBlockExUnits")?,
       max_value_size: p.max_value_size,
       collateral_percentage: p.collateral_percentage,
       max_collateral_inputs: p.max_collateral_inputs,
-      expansion_rate: p.expansion_rate.into(),
-      treasury_growth_rate: p.treasury_growth_rate.into(),
-      maximum_epoch: p.maximum_epoch,
-      pool_pledge_influence: p.pool_pledge_influence.into(),
-      decentralization_constant: p.decentralization_constant.into(),
-      extra_entropy,
-    }
+      expansion_rate: p.expansion_rate.try_into_rational("expansionRate")?,
+      treasury_growth_rate: p
+        .treasury_growth_rate
+        .try_into_rational("treasuryGrowthRate")?,
+      maximum_epoch: to_u64("maximumEpoch", p.maximum_epoch)?,
+      pool_pledge_influence: p
+        .pool_pledge_influence
+        .try_into_rational("poolPledgeInfluence")?,
+      decentralization_constant: p
+        .decentralization_constant
+        .try_into_rational("decentralizationConstant")?,
+      extra_entropy: to_nonce("extraEntropy", p.extra_entropy)?,
+    })
   }
 }
 
-impl From<NapiAlonzoBabbageProtParams> for BabbageProtParams {
-  fn from(p: NapiAlonzoBabbageProtParams) -> Self {
-    BabbageProtParams {
-      system_start: system_start(p.system_start),
-      epoch_length: p.epoch_length,
-      slot_length: p.slot_length,
+impl TryFrom<NapiPParams> for BabbageProtParams {
+  type Error = PParamsError;
+  fn try_from(p: NapiPParams) -> Result<Self, Self::Error> {
+    Ok(BabbageProtParams {
+      system_start: system_start("systemStart", p.system_start)?,
+      epoch_length: to_u64("epochLength", p.epoch_length)?,
+      slot_length: to_u64("slotLength", p.slot_length)?,
       minfee_a: p.minfee_a,
       minfee_b: p.minfee_b,
       max_block_body_size: p.max_block_body_size,
       max_transaction_size: p.max_transaction_size,
       max_block_header_size: p.max_block_header_size,
-      key_deposit: p.key_deposit,
-      pool_deposit: p.pool_deposit,
+      key_deposit: to_u64("keyDeposit", p.key_deposit)?,
+      pool_deposit: to_u64("poolDeposit", p.pool_deposit)?,
       desired_number_of_stake_pools: p.desired_number_of_stake_pools,
-      protocol_version: (p.protocol_version[0], p.protocol_version[1]),
-      min_pool_cost: p.min_pool_cost,
-      ada_per_utxo_byte: p.ada_per_utxo_byte,
-      cost_models_for_script_languages: BabbageCostModels {
-        plutus_v1: p.cost_models_for_script_languages.plutus_v1,
-        plutus_v2: p.cost_models_for_script_languages.plutus_v2,
-      },
-      execution_costs: p.execution_costs.into(),
-      max_tx_ex_units: p.max_tx_ex_units.into(),
-      max_block_ex_units: p.max_block_ex_units.into(),
+      protocol_version: protocol_version("protocolVersion", p.protocol_version)?,
+      min_pool_cost: to_u64("minPoolCost", p.min_pool_cost)?,
+      ada_per_utxo_byte: to_u64("adaPerUtxoByte", p.ada_per_utxo_byte)?,
+      cost_models_for_script_languages: p.cost_models_for_script_languages.into_babbage(),
+      execution_costs: p.execution_costs.try_into_ex_unit_prices("executionCosts")?,
+      max_tx_ex_units: p.max_tx_ex_units.try_into_ex_units("maxTxExUnits")?,
+      max_block_ex_units: p.max_block_ex_units.try_into_ex_units("maxBlockExUnits")?,
       max_value_size: p.max_value_size,
       collateral_percentage: p.collateral_percentage,
       max_collateral_inputs: p.max_collateral_inputs,
-      expansion_rate: p.expansion_rate.into(),
-      treasury_growth_rate: p.treasury_growth_rate.into(),
-      maximum_epoch: p.maximum_epoch,
-      pool_pledge_influence: p.pool_pledge_influence.into(),
-      decentralization_constant: p.decentralization_constant.into(),
-      extra_entropy: to_nonce(p.extra_entropy),
-    }
+      expansion_rate: p.expansion_rate.try_into_rational("expansionRate")?,
+      treasury_growth_rate: p
+        .treasury_growth_rate
+        .try_into_rational("treasuryGrowthRate")?,
+      maximum_epoch: to_u64("maximumEpoch", p.maximum_epoch)?,
+      pool_pledge_influence: p
+        .pool_pledge_influence
+        .try_into_rational("poolPledgeInfluence")?,
+      decentralization_constant: p
+        .decentralization_constant
+        .try_into_rational("decentralizationConstant")?,
+      extra_entropy: to_nonce("extraEntropy", p.extra_entropy)?,
+    })
   }
 }
 
-impl From<NapiConwayProtParams> for ConwayProtParams {
-  fn from(p: NapiConwayProtParams) -> Self {
-    ConwayProtParams {
-      system_start: system_start(p.system_start),
-      epoch_length: p.epoch_length,
-      slot_length: p.slot_length,
+impl TryFrom<NapiPParams> for ConwayProtParams {
+  type Error = PParamsError;
+  fn try_from(p: NapiPParams) -> Result<Self, Self::Error> {
+    Ok(ConwayProtParams {
+      system_start: system_start("systemStart", p.system_start)?,
+      epoch_length: to_u64("epochLength", p.epoch_length)?,
+      slot_length: to_u64("slotLength", p.slot_length)?,
       minfee_a: p.minfee_a,
       minfee_b: p.minfee_b,
       max_block_body_size: p.max_block_body_size,
       max_transaction_size: p.max_transaction_size,
       max_block_header_size: p.max_block_header_size,
-      key_deposit: p.key_deposit,
-      pool_deposit: p.pool_deposit,
+      key_deposit: to_u64("keyDeposit", p.key_deposit)?,
+      pool_deposit: to_u64("poolDeposit", p.pool_deposit)?,
       desired_number_of_stake_pools: p.desired_number_of_stake_pools,
-      protocol_version: (p.protocol_version[0], p.protocol_version[1]),
-      min_pool_cost: p.min_pool_cost,
-      ada_per_utxo_byte: p.ada_per_utxo_byte,
-      cost_models_for_script_languages: ConwayCostModels {
-        plutus_v1: p.cost_models_for_script_languages.plutus_v1,
-        plutus_v2: p.cost_models_for_script_languages.plutus_v2,
-        plutus_v3: p.cost_models_for_script_languages.plutus_v3,
-        unknown: BTreeMap::new(),
-      },
-      execution_costs: p.execution_costs.into(),
-      max_tx_ex_units: p.max_tx_ex_units.into(),
-      max_block_ex_units: p.max_block_ex_units.into(),
+      protocol_version: protocol_version("protocolVersion", p.protocol_version)?,
+      min_pool_cost: to_u64("minPoolCost", p.min_pool_cost)?,
+      ada_per_utxo_byte: to_u64("adaPerUtxoByte", p.ada_per_utxo_byte)?,
+      cost_models_for_script_languages: p.cost_models_for_script_languages.into_conway(),
+      execution_costs: p.execution_costs.try_into_ex_unit_prices("executionCosts")?,
+      max_tx_ex_units: p.max_tx_ex_units.try_into_ex_units("maxTxExUnits")?,
+      max_block_ex_units: p.max_block_ex_units.try_into_ex_units("maxBlockExUnits")?,
       max_value_size: p.max_value_size,
       collateral_percentage: p.collateral_percentage,
       max_collateral_inputs: p.max_collateral_inputs,
-      expansion_rate: p.expansion_rate.into(),
-      treasury_growth_rate: p.treasury_growth_rate.into(),
-      maximum_epoch: p.maximum_epoch,
-      pool_pledge_influence: p.pool_pledge_influence.into(),
-      pool_voting_thresholds: PoolVotingThresholds {
-        motion_no_confidence: p.pool_voting_thresholds.motion_no_confidence.into(),
-        committee_normal: p.pool_voting_thresholds.committee_normal.into(),
-        committee_no_confidence: p.pool_voting_thresholds.committee_no_confidence.into(),
-        hard_fork_initiation: p.pool_voting_thresholds.hard_fork_initiation.into(),
-        security_voting_threshold: p.pool_voting_thresholds.security_voting_threshold.into(),
-      },
-      drep_voting_thresholds: DRepVotingThresholds {
-        motion_no_confidence: p.drep_voting_thresholds.motion_no_confidence.into(),
-        committee_normal: p.drep_voting_thresholds.committee_normal.into(),
-        committee_no_confidence: p.drep_voting_thresholds.committee_no_confidence.into(),
-        update_constitution: p.drep_voting_thresholds.update_constitution.into(),
-        hard_fork_initiation: p.drep_voting_thresholds.hard_fork_initiation.into(),
-        pp_network_group: p.drep_voting_thresholds.pp_network_group.into(),
-        pp_economic_group: p.drep_voting_thresholds.pp_economic_group.into(),
-        pp_technical_group: p.drep_voting_thresholds.pp_technical_group.into(),
-        pp_governance_group: p.drep_voting_thresholds.pp_governance_group.into(),
-        treasury_withdrawal: p.drep_voting_thresholds.treasury_withdrawal.into(),
-      },
-      min_committee_size: p.min_committee_size,
-      committee_term_limit: p.committee_term_limit,
-      governance_action_validity_period: p.governance_action_validity_period,
-      governance_action_deposit: p.governance_action_deposit,
-      drep_deposit: p.drep_deposit,
-      drep_inactivity_period: p.drep_inactivity_period,
-      minfee_refscript_cost_per_byte: p.minfee_refscript_cost_per_byte.into(),
-    }
+      expansion_rate: p.expansion_rate.try_into_rational("expansionRate")?,
+      treasury_growth_rate: p
+        .treasury_growth_rate
+        .try_into_rational("treasuryGrowthRate")?,
+      maximum_epoch: to_u64("maximumEpoch", p.maximum_epoch)?,
+      pool_pledge_influence: p
+        .pool_pledge_influence
+        .try_into_rational("poolPledgeInfluence")?,
+      pool_voting_thresholds: p
+        .pool_voting_thresholds
+        .try_into_pool_voting_thresholds("poolVotingThresholds")?,
+      drep_voting_thresholds: p
+        .drep_voting_thresholds
+        .try_into_drep_voting_thresholds("drepVotingThresholds")?,
+      min_committee_size: to_u64("minCommitteeSize", p.min_committee_size)?,
+      committee_term_limit: to_u64("committeeTermLimit", p.committee_term_limit)?,
+      governance_action_validity_period: to_u64(
+        "governanceActionValidityPeriod",
+        p.governance_action_validity_period,
+      )?,
+      governance_action_deposit: to_u64(
+        "governanceActionDeposit",
+        p.governance_action_deposit,
+      )?,
+      drep_deposit: to_u64("drepDeposit", p.drep_deposit)?,
+      drep_inactivity_period: to_u64("drepInactivityPeriod", p.drep_inactivity_period)?,
+      minfee_refscript_cost_per_byte: p
+        .minfee_refscript_cost_per_byte
+        .try_into_rational("minfeeRefscriptCostPerByte")?,
+    })
   }
 }

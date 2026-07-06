@@ -65,3 +65,23 @@ export const NETWORK_MAGIC: Record<Network, number> = {
   preview: 2,
   devnet: 42,
 };
+
+export const SHELLEY_START_SECONDS: Record<Network, number> = {
+  mainnet: 1596491091,
+  preprod: 1655769600,
+  preview: 1660003200,
+  devnet: 1660003200,
+};
+
+export const PRE_BYRON_SLOT_OFFSET: Record<Network, number> = {
+  mainnet: 4924800,
+  preprod: 86400,
+  preview: 0,
+  devnet: 0,
+};
+
+export const SENTINEL_MAXIMUM_EPOCH = 999999999n;
+
+export function currentSlot(network: Network, nowSec: number = Math.floor(Date.now() / 1000)): number {
+  return Math.max(0, nowSec - SHELLEY_START_SECONDS[network] + PRE_BYRON_SLOT_OFFSET[network]);
+}

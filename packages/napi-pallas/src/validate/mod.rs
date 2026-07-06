@@ -8,15 +8,15 @@ use pallas::ledger::traverse::{Era, MultiEraTx};
 use pallas::ledger::validate::phase1::alonzo::validate_alonzo_tx;
 use pallas::ledger::validate::phase1::babbage::validate_babbage_tx;
 use pallas::ledger::validate::phase1::conway::validate_conway_tx;
-use pallas::ledger::validate::utils::ValidationError;
-
-use crate::_napi_rs_internal_register_parse_datum_info;
+use pallas::ledger::validate::utils::{
+  AlonzoProtParams, BabbageProtParams, ConwayProtParams, ValidationError,
+};
 
 use self::checks::{
   build_all_passed, build_checks_from_error, unsupported_era_response, ErrorMatcher, ALONZO_CHECKS,
   BABBAGE_CHECKS, CONWAY_CHECKS,
 };
-use self::params::{NapiAlonzoProtParams, NapiBabbageProtParams, NapiConwayProtParams};
+use self::params::NapiPParams;
 pub use self::types::{ValidationCheck, ValidationInput, ValidationResponse};
 use self::utxos::build_utxos_for_era;
 
@@ -56,7 +56,7 @@ fn validate_result(
 pub fn validate_cbor_tx(
   cbor: String,
   inputs: Vec<ValidationInput>,
-  pparams_json: String,
+  pparams: NapiPParams,
   slot: BigInt,
   network_id: u8,
   network_magic: u32,
@@ -94,17 +94,10 @@ pub fn validate_cbor_tx(
         Err(e) => return err("conway", "decode", e.to_string()),
       };
 
-      let pparams: NapiConwayProtParams = match serde_json::from_str(&pparams_json) {
+      let conway_pps = match ConwayProtParams::try_from(pparams) {
         Ok(p) => p,
-        Err(e) => {
-          return err(
-            "conway",
-            "params",
-            format!("Failed to parse Conway params: {}", e),
-          )
-        }
+        Err(e) => return err("conway", "params", e.to_string()),
       };
-      let conway_pps = pparams.into();
 
       validate_result(
         "conway",
@@ -120,17 +113,10 @@ pub fn validate_cbor_tx(
         Err(e) => return err("babbage", "decode", e.to_string()),
       };
 
-      let pparams: NapiBabbageProtParams = match serde_json::from_str(&pparams_json) {
+      let babbage_pps = match BabbageProtParams::try_from(pparams) {
         Ok(p) => p,
-        Err(e) => {
-          return err(
-            "babbage",
-            "params",
-            format!("Failed to parse Babbage params: {}", e),
-          )
-        }
+        Err(e) => return err("babbage", "params", e.to_string()),
       };
-      let babbage_pps = pparams.into();
 
       validate_result(
         "babbage",
@@ -163,17 +149,10 @@ pub fn validate_cbor_tx(
         Err(e) => return err("alonzo", "decode", e.to_string()),
       };
 
-      let pparams: NapiAlonzoProtParams = match serde_json::from_str(&pparams_json) {
+      let alonzo_pps = match AlonzoProtParams::try_from(pparams) {
         Ok(p) => p,
-        Err(e) => {
-          return err(
-            "alonzo",
-            "params",
-            format!("Failed to parse Alonzo params: {}", e),
-          )
-        }
+        Err(e) => return err("alonzo", "params", e.to_string()),
       };
-      let alonzo_pps = pparams.into();
 
       validate_result(
         "alonzo",
