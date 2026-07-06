@@ -10,6 +10,8 @@ use pallas::ledger::validate::phase1::babbage::validate_babbage_tx;
 use pallas::ledger::validate::phase1::conway::validate_conway_tx;
 use pallas::ledger::validate::utils::ValidationError;
 
+use crate::_napi_rs_internal_register_parse_datum_info;
+
 use self::checks::{
   build_all_passed, build_checks_from_error, unsupported_era_response, ErrorMatcher, ALONZO_CHECKS,
   BABBAGE_CHECKS, CONWAY_CHECKS,
@@ -59,8 +61,8 @@ pub fn validate_cbor_tx(
   network_id: u8,
   network_magic: u32,
 ) -> ValidationResponse {
-  let (_signed, slot_u64, lost_precision) = slot.get_u64();
-  if lost_precision {
+  let (_signed, slot_u64, lossless) = slot.get_u64();
+  if !lossless {
     return err(
       "unknown",
       "params",

@@ -1,9 +1,14 @@
-import { cborParse, validateCborTx, type ValidationInput } from "@laceanatomy/napi-pallas";
-import { query, UtxoRpcClient } from "@laceanatomy/utxorpc-sdk";
+import {
+  cborParse,
+  validateCborTx,
+  type ValidationInput,
+} from "@laceanatomy/napi-pallas";
+import { UtxoRpcClient } from "@laceanatomy/utxorpc-sdk";
 import { createGrpcTransport } from "@laceanatomy/utxorpc-sdk/transport/node";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import {
   getApiKey,
+  NETWORK,
   NETWORK_ID,
   NETWORK_MAGIC,
   validateTxSchema,
@@ -33,7 +38,7 @@ function getUtxoRpcClient(network: Network): UtxoRpcClient | null {
   const config = getNetworkConfigServer(network);
   if (!config.dolosUtxorpcUrl) return null;
   const headers = config.dolosUtxorpcApiKey
-    ? { "api-key": config.dolosUtxorpcApiKey }
+    ? { "dmtr-api-key": config.dolosUtxorpcApiKey }
     : undefined;
   return new UtxoRpcClient({
     transport: createGrpcTransport({
@@ -63,24 +68,62 @@ function uint8ToHex(bytes: Uint8Array): string {
   return Buffer.from(bytes).toString("hex");
 }
 
-async function resolveUtxos(
+async function resolveInputsFromTransactions(
   inputHashes: { txHash: string; index: number }[],
   client: UtxoRpcClient,
 ): Promise<{ resolved: ValidationInput[]; errors: UtxoResolutionError[] }> {
-  const keys = inputHashes.map(
-    ({ txHash, index }) =>
-      new query.TxoRef({ hash: Buffer.from(txHash, "hex"), index }),
+  const inputsByTx = new Map<string, { txHash: string; index: number }[]>();
+  for (const input of inputHashes) {
+    const list = inputsByTx.get(input.txHash) ?? [];
+    list.push(input);
+    inputsByTx.set(input.txHash, list);
+  }
+
+  const outputsByTx = new Map<string, { bytes: string }[]>();
+
+  await Promise.all(
+    Array.from(inputsByTx.keys()).map(async (txHash) => {
+      try {
+        const response = await client.query.readTx({
+          hash: new Uint8Array(Buffer.from(txHash, "hex")),
+        });
+
+        if (!response.tx || response.tx.chain.case !== "cardano") {
+          outputsByTx.set(txHash, []);
+          return;
+        }
+
+        const txHex = uint8ToHex(response.tx.nativeBytes);
+        const parsed = cborParse(txHex);
+        if (parsed.error || !parsed.cborRes) {
+          outputsByTx.set(txHash, []);
+          return;
+        }
+
+        outputsByTx.set(
+          txHash,
+          parsed.cborRes.outputs.map((output) => ({ bytes: output.bytes })),
+        );
+      } catch (err) {
+        const connectErr = err as { code?: unknown };
+        if (connectErr.code === 16) {
+          throw new Error(
+            "UTxORPC request was unauthenticated. Check that the correct *_DOLOS_UTXORPC_API_KEY is configured for the selected network.",
+          );
+        }
+        outputsByTx.set(txHash, []);
+      }
+    }),
   );
 
-  const response = await client.query.readUtxos({ keys });
   const resolved: ValidationInput[] = [];
   const errors: UtxoResolutionError[] = [];
 
-  for (let i = 0; i < inputHashes.length; i++) {
-    const input = inputHashes[i]!;
-    const item = response.items[i];
+  for (const input of inputHashes) {
+    const outputs = outputsByTx.get(input.txHash) ?? [];
+    const output = outputs[input.index];
 
-    if (!item || item.parsedState.case !== "cardano") {
+    if (!output) {
       errors.push({
         txHash: input.txHash,
         index: input.index,
@@ -92,7 +135,7 @@ async function resolveUtxos(
     resolved.push({
       txHash: input.txHash,
       index: input.index,
-      bytes: uint8ToHex(item.nativeBytes),
+      bytes: output.bytes,
     });
   }
 
@@ -347,20 +390,24 @@ export async function POST(req: Request) {
         },
       );
     }
-    const { resolved: resolvedUtxos, errors: utxoErrors } = await resolveUtxos(
-      allInputHashes,
-      utxoClient,
-    );
+    const { resolved: resolvedUtxos, errors: utxoErrors } =
+      await resolveInputsFromTransactions(allInputHashes, utxoClient);
 
     const pparams = await fetchProtocolParams(network, apiKey);
     const pparamsJson = JSON.stringify(pparams);
     const networkId = NETWORK_ID[network];
     const networkMagic = NETWORK_MAGIC[network];
 
-    const nowSec = Date.now() / 1000;
+    const nowSec = Math.floor(Date.now() / 1000);
     const currentSlot = Math.max(
       0,
-      Math.floor((nowSec - pparams.systemStart) / pparams.slotLength),
+      Math.floor(
+        network === NETWORK.MAINNET
+          ? nowSec - 1596491091 + 4924800
+          : network === NETWORK.PREPROD
+            ? nowSec - 1655769600 + 86400
+            : nowSec - 1660003200,
+      ),
     );
     const slot = providedSlot ?? currentSlot;
 

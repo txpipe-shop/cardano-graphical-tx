@@ -64,6 +64,7 @@ export default function CborPage() {
   const [network, setNetwork] = useState<Network>(NETWORK.MAINNET);
   const [devnetPort, setDevnetPort] = useState("5164");
   const [initialCbor, setInitialCbor] = useState<string | null>(null);
+  const [currentCbor, setCurrentCbor] = useState<string>("");
   const [parsedTx, setParsedTx] = useState<IGraphicalTransaction | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -103,6 +104,7 @@ export default function CborPage() {
         })
         .then(({ cbor }) => {
           setInitialCbor(cbor);
+          setCurrentCbor(cbor);
           return getTxFromCbor(cbor, net);
         })
         .then((tx) => {
@@ -155,6 +157,7 @@ export default function CborPage() {
         }
         const { cbor } = (await res.json()) as { cbor: string };
         setInitialCbor(cbor);
+        setCurrentCbor(cbor);
 
         const tx = await getTxFromCbor(cbor, net);
         const gtx = parseTxToGraphical([tx], { transactions: [], utxos: {} });
@@ -189,12 +192,13 @@ export default function CborPage() {
     [hashInput, updateUrl],
   );
 
-  const handleReParse = useCallback(async () => {
-    if (!initialCbor) return;
+  const handleParseCbor = useCallback(async () => {
+    const cbor = currentCbor.trim();
+    if (!cbor) return;
     setIsLoading(true);
     setParseError(null);
     try {
-      const tx = await getTxFromCbor(initialCbor, network);
+      const tx = await getTxFromCbor(cbor, network);
       const gtx = parseTxToGraphical([tx], { transactions: [], utxos: {} });
       setParsedTx(gtx[0]!);
     } catch (e) {
@@ -205,25 +209,27 @@ export default function CborPage() {
             ? e.message
             : "Failed to parse CBOR";
       setParseError(msg);
+      setParsedTx(null);
     } finally {
       setIsLoading(false);
     }
-  }, [initialCbor, network]);
+  }, [currentCbor, network]);
 
   const handleValidate = useCallback(async () => {
-    if (!initialCbor) return;
+    const cbor = currentCbor.trim();
+    if (!cbor) return;
     setValidationLoading(true);
     setValidationError(null);
     setValidationResult(null);
     try {
-      const result = await validateTx(initialCbor, network);
+      const result = await validateTx(cbor, network);
       setValidationResult(result);
     } catch (e) {
       setValidationError(e instanceof Error ? e.message : "Validation failed");
     } finally {
       setValidationLoading(false);
     }
-  }, [initialCbor, network]);
+  }, [currentCbor, network]);
 
   const tabs = [
     {
@@ -260,14 +266,38 @@ export default function CborPage() {
           Validating...
         </div>
       ) : validationError ? (
-        <div className="flex flex-1 items-center justify-center p-6">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
           <p className="whitespace-pre-wrap text-center text-red-2">
             {validationError}
           </p>
+          <Button
+            size="sm"
+            variant="flat"
+            className="font-mono shadow-md"
+            onPress={handleValidate}
+            isLoading={validationLoading}
+            isDisabled={!currentCbor.trim()}
+          >
+            Run Validation Again
+          </Button>
         </div>
       ) : validationResult ? (
-        <div className="flex-1 min-h-0 overflow-auto">
-          <ValidationView validation={validationResult} />
+        <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-auto">
+            <ValidationView validation={validationResult} />
+          </div>
+          <div className="flex shrink-0 justify-center">
+            <Button
+              size="sm"
+              variant="flat"
+              className="font-mono shadow-md"
+              onPress={handleValidate}
+              isLoading={validationLoading}
+              isDisabled={!currentCbor.trim()}
+            >
+              Run Validation Again
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="flex flex-1 items-center justify-center p-6">
@@ -277,7 +307,7 @@ export default function CborPage() {
             className="font-mono shadow-md"
             onPress={handleValidate}
             isLoading={validationLoading}
-            isDisabled={!initialCbor}
+            isDisabled={!currentCbor.trim()}
           >
             Run Validation
           </Button>
@@ -328,13 +358,17 @@ export default function CborPage() {
 
         <div className="flex flex-1 flex-col gap-4 overflow-hidden md:min-h-0 md:flex-row">
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <CborView cbor={initialCbor} />
+            <CborView
+              cbor={initialCbor ?? ""}
+              onCborChange={setCurrentCbor}
+            />
             <div className="flex shrink-0 justify-center pt-2">
               <Button
                 size="sm"
                 variant="flat"
                 className="font-mono shadow-md"
-                onPress={handleReParse}
+                onPress={handleParseCbor}
+                isDisabled={!currentCbor.trim()}
               >
                 CBOR → Transaction
               </Button>
