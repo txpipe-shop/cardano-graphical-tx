@@ -358,10 +358,7 @@ export default function CborPage() {
 
         <div className="flex flex-1 flex-col gap-4 overflow-hidden md:min-h-0 md:flex-row">
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <CborView
-              cbor={initialCbor ?? ""}
-              onCborChange={setCurrentCbor}
-            />
+            <CborView cbor={initialCbor ?? ""} onCborChange={setCurrentCbor} />
             <div className="flex shrink-0 justify-center pt-2">
               <Button
                 size="sm"
