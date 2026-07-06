@@ -117,6 +117,7 @@ static POST_ALONZO_CHECKS: &[(&str, ErrorMatcher)] = &[
     "check_script_data_hash",
     post_alonzo_matcher!(ScriptIntegrityHash),
   ),
+  ("unknown_error", |_: &ValidationError| true),
 ];
 
 pub static CONWAY_CHECKS: &[(&str, ErrorMatcher)] = POST_ALONZO_CHECKS;
@@ -180,6 +181,7 @@ pub static ALONZO_CHECKS: &[(&str, ErrorMatcher)] = &[
     alonzo_matcher!(ScriptIntegrityHash),
   ),
   ("check_minting", alonzo_matcher!(MintingLacksPolicy)),
+  ("unknown_error", |_: &ValidationError| true),
 ];
 
 pub fn build_checks_from_error(
