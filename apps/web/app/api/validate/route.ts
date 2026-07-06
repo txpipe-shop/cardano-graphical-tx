@@ -1,5 +1,5 @@
-import { cborParse, validateCborTx, type Utxo } from "@laceanatomy/napi-pallas";
-import { cardano, query, UtxoRpcClient } from "@laceanatomy/utxorpc-sdk";
+import { cborParse, validateCborTx, type ValidationInput } from "@laceanatomy/napi-pallas";
+import { query, UtxoRpcClient } from "@laceanatomy/utxorpc-sdk";
 import { createGrpcTransport } from "@laceanatomy/utxorpc-sdk/transport/node";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import {
@@ -63,22 +63,17 @@ function uint8ToHex(bytes: Uint8Array): string {
   return Buffer.from(bytes).toString("hex");
 }
 
-function bigIntToNumber(bi: cardano.BigInt | undefined): number {
-  if (bi?.bigInt?.case !== "int") return 0;
-  return Number(bi.bigInt.value);
-}
-
 async function resolveUtxos(
   inputHashes: { txHash: string; index: number }[],
   client: UtxoRpcClient,
-): Promise<{ resolved: Utxo[]; errors: UtxoResolutionError[] }> {
+): Promise<{ resolved: ValidationInput[]; errors: UtxoResolutionError[] }> {
   const keys = inputHashes.map(
     ({ txHash, index }) =>
       new query.TxoRef({ hash: Buffer.from(txHash, "hex"), index }),
   );
 
   const response = await client.query.readUtxos({ keys });
-  const resolved: Utxo[] = [];
+  const resolved: ValidationInput[] = [];
   const errors: UtxoResolutionError[] = [];
 
   for (let i = 0; i < inputHashes.length; i++) {
@@ -94,40 +89,10 @@ async function resolveUtxos(
       continue;
     }
 
-    const output = item.parsedState.value;
-    const assets = (output.assets ?? []).flatMap((ma) =>
-      ma.assets.map((a) => ({
-        policyId: uint8ToHex(ma.policyId),
-        assetsPolicy: [
-          {
-            assetName: uint8ToHex(a.name),
-            amount: bigIntToNumber(
-              a.quantity?.case === "outputCoin" ? a.quantity.value : undefined,
-            ),
-          },
-        ],
-      })),
-    );
-
     resolved.push({
       txHash: input.txHash,
       index: input.index,
       bytes: uint8ToHex(item.nativeBytes),
-      address: uint8ToHex(output.address),
-      lovelace: bigIntToNumber(output.coin),
-      datum:
-        output.datum && output.datum.originalCbor.length > 0
-          ? {
-              hash: uint8ToHex(output.datum.hash),
-              bytes: uint8ToHex(output.datum.originalCbor),
-              json: "",
-            }
-          : undefined,
-      assets,
-      scriptRef:
-        output.script?.script.case && output.script.script.case !== "native"
-          ? uint8ToHex(output.script.script.value as Uint8Array)
-          : undefined,
     });
   }
 

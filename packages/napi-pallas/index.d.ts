@@ -297,12 +297,18 @@ export interface Utxo {
   scriptRef?: string
 }
 
-export declare function validateCborTx(cbor: string, utxos: Array<Utxo>, pparamsJson: string, slot: bigint, networkId: number, networkMagic: number): ValidationResponse
+export declare function validateCborTx(cbor: string, inputs: Array<ValidationInput>, pparamsJson: string, slot: bigint, networkId: number, networkMagic: number): ValidationResponse
 
 export interface ValidationCheck {
   rule: string
   passed: boolean
   error?: string
+}
+
+export interface ValidationInput {
+  txHash: string
+  index: number
+  bytes: string
 }
 
 export interface ValidationResponse {

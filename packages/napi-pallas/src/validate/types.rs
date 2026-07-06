@@ -1,4 +1,11 @@
 #[napi(object)]
+pub struct ValidationInput {
+  pub tx_hash: String,
+  pub index: i64,
+  pub bytes: String,
+}
+
+#[napi(object)]
 pub struct ValidationCheck {
   pub rule: String,
   pub passed: bool,

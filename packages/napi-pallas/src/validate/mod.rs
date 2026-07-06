@@ -15,9 +15,8 @@ use self::checks::{
   BABBAGE_CHECKS, CONWAY_CHECKS,
 };
 use self::params::{NapiAlonzoProtParams, NapiBabbageProtParams, NapiConwayProtParams};
-pub use self::types::{ValidationCheck, ValidationResponse};
+pub use self::types::{ValidationCheck, ValidationInput, ValidationResponse};
 use self::utxos::build_utxos_for_era;
-use crate::Utxo;
 
 fn err(era: &str, rule: &str, msg: String) -> ValidationResponse {
   ValidationResponse {
@@ -54,7 +53,7 @@ fn validate_result(
 #[napi]
 pub fn validate_cbor_tx(
   cbor: String,
-  utxos: Vec<Utxo>,
+  inputs: Vec<ValidationInput>,
   pparams_json: String,
   slot: BigInt,
   network_id: u8,
@@ -87,8 +86,8 @@ pub fn validate_cbor_tx(
   match &metx {
     MultiEraTx::Conway(x) => {
       let era = Era::Conway;
-      let mut cbor_list = Vec::with_capacity(utxos.len());
-      let utxos_map = match build_utxos_for_era(&era, &utxos, &mut cbor_list) {
+      let mut cbor_list = Vec::with_capacity(inputs.len());
+      let utxos_map = match build_utxos_for_era(&era, &inputs, &mut cbor_list) {
         Ok(u) => u,
         Err(e) => return err("conway", "decode", e.to_string()),
       };
@@ -113,8 +112,8 @@ pub fn validate_cbor_tx(
     }
     MultiEraTx::Babbage(x) => {
       let era = Era::Babbage;
-      let mut cbor_list = Vec::with_capacity(utxos.len());
-      let utxos_map = match build_utxos_for_era(&era, &utxos, &mut cbor_list) {
+      let mut cbor_list = Vec::with_capacity(inputs.len());
+      let utxos_map = match build_utxos_for_era(&era, &inputs, &mut cbor_list) {
         Ok(u) => u,
         Err(e) => return err("babbage", "decode", e.to_string()),
       };
@@ -156,8 +155,8 @@ pub fn validate_cbor_tx(
       }
 
       let alonzo_era = Era::Alonzo;
-      let mut cbor_list = Vec::with_capacity(utxos.len());
-      let utxos_map = match build_utxos_for_era(&alonzo_era, &utxos, &mut cbor_list) {
+      let mut cbor_list = Vec::with_capacity(inputs.len());
+      let utxos_map = match build_utxos_for_era(&alonzo_era, &inputs, &mut cbor_list) {
         Ok(u) => u,
         Err(e) => return err("alonzo", "decode", e.to_string()),
       };

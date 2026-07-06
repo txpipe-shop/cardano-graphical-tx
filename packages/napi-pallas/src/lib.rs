@@ -15,7 +15,7 @@ mod tx;
 mod utils;
 mod validate;
 
-pub use validate::{ValidationCheck, ValidationResponse};
+pub use validate::{ValidationCheck, ValidationInput, ValidationResponse};
 
 #[derive(Clone)]
 #[napi(object)]

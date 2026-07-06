@@ -8,7 +8,7 @@ use pallas::ledger::validate::utils::UTxOs;
 use pallas_crypto::hash::Hash;
 use pallas_primitives::alonzo::TransactionInput;
 
-use crate::Utxo;
+use super::types::ValidationInput;
 
 const CONWAY_ERA_ORDER: &[Era] = &[Era::Conway, Era::Babbage, Era::Alonzo];
 const BABBAGE_ERA_ORDER: &[Era] = &[Era::Babbage, Era::Alonzo];
@@ -52,30 +52,30 @@ fn decode_output<'a>(eras: &[Era], cbor: &'a [u8]) -> Option<MultiEraOutput<'a>>
 
 pub fn build_utxos_for_era<'a>(
   era: &Era,
-  utxos: &[Utxo],
+  inputs: &[ValidationInput],
   cbor_list: &'a mut Vec<Vec<u8>>,
 ) -> Result<UTxOs<'a>, UtxoError> {
   let decode_eras = decode_order(era);
 
   cbor_list.clear();
-  for utxo in utxos {
-    let cbor = hex::decode(&utxo.bytes).map_err(UtxoError::DecodeBytes)?;
+  for input in inputs {
+    let cbor = hex::decode(&input.bytes).map_err(UtxoError::DecodeBytes)?;
     cbor_list.push(cbor);
   }
 
   let mut map: UTxOs = HashMap::new();
 
-  for (utxo, cbor) in utxos.iter().zip(cbor_list.iter()) {
-    let tx_hash = Hash::<32>::from_str(&utxo.tx_hash)
-      .map_err(|_| UtxoError::InvalidTxHash(utxo.tx_hash.clone()))?;
+  for (input, cbor) in inputs.iter().zip(cbor_list.iter()) {
+    let tx_hash = Hash::<32>::from_str(&input.tx_hash)
+      .map_err(|_| UtxoError::InvalidTxHash(input.tx_hash.clone()))?;
     let multi_era_in = MultiEraInput::AlonzoCompatible(Box::new(Cow::Owned(TransactionInput {
       transaction_id: tx_hash,
-      index: utxo.index as u64,
+      index: input.index as u64,
     })));
 
     let out = decode_output(decode_eras, cbor).ok_or_else(|| UtxoError::DecodeOutput {
-      tx_hash: utxo.tx_hash.clone(),
-      index: utxo.index,
+      tx_hash: input.tx_hash.clone(),
+      index: input.index,
     })?;
 
     map.insert(multi_era_in, out);
