@@ -14,7 +14,7 @@ use pallas_primitives::conway::{
 
 #[derive(Debug)]
 pub enum PParamsError {
-  InvalidU64 { field: String },
+  InvalidU64 { field: String, value: String },
   InvalidSystemStart { field: String, value: i64 },
   InvalidNonceHash { field: String, reason: String },
   InvalidProtocolVersion { field: String, reason: String },
@@ -23,7 +23,9 @@ pub enum PParamsError {
 impl fmt::Display for PParamsError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     match self {
-      Self::InvalidU64 { field } => write!(f, "Invalid u64 value for pparams field: {field}"),
+      Self::InvalidU64 { field, value } => {
+        write!(f, "Invalid u64 value for pparams field {field}: {value}")
+      }
       Self::InvalidSystemStart { field, value } => {
         write!(f, "Invalid system_start value {value} for field {field}")
       }
@@ -40,13 +42,20 @@ impl fmt::Display for PParamsError {
 impl std::error::Error for PParamsError {}
 
 fn to_u64(field: &str, b: BigInt) -> Result<u64, PParamsError> {
-  let (positive, value, lossless) = b.get_u64();
-  if !lossless || !positive {
-    return Err(PParamsError::InvalidU64 {
-      field: field.to_string(),
-    });
+  let (sign_bit, value, lossless) = b.get_u64();
+  if lossless && !sign_bit {
+    return Ok(value);
   }
-  Ok(value)
+  let (i_value, i_lossless) = b.get_i64();
+  let value_str = if i_lossless {
+    i_value.to_string()
+  } else {
+    "<value exceeds i64 range>".to_string()
+  };
+  Err(PParamsError::InvalidU64 {
+    field: field.to_string(),
+    value: value_str,
+  })
 }
 
 fn system_start(

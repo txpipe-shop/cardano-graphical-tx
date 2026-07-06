@@ -1,4 +1,8 @@
-import { cborParse, validateCborTx, type NapiPParams } from "@laceanatomy/napi-pallas";
+import {
+  cborParse,
+  validateCborTx,
+  type NapiPParams,
+} from "@laceanatomy/napi-pallas";
 import { UtxoRpcClient } from "@laceanatomy/utxorpc-sdk";
 import { createGrpcTransport } from "@laceanatomy/utxorpc-sdk/transport/node";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
@@ -12,8 +16,8 @@ import {
   validateTxSchema,
   type Network,
 } from "~/app/_utils";
-import { getNetworkConfigServer } from "~/server/api/server-network-config";
 import { resolveInputs } from "~/server/api/resolve-utxos";
+import { getNetworkConfigServer } from "~/server/api/server-network-config";
 
 function floatToRational(value: number) {
   if (value === 0) return { numerator: 0n, denominator: 1n };
@@ -33,6 +37,17 @@ function floatToRational(value: number) {
 function requireField<T>(value: T | null | undefined, field: string): T {
   if (value === null || value === undefined) {
     throw new Error(`Missing pparams field: ${field}`);
+  }
+  return value;
+}
+
+function requireNum(obj: Record<string, unknown>, field: string): number {
+  const value = requireField(obj[field], field);
+  if (typeof value === "string") return Number(value);
+  if (typeof value !== "number") {
+    throw new Error(
+      `Expected number for pparams field ${field}, got ${typeof value}`,
+    );
   }
   return value;
 }
@@ -92,68 +107,25 @@ async function fetchProtocolParams(
     ? Object.values(costModelsPL.PlutusV3)
     : undefined;
 
-  const poolVoting = requireField<Record<string, number>>(
-    epochParams.pool_voting_thresholds as Record<string, number> | undefined,
-    "pool_voting_thresholds",
-  );
-  const drepVoting = requireField<Record<string, number>>(
-    epochParams.drep_voting_thresholds as Record<string, number> | undefined,
-    "drep_voting_thresholds",
-  );
-
   return {
-    systemStart: requireField(genesis.system_start, "system_start") as number,
-    epochLength: BigInt(
-      requireField(genesis.epoch_length, "epoch_length") as number,
-    ),
-    slotLength: BigInt(
-      requireField(genesis.slot_length, "slot_length") as number,
-    ),
-    minfeeA: requireField(epochParams.min_fee_a, "min_fee_a") as number,
-    minfeeB: requireField(epochParams.min_fee_b, "min_fee_b") as number,
-    maxBlockBodySize: requireField(
-      genesis.max_block_body_size,
-      "max_block_body_size",
-    ) as number,
-    maxTransactionSize: requireField(
-      epochParams.max_tx_size,
-      "max_tx_size",
-    ) as number,
-    maxBlockHeaderSize: requireField(
-      genesis.max_block_header_size,
-      "max_block_header_size",
-    ) as number,
-    keyDeposit: BigInt(
-      Math.round(
-        requireField(epochParams.key_deposit, "key_deposit") as number,
-      ),
-    ),
-    poolDeposit: BigInt(
-      Math.round(
-        requireField(epochParams.pool_deposit, "pool_deposit") as number,
-      ),
-    ),
-    desiredNumberOfStakePools: requireField(
-      epochParams.n_opt,
-      "n_opt",
-    ) as number,
+    systemStart: requireNum(genesis, "system_start"),
+    epochLength: BigInt(requireNum(genesis, "epoch_length")),
+    slotLength: BigInt(requireNum(genesis, "slot_length")),
+    minfeeA: requireNum(epochParams, "min_fee_a"),
+    minfeeB: requireNum(epochParams, "min_fee_b"),
+    maxBlockBodySize: requireNum(epochParams, "max_block_size"),
+    maxTransactionSize: requireNum(epochParams, "max_tx_size"),
+    maxBlockHeaderSize: requireNum(epochParams, "max_block_header_size"),
+    keyDeposit: BigInt(Math.round(requireNum(epochParams, "key_deposit"))),
+    poolDeposit: BigInt(Math.round(requireNum(epochParams, "pool_deposit"))),
+    desiredNumberOfStakePools: requireNum(epochParams, "n_opt"),
     protocolVersion: [
-      BigInt(
-        requireField(epochParams.protocol_major, "protocol_major") as number,
-      ),
-      BigInt(
-        requireField(epochParams.protocol_minor, "protocol_minor") as number,
-      ),
+      BigInt(requireNum(epochParams, "protocol_major_ver")),
+      BigInt(requireNum(epochParams, "protocol_minor_ver")),
     ],
-    minPoolCost: BigInt(
-      Math.round(
-        requireField(epochParams.min_pool_cost, "min_pool_cost") as number,
-      ),
-    ),
+    minPoolCost: BigInt(Math.round(requireNum(epochParams, "min_pool_cost"))),
     adaPerUtxoByte: BigInt(
-      Math.round(
-        requireField(epochParams.coins_per_utxo_size, "coins_per_utxo_size") as number,
-      ),
+      Math.round(requireNum(epochParams, "coins_per_utxo_size")),
     ),
     costModelsForScriptLanguages: {
       plutusV1,
@@ -161,64 +133,26 @@ async function fetchProtocolParams(
       plutusV3,
     },
     executionCosts: {
-      memPrice: floatToRational(
-        requireField(epochParams.price_mem, "price_mem") as number,
-      ),
-      stepPrice: floatToRational(
-        requireField(epochParams.price_step, "price_step") as number,
-      ),
+      memPrice: floatToRational(requireNum(epochParams, "price_mem")),
+      stepPrice: floatToRational(requireNum(epochParams, "price_step")),
     },
     maxTxExUnits: {
-      mem: BigInt(
-        Math.round(
-          requireField(epochParams.max_tx_ex_mem, "max_tx_ex_mem") as number,
-        ),
-      ),
-      steps: BigInt(
-        Math.round(
-          requireField(epochParams.max_tx_ex_steps, "max_tx_ex_steps") as number,
-        ),
-      ),
+      mem: BigInt(Math.round(requireNum(epochParams, "max_tx_ex_mem"))),
+      steps: BigInt(Math.round(requireNum(epochParams, "max_tx_ex_steps"))),
     },
     maxBlockExUnits: {
-      mem: BigInt(
-        Math.round(
-          requireField(epochParams.max_block_ex_mem, "max_block_ex_mem") as number,
-        ),
-      ),
-      steps: BigInt(
-        Math.round(
-          requireField(epochParams.max_block_ex_steps, "max_block_ex_steps") as number,
-        ),
-      ),
+      mem: BigInt(Math.round(requireNum(epochParams, "max_block_ex_mem"))),
+      steps: BigInt(Math.round(requireNum(epochParams, "max_block_ex_steps"))),
     },
-    maxValueSize: requireField(epochParams.max_val_size, "max_val_size") as number,
-    collateralPercentage: requireField(
-      epochParams.collateral_percent,
-      "collateral_percent",
-    ) as number,
-    maxCollateralInputs: requireField(
-      epochParams.max_collateral_inputs,
-      "max_collateral_inputs",
-    ) as number,
-    expansionRate: floatToRational(
-      requireField(epochParams.monetary_expand_rate, "monetary_expand_rate") as number,
-    ),
-    treasuryGrowthRate: floatToRational(
-      requireField(epochParams.treasury_expand_rate, "treasury_expand_rate") as number,
-    ),
+    maxValueSize: requireNum(epochParams, "max_val_size"),
+    collateralPercentage: requireNum(epochParams, "collateral_percent"),
+    maxCollateralInputs: requireNum(epochParams, "max_collateral_inputs"),
+    expansionRate: floatToRational(requireNum(epochParams, "rho")),
+    treasuryGrowthRate: floatToRational(requireNum(epochParams, "tau")),
     maximumEpoch: SENTINEL_MAXIMUM_EPOCH,
-    poolPledgeInfluence: floatToRational(
-      requireField(
-        epochParams.pool_pledge_influence,
-        "pool_pledge_influence",
-      ) as number,
-    ),
+    poolPledgeInfluence: floatToRational(requireNum(epochParams, "a0")),
     decentralizationConstant: floatToRational(
-      requireField(
-        epochParams.decentralisation_param,
-        "decentralisation_param",
-      ) as number,
+      requireNum(epochParams, "decentralisation_param"),
     ),
     extraEntropy:
       epochParams.extra_entropy != null
@@ -226,101 +160,67 @@ async function fetchProtocolParams(
         : undefined,
     poolVotingThresholds: {
       motionNoConfidence: floatToRational(
-        requireField(poolVoting.motion_no_confidence, "motion_no_confidence"),
+        requireNum(epochParams, "pvt_motion_no_confidence"),
       ),
       committeeNormal: floatToRational(
-        requireField(poolVoting.committee_normal, "committee_normal"),
+        requireNum(epochParams, "pvt_committee_normal"),
       ),
       committeeNoConfidence: floatToRational(
-        requireField(
-          poolVoting.committee_no_confidence,
-          "committee_no_confidence",
-        ),
+        requireNum(epochParams, "pvt_committee_no_confidence"),
       ),
       hardForkInitiation: floatToRational(
-        requireField(poolVoting.hard_fork_initiation, "hard_fork_initiation"),
+        requireNum(epochParams, "pvt_hard_fork_initiation"),
       ),
       securityVotingThreshold: floatToRational(
-        requireField(
-          poolVoting.security_relevant_param_voting_threshold,
-          "security_relevant_param_voting_threshold",
-        ),
+        requireNum(epochParams, "pvt_p_p_security_group"),
       ),
     },
     drepVotingThresholds: {
       motionNoConfidence: floatToRational(
-        requireField(drepVoting.motion_no_confidence, "motion_no_confidence"),
+        requireNum(epochParams, "dvt_motion_no_confidence"),
       ),
       committeeNormal: floatToRational(
-        requireField(drepVoting.committee_normal, "committee_normal"),
+        requireNum(epochParams, "dvt_committee_normal"),
       ),
       committeeNoConfidence: floatToRational(
-        requireField(
-          drepVoting.committee_no_confidence,
-          "committee_no_confidence",
-        ),
+        requireNum(epochParams, "dvt_committee_no_confidence"),
       ),
       updateConstitution: floatToRational(
-        requireField(
-          drepVoting.update_to_constitution,
-          "update_to_constitution",
-        ),
+        requireNum(epochParams, "dvt_update_to_constitution"),
       ),
       hardForkInitiation: floatToRational(
-        requireField(drepVoting.hard_fork_initiation, "hard_fork_initiation"),
+        requireNum(epochParams, "dvt_hard_fork_initiation"),
       ),
       ppNetworkGroup: floatToRational(
-        requireField(drepVoting.pp_network_group, "pp_network_group"),
+        requireNum(epochParams, "dvt_p_p_network_group"),
       ),
       ppEconomicGroup: floatToRational(
-        requireField(drepVoting.pp_economic_group, "pp_economic_group"),
+        requireNum(epochParams, "dvt_p_p_economic_group"),
       ),
       ppTechnicalGroup: floatToRational(
-        requireField(drepVoting.pp_technical_group, "pp_technical_group"),
+        requireNum(epochParams, "dvt_p_p_technical_group"),
       ),
       ppGovernanceGroup: floatToRational(
-        requireField(drepVoting.pp_governance_group, "pp_governance_group"),
+        requireNum(epochParams, "dvt_p_p_gov_group"),
       ),
       treasuryWithdrawal: floatToRational(
-        requireField(drepVoting.treasury_withdrawal, "treasury_withdrawal"),
+        requireNum(epochParams, "dvt_treasury_withdrawal"),
       ),
     },
-    minCommitteeSize: BigInt(
-      requireField(epochParams.min_committee_size, "min_committee_size") as number,
-    ),
+    minCommitteeSize: BigInt(requireNum(epochParams, "committee_min_size")),
     committeeTermLimit: BigInt(
-      requireField(epochParams.committee_term_limit, "committee_term_limit") as number,
+      requireNum(epochParams, "committee_max_term_length"),
     ),
     governanceActionValidityPeriod: BigInt(
-      requireField(
-        epochParams.governance_action_validity_period,
-        "governance_action_validity_period",
-      ) as number,
+      requireNum(epochParams, "gov_action_lifetime"),
     ),
     governanceActionDeposit: BigInt(
-      Math.round(
-        requireField(
-          epochParams.governance_action_deposit,
-          "governance_action_deposit",
-        ) as number,
-      ),
+      Math.round(requireNum(epochParams, "gov_action_deposit")),
     ),
-    drepDeposit: BigInt(
-      Math.round(
-        requireField(epochParams.drep_deposit, "drep_deposit") as number,
-      ),
-    ),
-    drepInactivityPeriod: BigInt(
-      requireField(
-        epochParams.drep_inactivity_period,
-        "drep_inactivity_period",
-      ) as number,
-    ),
+    drepDeposit: BigInt(Math.round(requireNum(epochParams, "drep_deposit"))),
+    drepInactivityPeriod: 0n,
     minfeeRefscriptCostPerByte: floatToRational(
-      requireField(
-        epochParams.minfee_refscript_cost_per_byte,
-        "minfee_refscript_cost_per_byte",
-      ) as number,
+      requireNum(epochParams, "min_fee_ref_script_cost_per_byte"),
     ),
   };
 }
@@ -393,14 +293,18 @@ export async function POST(req: Request) {
         },
       );
     }
-    const { resolved: resolvedUtxos, errors: utxoErrors } =
-      await resolveInputs(allInputHashes, utxoClient);
+    const { resolved: resolvedUtxos, errors: utxoErrors } = await resolveInputs(
+      allInputHashes,
+      utxoClient,
+    );
 
     const pparams = await fetchProtocolParams(network, apiKey);
     const networkId = NETWORK_ID[network];
     const networkMagic = NETWORK_MAGIC[network];
 
     const slot = providedSlot ?? currentSlot(network);
+
+    console.dir(pparams, { depth: null });
 
     const result = validateCborTx(
       cbor,
@@ -438,7 +342,9 @@ export async function POST(req: Request) {
     return new Response(
       JSON.stringify({
         error:
-          err instanceof Error ? err.message : ReasonPhrases.INTERNAL_SERVER_ERROR,
+          err instanceof Error
+            ? err.message
+            : ReasonPhrases.INTERNAL_SERVER_ERROR,
       }),
       {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
