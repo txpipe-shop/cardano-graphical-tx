@@ -1,4 +1,4 @@
-import { cborParse, validateCborTx } from "@laceanatomy/napi-pallas";
+import { cborParse, validateCborTx, type Utxo } from "@laceanatomy/napi-pallas";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import {
   getApiKey,
@@ -42,13 +42,20 @@ async function fetchInputCbor(
   }
 }
 
+type UtxoResolutionError = {
+  txHash: string;
+  index: number;
+  reason: string;
+};
+
 async function resolveUtxos(
   inputHashes: { txHash: string; index: number }[],
   network: Network,
   apiKey: string,
-) {
+): Promise<{ resolved: Utxo[]; errors: UtxoResolutionError[] }> {
   const uniqueHashes = [...new Set(inputHashes.map((i) => i.txHash))];
   const cborMap = new Map<string, string>();
+  const errors: UtxoResolutionError[] = [];
 
   const cbors = await Promise.all(
     uniqueHashes.map((hash) => fetchInputCbor(network, apiKey, hash)),
@@ -58,17 +65,40 @@ async function resolveUtxos(
     if (cbor) cborMap.set(hash, cbor);
   });
 
-  return inputHashes.map((input) => {
+  const resolved: Utxo[] = [];
+
+  for (const input of inputHashes) {
     const parentCbor = cborMap.get(input.txHash);
-    if (!parentCbor) return null;
+    if (!parentCbor) {
+      errors.push({
+        txHash: input.txHash,
+        index: input.index,
+        reason: "Failed to fetch parent transaction CBOR from Blockfrost",
+      });
+      continue;
+    }
 
     const parsed = cborParse(parentCbor);
-    if (parsed.error || !parsed.cborRes) return null;
+    if (parsed.error || !parsed.cborRes) {
+      errors.push({
+        txHash: input.txHash,
+        index: input.index,
+        reason: `Failed to parse parent transaction: ${parsed.error || "unknown error"}`,
+      });
+      continue;
+    }
 
     const output = parsed.cborRes.outputs[input.index];
-    if (!output) return null;
+    if (!output) {
+      errors.push({
+        txHash: input.txHash,
+        index: input.index,
+        reason: `Output index ${input.index} not found in parent transaction (has ${parsed.cborRes.outputs.length} outputs)`,
+      });
+      continue;
+    }
 
-    return {
+    resolved.push({
       txHash: input.txHash,
       index: input.index,
       bytes: output.bytes,
@@ -77,8 +107,10 @@ async function resolveUtxos(
       datum: output.datum,
       assets: output.assets,
       scriptRef: output.scriptRef,
-    };
-  });
+    });
+  }
+
+  return { resolved, errors };
 }
 
 async function fetchProtocolParams(network: Network, apiKey: string) {
@@ -283,8 +315,7 @@ export async function POST(req: Request) {
       ...(tx.referenceInputs ?? []).map((i) => ({ txHash: i.txHash, index: i.index })),
       ...(tx.collateral?.inputs ?? []).map((i) => ({ txHash: i.txHash, index: i.index })),
     ];
-    const utxos = await resolveUtxos(allInputHashes, network, apiKey);
-    const validUtxos = utxos.filter((u): u is NonNullable<typeof u> => u !== null);
+    const { resolved: resolvedUtxos, errors: utxoErrors } = await resolveUtxos(allInputHashes, network, apiKey);
 
     const pparams = await fetchProtocolParams(network, apiKey);
     const pparamsJson = JSON.stringify(pparams);
@@ -293,12 +324,24 @@ export async function POST(req: Request) {
 
     const result = validateCborTx(
       cbor,
-      validUtxos,
+      resolvedUtxos,
       pparamsJson,
       slot,
       networkId!,
       networkMagic!,
     );
+
+    for (const err of utxoErrors) {
+      result.checks.unshift({
+        rule: "utxo_resolution",
+        passed: false,
+        error: `${err.txHash}#${err.index}: ${err.reason}`,
+      });
+    }
+
+    if (utxoErrors.length > 0) {
+      result.valid = false;
+    }
 
     return Response.json(result);
   } catch (err: any) {
