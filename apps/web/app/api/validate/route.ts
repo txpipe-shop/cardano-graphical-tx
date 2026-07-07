@@ -304,8 +304,6 @@ export async function POST(req: Request) {
 
     const slot = providedSlot ?? currentSlot(network);
 
-    console.dir(pparams, { depth: null });
-
     const result = validateCborTx(
       cbor,
       resolvedUtxos,

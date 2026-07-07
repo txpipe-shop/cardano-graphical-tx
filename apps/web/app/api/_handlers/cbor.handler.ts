@@ -111,7 +111,6 @@ const inputsHandle = async ({
 export const cborHandler = async ({ cbor, network }: ICborHandler) => {
   try {
     const res: SafeCborResponse = cborParse(cbor);
-    //console.dir({ res }, { depth: null })
 
     if (!isEmpty(res.error)) throw Error(res.error);
 

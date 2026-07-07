@@ -1,286 +1,40 @@
 "use client";
 
-import {
-  Button,
-  Chip,
-  Input,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@heroui/react";
-import type { ValidationResponse } from "@laceanatomy/napi-pallas";
-import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { DissectSection, Header } from "~/app/_components";
-import CborView from "~/app/_components/CborView";
+import { Button } from "@heroui/react";
+import { Header } from "~/app/_components";
 import { DetailTabs } from "~/app/_components/DetailTabs";
-import { parseTxToGraphical } from "~/app/_components/Input/TxInput/txInput.helper";
-import ValidationView from "~/app/_components/ValidationView";
-import { type IGraphicalTransaction } from "~/app/_interfaces";
-import { getTxFromCbor, validateTx } from "~/app/_utils";
-import { NETWORK, type Network } from "~/app/_utils/network-config";
-
-const NETWORKS = Object.values(NETWORK);
-
-function NetworkSelector({
-  network,
-  onChange,
-}: {
-  network: Network;
-  onChange: (net: Network) => void;
-}) {
-  return (
-    <Popover placement="bottom" showArrow>
-      <PopoverTrigger>
-        <Chip
-          variant="dot"
-          color="success"
-          size="lg"
-          className="cursor-pointer capitalize border-border"
-        >
-          {network}
-        </Chip>
-      </PopoverTrigger>
-      <PopoverContent className="flex gap-1">
-        {NETWORKS.map((value) => (
-          <Chip
-            key={value}
-            variant="dot"
-            color={network === value ? "success" : "danger"}
-            className="cursor-pointer capitalize min-w-full text-center"
-            onClick={() => onChange(value)}
-          >
-            {value}
-          </Chip>
-        ))}
-      </PopoverContent>
-    </Popover>
-  );
-}
+import CborView from "~/app/_components/CborView";
+import { DissectTab } from "./_components/DissectTab";
+import { HashInputBar } from "./_components/HashInputBar";
+import { ValidationTab } from "./_components/ValidationTab";
+import { useCborPageState } from "./_hooks/useCborPageState";
 
 export default function CborPage() {
-  const searchParams = useSearchParams();
-  const [hashInput, setHashInput] = useState(
-    () => searchParams?.get("hash") ?? "",
-  );
-  const [network, setNetwork] = useState<Network>(() => {
-    const netParam = searchParams?.get("net");
-    return netParam && NETWORKS.includes(netParam as Network)
-      ? (netParam as Network)
-      : NETWORK.MAINNET;
-  });
-  const [devnetPort, setDevnetPort] = useState(
-    () => searchParams?.get("port") ?? "5164",
-  );
-  const [initialCbor, setInitialCbor] = useState<string | null>(null);
-  const [currentCbor, setCurrentCbor] = useState<string>("");
-  const [parsedTx, setParsedTx] = useState<IGraphicalTransaction | null>(null);
-  const [parseError, setParseError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("dissect");
-  const [validationLoading, setValidationLoading] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const [validationResult, setValidationResult] =
-    useState<ValidationResponse | null>(null);
-
-  const updateUrl = useCallback(
-    (hash: string, net: Network) => {
-      const params = new URLSearchParams();
-      params.set("hash", hash);
-      params.set("net", net);
-      if (net === NETWORK.DEVNET) params.set("port", devnetPort);
-      window.history.replaceState(
-        null,
-        "",
-        `${window.location.pathname}?${params.toString()}`,
-      );
-    },
-    [devnetPort],
-  );
-
-  const fetchAndParse = useCallback(
-    async (hash: string, net: Network) => {
-      setIsLoading(true);
-      setParseError(null);
-      try {
-        const fetchUrl = new URL("/api/cbor/fetch", window.location.origin);
-        fetchUrl.searchParams.set("hash", hash);
-        fetchUrl.searchParams.set("net", net);
-        if (net === NETWORK.DEVNET)
-          fetchUrl.searchParams.set("port", devnetPort);
-
-        const res = await fetch(fetchUrl.toString());
-        if (!res.ok) {
-          const text = await res.text().catch(() => res.statusText);
-          throw new Error(text);
-        }
-        const { cbor } = (await res.json()) as { cbor: string };
-        setInitialCbor(cbor);
-        setCurrentCbor(cbor);
-
-        const tx = await getTxFromCbor(cbor, net);
-        const gtx = parseTxToGraphical([tx], { transactions: [], utxos: {} });
-        setParsedTx(gtx[0]!);
-      } catch (e) {
-        const msg =
-          e instanceof Response
-            ? e.statusText
-            : e instanceof Error
-              ? e.message
-              : "Failed to fetch and parse";
-        setParseError(msg);
-        setParsedTx(null);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [devnetPort],
-  );
-
-  useEffect(() => {
-    const hashParam = searchParams?.get("hash");
-    const netParam = searchParams?.get("net");
-
-    if (hashParam && netParam && NETWORKS.includes(netParam as Network)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      fetchAndParse(hashParam, netParam as Network);
-    }
-  }, [searchParams, fetchAndParse]);
-
-  const handleFetch = useCallback(() => {
-    if (!hashInput.trim()) return;
-    updateUrl(hashInput.trim(), network);
-    fetchAndParse(hashInput.trim(), network);
-  }, [hashInput, network, updateUrl, fetchAndParse]);
-
-  const handleNetworkChange = useCallback(
-    (net: Network) => {
-      setNetwork(net);
-      if (hashInput.trim()) updateUrl(hashInput.trim(), net);
-    },
-    [hashInput, updateUrl],
-  );
-
-  const handleParseCbor = useCallback(async () => {
-    const cbor = currentCbor.trim();
-    if (!cbor) return;
-    setIsLoading(true);
-    setParseError(null);
-    try {
-      const tx = await getTxFromCbor(cbor, network);
-      const gtx = parseTxToGraphical([tx], { transactions: [], utxos: {} });
-      setParsedTx(gtx[0]!);
-    } catch (e) {
-      const msg =
-        e instanceof Response
-          ? e.statusText
-          : e instanceof Error
-            ? e.message
-            : "Failed to parse CBOR";
-      setParseError(msg);
-      setParsedTx(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentCbor, network]);
-
-  const handleValidate = useCallback(async () => {
-    const cbor = currentCbor.trim();
-    if (!cbor) return;
-    setValidationLoading(true);
-    setValidationError(null);
-    setValidationResult(null);
-    try {
-      const result = await validateTx(cbor, network);
-      setValidationResult(result);
-    } catch (e) {
-      setValidationError(e instanceof Error ? e.message : "Validation failed");
-    } finally {
-      setValidationLoading(false);
-    }
-  }, [currentCbor, network]);
+  const s = useCborPageState();
 
   const tabs = [
     {
       key: "dissect",
       title: "Dissect",
-      content: isLoading ? (
-        <div className="flex flex-1 items-center justify-center text-p-secondary">
-          Loading...
-        </div>
-      ) : parseError ? (
-        <div className="flex flex-1 items-center justify-center p-6">
-          <p className="break-words whitespace-pre-wrap text-center text-red-2">
-            {parseError}
-          </p>
-        </div>
-      ) : parsedTx ? (
-        <div className="flex-1 min-h-0 overflow-auto">
-          <DissectSection tx={parsedTx} />
-        </div>
-      ) : (
-        <div className="flex flex-1 items-center justify-center p-6">
-          <p className="text-center text-p-secondary">
-            Enter a transaction hash and click Fetch, or paste CBOR into the
-            editor
-          </p>
-        </div>
+      content: (
+        <DissectTab
+          tx={s.parsedTx}
+          error={s.parseError}
+          isLoading={s.isLoading}
+        />
       ),
     },
     {
       key: "validation",
       title: "Validation",
-      content: validationLoading ? (
-        <div className="flex flex-1 items-center justify-center text-p-secondary">
-          Validating...
-        </div>
-      ) : validationError ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-          <p className="whitespace-pre-wrap text-center text-red-2">
-            {validationError}
-          </p>
-          <Button
-            size="sm"
-            variant="flat"
-            className="font-mono shadow-md"
-            onPress={handleValidate}
-            isLoading={validationLoading}
-            isDisabled={!currentCbor.trim()}
-          >
-            Run Validation Again
-          </Button>
-        </div>
-      ) : validationResult ? (
-        <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-hidden">
-          <div className="flex-1 min-h-0 overflow-auto">
-            <ValidationView validation={validationResult} />
-          </div>
-          <div className="flex shrink-0 justify-center">
-            <Button
-              size="sm"
-              variant="flat"
-              className="font-mono shadow-md"
-              onPress={handleValidate}
-              isLoading={validationLoading}
-              isDisabled={!currentCbor.trim()}
-            >
-              Run Validation Again
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-1 items-center justify-center p-6">
-          <Button
-            size="sm"
-            variant="flat"
-            className="font-mono shadow-md"
-            onPress={handleValidate}
-            isLoading={validationLoading}
-            isDisabled={!currentCbor.trim()}
-          >
-            Run Validation
-          </Button>
-        </div>
+      content: (
+        <ValidationTab
+          result={s.validationResult}
+          error={s.validationError}
+          isLoading={s.validationLoading}
+          onRun={s.handleValidate}
+          cbor={s.currentCbor}
+        />
       ),
     },
     {
@@ -294,47 +48,26 @@ export default function CborPage() {
     <div className="flex h-screen flex-col overflow-hidden">
       <Header />
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-5 md:overflow-hidden">
-        <div className="flex shrink-0 items-center gap-2">
-          <NetworkSelector network={network} onChange={handleNetworkChange} />
-          {network === NETWORK.DEVNET && (
-            <Input
-              value={devnetPort}
-              onValueChange={setDevnetPort}
-              placeholder="Port"
-              className="w-24"
-              size="sm"
-              variant="bordered"
-            />
-          )}
-          <Input
-            value={hashInput}
-            onValueChange={setHashInput}
-            placeholder="Transaction hash..."
-            variant="bordered"
-            className="flex-1"
-            size="sm"
-          />
-          <Button
-            variant="flat"
-            className="shrink-0 font-mono shadow-md"
-            size="sm"
-            onPress={handleFetch}
-            isLoading={isLoading}
-          >
-            Fetch
-          </Button>
-        </div>
+        <HashInputBar
+          hashInput={s.hashInput}
+          onHashInputChange={s.setHashInput}
+          onFetch={s.handleFetch}
+          isFetching={s.isFetching}
+        />
 
         <div className="flex flex-1 flex-col gap-4 overflow-hidden md:min-h-0 md:flex-row">
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <CborView cbor={initialCbor ?? ""} onCborChange={setCurrentCbor} />
+            <CborView
+              cbor={s.initialCbor ?? ""}
+              onCborChange={s.setCurrentCbor}
+            />
             <div className="flex shrink-0 justify-center pt-2">
               <Button
                 size="sm"
                 variant="flat"
                 className="font-mono shadow-md"
-                onPress={handleParseCbor}
-                isDisabled={!currentCbor.trim()}
+                onPress={s.handleParseCbor}
+                isDisabled={!s.currentCbor.trim()}
               >
                 CBOR → Transaction
               </Button>
@@ -345,8 +78,8 @@ export default function CborPage() {
             <DetailTabs
               tabs={tabs}
               defaultTab="dissect"
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
+              activeTab={s.activeTab}
+              onTabChange={s.setActiveTab}
               ariaLabel="Transaction analysis"
             />
           </div>
