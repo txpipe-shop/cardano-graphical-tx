@@ -419,7 +419,8 @@ export class DolosProvider
       const transactions = body.tx.map((tx) =>
         u5cToCardanoTx(
           tx,
-          block.timestamp,
+          // Block.timestamp is seconds; u5cToCardanoTx expects ms
+          block.timestamp * 1000n,
           blockHash,
           blockHeight,
           blockSlot,
