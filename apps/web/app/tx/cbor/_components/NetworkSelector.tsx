@@ -1,12 +1,9 @@
 "use client";
 
 import { Chip, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
+import { NETWORK, type Network } from "@laceanatomy/types/cardano";
 import { useConfigs } from "~/app/_contexts";
-import {
-  NETWORK,
-  type Network,
-  USER_CONFIGS,
-} from "~/app/_utils";
+import { USER_CONFIGS } from "~/app/_utils";
 
 const NETWORKS = Object.values(NETWORK);
 

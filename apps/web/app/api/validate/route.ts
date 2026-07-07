@@ -3,19 +3,18 @@ import {
   validateCborTx,
   type NapiPParams,
 } from "@laceanatomy/napi-pallas";
+import {
+  currentSlot,
+  NETWORK_ID,
+  NETWORK_MAGIC,
+  SENTINEL_MAXIMUM_EPOCH,
+  type Network,
+} from "@laceanatomy/types/cardano";
 import { UtxoRpcClient } from "@laceanatomy/utxorpc-sdk";
 import { createGrpcTransport } from "@laceanatomy/utxorpc-sdk/transport/node";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
-import {
-  currentSlot,
-  getApiKey,
-  NETWORK_ID,
-  NETWORK_MAGIC,
-  SENTINEL_MAXIMUM_EPOCH,
-  validateTxSchema,
-  type Network,
-} from "~/app/_utils";
+import { getApiKey, validateTxSchema } from "~/app/_utils";
 import { resolveInputs } from "~/server/api/resolve-utxos";
 import { getNetworkConfigServer } from "~/server/api/server-network-config";
 

@@ -1,13 +1,14 @@
 "use client";
 
 import { type cardano } from "@laceanatomy/types";
+import { type Network, NETWORK } from "@laceanatomy/types/cardano";
 import { useEffect, useMemo, useState } from "react";
 import { DevnetError } from "~/app/_components/DevnetError";
 import { DevnetLoadingCard } from "~/app/_components/DevnetLoadingCard";
 import Pagination from "~/app/_components/ExplorerSection/Pagination";
 import { TxTable } from "~/app/_components/ExplorerSection/Transactions";
 import { useConfigs } from "~/app/_contexts";
-import { type Network, NETWORK, resolveDevnetPort, ROUTES } from "~/app/_utils";
+import { resolveDevnetPort, ROUTES } from "~/app/_utils";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface DevnetTransactionsListProps {

@@ -6,6 +6,7 @@ import {
   type SafeCborResponse,
   type Utxo,
 } from "@laceanatomy/napi-pallas";
+import { type Network } from "@laceanatomy/types/cardano";
 import { StatusCodes } from "http-status-codes";
 import {
   BlockfrostUTxOSchema,
@@ -16,7 +17,6 @@ import {
   getUTxOsURL,
   isEmpty,
   POLICY_LENGTH,
-  type Network,
 } from "~/app/_utils";
 
 interface ICborHandler {

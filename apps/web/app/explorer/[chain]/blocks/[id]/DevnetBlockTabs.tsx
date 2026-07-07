@@ -1,11 +1,12 @@
 "use client";
 
+import { NETWORK } from "@laceanatomy/types/cardano";
 import { useEffect, useMemo, useState } from "react";
 import { DevnetError } from "~/app/_components/DevnetError";
 import { DevnetLoadingCard } from "~/app/_components/DevnetLoadingCard";
 import BlockTabs from "~/app/_components/ExplorerSection/Blocks/BlockTabs";
 import { useConfigs } from "~/app/_contexts";
-import { NETWORK, resolveDevnetPort, type BlockTab } from "~/app/_utils";
+import { resolveDevnetPort, type BlockTab } from "~/app/_utils";
 import { resolveBlockReq } from "~/app/_utils/block";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 

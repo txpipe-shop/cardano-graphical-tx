@@ -1,10 +1,10 @@
 "use client";
 
 import { Button, Input } from "@heroui/react";
+import { type Network } from "@laceanatomy/types/cardano";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { ROUTES } from "~/app/_utils";
-import { type Network } from "~/app/_utils/network-config";
 
 interface TxSearchProps {
   chain: Network;

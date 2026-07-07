@@ -1,7 +1,7 @@
 import { Hash } from "@laceanatomy/types";
-import { fetchCborByHash as fetchCborByHashAction } from "~/app/tx/cbor/actions";
-import { NETWORK, type Network } from "~/app/_utils/network-config";
+import { NETWORK, type Network } from "@laceanatomy/types/cardano";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
+import { fetchCborByHash as fetchCborByHashAction } from "~/app/tx/cbor/actions";
 
 export async function fetchCborByHash(
   hash: string,

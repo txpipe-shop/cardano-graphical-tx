@@ -1,13 +1,13 @@
 "use client";
 
 import { Button, Card, CardBody, Tooltip } from "@heroui/react";
+import { type Network } from "@laceanatomy/types/cardano";
 import { DetailLabel } from "~/app/_components/DetailLabel";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { MonoText } from "~/app/_components/MonoText";
 import { SubLabel } from "~/app/_components/SubLabel";
 import { useConfigs, useUI } from "~/app/_contexts";
 import type { IGraphicalTransaction } from "~/app/_interfaces";
-import { type Network } from "~/app/_utils/network-config";
 import Loading from "~/app/loading";
 import TOPICS from "./topics";
 import { Stat } from "./TransactionDetails";

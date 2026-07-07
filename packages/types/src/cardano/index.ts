@@ -8,6 +8,7 @@ import {
 
 export * from './utils.js';
 export * from './metadata/index.js';
+export * from './network.js';
 
 export enum RdmrPurpose {
   Spend = 'spend',

@@ -3,11 +3,11 @@
 import { Accordion, AccordionItem } from "@heroui/react";
 import type { BlockWithTxs } from "@laceanatomy/provider-core";
 import type { Cardano, cardano } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import Link from "next/link";
 import { EmptyState } from "~/app/_components/EmptyState";
 import { ROUTES } from "~/app/_utils";
 import { formatAda } from "~/app/_utils/explorer";
-import { type Network } from "~/app/_utils/network-config";
 import DateViewer from "../DateViewer";
 import ClockIcon from "../Icons/ClockIcon";
 import { TxTable } from "./TxTable";

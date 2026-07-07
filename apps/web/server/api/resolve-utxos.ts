@@ -2,14 +2,19 @@ import { cborParse, type ValidationInput } from "@laceanatomy/napi-pallas";
 import type { UtxoRpcClient } from "@laceanatomy/utxorpc-sdk";
 
 export type ResolvedInput = { txHash: string; index: number };
-export type ResolvedInputError = { txHash: string; index: number; reason: string };
+export type ResolvedInputError = {
+  txHash: string;
+  index: number;
+  reason: string;
+};
 
 export type ResolveInputsRes = {
   resolved: ValidationInput[];
   errors: ResolvedInputError[];
 };
 
-const uint8ToHex = (bytes: Uint8Array): string => Buffer.from(bytes).toString("hex");
+const uint8ToHex = (bytes: Uint8Array): string =>
+  Buffer.from(bytes).toString("hex");
 
 export async function resolveInputs(
   inputs: ResolvedInput[],
@@ -64,10 +69,18 @@ export async function resolveInputs(
   for (const input of inputs) {
     const output = outputsByTx.get(input.txHash)?.[input.index];
     if (!output) {
-      errors.push({ txHash: input.txHash, index: input.index, reason: "UTxO not found" });
+      errors.push({
+        txHash: input.txHash,
+        index: input.index,
+        reason: "UTxO not found",
+      });
       continue;
     }
-    resolved.push({ txHash: input.txHash, index: input.index, bytes: output.bytes });
+    resolved.push({
+      txHash: input.txHash,
+      index: input.index,
+      bytes: output.bytes,
+    });
   }
 
   return { resolved, errors };

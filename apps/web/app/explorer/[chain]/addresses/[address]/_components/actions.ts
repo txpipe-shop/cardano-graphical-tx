@@ -1,8 +1,8 @@
 "use server";
 
 import { type Address } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
-import { type Network } from "~/app/_utils/network-config";
 import { resolveProvider } from "./resolve-provider";
 
 export async function loadMoreUTxOs(

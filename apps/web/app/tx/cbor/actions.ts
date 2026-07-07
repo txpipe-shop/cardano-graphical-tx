@@ -1,8 +1,8 @@
 "use server";
 
 import { Hash } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import { getDolosProvider } from "~/server/api/dolos-provider";
-import { type Network } from "~/app/_utils/network-config";
 
 export async function fetchCborByHash(
   hash: string,

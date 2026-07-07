@@ -1,5 +1,5 @@
+import { NETWORK, type Network } from "@laceanatomy/types/cardano";
 import JSONbig from "json-bigint";
-import { NETWORK, type Network } from "./network-config";
 
 export const EXPLORER_PAGE_SIZE = 10n;
 export const ADDRESS_PAGE_SIZE = 20n;

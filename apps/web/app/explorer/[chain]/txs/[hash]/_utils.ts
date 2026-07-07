@@ -1,6 +1,6 @@
 import { type Hash } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import { headers } from "next/headers";
-import { type Network } from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { loadTxPageData } from "./_shared";
 

@@ -2,8 +2,8 @@
 
 import { Card, CardBody } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
+import type { Network } from "@laceanatomy/types/cardano";
 import { useMemo } from "react";
-import type { Network } from "~/app/_utils";
 import Pagination from "../Pagination";
 import { TxTable } from "../Transactions/TxTable";
 

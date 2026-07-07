@@ -2,12 +2,13 @@
 
 import { Button } from "@heroui/react";
 import { type cardano } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useGraphical } from "~/app/_contexts";
 import { type ITransaction } from "~/app/_interfaces";
-import { type Network, ROUTES, type TxTab } from "~/app/_utils";
+import { ROUTES, type TxTab } from "~/app/_utils";
 import { buildTabUrl } from "~/app/_utils/tabs";
 import { DetailTabs } from "../../DetailTabs";
 import { DissectSection } from "../../DissectSection/DissectSection";

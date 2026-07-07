@@ -3,12 +3,12 @@ import type {
   SafeAddressResponse,
   ValidationResponse,
 } from "@laceanatomy/napi-pallas";
+import { NETWORK, type Network } from "@laceanatomy/types/cardano";
 import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
 import type { IBlockfrostResponse, ITransaction } from "~/app/_interfaces";
 import { env } from "~/app/env.mjs";
 import { API_ROUTES, ERRORS } from "./constants";
-import { NETWORK, type Network } from "./network-config";
 
 export const getApiKey = (network: Network): string => {
   switch (network) {

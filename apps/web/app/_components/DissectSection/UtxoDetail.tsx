@@ -1,5 +1,6 @@
 import type { Assets } from "@laceanatomy/napi-pallas";
 import { Address } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import { CodeBlock } from "~/app/_components/CodeBlock";
 import { DetailLabel } from "~/app/_components/DetailLabel";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
@@ -7,7 +8,6 @@ import { FieldBlock } from "~/app/_components/FieldBlock";
 import { MonoText } from "~/app/_components/MonoText";
 import { SubField } from "~/app/_components/SubField";
 import type { IGraphicalUtxo } from "~/app/_interfaces";
-import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ExplorerSection/ColoredAddress";
 
 export function UtxoDetail({

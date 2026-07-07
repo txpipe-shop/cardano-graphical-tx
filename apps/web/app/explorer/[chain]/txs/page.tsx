@@ -1,5 +1,10 @@
 export const revalidate = 10;
 
+import {
+  isValidChain,
+  NETWORK,
+  type Network,
+} from "@laceanatomy/types/cardano";
 import { Suspense } from "react";
 import { DevnetError } from "~/app/_components/DevnetError";
 import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
@@ -9,11 +14,6 @@ import {
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
 import { EXPLORER_PAGE_SIZE, getBlockPageSize } from "~/app/_utils";
-import {
-  isValidChain,
-  NETWORK,
-  type Network,
-} from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { BlocksList } from "./BlocksList";
 import DevnetTransactionsList from "./DevnetTransactionsList";

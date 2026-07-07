@@ -14,11 +14,11 @@ import {
   type Unit,
   type Value,
 } from "@laceanatomy/types";
+import type { Network } from "@laceanatomy/types/cardano";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { ROUTES } from "~/app/_utils/constants";
-import type { Network } from "~/app/_utils/network-config";
 
 export interface TokenPillProps {
   unit: Unit;

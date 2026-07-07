@@ -1,13 +1,9 @@
 "use client";
 
 import { Button, Input } from "@heroui/react";
+import { NETWORK, type Network } from "@laceanatomy/types/cardano";
 import { useConfigs } from "~/app/_contexts";
-import {
-  DEFAULT_DEVNET_PORT,
-  NETWORK,
-  USER_CONFIGS,
-  type Network,
-} from "~/app/_utils";
+import { DEFAULT_DEVNET_PORT, USER_CONFIGS } from "~/app/_utils";
 import { NetworkSelector } from "./NetworkSelector";
 
 interface HashInputBarProps {

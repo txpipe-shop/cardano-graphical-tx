@@ -2,11 +2,11 @@
 
 import { Card, CardBody } from "@heroui/react";
 import { Unit } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import { useState } from "react";
 import { DetailTabs, type DetailTab } from "~/app/_components/DetailTabs";
 import { EmptyState } from "~/app/_components/EmptyState";
 import { type TokenTab } from "~/app/_utils/constants";
-import { type Network } from "~/app/_utils/network-config";
 import type { TokenPageData } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
 import HoldersTab from "./HoldersTab";
 import TokenOverview from "./TokenOverview";

@@ -1,6 +1,7 @@
 "use client";
 
 import { Hash } from "@laceanatomy/types";
+import { NETWORK } from "@laceanatomy/types/cardano";
 import { useEffect, useMemo, useState } from "react";
 import { DevnetError } from "~/app/_components/DevnetError";
 import { DevnetLoadingCard } from "~/app/_components/DevnetLoadingCard";
@@ -8,7 +9,6 @@ import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { useConfigs } from "~/app/_contexts";
 import {
   getTxFromDevnetCBOR,
-  NETWORK,
   resolveDevnetPort,
   type TxTab,
 } from "~/app/_utils";

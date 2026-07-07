@@ -2,6 +2,7 @@
 
 import { Chip, Tooltip } from "@heroui/react";
 import type { cardano, Unit, Value } from "@laceanatomy/types";
+import { isValidChain, type Network } from "@laceanatomy/types/cardano";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { EmptyState } from "~/app/_components/EmptyState";
@@ -12,7 +13,6 @@ import TokenPill from "~/app/_components/ExplorerSection/TokenPill";
 import { InfoCard } from "~/app/_components/InfoCard";
 import { KeyValue } from "~/app/_components/KeyValue";
 import { ROUTES } from "~/app/_utils";
-import { isValidChain, type Network } from "~/app/_utils/network-config";
 
 function resolveChain(
   params: { chain?: string | string[] },

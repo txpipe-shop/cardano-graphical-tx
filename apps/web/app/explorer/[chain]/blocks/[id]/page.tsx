@@ -1,3 +1,8 @@
+import {
+  isValidChain,
+  NETWORK,
+  type Network,
+} from "@laceanatomy/types/cardano";
 import assert from "assert";
 import { DevnetError } from "~/app/_components/DevnetError";
 import BlockTabs from "~/app/_components/ExplorerSection/Blocks/BlockTabs";
@@ -5,11 +10,6 @@ import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { Header } from "~/app/_components/Header";
 import { BLOCK_TABS, type BlockTab } from "~/app/_utils";
 import { resolveBlockReq } from "~/app/_utils/block";
-import {
-  isValidChain,
-  NETWORK,
-  type Network,
-} from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import DevnetBlockTabs from "./DevnetBlockTabs";
 

@@ -1,3 +1,4 @@
+import { type Network } from "@laceanatomy/types/cardano";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
 import {
@@ -5,7 +6,6 @@ import {
   ERRORS,
   getApiKey,
   getBlockfrostURL,
-  type Network,
 } from "~/app/_utils";
 
 interface IHashHandler {

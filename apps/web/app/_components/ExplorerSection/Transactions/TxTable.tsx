@@ -1,8 +1,8 @@
 "use client";
 
 import { type cardano } from "@laceanatomy/types";
+import type { Network } from "@laceanatomy/types/cardano";
 import { EmptyState } from "~/app/_components/EmptyState";
-import type { Network } from "~/app/_utils";
 import { TxRow } from "./TxRow";
 
 interface TxTableProps {

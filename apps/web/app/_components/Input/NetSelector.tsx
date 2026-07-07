@@ -5,14 +5,10 @@ import {
   PopoverTrigger,
   useDisclosure,
 } from "@heroui/react";
+import { NETWORK, type Network } from "@laceanatomy/types/cardano";
 import { useEffect, useState } from "react";
 import { useConfigs, useUI } from "~/app/_contexts";
-import {
-  DEFAULT_DEVNET_PORT,
-  NETWORK,
-  type Network,
-  USER_CONFIGS,
-} from "~/app/_utils";
+import { DEFAULT_DEVNET_PORT, USER_CONFIGS } from "~/app/_utils";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 interface NetSelectorProps {

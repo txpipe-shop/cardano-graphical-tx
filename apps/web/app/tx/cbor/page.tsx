@@ -2,8 +2,8 @@
 
 import { Button } from "@heroui/react";
 import { Header } from "~/app/_components";
-import { DetailTabs } from "~/app/_components/DetailTabs";
 import CborView from "~/app/_components/CborView";
+import { DetailTabs } from "~/app/_components/DetailTabs";
 import { DissectTab } from "./_components/DissectTab";
 import { HashInputBar } from "./_components/HashInputBar";
 import { ValidationTab } from "./_components/ValidationTab";

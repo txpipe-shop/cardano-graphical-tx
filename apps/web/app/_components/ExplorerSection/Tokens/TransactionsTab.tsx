@@ -1,10 +1,10 @@
 "use client";
 
 import { type cardano } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
-import { type Network } from "~/app/_utils/network-config";
 import { loadMoreTransactions } from "~/app/explorer/[chain]/tokens/[unit]/_components/actions";
 import { TxTable } from "../Transactions/TxTable";
 

@@ -1,14 +1,14 @@
 import type { Unit } from "@laceanatomy/types";
+import {
+  isValidChain,
+  NETWORK,
+  type Network,
+} from "@laceanatomy/types/cardano";
 import { Suspense } from "react";
 import { DevnetError } from "~/app/_components/DevnetError";
 import { EmptyState } from "~/app/_components/EmptyState";
 import TokenTabs from "~/app/_components/ExplorerSection/Tokens/TokenTabs";
 import { TOKEN_TABS, type TokenTab } from "~/app/_utils";
-import {
-  isValidChain,
-  NETWORK,
-  type Network,
-} from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { AssetHistoryList } from "./_components/AssetHistoryList";
 import { TokenPageLayout } from "./_components/TokenPageLayout";

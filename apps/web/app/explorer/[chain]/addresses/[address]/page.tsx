@@ -1,6 +1,11 @@
 import { parseAddress } from "@laceanatomy/napi-pallas";
 import type { Unit } from "@laceanatomy/types";
 import { Address } from "@laceanatomy/types";
+import {
+  isValidChain,
+  NETWORK,
+  type Network,
+} from "@laceanatomy/types/cardano";
 import Link from "next/link";
 import { Suspense } from "react";
 import {
@@ -17,11 +22,6 @@ import { TxTableSkeleton } from "~/app/_components/ExplorerSection/Transactions"
 import { Header } from "~/app/_components/Header";
 import { ROUTES } from "~/app/_utils/constants";
 import { formatAda } from "~/app/_utils/explorer";
-import {
-  isValidChain,
-  NETWORK,
-  type Network,
-} from "~/app/_utils/network-config";
 import AddressTabs from "./_components/AddressTabs";
 import { AddressTxList } from "./_components/AddressTxList";
 import { AddressUTxOsList } from "./_components/AddressUTxOsList";

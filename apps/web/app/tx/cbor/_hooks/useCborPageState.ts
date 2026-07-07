@@ -1,6 +1,7 @@
 "use client";
 
 import type { ValidationResponse } from "@laceanatomy/napi-pallas";
+import { NETWORK, type Network } from "@laceanatomy/types/cardano";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { parseTxToGraphical } from "~/app/_components/Input/TxInput/txInput.helper";
@@ -8,13 +9,11 @@ import { useConfigs } from "~/app/_contexts";
 import type { IGraphicalTransaction } from "~/app/_interfaces";
 import {
   getTxFromCbor,
-  toErrorMessage,
-  validateTx,
   HASH_URL_PARAM,
   NET_URL_PARAM,
-  NETWORK,
+  toErrorMessage,
   USER_CONFIGS,
-  type Network,
+  validateTx,
 } from "~/app/_utils";
 import { fetchCborByHash } from "~/app/tx/cbor/_utils";
 
@@ -55,20 +54,17 @@ export function useCborPageState() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const updateUrl = useCallback(
-    (hash: string, net: Network, port: string) => {
-      const params = new URLSearchParams();
-      params.set(HASH_URL_PARAM, hash);
-      params.set(NET_URL_PARAM, net);
-      if (net === NETWORK.DEVNET) params.set(PORT_PARAM, port);
-      window.history.replaceState(
-        null,
-        "",
-        `${window.location.pathname}?${params.toString()}`,
-      );
-    },
-    [],
-  );
+  const updateUrl = useCallback((hash: string, net: Network, port: string) => {
+    const params = new URLSearchParams();
+    params.set(HASH_URL_PARAM, hash);
+    params.set(NET_URL_PARAM, net);
+    if (net === NETWORK.DEVNET) params.set(PORT_PARAM, port);
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}?${params.toString()}`,
+    );
+  }, []);
 
   const fetchAndParse = useCallback(
     async (hash: string, net: Network, port: string) => {
