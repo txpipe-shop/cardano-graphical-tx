@@ -218,9 +218,9 @@ export interface ChainProvider<
     network?: 'mainnet' | 'preprod';
   }): Promise<Nullable<Shapes>>;
   getAssetInfo?(asset: Unit): Promise<AssetInfoRes>;
-  getAssetAddresses?(asset: Unit, count: number, page: number): Promise<AssetAddressesRes>;
+  getAssetHolders?(asset: Unit, count: number, page: number): Promise<AssetAddressesRes>;
   getAssetHistory?(asset: Unit, count: number, page: number): Promise<AssetHistoryRes>;
-  getAssetTransactions?(
+  getAssetTxs?(
     asset: Unit,
     count: number,
     page: number,

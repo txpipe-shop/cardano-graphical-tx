@@ -14,6 +14,6 @@ export async function loadMoreHolders(
     throw new Error(`Invalid chain: ${chain}`);
   }
   const provider = getDolosProvider(chain);
-  const data = await provider.getAssetAddresses(unit, HOLDERS_PAGE_SIZE, page);
+  const data = await provider.getAssetHolders(unit, HOLDERS_PAGE_SIZE, page);
   return { data: data as AssetAddress[] };
 }

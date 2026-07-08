@@ -507,7 +507,7 @@ export class DolosProvider
     };
   }
 
-  async getAssetAddresses(asset: string, count: number, page: number) {
+  async getAssetHolders(asset: string, count: number, page: number) {
     const resp = await this.assetsApi.assetsAssetAddressesGet(asset, count, page);
     return resp.data.map((item) => ({
       address: Address(item.address),
@@ -524,7 +524,7 @@ export class DolosProvider
     }));
   }
 
-  async getAssetTransactions(asset: string, count: number, page: number, order?: 'asc' | 'desc') {
+  async getAssetTxs(asset: string, count: number, page: number, order?: 'asc' | 'desc') {
     const resp = await this.assetsApi.assetsAssetTransactionsGet(asset, count, page, order);
     return resp.data.map((item) => ({
       txHash: Hash(item.tx_hash),

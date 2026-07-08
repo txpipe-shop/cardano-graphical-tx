@@ -71,9 +71,9 @@ export async function loadTokenPageData(
 
   const [addressesResp, rawTxs, cipResult] = await Promise.all([
     provider
-      .getAssetAddresses(rawUnit, HOLDERS_FETCH_SIZE, 1)
+      .getAssetHolders(rawUnit, HOLDERS_FETCH_SIZE, 1)
       .catch(() => [] as AssetAddress[]),
-    provider.getAssetTransactions(rawUnit, TX_FETCH_SIZE, txPage, "desc").catch(
+    provider.getAssetTxs(rawUnit, TX_FETCH_SIZE, txPage, "desc").catch(
       () =>
         [] as {
           txHash: string;

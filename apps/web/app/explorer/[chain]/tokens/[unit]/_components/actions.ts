@@ -33,12 +33,7 @@ export async function loadMoreTransactions(
     throw new Error(`Invalid chain: ${chain}`);
   }
   const provider = getDolosProvider(chain);
-  const rawTxs = await provider.getAssetTransactions(
-    unit,
-    TX_FETCH_SIZE,
-    page,
-    "desc",
-  );
+  const rawTxs = await provider.getAssetTxs(unit, TX_FETCH_SIZE, page, "desc");
   const hasMore = rawTxs.length > TX_PAGE_SIZE;
   const hashesToFetch = rawTxs.slice(0, TX_PAGE_SIZE).map((t) => t.txHash);
 
