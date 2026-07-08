@@ -13,7 +13,8 @@ const NETWORKS = Object.values(NETWORK).filter(
 export function NetworkSelector() {
   const { configs, updateConfigs } = useConfigs();
   const network = configs.net as Network;
-  const selectedNetwork = network === NETWORK.DEVNET ? NETWORK.MAINNET : network;
+  const selectedNetwork =
+    network === NETWORK.DEVNET ? NETWORK.MAINNET : network;
 
   useEffect(() => {
     if (network === NETWORK.DEVNET) {
