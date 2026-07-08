@@ -49,6 +49,7 @@ export const handleCopy = (text: string) => () => {
 };
 
 export const toErrorMessage = (err: unknown, fallback: string): string => {
+  if (typeof err === "string") return err;
   if (err instanceof Response) return err.statusText;
   if (err instanceof Error) return err.message;
   return fallback;

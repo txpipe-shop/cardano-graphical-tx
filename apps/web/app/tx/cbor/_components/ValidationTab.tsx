@@ -41,6 +41,9 @@ export function ValidationTab({
   if (result) {
     return (
       <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-hidden">
+        <p className="shrink-0 px-4 pt-2 text-xs text-p-secondary">
+          Validated against current protocol parameters and current slot.
+        </p>
         <div className="flex-1 min-h-0 overflow-auto">
           <ValidationView validation={result} />
         </div>
@@ -54,7 +57,10 @@ export function ValidationTab({
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center p-6">
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6">
+      <p className="text-center text-xs text-p-secondary">
+        Validation uses current protocol parameters and current slot.
+      </p>
       <RunValidationButton onRun={onRun} isLoading={isLoading} cbor={cbor}>
         Run Validation
       </RunValidationButton>

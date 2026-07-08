@@ -126,6 +126,16 @@ export const validateTx = async (
     body: JSON.stringify({ cbor, network, slot }),
     headers: { "Content-Type": "application/json" },
   });
-  if (res.status !== StatusCodes.OK) throw await res.text();
+  if (res.status !== StatusCodes.OK) {
+    let message = res.statusText || "Validation failed";
+    try {
+      const body = (await res.clone().json()) as { error?: unknown };
+      if (typeof body.error === "string") message = body.error;
+    } catch {
+      const text = await res.text();
+      if (text) message = text;
+    }
+    throw new Error(message);
+  }
   return res.json() as Promise<ValidationResponse>;
 };

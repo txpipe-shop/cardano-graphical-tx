@@ -12,9 +12,8 @@ interface IHashHandler {
 
 export const hashHandler = async ({ network, hash }: IHashHandler) => {
   try {
-    const { data } = await getBlockfrostTransactionsApi(network).txsHashCborGet(
-      hash,
-    );
+    const { data } =
+      await getBlockfrostTransactionsApi(network).txsHashCborGet(hash);
     const parsedData = BlockfrostResponseSchema.parse(data);
     return Response.json(parsedData);
   } catch (err: unknown) {

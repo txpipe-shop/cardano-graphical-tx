@@ -1,5 +1,9 @@
 import { cborParse, type ValidationInput } from "@laceanatomy/napi-pallas";
 import type { UtxoRpcClient } from "@laceanatomy/utxorpc-sdk";
+import {
+  ValidationSetupError,
+  isUnauthenticatedError,
+} from "./validation/errors";
 
 export type ResolvedInput = { txHash: string; index: number };
 export type ResolvedInputError = {
@@ -16,6 +20,22 @@ export type ResolveInputsRes = {
 const uint8ToHex = (bytes: Uint8Array): string =>
   Buffer.from(bytes).toString("hex");
 
+function isNotFoundError(err: unknown): boolean {
+  const error = err as {
+    code?: unknown;
+    rawMessage?: unknown;
+    message?: unknown;
+  };
+  return (
+    error.code === 5 ||
+    error.code === "NotFound" ||
+    error.code === "not_found" ||
+    String(error.rawMessage ?? error.message ?? "")
+      .toLowerCase()
+      .includes("not found")
+  );
+}
+
 export async function resolveInputs(
   inputs: ResolvedInput[],
   client: UtxoRpcClient,
@@ -27,7 +47,7 @@ export async function resolveInputs(
     inputsByTx.set(input.txHash, list);
   }
 
-  const outputsByTx = new Map<string, { bytes: string }[]>();
+  const outputsByTx = new Map<string, { bytes: string }[] | null>();
 
   await Promise.all(
     Array.from(inputsByTx.keys()).map(async (txHash) => {
@@ -36,15 +56,24 @@ export async function resolveInputs(
           hash: new Uint8Array(Buffer.from(txHash, "hex")),
         });
 
-        if (!response.tx || response.tx.chain.case !== "cardano") {
-          outputsByTx.set(txHash, []);
+        if (!response.tx) {
+          outputsByTx.set(txHash, null);
           return;
+        }
+
+        if (response.tx.chain.case !== "cardano") {
+          throw new ValidationSetupError(
+            `UTxORPC returned a non-Cardano transaction for ${txHash}`,
+          );
         }
 
         const parsed = cborParse(uint8ToHex(response.tx.nativeBytes));
         if (parsed.error || !parsed.cborRes) {
-          outputsByTx.set(txHash, []);
-          return;
+          throw new ValidationSetupError(
+            `Failed to parse UTxORPC transaction ${txHash}: ${
+              parsed.error || "missing parsed CBOR"
+            }`,
+          );
         }
 
         outputsByTx.set(
@@ -52,13 +81,23 @@ export async function resolveInputs(
           parsed.cborRes.outputs.map((output) => ({ bytes: output.bytes })),
         );
       } catch (err) {
-        const connectErr = err as { code?: unknown };
-        if (connectErr.code === 16) {
-          throw new Error(
+        if (err instanceof ValidationSetupError) {
+          throw err;
+        }
+        if (isUnauthenticatedError(err)) {
+          throw new ValidationSetupError(
             "UTxORPC request was unauthenticated. Check that the correct *_DOLOS_UTXORPC_API_KEY is configured for the selected network.",
           );
         }
-        outputsByTx.set(txHash, []);
+        if (isNotFoundError(err)) {
+          outputsByTx.set(txHash, null);
+          return;
+        }
+        throw new ValidationSetupError(
+          `Failed to resolve UTxORPC transaction ${txHash}: ${
+            err instanceof Error ? err.message : "transport error"
+          }`,
+        );
       }
     }),
   );
@@ -67,12 +106,13 @@ export async function resolveInputs(
   const errors: ResolvedInputError[] = [];
 
   for (const input of inputs) {
-    const output = outputsByTx.get(input.txHash)?.[input.index];
+    const outputs = outputsByTx.get(input.txHash);
+    const output = outputs?.[input.index];
     if (!output) {
       errors.push({
         txHash: input.txHash,
         index: input.index,
-        reason: "UTxO not found",
+        reason: outputs === null ? "transaction not found" : "output not found",
       });
       continue;
     }
