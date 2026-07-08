@@ -59,3 +59,17 @@ export type CardanoBlockFields = { epochNo: bigint };
 export type UTxO = BaseUTxO & { referenceScript?: Script };
 export type Tx = BaseTx<UTxO> & CardanoTxFields;
 export type Block = BaseBlock<UTxO, Tx> & CardanoBlockFields;
+
+export type DRep = {
+  /** Bech32 encoded id */
+  id: String;
+  /** Raw bytes of the DRep */
+  raw: HexString;
+  /** Total voting power delegated to this DRep*/
+  votingPower: bigint;
+  isScript: boolean;
+  retired: boolean;
+  /** DRep has been inactive for `pparams.drep_activity` epochs consecutively */
+  expired: boolean;
+  lastActiveEpoch: bigint | null;
+};
