@@ -121,6 +121,7 @@ export type BlocksReq = PaginatedRequest<BlocksQuery | undefined>;
 export type EpochsReq = PaginatedRequest<undefined>;
 export type AddressFundsReq = { address: Address };
 export type AddressUTxOsReq = PaginatedRequest<{ address: Address }>;
+export type ScriptReq = { hash: Hash };
 
 export type BlockWithTxs<U extends UTxO, T extends Tx<U>, Chain extends BaseChain<U, T>> = {
   block: BlockMetadata;
@@ -192,11 +193,19 @@ export type AssetTransactionsRes = Array<{
   blockTime: number;
 }>;
 
+export type ScriptRes<ScriptType> = {
+  serializedSize: bigint | null;
+  type: ScriptType;
+  // TODO: add parametric type for data representation based on the current type
+  data: string;
+};
+
 export interface ChainProvider<
   U extends UTxO,
   T extends Tx<U>,
   Chain extends BaseChain<U, T>,
-  Shapes extends TokenMetadataShapes = TokenMetadataShapes
+  Shapes extends TokenMetadataShapes = TokenMetadataShapes,
+  ScriptType = unknown
 > {
   getCBOR(params: TxReq): Promise<string>;
   getBlockCBOR?(params: BlockReq): Promise<string>;
@@ -226,6 +235,7 @@ export interface ChainProvider<
     page: number,
     order?: 'asc' | 'desc'
   ): Promise<AssetTransactionsRes>;
+  getScript?(params: ScriptReq): Promise<ScriptRes<ScriptType>>;
 }
 
 export interface CursorPaginatedProvider<
