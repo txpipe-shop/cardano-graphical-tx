@@ -39,6 +39,7 @@ import {
   CardanoAddressesApi,
   CardanoAssetsApi,
   CardanoBlocksApi,
+  CardanoGovernanceApi,
   CardanoScriptsApi,
   Configuration
 } from '@laceanatomy/blockfrost-sdk';
@@ -59,6 +60,7 @@ import {
   CIP68_PREFIX_NFT,
   CIP68_PREFIX_REF,
   CIP68_PREFIX_RFT,
+  DRep,
   parseCip68,
   ScriptType
 } from '@laceanatomy/types/cardano';
@@ -77,6 +79,7 @@ import {
   Cip68Rft444Schema,
   OnchainMetadataStandardSchema
 } from './schemas.js';
+import { DrepReq } from './types.js';
 
 export type DolosProviderParams = {
   /** UTxORPC gRPC transport pointing at a Dolos node */
@@ -99,6 +102,7 @@ export class DolosProvider
   private addrApi: CardanoAddressesApi;
   private assetsApi: CardanoAssetsApi;
   private scriptApi: CardanoScriptsApi;
+  private governanceApi: CardanoGovernanceApi;
   private addressPrefix: string;
   private tokenClient: TokenRegistryClient;
 
@@ -115,6 +119,7 @@ export class DolosProvider
     this.assetsApi = new CardanoAssetsApi(config);
     this.tokenClient = new TokenRegistryClient('preprod');
     this.scriptApi = new CardanoScriptsApi(config);
+    this.governanceApi = new CardanoGovernanceApi(config);
   }
 
   // ---------------------------------------------------------------------------
@@ -624,6 +629,21 @@ export class DolosProvider
         data: cborData.cbor
       };
     }
+  }
+
+  async getDrep({ id }: DrepReq): Promise<DRep> {
+    const { data, status } = await this.governanceApi.governanceDrepsDrepIdGet(id);
+    assert(status === 200, `Unexpected status code (${status}) fetching DRep ${id}`);
+    return {
+      id,
+      raw: HexString(data.hex),
+      votingPower: BigInt(data.amount),
+      isScript: data.has_script,
+      retired: data.retired,
+      expired: data.expired,
+      lastActiveEpoch:
+        typeof data.last_active_epoch === 'number' ? BigInt(data.last_active_epoch) : null
+    };
   }
 
   private async fetchCip25Metadata(
