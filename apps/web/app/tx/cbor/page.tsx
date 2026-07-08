@@ -40,7 +40,13 @@ export default function CborPage() {
     {
       key: "diagram",
       title: "Diagram",
-      content: <div className="flex flex-1 items-center justify-center p-6" />,
+      content: (
+        <div className="flex flex-1 items-center justify-center p-6">
+          <p className="font-mono text-sm text-p-secondary">
+            Diagram coming soon
+          </p>
+        </div>
+      ),
     },
   ];
 
