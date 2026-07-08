@@ -10,7 +10,6 @@ import {
   type BlocksReq,
   type BlocksRes,
   type BlocksWithTxsRes,
-  type ChainProvider,
   type CursorPaginatedProvider,
   type CursorPaginatedRequest,
   type EpochReq,
@@ -20,7 +19,10 @@ import {
   type TipRes,
   type TxReq,
   type TxsReq,
-  type TxsRes
+  type TxsRes,
+  ScriptReq,
+  ScriptRes,
+  ChainProvider
 } from '@laceanatomy/provider-core';
 import {
   Address,
@@ -37,6 +39,8 @@ import {
   CardanoAddressesApi,
   CardanoAssetsApi,
   CardanoBlocksApi,
+  CardanoGovernanceApi,
+  CardanoScriptsApi,
   Configuration
 } from '@laceanatomy/blockfrost-sdk';
 import {
@@ -47,8 +51,7 @@ import {
   findTxIndexInBlock
 } from '@laceanatomy/cardano-provider-u5c/mappers';
 import { UtxoRpcClient } from '@laceanatomy/utxorpc-sdk';
-import { query, sync, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
-
+import { query, type cardano as cardanoUtxoRpc } from '@utxorpc/spec';
 import { parseDatumInfo } from '@laceanatomy/napi-pallas';
 import { TokenRegistryClient } from '@laceanatomy/cardano-token-registry-sdk';
 import {
@@ -57,7 +60,9 @@ import {
   CIP68_PREFIX_NFT,
   CIP68_PREFIX_REF,
   CIP68_PREFIX_RFT,
-  parseCip68
+  DRep,
+  parseCip68,
+  ScriptType
 } from '@laceanatomy/types/cardano';
 import assert from 'assert';
 import { Buffer } from 'buffer';
@@ -74,6 +79,7 @@ import {
   Cip68Rft444Schema,
   OnchainMetadataStandardSchema
 } from './schemas.js';
+import { DrepReq } from './types.js';
 
 export type DolosProviderParams = {
   /** UTxORPC gRPC transport pointing at a Dolos node */
@@ -86,7 +92,7 @@ export type DolosProviderParams = {
 
 export class DolosProvider
   implements
-    ChainProvider<cardano.UTxO, cardano.Tx, Cardano, cardano.TokenMetadata>,
+    ChainProvider<cardano.UTxO, cardano.Tx, Cardano, cardano.TokenMetadata, ScriptType>,
     CursorPaginatedProvider<cardano.UTxO, cardano.Tx, Cardano, BlockCursor>
 {
   private static readonly MAX_BLOCKS_LOOKBACK = 100;
@@ -95,6 +101,8 @@ export class DolosProvider
   private blockApi: CardanoBlocksApi;
   private addrApi: CardanoAddressesApi;
   private assetsApi: CardanoAssetsApi;
+  private scriptApi: CardanoScriptsApi;
+  private governanceApi: CardanoGovernanceApi;
   private addressPrefix: string;
   private tokenClient: TokenRegistryClient;
 
@@ -110,6 +118,8 @@ export class DolosProvider
     this.addrApi = new CardanoAddressesApi(config);
     this.assetsApi = new CardanoAssetsApi(config);
     this.tokenClient = new TokenRegistryClient('preprod');
+    this.scriptApi = new CardanoScriptsApi(config);
+    this.governanceApi = new CardanoGovernanceApi(config);
   }
 
   // ---------------------------------------------------------------------------
@@ -585,6 +595,55 @@ export class DolosProvider
     }
 
     return metadata;
+  }
+
+  async getScript(params: ScriptReq): Promise<ScriptRes<ScriptType>> {
+    const { data, status } = await this.scriptApi.scriptsScriptHashGet(params.hash);
+    if (status === 404) throw new Error(`Script ${params.hash} not found`);
+    assert(status === 200, `Unexpected status code (${status}) fetching script ${params.hash}`);
+    if (data.type === 'timelock') {
+      const { data: jsonData, status } = await this.scriptApi.scriptsScriptHashJsonGet(params.hash);
+      assert(
+        status === 200,
+        `Unexpected status code (${status}) fetching script json ${params.hash}`
+      );
+      assert(jsonData.json, `Json data is null for script ${params.hash}`);
+      return {
+        serializedSize:
+          typeof data.serialised_size === 'number' ? BigInt(data.serialised_size) : null,
+        type: ScriptType.Native,
+        data: JSON.stringify(jsonData.json)
+      };
+    } else {
+      const { data: cborData, status } = await this.scriptApi.scriptsScriptHashCborGet(params.hash);
+      assert(
+        status === 200,
+        `Unexpected status code (${status}) fetching script cbor ${params.hash}`
+      );
+      assert(cborData.cbor, `Cbor data is null for script ${params.hash}`);
+
+      return {
+        serializedSize:
+          typeof data.serialised_size === 'number' ? BigInt(data.serialised_size) : null,
+        type: data.type === 'plutusV1' ? ScriptType.PlutusV1 : ScriptType.PlutusV2,
+        data: cborData.cbor
+      };
+    }
+  }
+
+  async getDrep({ id }: DrepReq): Promise<DRep> {
+    const { data, status } = await this.governanceApi.governanceDrepsDrepIdGet(id);
+    assert(status === 200, `Unexpected status code (${status}) fetching DRep ${id}`);
+    return {
+      id,
+      raw: HexString(data.hex),
+      votingPower: BigInt(data.amount),
+      isScript: data.has_script,
+      retired: data.retired,
+      expired: data.expired,
+      lastActiveEpoch:
+        typeof data.last_active_epoch === 'number' ? BigInt(data.last_active_epoch) : null
+    };
   }
 
   private async fetchCip25Metadata(
