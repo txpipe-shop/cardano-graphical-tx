@@ -8,7 +8,7 @@ import {
   isBech32,
   isHexString,
 } from "@laceanatomy/types";
-import { getNetworkConfig, type Network } from "~/app/_utils/network-config";
+import { getNetworkConfig, type Network } from "@laceanatomy/types/cardano";
 import { getAddressTxPage } from "./_components/AddressTxList";
 import { getAddressUTxOsPage } from "./_components/AddressUTxOsList";
 

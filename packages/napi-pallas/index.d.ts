@@ -173,6 +173,96 @@ export interface MirTarget {
   amount: number
 }
 
+export interface NapiCostModels {
+  plutusV1?: Array<number>
+  plutusV2?: Array<number>
+  plutusV3?: Array<number>
+}
+
+export interface NapiDRepVotingThresholds {
+  motionNoConfidence: NapiUnitInterval
+  committeeNormal: NapiUnitInterval
+  committeeNoConfidence: NapiUnitInterval
+  updateConstitution: NapiUnitInterval
+  hardForkInitiation: NapiUnitInterval
+  ppNetworkGroup: NapiUnitInterval
+  ppEconomicGroup: NapiUnitInterval
+  ppTechnicalGroup: NapiUnitInterval
+  ppGovernanceGroup: NapiUnitInterval
+  treasuryWithdrawal: NapiUnitInterval
+}
+
+export interface NapiExUnitPrices {
+  memPrice: NapiUnitInterval
+  stepPrice: NapiUnitInterval
+}
+
+export interface NapiExUnits {
+  mem: bigint
+  steps: bigint
+}
+
+export interface NapiNonce {
+  variant: number
+  hash?: string
+}
+
+export interface NapiPoolVotingThresholds {
+  motionNoConfidence: NapiUnitInterval
+  committeeNormal: NapiUnitInterval
+  committeeNoConfidence: NapiUnitInterval
+  hardForkInitiation: NapiUnitInterval
+  securityVotingThreshold: NapiUnitInterval
+}
+
+/**
+ * Union of all protocol-parameter fields for Alonzo, Babbage, and Conway.
+ * Pre-Conway eras ignore the Conway-only fields.
+ */
+export interface NapiPParams {
+  systemStart: number
+  epochLength: bigint
+  slotLength: bigint
+  minfeeA: number
+  minfeeB: number
+  maxBlockBodySize: number
+  maxTransactionSize: number
+  maxBlockHeaderSize: number
+  keyDeposit: bigint
+  poolDeposit: bigint
+  desiredNumberOfStakePools: number
+  protocolVersion: Array<bigint>
+  minPoolCost: bigint
+  adaPerUtxoByte: bigint
+  costModelsForScriptLanguages: NapiCostModels
+  executionCosts: NapiExUnitPrices
+  maxTxExUnits: NapiExUnits
+  maxBlockExUnits: NapiExUnits
+  maxValueSize: number
+  collateralPercentage: number
+  maxCollateralInputs: number
+  expansionRate: NapiUnitInterval
+  treasuryGrowthRate: NapiUnitInterval
+  maximumEpoch: bigint
+  poolPledgeInfluence: NapiUnitInterval
+  decentralizationConstant: NapiUnitInterval
+  extraEntropy?: NapiNonce
+  poolVotingThresholds: NapiPoolVotingThresholds
+  drepVotingThresholds: NapiDRepVotingThresholds
+  minCommitteeSize: bigint
+  committeeTermLimit: bigint
+  governanceActionValidityPeriod: bigint
+  governanceActionDeposit: bigint
+  drepDeposit: bigint
+  drepInactivityPeriod: bigint
+  minfeeRefscriptCostPerByte: NapiUnitInterval
+}
+
+export interface NapiUnitInterval {
+  numerator: bigint
+  denominator: bigint
+}
+
 export declare function parseAddress(raw: string): SafeAddressResponse
 
 export declare function parseDatumInfo(raw: string): Datum | null
@@ -295,6 +385,26 @@ export interface Utxo {
   datum?: Datum
   assets: Array<Assets>
   scriptRef?: string
+}
+
+export declare function validateCborTx(cbor: string, inputs: Array<ValidationInput>, pparams: NapiPParams, slot: bigint, networkId: number, networkMagic: number): ValidationResponse
+
+export interface ValidationCheck {
+  rule: string
+  passed: boolean
+  error?: string
+}
+
+export interface ValidationInput {
+  txHash: string
+  index: number
+  bytes: string
+}
+
+export interface ValidationResponse {
+  era: string
+  checks: Array<ValidationCheck>
+  valid: boolean
 }
 
 export type Voter =

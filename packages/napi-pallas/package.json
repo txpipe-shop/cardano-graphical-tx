@@ -54,6 +54,7 @@
     "bench": "node --import @oxc-node/core/register benchmark/bench.ts",
     "build": "node scripts/build-if-needed.mjs",
     "build:debug": "napi build --platform",
+    "clean": "rm -rf target .cargo .turbo node_modules napi-pallas.linux-x64-gnu.node",
     "format": "run-p format:prettier format:rs format:toml",
     "format:prettier": "prettier . -w",
     "format:toml": "taplo format",

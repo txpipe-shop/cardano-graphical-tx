@@ -6,12 +6,13 @@ import {
   policyFromUnit,
   type Unit,
 } from "@laceanatomy/types";
+import { NETWORK } from "@laceanatomy/types/cardano";
 import { useEffect, useState } from "react";
 import { DevnetError } from "~/app/_components/DevnetError";
 import { DevnetLoadingCard } from "~/app/_components/DevnetLoadingCard";
 import TokenTabs from "~/app/_components/ExplorerSection/Tokens/TokenTabs";
 import { useConfigs } from "~/app/_contexts";
-import { NETWORK, resolveDevnetPort, type TokenTab } from "~/app/_utils";
+import { resolveDevnetPort, type TokenTab } from "~/app/_utils";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 import type { TokenPageData } from "./_shared";
 

@@ -1,14 +1,14 @@
 import { Hash } from "@laceanatomy/types";
+import {
+  isValidChain,
+  NETWORK,
+  type Network,
+} from "@laceanatomy/types/cardano";
 import { DevnetError } from "~/app/_components/DevnetError";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { Header } from "~/app/_components/Header";
 import { TX_TABS, type TxTab } from "~/app/_utils";
-import {
-  isValidChain,
-  NETWORK,
-  type Network,
-} from "~/app/_utils/network-config";
 import DevnetTxTabs from "./DevnetTxTabs";
 import { loadPageData } from "./_utils";
 

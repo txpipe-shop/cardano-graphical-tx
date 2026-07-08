@@ -2,12 +2,12 @@
 
 import { Card, CardBody } from "@heroui/react";
 import { Address, type Unit } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { EmptyState } from "~/app/_components/EmptyState";
 import ColoredAddress from "~/app/_components/ExplorerSection/ColoredAddress";
 import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
-import { type Network } from "~/app/_utils/network-config";
 import type { AssetAddress } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
 import { loadMoreHolders } from "./actions";
 import { HOLDERS_PAGE_SIZE as PAGE_SIZE } from "./constants";

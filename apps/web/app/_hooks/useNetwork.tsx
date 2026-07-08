@@ -1,15 +1,15 @@
 "use client";
 
 import { type U5CProvider } from "@laceanatomy/cardano-provider-u5c";
-import { useMemo } from "react";
-import { useConfigs } from "~/app/_contexts";
-import { resolveDevnetPort } from "~/app/_utils";
 import {
   getNetworkConfig,
   NETWORK,
   type Network,
   type NetworkConfig,
-} from "~/app/_utils/network-config";
+} from "@laceanatomy/types/cardano";
+import { useMemo } from "react";
+import { useConfigs } from "~/app/_contexts";
+import { resolveDevnetPort } from "~/app/_utils";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 
 export interface UseNetworkReturn {

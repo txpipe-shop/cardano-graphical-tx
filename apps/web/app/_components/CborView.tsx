@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Textarea } from "@heroui/react";
+import { useEffect } from "react";
 import { useCborDiagnostic } from "~/app/_hooks/useCborDiagnostic";
 import { EmptyState } from "./EmptyState";
 import { InfoCard } from "./InfoCard";
@@ -8,6 +9,7 @@ import { InfoCard } from "./InfoCard";
 interface CborViewProps {
   cbor: string | null;
   emptyMessage?: string;
+  onCborChange?: (cbor: string) => void;
 }
 
 const textareaClassNames = {
@@ -21,6 +23,7 @@ const textareaClassNames = {
 export default function CborView({
   cbor,
   emptyMessage = "CBOR not available",
+  onCborChange,
 }: CborViewProps) {
   const {
     cborText,
@@ -33,7 +36,13 @@ export default function CborView({
     encodeError,
   } = useCborDiagnostic(cbor);
 
-  if (!cbor) {
+  useEffect(() => {
+    if (cbor != null && onCborChange) {
+      onCborChange(cborText);
+    }
+  }, [cbor, cborText, onCborChange]);
+
+  if (cbor == null) {
     return <EmptyState message={emptyMessage} />;
   }
 
@@ -64,7 +73,7 @@ export default function CborView({
             <Textarea
               value={cborText}
               onValueChange={setCborText}
-              placeholder="CBOR not available"
+              placeholder="Paste or edit CBOR"
               minRows={12}
               disableAutosize
               classNames={textareaClassNames}

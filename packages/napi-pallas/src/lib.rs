@@ -13,6 +13,9 @@ mod certs;
 mod governance;
 mod tx;
 mod utils;
+mod validate;
+
+pub use validate::{ValidationCheck, ValidationInput, ValidationResponse};
 
 #[derive(Clone)]
 #[napi(object)]

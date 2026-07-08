@@ -1,3 +1,4 @@
+import { Address } from "@laceanatomy/types";
 import type { Meta, StoryObj } from "@storybook/react";
 import ColoredAddress from "./ColoredAddress";
 
@@ -17,26 +18,27 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const sampleAddress = Address(
+  "addr1qxy2fwd5v7x2nhfty8mhz40w49n0jqpz0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4",
+);
+
 export const Truncated: Story = {
   args: {
-    address:
-      "addr1qxy2fwd5v7x2nhfty8mhz40w49n0jqpz0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4",
+    address: sampleAddress,
     full: false,
   },
 };
 
 export const Full: Story = {
   args: {
-    address:
-      "addr1qxy2fwd5v7x2nhfty8mhz40w49n0jqpz0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4",
+    address: sampleAddress,
     full: true,
   },
 };
 
 export const WithChainLink: Story = {
   args: {
-    address:
-      "addr1qxy2fwd5v7x2nhfty8mhz40w49n0jqpz0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4x6q0wqj4",
+    address: sampleAddress,
     chain: "mainnet",
     full: false,
   },

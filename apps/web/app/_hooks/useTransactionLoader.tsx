@@ -1,3 +1,4 @@
+import { NETWORK, type Network } from "@laceanatomy/types/cardano";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import {
@@ -8,8 +9,6 @@ import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   HASH_URL_PARAM,
   NET_URL_PARAM,
-  type Network,
-  NETWORK,
   OPTIONS,
   USER_CONFIGS,
 } from "~/app/_utils";

@@ -18,6 +18,7 @@ import {
   policyFromUnit,
   Unit,
 } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import { bech32 } from "bech32";
 import type { Vector2d } from "konva/lib/types";
 import { type Dispatch, type SetStateAction } from "react";
@@ -47,7 +48,6 @@ import {
   TX_WIDTH,
   UTXO_LINE_GAP,
   utxoKey,
-  type Network,
 } from "~/app/_utils";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
 

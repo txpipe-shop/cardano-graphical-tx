@@ -1,7 +1,7 @@
+import { type Network } from "@laceanatomy/types/cardano";
 import { cache } from "react";
 import { EmptyState } from "~/app/_components/EmptyState";
 import { HOLDERS_PAGE_SIZE as PAGE_SIZE } from "~/app/_components/ExplorerSection/Tokens/constants";
-import { type Network } from "~/app/_utils/network-config";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import type { AssetHistory } from "../_shared";
 import { AssetHistoryListClient } from "./AssetHistoryListClient";

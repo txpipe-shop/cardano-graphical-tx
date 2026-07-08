@@ -6,18 +6,17 @@ import {
   type SafeCborResponse,
   type Utxo,
 } from "@laceanatomy/napi-pallas";
+import { type Network } from "@laceanatomy/types/cardano";
+import { isAxiosError } from "axios";
 import { StatusCodes } from "http-status-codes";
 import {
   BlockfrostUTxOSchema,
   ERRORS,
-  getApiKey,
   getAssetName,
-  getTransactionURL,
-  getUTxOsURL,
   isEmpty,
   POLICY_LENGTH,
-  type Network,
 } from "~/app/_utils";
+import { getBlockfrostTransactionsApi } from "~/server/api/blockfrost";
 
 interface ICborHandler {
   network: Network;
@@ -27,20 +26,14 @@ interface ICborHandler {
 const inputsHandle = async ({
   inputs,
   network,
-  apiKey,
 }: {
   inputs: Input[];
   network: Network;
-  apiKey: string;
 }): Promise<Utxo[]> => {
+  const api = getBlockfrostTransactionsApi(network);
   const inputPromises = inputs.map(async (input) => {
     try {
-      const blockfrostUtxoRes = await fetch(
-        getUTxOsURL(network, input.txHash),
-        { headers: { project_id: apiKey }, method: "GET" },
-      );
-      if (blockfrostUtxoRes.status !== StatusCodes.OK) throw blockfrostUtxoRes;
-      const blockfrostUtxo = await blockfrostUtxoRes.json();
+      const { data: blockfrostUtxo } = await api.txsHashUtxosGet(input.txHash);
       const parsedUtxo = BlockfrostUTxOSchema.parse(blockfrostUtxo);
       const utxo = parsedUtxo.outputs.find(
         (utxo) => utxo.output_index === Number(input.index),
@@ -111,23 +104,18 @@ const inputsHandle = async ({
 export const cborHandler = async ({ cbor, network }: ICborHandler) => {
   try {
     const res: SafeCborResponse = cborParse(cbor);
-    //console.dir({ res }, { depth: null })
 
     if (!isEmpty(res.error)) throw Error(res.error);
-
-    const apiKey = getApiKey(network);
 
     const cborRes = res.cborRes!;
 
     const inputs = await inputsHandle({
       inputs: cborRes.inputs,
       network,
-      apiKey,
     });
     const referenceInputs = await inputsHandle({
       inputs: cborRes.referenceInputs,
       network,
-      apiKey,
     });
 
     let warning = "";
@@ -136,22 +124,8 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
     }
 
     try {
-      const txInfoRes = await fetch(
-        getTransactionURL(network, cborRes.txHash),
-        {
-          headers: { project_id: apiKey },
-          method: "GET",
-        },
-      );
-
-      if (txInfoRes.status !== StatusCodes.OK)
-        return Response.json({
-          ...cborRes,
-          inputs,
-          referenceInputs,
-          warning,
-        });
-      const txInfo = await txInfoRes.json();
+      const api = getBlockfrostTransactionsApi(network);
+      const { data: txInfo } = await api.txsHashGet(cborRes.txHash);
 
       return Response.json({
         ...cborRes,
@@ -164,6 +138,14 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
         warning,
       });
     } catch (error) {
+      if (isAxiosError(error) && error.response?.status !== StatusCodes.OK) {
+        return Response.json({
+          ...cborRes,
+          inputs,
+          referenceInputs,
+          warning,
+        });
+      }
       if (error instanceof TypeError) {
         return Response.json({
           ...cborRes,

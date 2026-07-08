@@ -1,9 +1,9 @@
 "use client";
 
 import { type Address, isBech32 } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import Link from "next/link";
 import { ROUTES, normalizeAddress } from "~/app/_utils";
-import { type Network } from "~/app/_utils/network-config";
 import CopyButton from "./CopyButton";
 
 export interface ColoredAddressProps {

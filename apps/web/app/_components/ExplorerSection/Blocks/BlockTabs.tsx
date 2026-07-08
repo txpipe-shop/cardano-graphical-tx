@@ -2,8 +2,8 @@
 
 import { type BlockRes } from "@laceanatomy/provider-core";
 import { type cardano } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import { type BlockTab } from "~/app/_utils";
-import { type Network } from "~/app/_utils/network-config";
 import { DetailTabs } from "../../DetailTabs";
 import BlockCbor from "./BlockCbor";
 import BlockOverview from "./BlockOverview";

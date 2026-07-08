@@ -18,3 +18,4 @@ bun.lockb
 /packages/napi-pallas/napi-pallas.wasi.cjs
 /packages/napi-pallas/wasi-worker-browser.mjs
 /packages/napi-pallas/wasi-worker.mjs
+apps/web/storybook-static

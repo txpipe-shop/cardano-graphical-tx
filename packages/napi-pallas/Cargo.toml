@@ -9,9 +9,10 @@ crate-type = ["cdylib", "lib"]
 
 [dependencies]
 anyhow = "1.0.79"
+chrono = "0.4.42"
 hex = "0.4.3"
 jsonschema = "0.26.1"
-napi = { version = "3.0.0", features = ["async"] }
+napi = { version = "3.0.0", features = ["async", "napi6"] }
 napi-derive = "3.0.0"
 pallas = { version = "1.0.0" }
 pallas-addresses = { version = "1.0.0" }
@@ -19,6 +20,7 @@ pallas-codec = { version = "1.0.0" }
 pallas-crypto = { version = "1.0.0" }
 pallas-network = { version = "1.0.0" }
 pallas-primitives = { version = "1.0.0" }
+pallas-validate = { version = "1.0.0" }
 regex = "1.11.1"
 serde_json = "1.0.64"
 

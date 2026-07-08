@@ -48,6 +48,13 @@ export const handleCopy = (text: string) => () => {
   toast.success("Copied to clipboard");
 };
 
+export const toErrorMessage = (err: unknown, fallback: string): string => {
+  if (typeof err === "string") return err;
+  if (err instanceof Response) return err.statusText;
+  if (err instanceof Error) return err.message;
+  return fallback;
+};
+
 export const checkIfHash = (hash: string): boolean => {
   if (hash.length === 64) {
     return isHexa(hash);

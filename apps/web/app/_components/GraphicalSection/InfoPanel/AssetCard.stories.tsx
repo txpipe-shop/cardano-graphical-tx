@@ -15,7 +15,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Lovelace: Story = {
   args: {
-    asset: { assetName: "lovelace", assetNameAscii: null, amount: 1500000 },
+    asset: {
+      assetName: "lovelace",
+      assetNameAscii: undefined,
+      amount: 1500000,
+    },
     policyId: "",
   },
 };

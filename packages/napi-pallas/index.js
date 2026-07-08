@@ -581,3 +581,4 @@ module.exports.cborParseBlock = nativeBinding.cborParseBlock
 module.exports.downloadBlock = nativeBinding.downloadBlock
 module.exports.parseAddress = nativeBinding.parseAddress
 module.exports.parseDatumInfo = nativeBinding.parseDatumInfo
+module.exports.validateCborTx = nativeBinding.validateCborTx

@@ -1,11 +1,11 @@
 "use client";
 
 import { type Address, type cardano } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import { useState } from "react";
 import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
 import { UtxoList } from "~/app/_components/ExplorerSection/Transactions/TxOverview";
 import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
-import { type Network } from "~/app/_utils/network-config";
 import { loadMoreUTxOs } from "./actions";
 
 interface Props {

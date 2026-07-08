@@ -1,0 +1,166 @@
+mod checks;
+mod params;
+mod types;
+mod utxos;
+
+use napi::bindgen_prelude::BigInt;
+use pallas::ledger::traverse::{Era, MultiEraTx};
+use pallas::ledger::validate::phase1::alonzo::validate_alonzo_tx;
+use pallas::ledger::validate::phase1::babbage::validate_babbage_tx;
+use pallas::ledger::validate::phase1::conway::validate_conway_tx;
+use pallas::ledger::validate::utils::{
+  AlonzoProtParams, BabbageProtParams, ConwayProtParams, ValidationError,
+};
+
+use self::checks::{
+  build_all_passed, build_checks_from_error, unsupported_era_response, ErrorMatcher, ALONZO_CHECKS,
+  BABBAGE_CHECKS, CONWAY_CHECKS,
+};
+use self::params::NapiPParams;
+pub use self::types::{ValidationCheck, ValidationInput, ValidationResponse};
+use self::utxos::build_utxos_for_era;
+
+fn err(era: &str, rule: &str, msg: String) -> ValidationResponse {
+  ValidationResponse {
+    era: era.to_string(),
+    checks: vec![ValidationCheck {
+      rule: rule.to_string(),
+      passed: false,
+      error: Some(msg),
+    }],
+    valid: false,
+  }
+}
+
+fn validate_result(
+  era: &str,
+  checks: &[(&str, ErrorMatcher)],
+  result: Result<(), ValidationError>,
+) -> ValidationResponse {
+  match result {
+    Ok(()) => ValidationResponse {
+      era: era.to_string(),
+      checks: build_all_passed(checks),
+      valid: true,
+    },
+    Err(e) => ValidationResponse {
+      era: era.to_string(),
+      checks: build_checks_from_error(checks, &e),
+      valid: false,
+    },
+  }
+}
+
+// &***x below: deref through napi-rs Box wrapper → &ConwayTx etc.
+#[napi]
+pub fn validate_cbor_tx(
+  cbor: String,
+  inputs: Vec<ValidationInput>,
+  pparams: NapiPParams,
+  slot: BigInt,
+  network_id: u8,
+  network_magic: u32,
+) -> ValidationResponse {
+  let (_signed, slot_u64, lossless) = slot.get_u64();
+  if !lossless {
+    return err(
+      "unknown",
+      "params",
+      "Slot value exceeds u64 range".to_string(),
+    );
+  }
+  let cbor_bytes = match hex::decode(&cbor) {
+    Ok(b) => b,
+    Err(e) => return err("unknown", "decode", format!("Failed to decode CBOR: {}", e)),
+  };
+
+  let metx = match MultiEraTx::decode(&cbor_bytes) {
+    Ok(tx) => tx,
+    Err(e) => {
+      return err(
+        "unknown",
+        "decode",
+        format!("Failed to decode transaction: {}", e),
+      )
+    }
+  };
+
+  match &metx {
+    MultiEraTx::Conway(x) => {
+      let era = Era::Conway;
+      let mut cbor_list = Vec::with_capacity(inputs.len());
+      let utxos_map = match build_utxos_for_era(&era, &inputs, &mut cbor_list) {
+        Ok(u) => u,
+        Err(e) => return err("conway", "decode", e.to_string()),
+      };
+
+      let conway_pps = match ConwayProtParams::try_from(pparams) {
+        Ok(p) => p,
+        Err(e) => return err("conway", "params", e.to_string()),
+      };
+
+      validate_result(
+        "conway",
+        CONWAY_CHECKS,
+        validate_conway_tx(&***x, &utxos_map, &conway_pps, &slot_u64, &network_id),
+      )
+    }
+    MultiEraTx::Babbage(x) => {
+      let era = Era::Babbage;
+      let mut cbor_list = Vec::with_capacity(inputs.len());
+      let utxos_map = match build_utxos_for_era(&era, &inputs, &mut cbor_list) {
+        Ok(u) => u,
+        Err(e) => return err("babbage", "decode", e.to_string()),
+      };
+
+      let babbage_pps = match BabbageProtParams::try_from(pparams) {
+        Ok(p) => p,
+        Err(e) => return err("babbage", "params", e.to_string()),
+      };
+
+      validate_result(
+        "babbage",
+        BABBAGE_CHECKS,
+        validate_babbage_tx(
+          &***x,
+          &utxos_map,
+          &babbage_pps,
+          &slot_u64,
+          &network_magic,
+          &network_id,
+        ),
+      )
+    }
+    MultiEraTx::AlonzoCompatible(x, era) => {
+      if !matches!(era, Era::Alonzo) {
+        let era_name = match era {
+          Era::Shelley => "shelley",
+          Era::Allegra => "allegra",
+          Era::Mary => "mary",
+          _ => "unknown",
+        };
+        return unsupported_era_response(era_name);
+      }
+
+      let alonzo_era = Era::Alonzo;
+      let mut cbor_list = Vec::with_capacity(inputs.len());
+      let utxos_map = match build_utxos_for_era(&alonzo_era, &inputs, &mut cbor_list) {
+        Ok(u) => u,
+        Err(e) => return err("alonzo", "decode", e.to_string()),
+      };
+
+      let alonzo_pps = match AlonzoProtParams::try_from(pparams) {
+        Ok(p) => p,
+        Err(e) => return err("alonzo", "params", e.to_string()),
+      };
+
+      validate_result(
+        "alonzo",
+        ALONZO_CHECKS,
+        validate_alonzo_tx(&***x, &utxos_map, &alonzo_pps, &slot_u64, &network_id),
+      )
+    }
+    MultiEraTx::Byron(_) => unsupported_era_response("byron"),
+    _ => unsupported_era_response("unknown"),
+  }
+}

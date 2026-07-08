@@ -1,5 +1,6 @@
 import { Button, Input } from "@heroui/react";
 import { Hash } from "@laceanatomy/types";
+import { NETWORK } from "@laceanatomy/types/cardano";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { type Dispatch, type SetStateAction } from "react";
@@ -10,7 +11,6 @@ import {
   getTransaction,
   isInputUtxo,
   isOutputUtxo,
-  NETWORK,
   OPTIONS,
   ROUTES,
   utxoKey,

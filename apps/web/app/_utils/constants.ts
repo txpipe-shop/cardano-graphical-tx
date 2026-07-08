@@ -1,5 +1,5 @@
+import { NETWORK, type Network } from "@laceanatomy/types/cardano";
 import JSONbig from "json-bigint";
-import { NETWORK, type Network } from "./network-config";
 
 export const EXPLORER_PAGE_SIZE = 10n;
 export const ADDRESS_PAGE_SIZE = 20n;
@@ -23,6 +23,7 @@ export const ROUTES = {
   TX: "/tx",
   ADDRESS: "/address",
   DISSECT: "/tx/dissect",
+  CBOR: "/tx/cbor",
 };
 
 export type ROUTES = (typeof ROUTES)[keyof typeof ROUTES];
@@ -32,6 +33,7 @@ export const API_ROUTES = {
   DEVNET_CBOR: "api/cbor/devnet",
   HASH: "api/hash",
   ADDRESS: "api/address",
+  VALIDATE: "api/validate",
   TOKEN_METADATA: "api/token-metadata",
 };
 

@@ -2,10 +2,11 @@
 
 import type { BlockCursor, BlockWithTxs } from "@laceanatomy/provider-core";
 import type { Cardano, cardano } from "@laceanatomy/types";
+import type { Network } from "@laceanatomy/types/cardano";
 import { useState } from "react";
 import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
 import { BlockTxsAccordion } from "~/app/_components/ExplorerSection/Transactions/BlockTxsAccordion";
-import { getBlockPageSize, type Network } from "~/app/_utils";
+import { getBlockPageSize } from "~/app/_utils";
 import { loadMoreBlocks } from "./actions";
 
 interface BlocksListProps {

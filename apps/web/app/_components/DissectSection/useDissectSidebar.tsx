@@ -3,9 +3,9 @@ import type {
   Metadata,
   RewardWithdrawal as WithdrawalType,
 } from "@laceanatomy/napi-pallas";
+import { type Network } from "@laceanatomy/types/cardano";
 import { useCallback, useMemo, useState } from "react";
 import type { IGraphicalTransaction } from "~/app/_interfaces";
-import { type Network } from "~/app/_utils/network-config";
 import {
   ProposalProcedureDetail,
   VotingProcedureDetail,

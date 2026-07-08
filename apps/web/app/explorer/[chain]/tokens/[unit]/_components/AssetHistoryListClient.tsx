@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardBody, Tooltip } from "@heroui/react";
+import { type Network } from "@laceanatomy/types/cardano";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -8,7 +9,6 @@ import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { PaginationButton } from "~/app/_components/ExplorerSection/PaginationButton";
 import { HISTORY_PAGE_SIZE as PAGE_SIZE } from "~/app/_components/ExplorerSection/Tokens/constants";
 import { ROUTES } from "~/app/_utils/constants";
-import { type Network } from "~/app/_utils/network-config";
 import type { AssetHistory } from "../_shared";
 import { loadMoreHistory } from "./actions";
 

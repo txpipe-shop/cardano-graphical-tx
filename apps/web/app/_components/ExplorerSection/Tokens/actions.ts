@@ -1,6 +1,6 @@
 "use server";
 
-import { isValidChain, type Network } from "~/app/_utils/network-config";
+import { isValidChain, type Network } from "@laceanatomy/types/cardano";
 import type { AssetAddress } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { HOLDERS_PAGE_SIZE } from "./constants";

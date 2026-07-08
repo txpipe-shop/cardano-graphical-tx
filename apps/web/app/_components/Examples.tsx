@@ -1,11 +1,11 @@
 "use client";
 
+import { NETWORK } from "@laceanatomy/types/cardano";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   AddressExamples,
-  NETWORK,
   OPTIONS,
   ROUTES,
   TxExamples,

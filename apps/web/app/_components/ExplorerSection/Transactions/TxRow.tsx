@@ -1,11 +1,11 @@
 "use client";
 import { Button, Card, CardBody } from "@heroui/react";
 import type { cardano, Unit } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import Link from "next/link";
 import { SubLabel } from "~/app/_components/SubLabel";
 import { ROUTES } from "~/app/_utils";
 import { formatAda } from "~/app/_utils/explorer";
-import { type Network } from "~/app/_utils/network-config";
 import ColoredAddress from "../ColoredAddress";
 import CopyButton from "../CopyButton";
 import DateViewer from "../DateViewer";

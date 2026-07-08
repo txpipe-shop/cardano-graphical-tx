@@ -2,6 +2,7 @@
 
 import type { BlockRes } from "@laceanatomy/provider-core";
 import type { Address, cardano, Unit } from "@laceanatomy/types";
+import type { Network } from "@laceanatomy/types/cardano";
 import ColoredAddress from "~/app/_components/ExplorerSection/ColoredAddress";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import DateViewer from "~/app/_components/ExplorerSection/DateViewer";
@@ -9,7 +10,6 @@ import TokenPill from "~/app/_components/ExplorerSection/TokenPill";
 import { InfoCard } from "~/app/_components/InfoCard";
 import { KeyValue } from "~/app/_components/KeyValue";
 import { formatAda } from "~/app/_utils/explorer";
-import type { Network } from "~/app/_utils/network-config";
 
 interface BlockOverviewProps {
   block: BlockRes;

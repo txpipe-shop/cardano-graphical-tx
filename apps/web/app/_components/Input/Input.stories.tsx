@@ -40,6 +40,7 @@ export const SmallTextInput: Story = {
 export const Checkbox: Story = {
   args: {
     name: "toggle",
+    value: "",
     isCheckbox: true,
     checked: false,
     label: "Enable advanced mode",
@@ -49,6 +50,7 @@ export const Checkbox: Story = {
 export const CheckboxChecked: Story = {
   args: {
     name: "toggle",
+    value: "",
     isCheckbox: true,
     checked: true,
     label: "Enable advanced mode",

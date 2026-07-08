@@ -1,8 +1,8 @@
 import { type Address, type cardano } from "@laceanatomy/types";
+import { type Network } from "@laceanatomy/types/cardano";
 import { cache } from "react";
 import { EmptyState } from "~/app/_components/EmptyState";
 import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
-import { type Network } from "~/app/_utils/network-config";
 import { AddressUTxOsListClient } from "./AddressUTxOsListClient";
 import { resolveProvider } from "./resolve-provider";
 
