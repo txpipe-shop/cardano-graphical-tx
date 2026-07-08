@@ -60,7 +60,6 @@ import {
   CIP68_PREFIX_REF,
   CIP68_PREFIX_RFT,
   parseCip68,
-  Script,
   ScriptType
 } from '@laceanatomy/types/cardano';
 import assert from 'assert';
@@ -90,7 +89,7 @@ export type DolosProviderParams = {
 
 export class DolosProvider
   implements
-    ChainProvider<cardano.UTxO, cardano.Tx, Cardano, cardano.TokenMetadata, Script>,
+    ChainProvider<cardano.UTxO, cardano.Tx, Cardano, cardano.TokenMetadata, ScriptType>,
     CursorPaginatedProvider<cardano.UTxO, cardano.Tx, Cardano, BlockCursor>
 {
   private static readonly MAX_BLOCKS_LOOKBACK = 100;
