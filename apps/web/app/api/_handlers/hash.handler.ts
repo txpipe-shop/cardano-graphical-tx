@@ -1,12 +1,9 @@
 import { type Network } from "@laceanatomy/types/cardano";
+import { isAxiosError } from "axios";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
-import {
-  BlockfrostResponseSchema,
-  ERRORS,
-  getApiKey,
-  getBlockfrostURL,
-} from "~/app/_utils";
+import { BlockfrostResponseSchema } from "~/app/_utils";
+import { getBlockfrostTransactionsApi } from "~/server/api/blockfrost";
 
 interface IHashHandler {
   network: Network;
@@ -15,14 +12,10 @@ interface IHashHandler {
 
 export const hashHandler = async ({ network, hash }: IHashHandler) => {
   try {
-    const apiKey = getApiKey(network);
-    const cborRes = await fetch(getBlockfrostURL(network, hash), {
-      headers: { project_id: apiKey },
-      method: "GET",
-    });
-    if (cborRes.status !== StatusCodes.OK) throw cborRes;
-    const cbor = await cborRes.json();
-    const parsedData = BlockfrostResponseSchema.parse(cbor);
+    const { data } = await getBlockfrostTransactionsApi(network).txsHashCborGet(
+      hash,
+    );
+    const parsedData = BlockfrostResponseSchema.parse(data);
     return Response.json(parsedData);
   } catch (err: unknown) {
     console.error(err);
@@ -38,33 +31,31 @@ export const hashHandler = async ({ network, hash }: IHashHandler) => {
       );
     }
 
-    if (err instanceof TypeError) {
-      return Response.json({ cbor: "", warning: ERRORS.internal_error });
-    }
-
-    if (err instanceof Response) {
-      if (err.status === StatusCodes.NOT_FOUND) {
+    if (isAxiosError(err)) {
+      if (err.response?.status === StatusCodes.NOT_FOUND) {
         return Response.json(
           {
             error:
               "Transaction not found. Check your hash or try using another network",
           },
           {
-            status: err.status,
+            status: err.response.status,
             statusText:
               "Transaction not found. Check your hash or try using another network",
           },
         );
-      } else if (err.status !== StatusCodes.OK) {
+      }
+      if (err.response) {
         return Response.json(
-          { error: err.statusText },
+          { error: err.response.statusText },
           {
-            status: err.status,
-            statusText: err.statusText,
+            status: err.response.status,
+            statusText: err.response.statusText,
           },
         );
       }
     }
+
     return Response.json(
       { error: ReasonPhrases.INTERNAL_SERVER_ERROR },
       {

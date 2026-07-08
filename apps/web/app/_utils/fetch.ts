@@ -3,38 +3,10 @@ import type {
   SafeAddressResponse,
   ValidationResponse,
 } from "@laceanatomy/napi-pallas";
-import { NETWORK, type Network } from "@laceanatomy/types/cardano";
 import { StatusCodes } from "http-status-codes";
 import type { Dispatch, SetStateAction } from "react";
 import type { IBlockfrostResponse, ITransaction } from "~/app/_interfaces";
-import { env } from "~/app/env.mjs";
 import { API_ROUTES, ERRORS } from "./constants";
-
-export const getApiKey = (network: Network): string => {
-  switch (network) {
-    case NETWORK.MAINNET:
-      return env.MAINNET_BLOCKFROST_KEY;
-    case NETWORK.PREPROD:
-      return env.PREPROD_BLOCKFROST_KEY;
-    case NETWORK.PREVIEW:
-      return env.PREVIEW_BLOCKFROST_KEY;
-    case NETWORK.DEVNET:
-      return "";
-    default:
-      throw new Error("Invalid network provided");
-  }
-};
-
-export const getBlockfrostURL = (network: Network, hash: string) => {
-  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/cbor`;
-};
-export const getUTxOsURL = (network: Network, hash: string) => {
-  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}/utxos`;
-};
-
-export const getTransactionURL = (network: Network, hash: string) => {
-  return `https://cardano-${network}.blockfrost.io/api/v0/txs/${hash}`;
-};
 
 const parseQuery = (
   route: (typeof API_ROUTES)[keyof typeof API_ROUTES],
@@ -68,7 +40,7 @@ export const getTxFromDevnetCBOR = async (
 
 export const getTxFromCbor = async (
   cbor: string,
-  network: Network,
+  network: string,
 ): Promise<ITransaction> => {
   try {
     const query = { network };
@@ -93,7 +65,7 @@ export const getTxFromCbor = async (
 
 export const getCborFromHash = async (
   txId: string,
-  network: Network,
+  network: string,
   setError: Dispatch<SetStateAction<string>>,
 ): Promise<IBlockfrostResponse> => {
   try {
@@ -146,7 +118,7 @@ export const getAddressInfo = async (
 
 export const validateTx = async (
   cbor: string,
-  network: Network,
+  network: string,
   slot?: number,
 ): Promise<ValidationResponse> => {
   const res = await fetch(parseQuery(API_ROUTES.VALIDATE, {}), {
