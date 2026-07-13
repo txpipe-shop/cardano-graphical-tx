@@ -4,13 +4,13 @@ import { type Metadata } from "next";
 import { IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "react-hot-toast";
+import { ROUTES } from "./_utils/constants";
 import {
   DEFAULT_DESCRIPTION,
   DEFAULT_TITLE,
   SITE_NAME,
   SITE_URL,
 } from "./_utils/metadata";
-import { ROUTES } from "./_utils/constants";
 import "./globals.css";
 
 import { Providers } from "./providers";

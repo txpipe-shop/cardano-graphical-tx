@@ -14,11 +14,8 @@ import {
   TxSearch,
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
-import { EXPLORER_PAGE_SIZE, ROUTES, getBlockPageSize } from "~/app/_utils";
-import {
-  createPageMetadata,
-  formatChain,
-} from "~/app/_utils/metadata";
+import { EXPLORER_PAGE_SIZE, getBlockPageSize, ROUTES } from "~/app/_utils";
+import { createPageMetadata, formatChain } from "~/app/_utils/metadata";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { BlocksList } from "./BlocksList";
 import DevnetTransactionsList from "./DevnetTransactionsList";

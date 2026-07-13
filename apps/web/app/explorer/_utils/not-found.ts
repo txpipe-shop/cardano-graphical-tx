@@ -7,8 +7,8 @@ function getErrorStatus(error: unknown): number | undefined {
   const statusCode = (error as { statusCode?: unknown }).statusCode;
   if (typeof statusCode === "number") return statusCode;
 
-  const responseStatus = (error as { response?: { status?: unknown } })
-    .response?.status;
+  const responseStatus = (error as { response?: { status?: unknown } }).response
+    ?.status;
   if (typeof responseStatus === "number") return responseStatus;
 
   return getErrorStatus((error as { cause?: unknown }).cause);
