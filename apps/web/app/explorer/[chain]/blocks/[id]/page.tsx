@@ -4,18 +4,77 @@ import {
   type Network,
 } from "@laceanatomy/types/cardano";
 import assert from "assert";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { DevnetError } from "~/app/_components/DevnetError";
 import BlockTabs from "~/app/_components/ExplorerSection/Blocks/BlockTabs";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { Header } from "~/app/_components/Header";
-import { BLOCK_TABS, type BlockTab } from "~/app/_utils";
+import { BLOCK_TABS, ROUTES, type BlockTab } from "~/app/_utils";
 import { resolveBlockReq } from "~/app/_utils/block";
+import {
+  createPageMetadata,
+  formatAdaCompact,
+  formatChain,
+  truncateMiddle,
+} from "~/app/_utils/metadata";
 import { getDolosProvider } from "~/server/api/dolos-provider";
+import { isExplorerNotFound } from "../../../_utils/not-found";
 import DevnetBlockTabs from "./DevnetBlockTabs";
 
 interface Props {
   params: Promise<{ chain: Network; id: string }>;
   searchParams?: Promise<{ tab?: string; page?: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id, chain: chainParam } = await params;
+  const chain: Network = isValidChain(chainParam)
+    ? chainParam
+    : NETWORK.MAINNET;
+  const chainLabel = formatChain(chain);
+  const blockReq = resolveBlockReq(id);
+  const fallbackTitle = `Block ${truncateMiddle(id)} on ${chainLabel}`;
+  const fallbackDescription = `Inspect Cardano ${chainLabel} block ${truncateMiddle(id)} in Lace Anatomy.`;
+  const path = ROUTES.EXPLORER_BLOCK(chain, id);
+
+  if (!blockReq) notFound();
+
+  if (chain === NETWORK.DEVNET) {
+    return createPageMetadata({
+      title: fallbackTitle,
+      description: fallbackDescription,
+      path,
+    });
+  }
+
+  try {
+    const {
+      data: [blockWithTxs],
+    } = await getDolosProvider(chain).getBlocksWithTxs({
+      cursor: blockReq,
+      limit: 1n,
+    });
+    assert(blockWithTxs, "Block not found");
+    const { block, transactions } = blockWithTxs;
+    const title = `Block ${block.height.toString()} on ${chainLabel}`;
+    const description = `${transactions.length} transactions, ${formatAdaCompact(block.fees)} total fees, slot ${block.slot.toString()}.`;
+
+    return createPageMetadata({
+      title,
+      description,
+      path,
+    });
+  } catch (err) {
+    console.error(err);
+    if (isExplorerNotFound(err)) notFound();
+
+    return createPageMetadata({
+      title: fallbackTitle,
+      description: fallbackDescription,
+      path,
+    });
+  }
 }
 
 function resolveTab(tab?: string): BlockTab {
@@ -39,16 +98,7 @@ export default async function BlockPage({ params, searchParams }: Props) {
 
   const blockReq = resolveBlockReq(id);
 
-  if (!blockReq) {
-    return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <Header />
-        <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-          <DevnetError title="Invalid block identifier." />
-        </main>
-      </div>
-    );
-  }
+  if (!blockReq) notFound();
 
   if (chain === NETWORK.DEVNET) {
     return (
@@ -111,6 +161,8 @@ export default async function BlockPage({ params, searchParams }: Props) {
     /* eslint-enable react-hooks/error-boundaries */
   } catch (err) {
     console.error(err);
+    if (isExplorerNotFound(err)) notFound();
+
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <Header />

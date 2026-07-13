@@ -6,15 +6,15 @@ import {
   NETWORK,
   type Network,
 } from "@laceanatomy/types/cardano";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import {
   ByronSection,
   ShelleySection,
   StakeSection,
 } from "~/app/_components/AddressSection";
-import { DevnetError } from "~/app/_components/DevnetError";
-import { EmptyState } from "~/app/_components/EmptyState";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import DateViewer from "~/app/_components/ExplorerSection/DateViewer";
 import TokenPill from "~/app/_components/ExplorerSection/TokenPill";
@@ -22,6 +22,12 @@ import { TxTableSkeleton } from "~/app/_components/ExplorerSection/Transactions"
 import { Header } from "~/app/_components/Header";
 import { ROUTES } from "~/app/_utils/constants";
 import { formatAda } from "~/app/_utils/explorer";
+import {
+  createPageMetadata,
+  formatAdaCompact,
+  formatChain,
+  truncateMiddle,
+} from "~/app/_utils/metadata";
 import AddressTabs from "./_components/AddressTabs";
 import { AddressTxList } from "./_components/AddressTxList";
 import { AddressUTxOsList } from "./_components/AddressUTxOsList";
@@ -41,15 +47,82 @@ interface Props {
   searchParams?: Promise<{ tab?: string }>;
 }
 
-function AddressError() {
+function hasAddressActivity({
+  balance,
+  tokenEntries,
+  txCount,
+  firstSeen,
+  lastSeen,
+}: Awaited<ReturnType<typeof loadAddressStats>>): boolean {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <Header />
-      <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-        <DevnetError title="Invalid Cardano address." />
-      </main>
-    </div>
+    txCount > 0n ||
+    balance > 0n ||
+    tokenEntries.length > 0 ||
+    !!firstSeen ||
+    !!lastSeen
   );
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { chain: chainParam, address: raw } = await params;
+  const chain: Network = isValidChain(chainParam)
+    ? chainParam
+    : NETWORK.MAINNET;
+  const chainLabel = formatChain(chain);
+  const shortAddress = truncateMiddle(raw, 16, 12);
+  const fallbackTitle = `Address ${shortAddress} on ${chainLabel}`;
+  const fallbackDescription = `Inspect Cardano ${chainLabel} address ${shortAddress} in Lace Anatomy.`;
+  const path = ROUTES.EXPLORER_ADDRESS(chain, raw);
+
+  let normalizedAddress: Address;
+  try {
+    normalizedAddress = Address(raw);
+  } catch {
+    notFound();
+  }
+
+  let addressInfoRes: ReturnType<typeof parseAddress>;
+  try {
+    addressInfoRes = parseAddress(raw);
+  } catch {
+    notFound();
+  }
+
+  if (addressInfoRes.error?.trim()) notFound();
+
+  try {
+    const addressInfo = addressInfoRes.address;
+    const typeLabel = resolveTypeLabel(addressInfo, raw);
+    const displayAddress = resolveDisplayAddress(
+      raw,
+      addressInfo?.kind,
+      chain,
+      normalizedAddress,
+    );
+    const stats = await loadAddressStats({
+      chain,
+      normalizedAddress,
+    });
+    const { balance, tokenEntries, txCount } = stats;
+
+    if (!stats.error && !hasAddressActivity(stats)) notFound();
+
+    const title = `${typeLabel} ${truncateMiddle(displayAddress, 16, 12)}`;
+    const description = `${formatAdaCompact(balance)} balance, ${txCount.toString()} transactions, ${tokenEntries.length} native assets on ${chainLabel}.`;
+
+    return createPageMetadata({
+      title,
+      description,
+      path,
+    });
+  } catch (err) {
+    console.error(err);
+    return createPageMetadata({
+      title: fallbackTitle,
+      description: fallbackDescription,
+      path,
+    });
+  }
 }
 
 export default async function AddressDetailPage({
@@ -70,7 +143,7 @@ export default async function AddressDetailPage({
   try {
     normalizedAddress = Address(raw);
   } catch {
-    return <AddressError />;
+    notFound();
   }
 
   let addressInfoRes: ReturnType<typeof parseAddress>;
@@ -82,7 +155,7 @@ export default async function AddressDetailPage({
   }
 
   if (addressInfoRes.error?.trim()) {
-    return <AddressError />;
+    notFound();
   }
 
   const addressInfo = addressInfoRes.address;
@@ -94,17 +167,13 @@ export default async function AddressDetailPage({
     normalizedAddress,
   );
 
-  const basePath = `/explorer/${chain}/addresses/${encodeURIComponent(raw)}`;
+  const basePath = ROUTES.EXPLORER_ADDRESS(chain, raw);
 
-  const { balance, tokenEntries, txCount, firstSeen, lastSeen, error } =
-    await loadAddressStats({ chain, normalizedAddress });
+  const stats = await loadAddressStats({ chain, normalizedAddress });
+  const { balance, tokenEntries, txCount, firstSeen, lastSeen, error } = stats;
 
-  const hasAnyActivity =
-    txCount > 0n ||
-    balance > 0n ||
-    tokenEntries.length > 0 ||
-    !!firstSeen ||
-    !!lastSeen;
+  const hasAnyActivity = hasAddressActivity(stats);
+  if (!error && !hasAnyActivity) notFound();
 
   const dissectContent = (
     <div className="px-4 py-2">
@@ -158,13 +227,6 @@ export default async function AddressDetailPage({
           <div className="mb-4 rounded-lg border-2 border-dashed border-border bg-surface p-4 text-center text-p-secondary shadow-md">
             {error}
           </div>
-        )}
-
-        {!hasAnyActivity && (
-          <EmptyState
-            message="No activity for this address."
-            className="mb-4"
-          />
         )}
 
         <div className="rounded-lg border-2 border-dashed border-border bg-surface shadow-md">
