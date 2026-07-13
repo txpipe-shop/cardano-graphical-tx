@@ -109,7 +109,13 @@ export class DolosProvider
   private addressPrefix: string;
   private tokenClient: TokenRegistryClient;
 
-  constructor({ transport, blockfrostUrl, blockfrostApiKey, addressPrefix, network }: DolosProviderParams) {
+  constructor({
+    transport,
+    blockfrostUrl,
+    blockfrostApiKey,
+    addressPrefix,
+    network
+  }: DolosProviderParams) {
     this.utxoRpc = new UtxoRpcClient({ transport });
     this.addressPrefix = addressPrefix;
 

@@ -32,15 +32,18 @@ export const OPEN_GRAPH_IMAGE_SIZE = {
 } as const;
 
 const colors = {
-  background: "#fafafa",
-  surface: "#f3f4f6",
+  background: "#eef6fc",
+  accentSurface: "#e6f3fb",
   ink: "#1f2937",
-  muted: "#4b5563",
-  subtle: "#6b7280",
-  border: "#d1d5db",
-  softBorder: "#e5e7eb",
-  accent: "#4299e1",
-  explorer: "#f5f3ff",
+  muted: "#374151",
+  subtle: "#536579",
+  border: "#b9d9ee",
+  softBorder: "#d8e8f3",
+  accent: "#2b6cb0",
+  accentStrong: "#1e4e8c",
+  accentMid: "#90cdf4",
+  explorer: "#ede9fe",
+  explorerInk: "#5b21b6",
 } as const;
 
 const fontStacks = {
@@ -78,6 +81,10 @@ function truncateDescription(description: string): string {
   return `${description.slice(0, 129).trimEnd()}...`;
 }
 
+function normalizeOpenGraphText(value: string): string {
+  return value.replaceAll("₳", "ADA");
+}
+
 export function OpenGraphImage({
   kind = "home",
   title = SITE_NAME,
@@ -87,17 +94,30 @@ export function OpenGraphImage({
   facts = [],
   logoSrc = "https://laceanatomy.com/txpipe.png",
 }: OpenGraphImageProps) {
+  const normalizedTitle = normalizeOpenGraphText(title);
   const displayTitle =
     kind === "transaction" || kind === "address" || kind === "token"
-      ? truncateMiddle(title, 22, 18)
-      : title;
-  const visibleFacts = facts.slice(0, 6);
+      ? truncateMiddle(normalizedTitle, 22, 18)
+      : normalizedTitle;
+  const visibleFacts = facts
+    .slice(0, 6)
+    .map(
+      ([label, value]) =>
+        [label, normalizeOpenGraphText(value)] as OpenGraphFact,
+    );
   const factRows = [visibleFacts.slice(0, 3), visibleFacts.slice(3, 6)].filter(
     (row) => row.length > 0,
   );
   const titleSize = resolveTitleSize(displayTitle);
-  const displayDescription = truncateDescription(description);
+  const displayDescription = truncateDescription(
+    normalizeOpenGraphText(description),
+  );
   const descriptionSize = resolveDescriptionSize(displayDescription);
+  const normalizedEyebrow = normalizeOpenGraphText(eyebrow);
+  const displayEyebrow =
+    normalizedEyebrow.trim().toLowerCase() === kind.trim().toLowerCase()
+      ? null
+      : normalizedEyebrow;
 
   return (
     <div
@@ -117,9 +137,9 @@ export function OpenGraphImage({
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage: `radial-gradient(${colors.border} 1px, transparent 1px)`,
+          backgroundImage: `radial-gradient(${colors.accentMid} 1.5px, transparent 1.5px)`,
           backgroundSize: "36px 36px",
-          opacity: 0.32,
+          opacity: 0.5,
         }}
       />
       <div
@@ -130,35 +150,60 @@ export function OpenGraphImage({
           width: "100%",
           height: "100%",
           boxSizing: "border-box",
-          border: `2px dashed ${colors.border}`,
+          overflow: "hidden",
+          border: `2px dashed ${colors.accentMid}`,
           borderRadius: radii.lg,
-          backgroundColor: "rgba(250, 250, 250, 0.94)",
+          backgroundColor: "#fcfeff",
           padding: spacing.panel,
         }}
       >
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: 8,
+            backgroundColor: colors.accent,
+          }}
+        />
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             width: "100%",
-            marginBottom: spacing.headerGap,
+            marginBottom: spacing.headerGap - 2,
+            paddingBottom: 20,
+            borderBottom: `2px dashed ${colors.softBorder}`,
           }}
         >
           <div style={{ display: "flex", alignItems: "center" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={logoSrc}
-              width={50}
-              height={50}
-              alt="TxPipe"
+            <div
               style={{
-                width: 50,
-                height: 50,
+                width: 58,
+                height: 58,
                 display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 marginRight: 14,
+                border: `2px solid ${colors.border}`,
+                borderRadius: radii.md,
               }}
-            />
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={logoSrc}
+                width={44}
+                height={44}
+                alt="TxPipe"
+                style={{
+                  width: 44,
+                  height: 44,
+                  display: "flex",
+                }}
+              />
+            </div>
             <div
               style={{
                 display: "flex",
@@ -189,7 +234,8 @@ export function OpenGraphImage({
                 padding: "10px 18px",
                 fontFamily: fontStacks.mono,
                 fontSize: 18,
-                color: colors.muted,
+                color: colors.explorerInk,
+                fontWeight: 600,
               }}
             >
               {formatChain(chain)}
@@ -203,25 +249,33 @@ export function OpenGraphImage({
             flexDirection: "column",
           }}
         >
+          {displayEyebrow ? (
+            <div
+              style={{
+                display: "flex",
+                alignSelf: "flex-start",
+                fontFamily: fontStacks.mono,
+                fontSize: 16,
+                color: colors.accent,
+                fontWeight: 600,
+                borderRadius: radii.pill,
+                backgroundColor: colors.accentSurface,
+                padding: "7px 12px",
+              }}
+            >
+              {displayEyebrow}
+            </div>
+          ) : null}
           <div
             style={{
               display: "flex",
-              fontFamily: fontStacks.mono,
-              fontSize: 18,
-              color: colors.accent,
-            }}
-          >
-            {eyebrow}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              marginTop: spacing.contentGap,
+              marginTop: displayEyebrow ? spacing.contentGap : 0,
               maxWidth: 960,
               fontSize: titleSize,
               fontWeight: 800,
               lineHeight: 1.04,
               letterSpacing: -1,
+              color: colors.accentStrong,
             }}
           >
             {displayTitle}
@@ -271,7 +325,7 @@ export function OpenGraphImage({
                     boxSizing: "border-box",
                     border: `2px solid ${colors.softBorder}`,
                     borderRadius: radii.md,
-                    backgroundColor: colors.surface,
+                    backgroundColor: colors.accentSurface,
                     padding: "10px 14px",
                     marginRight: index === row.length - 1 ? 0 : spacing.factGap,
                   }}
@@ -279,9 +333,10 @@ export function OpenGraphImage({
                   <div
                     style={{
                       display: "flex",
-                      color: colors.subtle,
+                      color: colors.accent,
                       fontFamily: fontStacks.mono,
                       fontSize: 13,
+                      fontWeight: 600,
                     }}
                   >
                     {label}
