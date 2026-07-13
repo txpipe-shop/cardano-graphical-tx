@@ -3,7 +3,6 @@ import {
   NETWORK,
   type Network,
 } from "@laceanatomy/types/cardano";
-import { getBlockPageSize } from "~/app/_utils";
 import { formatChain } from "~/app/_utils/metadata";
 import {
   ogImageContentType,
@@ -37,7 +36,6 @@ export default async function Image({ params }: Props) {
     facts: [
       ["Network", chainLabel],
       ["View", "Blocks + txs"],
-      ["Page size", getBlockPageSize(chain).toString()],
     ],
   });
 }

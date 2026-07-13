@@ -23,7 +23,6 @@ export type OpenGraphImageProps = {
   description?: string;
   chain?: string | null;
   facts?: OpenGraphFact[];
-  logoSrc?: string;
 };
 
 export const OPEN_GRAPH_IMAGE_SIZE = {
@@ -36,8 +35,6 @@ const colors = {
   accentSurface: "#e6f3fb",
   ink: "#1f2937",
   muted: "#374151",
-  subtle: "#536579",
-  border: "#b9d9ee",
   softBorder: "#d8e8f3",
   accent: "#2b6cb0",
   accentStrong: "#1e4e8c",
@@ -92,7 +89,6 @@ export function OpenGraphImage({
   description = DEFAULT_DESCRIPTION,
   chain,
   facts = [],
-  logoSrc = "https://laceanatomy.com/txpipe.png",
 }: OpenGraphImageProps) {
   const normalizedTitle = normalizeOpenGraphText(title);
   const displayTitle =
@@ -178,51 +174,8 @@ export function OpenGraphImage({
             borderBottom: `2px dashed ${colors.softBorder}`,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div
-              style={{
-                width: 58,
-                height: 58,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 14,
-                border: `2px solid ${colors.border}`,
-                borderRadius: radii.md,
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={logoSrc}
-                width={44}
-                height={44}
-                alt="TxPipe"
-                style={{
-                  width: 44,
-                  height: 44,
-                  display: "flex",
-                }}
-              />
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <div style={{ fontSize: 28, fontWeight: 700 }}>{SITE_NAME}</div>
-              <div
-                style={{
-                  marginTop: 2,
-                  fontSize: 15,
-                  color: colors.subtle,
-                  letterSpacing: 0.4,
-                  fontFamily: fontStacks.mono,
-                }}
-              >
-                txpipe.io
-              </div>
-            </div>
+          <div style={{ display: "flex", fontSize: 28, fontWeight: 700 }}>
+            {SITE_NAME}
           </div>
           {chain ? (
             <div

@@ -19,8 +19,5 @@ export type OpenGraphImageData = {
 };
 
 export function renderOpenGraphImage(data: OpenGraphImageData) {
-  return new ImageResponse(
-    <OpenGraphImage {...data} logoSrc={"https://laceanatomy.com/txpipe.png"} />,
-    OPEN_GRAPH_IMAGE_SIZE,
-  );
+  return new ImageResponse(<OpenGraphImage {...data} />, OPEN_GRAPH_IMAGE_SIZE);
 }
