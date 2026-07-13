@@ -4,17 +4,68 @@ import {
   NETWORK,
   type Network,
 } from "@laceanatomy/types/cardano";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { DevnetError } from "~/app/_components/DevnetError";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { Header } from "~/app/_components/Header";
-import { TX_TABS, type TxTab } from "~/app/_utils";
+import { ROUTES, TX_TABS, type TxTab } from "~/app/_utils";
+import {
+  createPageMetadata,
+  formatAdaCompact,
+  formatChain,
+  truncateMiddle,
+} from "~/app/_utils/metadata";
+import { getDolosProvider } from "~/server/api/dolos-provider";
+import { isExplorerNotFound } from "../../../_utils/not-found";
 import DevnetTxTabs from "./DevnetTxTabs";
 import { loadPageData } from "./_utils";
 
 interface Props {
   params: Promise<{ chain: Network; hash: string }>;
   searchParams?: Promise<{ tab?: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { hash, chain: chainParam } = await params;
+  const chain: Network = isValidChain(chainParam)
+    ? chainParam
+    : NETWORK.MAINNET;
+  const chainLabel = formatChain(chain);
+  const shortHash = truncateMiddle(hash);
+  const fallbackTitle = `Transaction ${shortHash} on ${chainLabel}`;
+  const fallbackDescription = `Inspect Cardano ${chainLabel} transaction ${shortHash} in Lace Anatomy.`;
+  const path = ROUTES.EXPLORER_TX(chain, hash);
+
+  if (chain === NETWORK.DEVNET) {
+    return createPageMetadata({
+      title: fallbackTitle,
+      description: fallbackDescription,
+      path,
+    });
+  }
+
+  try {
+    const tx = await getDolosProvider(chain).getTx({ hash: Hash(hash) });
+    const title = `Transaction ${shortHash} on ${chainLabel}`;
+    const description = `Block ${tx.block.height.toString()} transaction with ${tx.inputs.length} inputs, ${tx.outputs.length} outputs, and ${formatAdaCompact(tx.fee)} fee.`;
+
+    return createPageMetadata({
+      title,
+      description,
+      path,
+    });
+  } catch (err) {
+    console.error(err);
+    if (isExplorerNotFound(err)) notFound();
+
+    return createPageMetadata({
+      title: fallbackTitle,
+      description: fallbackDescription,
+      path,
+    });
+  }
 }
 
 function resolveTab(tab?: string): TxTab {
@@ -88,6 +139,8 @@ export default async function TxPage({ params, searchParams }: Props) {
     );
   } catch (err) {
     console.error(err);
+    if (isExplorerNotFound(err)) notFound();
+
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <Header />
