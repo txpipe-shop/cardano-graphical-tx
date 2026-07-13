@@ -37,6 +37,7 @@ export function getDolosProvider(chain: Network): DolosProvider {
     blockfrostUrl: dolosBlockfrostUrl,
     blockfrostApiKey: dolosBlockfrostApiKey,
     addressPrefix,
+    network: chain,
   });
 }
 

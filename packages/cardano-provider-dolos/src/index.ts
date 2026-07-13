@@ -35,6 +35,7 @@ import {
   policyFromUnit,
   Unit
 } from '@laceanatomy/types';
+import type { Network } from '@laceanatomy/types/cardano';
 import {
   CardanoAddressesApi,
   CardanoAssetsApi,
@@ -88,6 +89,8 @@ export type DolosProviderParams = {
   blockfrostApiKey?: string;
   /** Bech32 address prefix: 'addr' for mainnet, 'addr_test' for testnets */
   addressPrefix: string;
+  /** Cardano network for token registry selection */
+  network: Network;
 };
 
 export class DolosProvider
@@ -106,7 +109,7 @@ export class DolosProvider
   private addressPrefix: string;
   private tokenClient: TokenRegistryClient;
 
-  constructor({ transport, blockfrostUrl, blockfrostApiKey, addressPrefix }: DolosProviderParams) {
+  constructor({ transport, blockfrostUrl, blockfrostApiKey, addressPrefix, network }: DolosProviderParams) {
     this.utxoRpc = new UtxoRpcClient({ transport });
     this.addressPrefix = addressPrefix;
 
@@ -117,7 +120,8 @@ export class DolosProvider
     this.blockApi = new CardanoBlocksApi(config);
     this.addrApi = new CardanoAddressesApi(config);
     this.assetsApi = new CardanoAssetsApi(config);
-    this.tokenClient = new TokenRegistryClient('preprod');
+    const registryNetwork = network === 'mainnet' ? 'mainnet' : 'preprod';
+    this.tokenClient = new TokenRegistryClient(registryNetwork);
     this.scriptApi = new CardanoScriptsApi(config);
     this.governanceApi = new CardanoGovernanceApi(config);
   }
