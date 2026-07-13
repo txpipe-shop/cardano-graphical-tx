@@ -5,6 +5,7 @@ import {
   NETWORK,
   type Network,
 } from "@laceanatomy/types/cardano";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { DevnetError } from "~/app/_components/DevnetError";
 import ChainSelector from "~/app/_components/ExplorerSection/ChainSelector";
@@ -13,13 +14,35 @@ import {
   TxSearch,
 } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
-import { EXPLORER_PAGE_SIZE, getBlockPageSize } from "~/app/_utils";
+import { EXPLORER_PAGE_SIZE, ROUTES, getBlockPageSize } from "~/app/_utils";
+import {
+  createPageMetadata,
+  formatChain,
+} from "~/app/_utils/metadata";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { BlocksList } from "./BlocksList";
 import DevnetTransactionsList from "./DevnetTransactionsList";
 
 interface ExplorerPageProps {
   params: Promise<{ chain: Network }>;
+}
+
+export async function generateMetadata({
+  params,
+}: ExplorerPageProps): Promise<Metadata> {
+  const { chain: chainParam } = await params;
+  const chain: Network = isValidChain(chainParam)
+    ? chainParam
+    : NETWORK.MAINNET;
+  const chainLabel = formatChain(chain);
+  const title = `${chainLabel} Transaction Explorer`;
+  const description = `Explore recent Cardano ${chainLabel} blocks and transactions in Lace Anatomy.`;
+
+  return createPageMetadata({
+    title,
+    description,
+    path: ROUTES.EXPLORER_TXS(chain),
+  });
 }
 
 async function TransactionsList({ chain }: { chain: Network }) {
