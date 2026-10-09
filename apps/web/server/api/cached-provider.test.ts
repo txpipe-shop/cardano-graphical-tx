@@ -30,6 +30,7 @@ function fakeProvider() {
       call(`getTx:${hash}`, () => ({
         hash,
         fee: 170_000n,
+        indexInBlock: hash.startsWith("unindexed") ? undefined : 0n,
         block: { hash: "b", slot: 1n, height: BigInt(hash.split("@")[1] ?? 0) },
       })),
     getCBOR: ({ hash }: { hash: string }) =>
@@ -111,6 +112,17 @@ describe("withUpstreamCache", () => {
     await cached.getBlocksWithTxs({ cursor: { height: deep }, limit: 1n });
     await cached.getBlockCBOR({ height: deep });
     expect(immutable.size).toBe(2);
+  });
+
+  it("never stores a tx without its in-block index as final", async () => {
+    const { cached, calls, immutable, mutable } = setup();
+    const hash = `unindexed@${TIP - SECURITY_PARAM - 1n}` as never;
+
+    await cached.getTx({ hash });
+    await cached.getTx({ hash });
+    expect(count(calls, `getTx:${hash}`)).toBe(1);
+    expect(immutable.size).toBe(0);
+    expect(mutable.size).toBe(1);
   });
 
   it("stores content-addressed lookups as final regardless of depth", async () => {

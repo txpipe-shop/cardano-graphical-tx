@@ -37,9 +37,13 @@ export type UpstreamCacheOptions = {
 
 /**
  * Where a loaded value is stored: always final, short-lived, or decided by the
- * depth of the block it sits in. A `null` height marks a miss, which is never stored.
+ * depth of the block it sits in. A `null` height marks a miss, which is never
+ * stored; `"mutable"` keeps an incomplete value from being stored as final.
  */
-type Placement<T> = "immutable" | "mutable" | ((value: T) => bigint | null);
+type Placement<T> =
+  | "immutable"
+  | "mutable"
+  | ((value: T) => bigint | "mutable" | null);
 
 function blockKey(ref: BlockReq): string {
   if ("hash" in ref) return `hash:${ref.hash}`;
@@ -96,7 +100,11 @@ export function withUpstreamCache<P extends CacheableProvider>(
     } else {
       const height = placement(value);
       if (height === null) return serialized;
-      if (tipNow !== undefined && tipNow - height > SECURITY_PARAM) {
+      if (
+        height !== "mutable" &&
+        tipNow !== undefined &&
+        tipNow - height > SECURITY_PARAM
+      ) {
         immutable.set(key, serialized);
       } else {
         mutable.set(key, serialized, ttlMs);
@@ -142,7 +150,8 @@ export function withUpstreamCache<P extends CacheableProvider>(
       lookup(
         `tx:${req.hash}`,
         () => provider.getTx(req),
-        (tx) => tx.block.height,
+        // The provider leaves the index unset when its lookup fails.
+        (tx) => (tx.indexInBlock === undefined ? "mutable" : tx.block.height),
       ),
     getCBOR: (req) =>
       lookup(`tx-cbor:${req.hash}`, () => provider.getCBOR(req), "immutable"),
