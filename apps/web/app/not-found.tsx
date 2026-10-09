@@ -10,7 +10,7 @@ import {
   TX_WIDTH,
 } from "~/app/_utils";
 import { Header, PropBlock } from "./_components";
-import Loading from "./loading";
+import Loading from "./_components/Loading";
 
 export default function FourOhFour() {
   const [divSize, setDivSize] = useState({ width: 0, height: 0 });

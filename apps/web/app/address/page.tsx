@@ -12,9 +12,9 @@ import {
   ShelleySection,
   StakeSection,
 } from "~/app/_components";
+import Loading from "~/app/_components/Loading";
 import { useConfigs, useUI } from "~/app/_contexts";
 import { getAddressInfo, isEmpty } from "~/app/_utils";
-import Loading from "~/app/loading";
 
 export default function Index() {
   const { error, loading, setError } = useUI();

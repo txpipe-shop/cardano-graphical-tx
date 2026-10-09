@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { Layer, Stage } from "react-konva";
+import Loading from "~/app/_components/Loading";
 import { useConfigs, useGraphical, useUI } from "~/app/_contexts";
 import {
   ERRORS,
@@ -12,7 +13,6 @@ import {
   UTXO_URL_PARAM,
   utxoKey,
 } from "~/app/_utils";
-import Loading from "~/app/loading";
 import { Line, Transaction, Utxo } from ".";
 import { Error } from "../Error";
 import { setPositions } from "../Input/TxInput/txInput.helper";
