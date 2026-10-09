@@ -1,4 +1,5 @@
 import { createGrpcTransport } from "@laceanatomy/utxorpc-sdk/transport/node";
+import { getHeapStatistics } from "node:v8";
 import { env } from "~/app/env.mjs";
 
 function positiveInt(value: unknown, fallback: number): number {
@@ -16,6 +17,28 @@ export const UPSTREAM_GRPC_TIMEOUT_MS = positiveInt(
 export const UPSTREAM_HTTP_TIMEOUT_MS = positiveInt(
   env.UPSTREAM_HTTP_TIMEOUT_MS,
   15_000,
+);
+
+const MB = 1024 * 1024;
+const heapLimit = getHeapStatistics().heap_size_limit;
+
+/**
+ * Byte cap for final chain data. With the mutable cap, the default totals a
+ * quarter of the heap limit, which `--max-old-space-size` sets.
+ */
+export const UPSTREAM_CACHE_IMMUTABLE_BYTES =
+  positiveInt(env.UPSTREAM_CACHE_IMMUTABLE_MB, 0) * MB ||
+  Math.floor(heapLimit * 0.2);
+
+/** Byte cap for short-lived entries: asset, address and near-tip lookups. */
+export const UPSTREAM_CACHE_MUTABLE_BYTES =
+  positiveInt(env.UPSTREAM_CACHE_MUTABLE_MB, 0) * MB ||
+  Math.floor(heapLimit * 0.05);
+
+/** How long a short-lived entry, and the tip used to judge depth, is kept. */
+export const UPSTREAM_CACHE_TTL_MS = positiveInt(
+  env.UPSTREAM_CACHE_TTL_MS,
+  30_000,
 );
 
 /**
