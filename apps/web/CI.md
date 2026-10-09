@@ -6,20 +6,21 @@ The docker image is built manually via `workflow_dispatch` — go to Actions →
 
 ## How is this all being built?
 
-It's built as a docker image through this [workflow](https://github.com/txpipe-shop/cardano-graphical-tx/blob/main/.github/workflows/docker.yml). It's pushed to Docker Hub. You can change the account it's being pushed to by changing the repository secrets.
+It's built as a docker image through this [workflow](https://github.com/txpipe-shop/cardano-graphical-tx/blob/main/.github/workflows/docker.yml) and pushed to the GitHub Container Registry as `ghcr.io/txpipe-shop/cardano-graphical-tx`. The workflow authenticates with its own `GITHUB_TOKEN`, so no registry secrets are needed.
+
+Each run publishes two tags:
+
+- `ui-<sha7>` — the first 7 characters of the built commit, e.g. `ui-bc20bf7`.
+- `ui-<ref>` — the branch the workflow ran on, e.g. `ui-main`.
+
+The image namespace is set in `docker.yml`; change it there to publish elsewhere.
 
 ## Just merged a PR. What do I do to see this in production?
 
-If you've just added a PR and you want this deployed. Do the following:
-
 1. Go to Actions → "Build and push dockers" → "Run workflow" to trigger a build on `main`.
-2. Check if docker image was built and published successfully (green checkmark on the workflow run).
-
+2. Check that the image was built and published successfully (green checkmark on the workflow run).
 3. Copy the first **7** characters of the commit.
-
-4. Go to Demeter and change the version of the deployed docker image `dockerusername/cardano-graphical-tx:bc20bf7` to have the hash of your commit.
-
-5. Save changes.
+4. Roll the deployment to the new image tag, `ghcr.io/txpipe-shop/cardano-graphical-tx:ui-<sha7>`.
 
 Done!
 
@@ -38,4 +39,4 @@ build-args: |
 
 If the environment variable starts with `NEXT_PUBLIC`, read [NEXT_PUBLIC undefined](#my-next_public-variable-is-undefined).
 
-Otherwise, just add it in Demeter.
+Otherwise, add it to the deployment's runtime environment.

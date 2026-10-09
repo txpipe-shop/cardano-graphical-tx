@@ -1,24 +1,21 @@
 import { type Network } from "@laceanatomy/types/cardano";
 import { UtxoRpcClient } from "@laceanatomy/utxorpc-sdk";
-import { createGrpcTransport } from "@laceanatomy/utxorpc-sdk/transport/node";
 import { getNetworkConfigServer } from "./server-network-config";
+import { createUpstreamTransport, memoize } from "./upstream";
 
-export function getUtxoRpcClient(network: Network): UtxoRpcClient | null {
-  const config = getNetworkConfigServer(network);
-  if (!config.dolosUtxorpcUrl) return null;
+/** The network's Dolos UTxORPC transport, shared by every client of it. */
+export const getUtxoRpcTransport = memoize((network: Network) => {
+  const { dolosUtxorpcUrl, dolosUtxorpcApiKey } =
+    getNetworkConfigServer(network);
+  if (!dolosUtxorpcUrl) return null;
 
-  return new UtxoRpcClient({
-    transport: createGrpcTransport({
-      httpVersion: "2",
-      baseUrl: config.dolosUtxorpcUrl,
-      interceptors: config.dolosUtxorpcApiKey
-        ? [
-            (next) => async (req) => {
-              req.header.set("dmtr-api-key", config.dolosUtxorpcApiKey!);
-              return next(req);
-            },
-          ]
-        : [],
-    }),
-  });
-}
+  return createUpstreamTransport(
+    dolosUtxorpcUrl,
+    dolosUtxorpcApiKey ? { "dmtr-api-key": dolosUtxorpcApiKey } : undefined,
+  );
+});
+
+export const getUtxoRpcClient = memoize((network: Network) => {
+  const transport = getUtxoRpcTransport(network);
+  return transport ? new UtxoRpcClient({ transport }) : null;
+});

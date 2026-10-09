@@ -57,10 +57,11 @@ function threshold(
 
 export async function fetchCurrentPParamsFromUtxorpc(
   client: UtxoRpcClient,
+  signal?: AbortSignal,
 ): Promise<NapiPParams> {
   const [paramsRes, genesisRes] = await Promise.all([
-    client.query.readParams({}),
-    client.query.readGenesis({}),
+    client.query.readParams({}, { signal }),
+    client.query.readGenesis({}, { signal }),
   ]);
 
   const params = paramsRes.values;
