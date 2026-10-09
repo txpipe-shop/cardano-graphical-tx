@@ -14,7 +14,7 @@ interface AssetHistoryListProps {
 }
 
 export const getAssetHistoryPage = cache(
-  async ({ chain, unit }: Readonly<AssetHistoryListProps>) => {
+  async (chain: Network, unit: string) => {
     const provider = getDolosProvider(chain);
     return provider.getAssetHistory(unit, FETCH_SIZE, 1);
   },
@@ -28,7 +28,7 @@ export async function AssetHistoryList({
   let hasMore = false;
 
   try {
-    allHistory = await getAssetHistoryPage({ chain, unit });
+    allHistory = await getAssetHistoryPage(chain, unit);
     hasMore = allHistory.length > PAGE_SIZE;
   } catch (err) {
     console.error(err);
