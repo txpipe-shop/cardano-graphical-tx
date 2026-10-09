@@ -5,7 +5,6 @@ import {
 } from "@laceanatomy/types/cardano";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { DevnetError } from "~/app/_components/DevnetError";
 import BlockTabs from "~/app/_components/ExplorerSection/Blocks/BlockTabs";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import { Header } from "~/app/_components/Header";
@@ -149,16 +148,7 @@ export default async function BlockPage({ params, searchParams }: Props) {
     );
     /* eslint-enable react-hooks/error-boundaries */
   } catch (err) {
-    console.error(err);
     if (isExplorerNotFound(err)) notFound();
-
-    return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <Header />
-        <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-          <DevnetError title="Block not found or could not be loaded." />
-        </main>
-      </div>
-    );
+    throw err;
   }
 }

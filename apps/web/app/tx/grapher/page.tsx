@@ -8,10 +8,10 @@ import {
   TxInput,
   UtxoInfo,
 } from "~/app/_components";
+import Loading from "~/app/_components/Loading";
 import { useUI } from "~/app/_contexts";
 import { useTransactionLoader } from "~/app/_hooks/useTransactionLoader";
 import { TX_URL_PARAM, UTXO_URL_PARAM } from "~/app/_utils";
-import Loading from "~/app/loading";
 
 export default function Index() {
   useTransactionLoader();

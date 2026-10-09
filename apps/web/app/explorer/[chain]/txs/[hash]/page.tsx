@@ -5,7 +5,6 @@ import {
 } from "@laceanatomy/types/cardano";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { DevnetError } from "~/app/_components/DevnetError";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
 import TxTabs from "~/app/_components/ExplorerSection/Transactions/TxTabs";
 import { Header } from "~/app/_components/Header";
@@ -133,16 +132,7 @@ export default async function TxPage({ params, searchParams }: Props) {
       </div>
     );
   } catch (err) {
-    console.error(err);
     if (isExplorerNotFound(err)) notFound();
-
-    return (
-      <div className="flex min-h-screen flex-col bg-background">
-        <Header />
-        <main className="container mx-auto flex flex-1 flex-col px-4 py-6">
-          <DevnetError title="Transaction not found or could not be loaded." />
-        </main>
-      </div>
-    );
+    throw err;
   }
 }
