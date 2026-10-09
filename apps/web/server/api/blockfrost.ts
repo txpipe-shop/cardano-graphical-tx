@@ -6,6 +6,7 @@ import {
 } from "@laceanatomy/blockfrost-sdk";
 import { type Network } from "@laceanatomy/types/cardano";
 import { getNetworkConfigServer } from "./server-network-config";
+import { UPSTREAM_HTTP_TIMEOUT_MS } from "./upstream";
 
 function getBlockfrostConfig(network: Network): Configuration {
   const config = getNetworkConfigServer(network);
@@ -13,6 +14,7 @@ function getBlockfrostConfig(network: Network): Configuration {
     basePath: config.dolosBlockfrostUrl,
     apiKey: config.dolosBlockfrostApiKey,
     baseOptions: {
+      timeout: UPSTREAM_HTTP_TIMEOUT_MS,
       headers: {
         "dmtr-api-key": config.dolosBlockfrostApiKey,
       },

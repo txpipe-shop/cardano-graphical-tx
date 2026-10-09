@@ -8,12 +8,13 @@ import { getBlockfrostTransactionsApi } from "~/server/api/blockfrost";
 interface IHashHandler {
   network: Network;
   hash: string;
+  signal?: AbortSignal;
 }
 
-export const hashHandler = async ({ network, hash }: IHashHandler) => {
+export const hashHandler = async ({ network, hash, signal }: IHashHandler) => {
   try {
-    const { data } =
-      await getBlockfrostTransactionsApi(network).txsHashCborGet(hash);
+    const api = getBlockfrostTransactionsApi(network);
+    const { data } = await api.txsHashCborGet(hash, { signal });
     const parsedData = BlockfrostResponseSchema.parse(data);
     return Response.json(parsedData);
   } catch (err: unknown) {

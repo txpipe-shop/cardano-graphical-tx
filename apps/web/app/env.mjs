@@ -23,6 +23,8 @@ export const env = createEnv({
     MAINNET_DOLOS_UTXORPC_API_KEY: z.string().optional(),
     PREPROD_DOLOS_UTXORPC_API_KEY: z.string().optional(),
     PREVIEW_DOLOS_UTXORPC_API_KEY: z.string().optional(),
+    UPSTREAM_GRPC_TIMEOUT_MS: z.coerce.number().int().positive().optional(),
+    UPSTREAM_HTTP_TIMEOUT_MS: z.coerce.number().int().positive().optional(),
   },
   /*
    * Environment variables available on the client (and server).
@@ -61,6 +63,8 @@ export const env = createEnv({
     MAINNET_DOLOS_UTXORPC_API_KEY: process.env.MAINNET_DOLOS_UTXORPC_API_KEY,
     PREPROD_DOLOS_UTXORPC_API_KEY: process.env.PREPROD_DOLOS_UTXORPC_API_KEY,
     PREVIEW_DOLOS_UTXORPC_API_KEY: process.env.PREVIEW_DOLOS_UTXORPC_API_KEY,
+    UPSTREAM_GRPC_TIMEOUT_MS: process.env.UPSTREAM_GRPC_TIMEOUT_MS,
+    UPSTREAM_HTTP_TIMEOUT_MS: process.env.UPSTREAM_HTTP_TIMEOUT_MS,
   },
   emptyStringAsUndefined: true,
   skipValidation:

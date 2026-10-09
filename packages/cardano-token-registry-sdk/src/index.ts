@@ -50,16 +50,25 @@ const BASE_URLS: Record<TokenRegistryNetwork, string> = {
   preprod: 'https://preprod.tokens.cardano.org'
 };
 
+export type TokenRegistryOptions = {
+  /** Per-request timeout; none when omitted */
+  timeoutMs?: number;
+};
+
 export class TokenRegistryClient {
   private baseUrl: string;
+  private timeoutMs?: number;
 
-  constructor(network: TokenRegistryNetwork = 'mainnet') {
+  constructor(network: TokenRegistryNetwork = 'mainnet', options: TokenRegistryOptions = {}) {
     this.baseUrl = `${BASE_URLS[network]}/metadata`;
+    this.timeoutMs = options.timeoutMs;
   }
 
   async getToken(subject: string): Promise<TokenMetadata | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/${subject}`);
+      const response = await fetch(`${this.baseUrl}/${subject}`, {
+        signal: this.timeoutMs ? AbortSignal.timeout(this.timeoutMs) : undefined
+      });
 
       if (!response.ok) {
         if (response.status === 404) return null;

@@ -39,6 +39,7 @@ function isNotFoundError(err: unknown): boolean {
 export async function resolveInputs(
   inputs: ResolvedInput[],
   client: UtxoRpcClient,
+  signal?: AbortSignal,
 ): Promise<ResolveInputsRes> {
   const inputsByTx = new Map<string, ResolvedInput[]>();
   for (const input of inputs) {
@@ -52,9 +53,10 @@ export async function resolveInputs(
   await Promise.all(
     Array.from(inputsByTx.keys()).map(async (txHash) => {
       try {
-        const response = await client.query.readTx({
-          hash: new Uint8Array(Buffer.from(txHash, "hex")),
-        });
+        const response = await client.query.readTx(
+          { hash: new Uint8Array(Buffer.from(txHash, "hex")) },
+          { signal },
+        );
 
         if (!response.tx) {
           outputsByTx.set(txHash, null);
