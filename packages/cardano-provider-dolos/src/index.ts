@@ -347,33 +347,17 @@ export class DolosProvider
     );
   }
 
-  private async toCardanoTx(
-    txResponse: query.ReadTxResponse,
-    indexInBlock?: number
-  ): Promise<cardano.Tx> {
+  /** The in-block index stays unset when the caller doesn't have it. */
+  private toCardanoTx(txResponse: query.ReadTxResponse, indexInBlock?: number): cardano.Tx {
     const { tx, block } = this.validateTx(txResponse);
-    const index = indexInBlock ?? (await this.findTxIndexByFetchingBlock(block, tx));
-
     return u5cToCardanoTx(
       tx,
       block.timestamp,
       Hash(Buffer.from(block.hash).toString('hex')),
       block.height,
       block.slot,
-      index
+      indexInBlock
     );
-  }
-
-  /** Fallback when minibf couldn't give the index: the full block. */
-  private async findTxIndexByFetchingBlock(
-    block: query.ChainPoint,
-    tx: cardanoUtxoRpc.Tx
-  ): Promise<number> {
-    const blockResp = await this.utxoRpc.sync.fetchBlock({
-      ref: [{ hash: Buffer.from(block.hash) }]
-    });
-    const { body } = validateBlock(blockResp);
-    return findTxIndexInBlock(body, tx);
   }
 
   private validateTx(txResponse: query.ReadTxResponse): {
