@@ -15,7 +15,9 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const input = validateTxSchema.parse(body);
-    return Response.json(await validateCurrentTx(input));
+    return Response.json(
+      await validateCurrentTx({ ...input, signal: req.signal }),
+    );
   } catch (err) {
     console.error("Validation error:", err);
 

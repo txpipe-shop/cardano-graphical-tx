@@ -87,6 +87,8 @@ export type DolosProviderParams = {
   transport: Transport;
   blockfrostUrl: string;
   blockfrostApiKey?: string;
+  /** Timeout for minibf and token registry HTTP calls; none when omitted */
+  httpTimeoutMs?: number;
   /** Bech32 address prefix: 'addr' for mainnet, 'addr_test' for testnets */
   addressPrefix: string;
   /** Cardano network for token registry selection */
@@ -113,6 +115,7 @@ export class DolosProvider
     transport,
     blockfrostUrl,
     blockfrostApiKey,
+    httpTimeoutMs,
     addressPrefix,
     network
   }: DolosProviderParams) {
@@ -121,13 +124,14 @@ export class DolosProvider
 
     const config = new Configuration({
       apiKey: blockfrostApiKey,
-      basePath: blockfrostUrl
+      basePath: blockfrostUrl,
+      baseOptions: { timeout: httpTimeoutMs }
     });
     this.blockApi = new CardanoBlocksApi(config);
     this.addrApi = new CardanoAddressesApi(config);
     this.assetsApi = new CardanoAssetsApi(config);
     const registryNetwork = network === 'mainnet' ? 'mainnet' : 'preprod';
-    this.tokenClient = new TokenRegistryClient(registryNetwork);
+    this.tokenClient = new TokenRegistryClient(registryNetwork, { timeoutMs: httpTimeoutMs });
     this.scriptApi = new CardanoScriptsApi(config);
     this.governanceApi = new CardanoGovernanceApi(config);
   }

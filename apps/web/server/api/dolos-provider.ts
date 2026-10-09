@@ -1,45 +1,30 @@
 import { DolosProvider } from "@laceanatomy/cardano-provider-dolos";
 import { type Network } from "@laceanatomy/types/cardano";
-import { createGrpcTransport as createGrpcTransportNode } from "@laceanatomy/utxorpc-sdk/transport/node";
 import { getNetworkConfigServer } from "./server-network-config";
+import { UPSTREAM_HTTP_TIMEOUT_MS, memoize } from "./upstream";
+import { getUtxoRpcTransport } from "./utxorpc-client";
 
-export function getDolosProvider(chain: Network): DolosProvider {
-  const {
-    dolosBlockfrostUrl,
-    dolosBlockfrostApiKey,
-    dolosUtxorpcUrl,
-    dolosUtxorpcApiKey,
-    addressPrefix,
-  } = getNetworkConfigServer(chain);
+export const getDolosProvider = memoize((chain: Network): DolosProvider => {
+  const { dolosBlockfrostUrl, dolosBlockfrostApiKey, addressPrefix } =
+    getNetworkConfigServer(chain);
 
   if (!dolosBlockfrostUrl) {
     throw new Error(`Dolos Blockfrost URL not configured for chain: ${chain}`);
   }
-  if (!dolosUtxorpcUrl) {
+  const transport = getUtxoRpcTransport(chain);
+  if (!transport) {
     throw new Error(`Dolos UTxORPC URL not configured for chain: ${chain}`);
   }
-
-  const transport = createGrpcTransportNode({
-    httpVersion: "2",
-    baseUrl: dolosUtxorpcUrl,
-    interceptors: dolosUtxorpcApiKey
-      ? [
-          (next) => async (req) => {
-            req.header.set("dmtr-api-key", dolosUtxorpcApiKey);
-            return next(req);
-          },
-        ]
-      : [],
-  });
 
   return new DolosProvider({
     transport,
     blockfrostUrl: dolosBlockfrostUrl,
     blockfrostApiKey: dolosBlockfrostApiKey,
+    httpTimeoutMs: UPSTREAM_HTTP_TIMEOUT_MS,
     addressPrefix,
     network: chain,
   });
-}
+});
 
 export function isDolosConfigured(chain: Network): boolean {
   const { dolosBlockfrostUrl, dolosUtxorpcUrl } = getNetworkConfigServer(chain);

@@ -7,7 +7,7 @@ import { hashHandler } from "~/app/api/_handlers";
 export async function GET(req: NextRequest) {
   try {
     const { network, txId } = getTxFromHashSchema.parse(getQuery(req.url));
-    return await hashHandler({ network, hash: txId });
+    return await hashHandler({ network, hash: txId, signal: req.signal });
   } catch (err: unknown) {
     if (err instanceof ZodError) {
       const errors = err.issues.map((issue) => issue.message).join(", ");

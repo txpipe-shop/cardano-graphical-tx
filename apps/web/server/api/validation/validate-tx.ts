@@ -19,6 +19,7 @@ type ValidateCurrentTxInput = {
   cbor: string;
   network: Network;
   slot?: number;
+  signal?: AbortSignal;
 };
 
 function validationFailure(rule: string, error: string): ValidationResponse {
@@ -33,6 +34,7 @@ export async function validateCurrentTx({
   cbor,
   network,
   slot: providedSlot,
+  signal,
 }: ValidateCurrentTxInput): Promise<ValidationResponse> {
   if (network === NETWORK.DEVNET) {
     return validationFailure("unsupported", "Devnet validation not available");
@@ -65,8 +67,8 @@ export async function validateCurrentTx({
 
   const [{ resolved: resolvedUtxos, errors: utxoErrors }, pparams] =
     await Promise.all([
-      resolveInputs(inputs, utxoClient),
-      fetchCurrentPParamsFromUtxorpc(utxoClient),
+      resolveInputs(inputs, utxoClient, signal),
+      fetchCurrentPParamsFromUtxorpc(utxoClient, signal),
     ]);
 
   const result = validateCborTx(

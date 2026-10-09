@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       ...getQuery(req.url),
       cbor: formDataCbor,
     });
-    return await cborHandler({ network, cbor });
+    return await cborHandler({ network, cbor, signal: req.signal });
   } catch (err: unknown) {
     console.error(err);
     const zodErr = err as { issues?: Array<{ message: string }> };

@@ -21,19 +21,24 @@ import { getBlockfrostTransactionsApi } from "~/server/api/blockfrost";
 interface ICborHandler {
   network: Network;
   cbor: string;
+  signal?: AbortSignal;
 }
 
 const inputsHandle = async ({
   inputs,
   network,
+  signal,
 }: {
   inputs: Input[];
   network: Network;
+  signal?: AbortSignal;
 }): Promise<Utxo[]> => {
   const api = getBlockfrostTransactionsApi(network);
   const inputPromises = inputs.map(async (input) => {
     try {
-      const { data: blockfrostUtxo } = await api.txsHashUtxosGet(input.txHash);
+      const { data: blockfrostUtxo } = await api.txsHashUtxosGet(input.txHash, {
+        signal,
+      });
       const parsedUtxo = BlockfrostUTxOSchema.parse(blockfrostUtxo);
       const utxo = parsedUtxo.outputs.find(
         (utxo) => utxo.output_index === Number(input.index),
@@ -101,7 +106,7 @@ const inputsHandle = async ({
   });
 };
 
-export const cborHandler = async ({ cbor, network }: ICborHandler) => {
+export const cborHandler = async ({ cbor, network, signal }: ICborHandler) => {
   try {
     const res: SafeCborResponse = cborParse(cbor);
 
@@ -112,10 +117,12 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
     const inputs = await inputsHandle({
       inputs: cborRes.inputs,
       network,
+      signal,
     });
     const referenceInputs = await inputsHandle({
       inputs: cborRes.referenceInputs,
       network,
+      signal,
     });
 
     let warning = "";
@@ -125,7 +132,7 @@ export const cborHandler = async ({ cbor, network }: ICborHandler) => {
 
     try {
       const api = getBlockfrostTransactionsApi(network);
-      const { data: txInfo } = await api.txsHashGet(cborRes.txHash);
+      const { data: txInfo } = await api.txsHashGet(cborRes.txHash, { signal });
 
       return Response.json({
         ...cborRes,
