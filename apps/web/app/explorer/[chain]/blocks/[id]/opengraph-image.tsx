@@ -3,7 +3,6 @@ import {
   NETWORK,
   type Network,
 } from "@laceanatomy/types/cardano";
-import assert from "assert";
 import { resolveBlockReq } from "~/app/_utils/block";
 import {
   formatAdaCompact,
@@ -15,7 +14,7 @@ import {
   ogImageSize,
   renderOpenGraphImage,
 } from "~/app/_utils/og-image";
-import { getDolosProvider } from "~/server/api/dolos-provider";
+import { getBlockWithTxs } from "./_utils";
 
 export const alt = "Block";
 export const size = ogImageSize;
@@ -49,14 +48,7 @@ export default async function Image({ params }: Props) {
   }
 
   try {
-    const {
-      data: [blockWithTxs],
-    } = await getDolosProvider(chain).getBlocksWithTxs({
-      cursor: blockReq,
-      limit: 1n,
-    });
-    assert(blockWithTxs, "Block not found");
-    const { block, transactions } = blockWithTxs;
+    const { block, transactions } = await getBlockWithTxs(chain, id);
     const description = `${transactions.length} transactions, ${formatAdaCompact(block.fees)} total fees, slot ${block.slot.toString()}.`;
 
     return renderOpenGraphImage({

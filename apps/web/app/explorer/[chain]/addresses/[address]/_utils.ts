@@ -9,6 +9,7 @@ import {
   isHexString,
 } from "@laceanatomy/types";
 import { getNetworkConfig, type Network } from "@laceanatomy/types/cardano";
+import { cache } from "react";
 import { getAddressTxPage } from "./_components/AddressTxList";
 import { getAddressUTxOsPage } from "./_components/AddressUTxOsList";
 
@@ -102,13 +103,10 @@ export interface AddressStats {
   error: string | null;
 }
 
-export async function loadAddressStats({
-  chain,
-  normalizedAddress,
-}: Readonly<{
-  chain: Network;
-  normalizedAddress: Address;
-}>): Promise<AddressStats> {
+export const loadAddressStats = cache(async function loadAddressStats(
+  chain: Network,
+  normalizedAddress: Address,
+): Promise<AddressStats> {
   let balance = 0n;
   let tokenEntries: [string, bigint][] = [];
   let txCount = 0n;
@@ -117,8 +115,8 @@ export async function loadAddressStats({
   let error: string | null = null;
 
   const [utxosRes, txsRes] = await Promise.allSettled([
-    getAddressUTxOsPage({ chain, address: normalizedAddress }),
-    getAddressTxPage({ chain, address: normalizedAddress }),
+    getAddressUTxOsPage(chain, normalizedAddress),
+    getAddressTxPage(chain, normalizedAddress),
   ]);
 
   if (utxosRes.status === "fulfilled") {
@@ -163,4 +161,4 @@ export async function loadAddressStats({
   }
 
   return { balance, tokenEntries, txCount, firstSeen, lastSeen, error };
-}
+});

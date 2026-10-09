@@ -1,4 +1,3 @@
-import { Hash } from "@laceanatomy/types";
 import {
   isValidChain,
   NETWORK,
@@ -17,10 +16,9 @@ import {
   formatChain,
   truncateMiddle,
 } from "~/app/_utils/metadata";
-import { getDolosProvider } from "~/server/api/dolos-provider";
 import { isExplorerNotFound } from "../../../_utils/not-found";
 import DevnetTxTabs from "./DevnetTxTabs";
-import { loadPageData } from "./_utils";
+import { getTx, loadPageData } from "./_utils";
 
 interface Props {
   params: Promise<{ chain: Network; hash: string }>;
@@ -47,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   try {
-    const tx = await getDolosProvider(chain).getTx({ hash: Hash(hash) });
+    const tx = await getTx(chain, hash);
     const title = `Transaction ${shortHash} on ${chainLabel}`;
     const description = `Block ${tx.block.height.toString()} transaction with ${tx.inputs.length} inputs, ${tx.outputs.length} outputs, and ${formatAdaCompact(tx.fee)} fee.`;
 
@@ -108,10 +106,7 @@ export default async function TxPage({ params, searchParams }: Props) {
   }
 
   try {
-    const { cardanoTx, cbor, tx } = await loadPageData({
-      chain,
-      hash: Hash(hash),
-    });
+    const { cardanoTx, cbor, tx } = await loadPageData(chain, hash);
     /* eslint-disable react-hooks/error-boundaries */
     return (
       <div className="flex min-h-screen flex-col bg-background">
