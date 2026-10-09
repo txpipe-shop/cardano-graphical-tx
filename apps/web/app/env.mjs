@@ -25,6 +25,10 @@ export const env = createEnv({
     PREVIEW_DOLOS_UTXORPC_API_KEY: z.string().optional(),
     UPSTREAM_GRPC_TIMEOUT_MS: z.coerce.number().int().positive().optional(),
     UPSTREAM_HTTP_TIMEOUT_MS: z.coerce.number().int().positive().optional(),
+    UPSTREAM_CACHE_IMMUTABLE_MB: z.coerce.number().int().positive().optional(),
+    UPSTREAM_CACHE_MUTABLE_MB: z.coerce.number().int().positive().optional(),
+    UPSTREAM_CACHE_TTL_MS: z.coerce.number().int().positive().optional(),
+    UPSTREAM_REQUEST_LOG: z.enum(["0", "1"]).optional(),
   },
   /*
    * Environment variables available on the client (and server).
@@ -65,6 +69,10 @@ export const env = createEnv({
     PREVIEW_DOLOS_UTXORPC_API_KEY: process.env.PREVIEW_DOLOS_UTXORPC_API_KEY,
     UPSTREAM_GRPC_TIMEOUT_MS: process.env.UPSTREAM_GRPC_TIMEOUT_MS,
     UPSTREAM_HTTP_TIMEOUT_MS: process.env.UPSTREAM_HTTP_TIMEOUT_MS,
+    UPSTREAM_CACHE_IMMUTABLE_MB: process.env.UPSTREAM_CACHE_IMMUTABLE_MB,
+    UPSTREAM_CACHE_MUTABLE_MB: process.env.UPSTREAM_CACHE_MUTABLE_MB,
+    UPSTREAM_CACHE_TTL_MS: process.env.UPSTREAM_CACHE_TTL_MS,
+    UPSTREAM_REQUEST_LOG: process.env.UPSTREAM_REQUEST_LOG,
   },
   emptyStringAsUndefined: true,
   skipValidation:
