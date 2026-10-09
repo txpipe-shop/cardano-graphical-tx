@@ -42,6 +42,7 @@ import {
   CardanoBlocksApi,
   CardanoGovernanceApi,
   CardanoScriptsApi,
+  CardanoTransactionsApi,
   Configuration
 } from '@laceanatomy/blockfrost-sdk';
 import {
@@ -106,6 +107,7 @@ export class DolosProvider
   private assetsApi: CardanoAssetsApi;
   private scriptApi: CardanoScriptsApi;
   private governanceApi: CardanoGovernanceApi;
+  private txApi: CardanoTransactionsApi;
   private addressPrefix: string;
   private tokenClient: TokenRegistryClient;
 
@@ -130,6 +132,7 @@ export class DolosProvider
     this.tokenClient = new TokenRegistryClient(registryNetwork);
     this.scriptApi = new CardanoScriptsApi(config);
     this.governanceApi = new CardanoGovernanceApi(config);
+    this.txApi = new CardanoTransactionsApi(config);
   }
 
   // ---------------------------------------------------------------------------
@@ -202,8 +205,8 @@ export class DolosProvider
 
     if (txRefs.length === 0) return { data: [], total };
 
-    const data = await this.fetchTxsFromBlocks(
-      txRefs.map((t) => ({ hash: t.tx_hash, blockHeight: t.block_height }))
+    const data = await this.readTxs(
+      txRefs.map((t) => ({ hash: t.tx_hash, indexInBlock: t.tx_index }))
     );
     return { data, total };
   }
@@ -318,22 +321,42 @@ export class DolosProvider
   // Single tx — UTxORPC only (inputs are resolved via asOutput)
   // ---------------------------------------------------------------------------
   async getTx({ hash }: TxReq): Promise<cardano.Tx> {
-    const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') });
+    // UTxORPC's readTx doesn't carry the tx's position in its block. Ask
+    // minibf for it instead of downloading the whole block.
+    const [txResponse, indexInBlock] = await Promise.all([
+      this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') }),
+      this.txApi
+        .txsHashGet(hash)
+        .then((resp) => resp.data.index)
+        .catch(() => undefined)
+    ]);
+    return this.toCardanoTx(txResponse, indexInBlock);
+  }
+
+  /**
+   * Reads each tx on its own, in parallel, instead of fetching every block
+   * that contains one of them. Callers pass the in-block index when their
+   * listing already returned it.
+   */
+  private async readTxs(refs: { hash: string; indexInBlock?: number }[]): Promise<cardano.Tx[]> {
+    return Promise.all(
+      refs.map(async ({ hash, indexInBlock }) => {
+        const txResponse = await this.utxoRpc.query.readTx({ hash: Buffer.from(hash, 'hex') });
+        return this.toCardanoTx(txResponse, indexInBlock);
+      })
+    );
+  }
+
+  /** The in-block index stays unset when the caller doesn't have it. */
+  private toCardanoTx(txResponse: query.ReadTxResponse, indexInBlock?: number): cardano.Tx {
     const { tx, block } = this.validateTx(txResponse);
-
-    const blockHash = Hash(Buffer.from(block.hash).toString('hex'));
-    const blockResp = await this.utxoRpc.sync.fetchBlock({
-      ref: [{ hash: Buffer.from(block.hash) }]
-    });
-    const { body } = validateBlock(blockResp);
-
     return u5cToCardanoTx(
       tx,
       block.timestamp,
-      blockHash,
+      Hash(Buffer.from(block.hash).toString('hex')),
       block.height,
       block.slot,
-      findTxIndexInBlock(body, tx)
+      indexInBlock
     );
   }
 

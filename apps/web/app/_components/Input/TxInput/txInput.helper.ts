@@ -594,7 +594,8 @@ export async function addDevnetCBORsToContext(
           referenceInputs: buildUtxos(referenceInputs),
           blockHash: tx ? tx.block.hash : undefined,
           blockHeight: tx ? Number(tx.block.height) : undefined,
-          blockTxIndex: tx ? Number(tx.indexInBlock) : undefined,
+          blockTxIndex:
+            tx?.indexInBlock === undefined ? undefined : Number(tx.indexInBlock),
           blockAbsoluteSlot: tx ? Number(tx.block.slot) : undefined,
         };
       }),

@@ -51,7 +51,8 @@ export type CardanoTxFields = {
   createdAt?: number;
   witnesses?: { redeemers?: Redeemer[]; scripts?: Script[] };
   validityInterval?: { invalidBefore?: bigint; invalidHereafter?: bigint };
-  indexInBlock: bigint;
+  /** Position in its block; unset when the provider could not determine it */
+  indexInBlock?: bigint;
 };
 
 export type CardanoBlockFields = { epochNo: bigint };

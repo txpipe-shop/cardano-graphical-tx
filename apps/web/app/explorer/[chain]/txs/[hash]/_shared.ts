@@ -83,7 +83,8 @@ export async function loadTxPageData(
     blockAbsoluteSlot: Number(cardanoTx.block.slot),
     blockHash: cardanoTx.block.hash,
     blockHeight: Number(cardanoTx.block.height),
-    blockTxIndex: Number(cardanoTx.indexInBlock),
+    blockTxIndex:
+      cardanoTx.indexInBlock === undefined ? undefined : Number(cardanoTx.indexInBlock),
     certificates: analyzedCbor.certificates,
     collateral: analyzedCbor.collateral,
     metadata: analyzedCbor.metadata,
