@@ -3,7 +3,6 @@ import {
   NETWORK,
   type Network,
 } from "@laceanatomy/types/cardano";
-import assert from "assert";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { DevnetError } from "~/app/_components/DevnetError";
@@ -21,6 +20,7 @@ import {
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { isExplorerNotFound } from "../../../_utils/not-found";
 import DevnetBlockTabs from "./DevnetBlockTabs";
+import { getBlockWithTxs } from "./_utils";
 
 interface Props {
   params: Promise<{ chain: Network; id: string }>;
@@ -49,14 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   try {
-    const {
-      data: [blockWithTxs],
-    } = await getDolosProvider(chain).getBlocksWithTxs({
-      cursor: blockReq,
-      limit: 1n,
-    });
-    assert(blockWithTxs, "Block not found");
-    const { block, transactions } = blockWithTxs;
+    const { block, transactions } = await getBlockWithTxs(chain, id);
     const title = `Block ${block.height.toString()} on ${chainLabel}`;
     const description = `${transactions.length} transactions, ${formatAdaCompact(block.fees)} total fees, slot ${block.slot.toString()}.`;
 
@@ -123,11 +116,7 @@ export default async function BlockPage({ params, searchParams }: Props) {
 
   try {
     const provider = getDolosProvider(chain);
-    const {
-      data: [blockWithTxs],
-    } = await provider.getBlocksWithTxs({ cursor: blockReq, limit: 1n });
-    assert(blockWithTxs, "Block not found");
-    const { block, transactions } = blockWithTxs;
+    const { block, transactions } = await getBlockWithTxs(chain, id);
     const cbor = provider.getBlockCBOR
       ? await provider.getBlockCBOR(blockReq)
       : null;

@@ -99,10 +99,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       chain,
       normalizedAddress,
     );
-    const stats = await loadAddressStats({
-      chain,
-      normalizedAddress,
-    });
+    const stats = await loadAddressStats(chain, normalizedAddress);
     const { balance, tokenEntries, txCount } = stats;
 
     if (!stats.error && !hasAddressActivity(stats)) notFound();
@@ -169,7 +166,7 @@ export default async function AddressDetailPage({
 
   const basePath = ROUTES.EXPLORER_ADDRESS(chain, raw);
 
-  const stats = await loadAddressStats({ chain, normalizedAddress });
+  const stats = await loadAddressStats(chain, normalizedAddress);
   const { balance, tokenEntries, txCount, firstSeen, lastSeen, error } = stats;
 
   const hasAnyActivity = hasAddressActivity(stats);

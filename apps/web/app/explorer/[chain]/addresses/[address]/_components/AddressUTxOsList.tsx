@@ -12,10 +12,7 @@ interface AddressUTxOsListProps {
 }
 
 export const getAddressUTxOsPage = cache(
-  async ({
-    chain,
-    address,
-  }: Readonly<Pick<AddressUTxOsListProps, "chain" | "address">>) => {
+  async (chain: Network, address: Address) => {
     const provider = resolveProvider(chain);
 
     return provider.getAddressUTxOs({
@@ -34,7 +31,7 @@ export async function AddressUTxOsList({
   let hasMore = false;
 
   try {
-    const response = await getAddressUTxOsPage({ chain, address });
+    const response = await getAddressUTxOsPage(chain, address);
     allUtxos = response.data;
     hasMore = allUtxos.length > ADDRESS_PAGE_SIZE;
   } catch (err) {

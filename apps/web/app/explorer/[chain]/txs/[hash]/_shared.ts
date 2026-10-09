@@ -56,7 +56,10 @@ function providerToPreGraphicalUTxO(cUtxo: cardano.UTxO): Utxo {
 }
 
 export async function loadTxPageData(
-  provider: ChainProvider<cardano.UTxO, cardano.Tx, Cardano>,
+  provider: Pick<
+    ChainProvider<cardano.UTxO, cardano.Tx, Cardano>,
+    "getTx" | "getCBOR"
+  >,
   hash: Hash,
   parseCbor: ParseCbor,
 ) {

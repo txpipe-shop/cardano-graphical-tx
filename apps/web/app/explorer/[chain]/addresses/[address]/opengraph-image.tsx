@@ -52,7 +52,7 @@ export default async function Image({ params }: Props) {
       normalizedAddress,
     );
     const { balance, tokenEntries, txCount, firstSeen, lastSeen } =
-      await loadAddressStats({ chain, normalizedAddress });
+      await loadAddressStats(chain, normalizedAddress);
     const description = `${formatAdaCompact(balance)} balance, ${txCount.toString()} transactions, ${tokenEntries.length} native assets on ${chainLabel}.`;
 
     return renderOpenGraphImage({

@@ -1,46 +1,31 @@
-import { type Hash } from "@laceanatomy/types";
+import { cborParse } from "@laceanatomy/napi-pallas";
+import { Hash } from "@laceanatomy/types";
 import { type Network } from "@laceanatomy/types/cardano";
-import { headers } from "next/headers";
+import { cache } from "react";
+import { isEmpty } from "~/app/_utils";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { loadTxPageData } from "./_shared";
 
-type PageData = {
-  chain: Network;
-  hash: Hash;
-};
-
-export async function loadPageData({ chain, hash }: PageData) {
-  const provider = getDolosProvider(chain);
-  const parseCborViaApi = async (cbor: string) => {
-    const formData = new FormData();
-    formData.append("tx", cbor);
-
-    const requestHeaders = await headers();
-    const host =
-      requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-    const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
-
-    if (!host) {
-      throw new Error("Unable to resolve host for CBOR parsing");
-    }
-
-    const res = await fetch(`${protocol}://${host}/api/cbor/devnet`, {
-      method: "POST",
-      body: formData,
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      throw new Error(res.statusText || "Failed to parse CBOR");
-    }
-
-    const data = await res.json();
-    if (!data?.tx) {
-      throw new Error("Transaction cbor could not be parsed");
-    }
-
-    return data.tx;
-  };
-
-  return loadTxPageData(provider, hash, parseCborViaApi);
+async function parseCbor(cbor: string) {
+  const res = cborParse(cbor);
+  if (!isEmpty(res.error) || !res.cborRes) {
+    throw new Error(res.error || "Transaction cbor could not be parsed");
+  }
+  return res.cborRes;
 }
+
+export const getTx = cache((chain: Network, hash: string) =>
+  getDolosProvider(chain).getTx({ hash: Hash(hash) }),
+);
+
+export const loadPageData = cache((chain: Network, hash: string) => {
+  const provider = getDolosProvider(chain);
+  return loadTxPageData(
+    {
+      getTx: () => getTx(chain, hash),
+      getCBOR: (query) => provider.getCBOR(query),
+    },
+    Hash(hash),
+    parseCbor,
+  );
+});

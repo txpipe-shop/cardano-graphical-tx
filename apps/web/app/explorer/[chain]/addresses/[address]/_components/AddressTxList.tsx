@@ -11,10 +11,7 @@ interface AddressTxListProps {
 }
 
 export const getAddressTxPage = cache(
-  async ({
-    chain,
-    address,
-  }: Readonly<Pick<AddressTxListProps, "chain" | "address">>) => {
+  async (chain: Network, address: Address) => {
     const provider = resolveProvider(chain);
 
     return provider.getTxs({
@@ -33,7 +30,7 @@ export async function AddressTxList({
   let hasMore = false;
 
   try {
-    const response = await getAddressTxPage({ chain, address });
+    const response = await getAddressTxPage(chain, address);
     allTxs = response.data;
     hasMore = allTxs.length > ADDRESS_PAGE_SIZE;
   } catch (err) {

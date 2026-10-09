@@ -16,11 +16,11 @@ import {
   formatChain,
   truncateMiddle,
 } from "~/app/_utils/metadata";
-import { getDolosProvider } from "~/server/api/dolos-provider";
 import { isExplorerNotFound } from "../../../_utils/not-found";
 import { AssetHistoryList } from "./_components/AssetHistoryList";
 import { TokenPageLayout } from "./_components/TokenPageLayout";
-import { type AssetInfo, loadTokenPageData } from "./_shared";
+import { type AssetInfo, type TokenSummary } from "./_shared";
+import { loadTokenPageData, loadTokenSummary } from "./_utils";
 import DevnetTokenTabs from "./DevnetTokenTabs";
 
 interface Props {
@@ -86,10 +86,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     });
   }
 
-  const { data, error } = await loadData(chain, unit);
-
-  if (!data) {
-    if (isExplorerNotFound(error)) notFound();
+  let data: TokenSummary;
+  try {
+    data = await loadTokenSummary(chain, unit);
+  } catch (err) {
+    console.error(err);
+    if (isExplorerNotFound(err)) notFound();
 
     return createPageMetadata({
       title: fallbackTitle,
@@ -122,10 +124,9 @@ function resolveTab(tab?: string): TokenTab {
   return match ?? "Holders";
 }
 
-async function loadData(chain: Network, unit: Unit, page: number = 1) {
+async function loadData(chain: Network, unit: Unit, page: number) {
   try {
-    const provider = getDolosProvider(chain);
-    const data = await loadTokenPageData(provider, unit, chain, page);
+    const data = await loadTokenPageData(chain, unit, page);
     return { data, error: null };
   } catch (err) {
     console.error(err);

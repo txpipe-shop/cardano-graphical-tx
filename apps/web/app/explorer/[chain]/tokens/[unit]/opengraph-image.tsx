@@ -10,8 +10,8 @@ import {
   ogImageSize,
   renderOpenGraphImage,
 } from "~/app/_utils/og-image";
-import { getDolosProvider } from "~/server/api/dolos-provider";
-import { type AssetInfo, loadTokenPageData } from "./_shared";
+import { type AssetInfo, type TokenSummary } from "./_shared";
+import { loadTokenSummary } from "./_utils";
 
 export const alt = "Token";
 export const size = ogImageSize;
@@ -61,14 +61,15 @@ function formatSupply(totalSupply: string): string {
   }
 }
 
-async function loadData(chain: Network, unit: Unit, page: number = 1) {
+async function loadSummary(
+  chain: Network,
+  unit: Unit,
+): Promise<TokenSummary | null> {
   try {
-    const provider = getDolosProvider(chain);
-    const data = await loadTokenPageData(provider, unit, chain, page);
-    return { data, error: null };
+    return await loadTokenSummary(chain, unit);
   } catch (err) {
     console.error(err);
-    return { data: null, error: true };
+    return null;
   }
 }
 
@@ -94,7 +95,7 @@ export default async function Image({ params }: Props) {
     });
   }
 
-  const { data } = await loadData(chain, unit);
+  const data = await loadSummary(chain, unit);
 
   if (!data) {
     return renderOpenGraphImage({

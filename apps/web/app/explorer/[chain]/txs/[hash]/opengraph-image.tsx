@@ -1,4 +1,3 @@
-import { Hash } from "@laceanatomy/types";
 import {
   isValidChain,
   NETWORK,
@@ -15,7 +14,7 @@ import {
   ogImageSize,
   renderOpenGraphImage,
 } from "~/app/_utils/og-image";
-import { getDolosProvider } from "~/server/api/dolos-provider";
+import { getTx } from "./_utils";
 
 export const alt = "Transaction";
 export const size = ogImageSize;
@@ -49,7 +48,7 @@ export default async function Image({ params }: Props) {
   }
 
   try {
-    const tx = await getDolosProvider(chain).getTx({ hash: Hash(hash) });
+    const tx = await getTx(chain, hash);
     const mintCount = Object.keys(tx.mint ?? {}).length;
     const scriptCount = tx.witnesses?.scripts?.length ?? 0;
     const datumCount = tx.outputs.filter((output) => output.datum).length;
