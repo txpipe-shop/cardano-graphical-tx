@@ -114,7 +114,10 @@ fn metadatum_to_string(metadatum: &Metadatum) -> String {
   match metadatum {
     Metadatum::Text(text) => text.clone(),
     Metadatum::Int(int) => int.to_string(),
-    Metadatum::Bytes(bytes) => String::from_utf8(bytes.to_vec()).unwrap(),
+    Metadatum::Bytes(bytes) => match std::str::from_utf8(bytes) {
+      Ok(text) => text.to_owned(),
+      Err(_) => hex::encode(bytes.as_slice()),
+    },
     Metadatum::Array(arr) => arr
       .iter()
       .map(metadatum_to_string)
@@ -155,8 +158,9 @@ pub(crate) fn get_metadata(tx: &MultiEraTx<'_>) -> Vec<Metadata> {
         let json_metadata = match v {
           Metadatum::Map(map) => map_to_hashmap(map),
           _ => {
-            let json_value = serde_json::to_value(v).expect("Failed to convert to JSON");
-            let json_string = serde_json::to_string(&json_value).expect("Failed to serialize JSON");
+            let json_string = serde_json::to_value(v)
+              .and_then(|value| serde_json::to_string(&value))
+              .unwrap_or_else(|_| metadatum_to_string(v));
             let mut hashmap = HashMap::new();
             hashmap.insert("value".to_string(), json_string);
             hashmap
@@ -465,4 +469,21 @@ pub fn cbor_to_tx(raw: String) -> SafeCborResponse {
     let tx = MultiEraTx::decode(&cbor).map_err(|e| format!("Failed to decode tx. {}", e))?;
     parse_tx_from_multiera(&tx, false)
   })
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn metadatum_bytes_render_as_text_when_utf8() {
+    let bytes = Metadatum::Bytes(b"hello".to_vec().into());
+    assert_eq!(metadatum_to_string(&bytes), "hello");
+  }
+
+  #[test]
+  fn metadatum_bytes_render_as_hex_when_not_utf8() {
+    let bytes = Metadatum::Bytes(vec![1, 164, 144, 138].into());
+    assert_eq!(metadatum_to_string(&bytes), "01a4908a");
+  }
 }

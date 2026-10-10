@@ -52,7 +52,7 @@ fn validate_result(
 }
 
 // &***x below: deref through napi-rs Box wrapper → &ConwayTx etc.
-#[napi]
+#[napi(catch_unwind)]
 pub fn validate_cbor_tx(
   cbor: String,
   inputs: Vec<ValidationInput>,
