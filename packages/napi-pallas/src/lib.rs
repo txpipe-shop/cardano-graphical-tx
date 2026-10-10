@@ -217,22 +217,22 @@ impl SafeBlockCborResponse {
   }
 }
 
-#[napi]
+#[napi(catch_unwind)]
 pub fn cbor_parse(raw: String) -> SafeCborResponse {
   tx::cbor_to_tx(raw)
 }
 
-#[napi]
+#[napi(catch_unwind)]
 pub fn cbor_parse_block(raw: String) -> SafeBlockCborResponse {
   blocks::cbor_to_block(raw)
 }
 
-#[napi]
+#[napi(catch_unwind)]
 pub fn parse_datum_info(raw: String) -> Option<Datum> {
   utils::parse_datum_info(raw)
 }
 
-#[napi]
+#[napi(catch_unwind)]
 pub fn parse_address(raw: String) -> address::SafeAddressResponse {
   match address::Address::from_str(&raw) {
     Ok(addr) => address::SafeAddressResponse {

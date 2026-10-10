@@ -2,6 +2,7 @@ import { type Network } from "@laceanatomy/types/cardano";
 import { cache } from "react";
 import { EmptyState } from "~/app/_components/EmptyState";
 import { HOLDERS_PAGE_SIZE as PAGE_SIZE } from "~/app/_components/ExplorerSection/Tokens/constants";
+import { isExplorerNotFound } from "~/app/explorer/_utils/not-found";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import type { AssetHistory } from "../_shared";
 import { AssetHistoryListClient } from "./AssetHistoryListClient";
@@ -31,7 +32,8 @@ export async function AssetHistoryList({
     allHistory = await getAssetHistoryPage(chain, unit);
     hasMore = allHistory.length > PAGE_SIZE;
   } catch (err) {
-    console.error(err);
+    // Dolos minibf has no /assets/{unit}/history route, so a 404 is expected.
+    if (!isExplorerNotFound(err)) console.error(err);
   }
 
   const history = allHistory.slice(0, PAGE_SIZE);

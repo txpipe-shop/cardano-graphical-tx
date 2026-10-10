@@ -98,6 +98,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg62-turbo \
     libgif7 \
     librsvg2-2 \
+    tini \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --system --gid 1001 nodejs && \
@@ -116,4 +117,6 @@ USER nodejs
 
 ENV NODE_ENV=production
 
+# As PID 1, a native abort() hangs the process instead of ending it.
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["node", "apps/web/server.js"]
