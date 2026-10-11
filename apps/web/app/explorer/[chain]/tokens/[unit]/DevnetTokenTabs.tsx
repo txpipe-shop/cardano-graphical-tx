@@ -14,7 +14,7 @@ import TokenTabs from "~/app/_components/ExplorerSection/Tokens/TokenTabs";
 import { useConfigs } from "~/app/_contexts";
 import { resolveDevnetPort, type TokenTab } from "~/app/_utils";
 import { getU5CProviderWeb } from "~/app/_utils/u5c-provider-web";
-import type { TokenPageData } from "./_shared";
+import type { TokenSummary } from "./_shared";
 
 interface DevnetTokenTabsProps {
   unit: Unit;
@@ -26,7 +26,7 @@ export default function DevnetTokenTabs({ unit, tab }: DevnetTokenTabsProps) {
   const port = resolveDevnetPort(configs.port);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<TokenPageData | null>(null);
+  const [data, setData] = useState<TokenSummary | null>(null);
 
   useEffect(() => {
     let isActive = true;
@@ -38,7 +38,7 @@ export default function DevnetTokenTabs({ unit, tab }: DevnetTokenTabsProps) {
 
         const provider = getU5CProviderWeb(port);
 
-        const info: TokenPageData["assetInfo"] = {
+        const info: TokenSummary["assetInfo"] = {
           unit,
           policyId: policyFromUnit(unit),
           assetNameHex: assetNameFromUnit(unit),
@@ -96,14 +96,12 @@ export default function DevnetTokenTabs({ unit, tab }: DevnetTokenTabsProps) {
         );
         const hasMore = allAddresses.length > 20;
 
-        const pageData: TokenPageData = {
+        const pageData: TokenSummary = {
           assetInfo: { ...info, totalSupply: total },
           addresses: allAddresses.slice(0, 20),
           addressesTotal: allAddresses.length,
           hasMoreHolders: hasMore,
           allHolders: allAddresses,
-          transactions: [],
-          hasMoreTransactions: false,
         };
 
         setData(pageData);

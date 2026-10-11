@@ -31,7 +31,7 @@ export type TokenSummary = {
   allHolders?: AssetAddress[];
 };
 
-export type TokenPageData = TokenSummary & {
+export type TokenTxsPage = {
   transactions: cardano.Tx[];
   hasMoreTransactions: boolean;
 };

@@ -18,9 +18,10 @@ import {
 } from "~/app/_utils/metadata";
 import { isExplorerNotFound } from "../../../_utils/not-found";
 import { AssetHistoryList } from "./_components/AssetHistoryList";
+import { AssetTxList } from "./_components/AssetTxList";
 import { TokenPageLayout } from "./_components/TokenPageLayout";
 import { type AssetInfo, type TokenSummary } from "./_shared";
-import { loadTokenPageData, loadTokenSummary } from "./_utils";
+import { loadTokenSummary } from "./_utils";
 import DevnetTokenTabs from "./DevnetTokenTabs";
 
 interface Props {
@@ -124,9 +125,9 @@ function resolveTab(tab?: string): TokenTab {
   return match ?? "Holders";
 }
 
-async function loadData(chain: Network, unit: Unit, page: number) {
+async function loadData(chain: Network, unit: Unit) {
   try {
-    const data = await loadTokenPageData(chain, unit, page);
+    const data = await loadTokenSummary(chain, unit);
     return { data, error: null };
   } catch (err) {
     console.error(err);
@@ -153,7 +154,7 @@ export default async function TokenPage({ params, searchParams }: Props) {
     );
   }
 
-  const { data, error } = await loadData(chain, unit, page);
+  const { data, error } = await loadData(chain, unit);
 
   if (error || !data) {
     if (isExplorerNotFound(error)) notFound();
@@ -171,6 +172,14 @@ export default async function TokenPage({ params, searchParams }: Props) {
     </Suspense>
   );
 
+  // Dolos's asset transaction scan is the slowest call on this page, so its
+  // tab streams in after the summary instead of holding the response.
+  const transactionsContent = (
+    <Suspense fallback={<EmptyState message="Loading transactions..." />}>
+      <AssetTxList chain={chain} unit={data.assetInfo.unit} page={page} />
+    </Suspense>
+  );
+
   return (
     <TokenPageLayout>
       <TokenTabs
@@ -178,6 +187,7 @@ export default async function TokenPage({ params, searchParams }: Props) {
         tab={tab}
         chain={chain}
         historyContent={historyContent}
+        transactionsContent={transactionsContent}
       />
     </TokenPageLayout>
   );

@@ -9,8 +9,8 @@ import { getDolosProvider } from "~/server/api/dolos-provider";
 import type {
   AssetAddress,
   AssetInfo,
-  TokenPageData,
   TokenSummary,
+  TokenTxsPage,
 } from "./_shared";
 
 const TX_FETCH_SIZE = TX_PAGE_SIZE + 1;
@@ -41,12 +41,12 @@ const getAssetInfo = cache((chain: Network, rawUnit: string) =>
   getDolosProvider(chain).getAssetInfo(rawUnit),
 );
 
-const loadTokenTxs = cache(
+export const loadTokenTxs = cache(
   async (
     chain: Network,
     rawUnit: string,
     txPage: number,
-  ): Promise<Pick<TokenPageData, "transactions" | "hasMoreTransactions">> => {
+  ): Promise<TokenTxsPage> => {
     const provider = getDolosProvider(chain);
     const rawTxs = await provider
       .getAssetTxs(rawUnit, TX_FETCH_SIZE, txPage, "desc")
@@ -132,22 +132,5 @@ export const loadTokenSummary = cache(
       addressesTotal: hasMoreHolders ? null : addressesResp.length,
       hasMoreHolders,
     };
-  },
-);
-
-export const loadTokenPageData = cache(
-  async (
-    chain: Network,
-    unit: string,
-    txPage: number,
-  ): Promise<TokenPageData> => {
-    const rawUnit = toRawUnit(unit);
-    // An unknown asset fails here, before the list lookups start.
-    await getAssetInfo(chain, rawUnit);
-    const [summary, txs] = await Promise.all([
-      loadTokenSummary(chain, unit),
-      loadTokenTxs(chain, rawUnit, txPage),
-    ]);
-    return { ...summary, ...txs };
   },
 );
