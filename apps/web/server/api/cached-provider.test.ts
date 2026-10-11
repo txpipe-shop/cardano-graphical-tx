@@ -5,15 +5,22 @@ import { SECURITY_PARAM, withUpstreamCache } from "./cached-provider";
 
 const TIP = 10_000n;
 const TTL_MS = 30_000;
+const BACKOFF_MS = 60_000;
 
 function fakeProvider() {
   const calls: string[] = [];
   const failing = new Set<string>();
+  const timingOut = new Set<string>();
   let tipFails = false;
 
   const call = async <T>(name: string, value: () => T): Promise<T> => {
     calls.push(name);
     if (failing.has(name)) throw new Error(`${name} failed`);
+    if (timingOut.has(name)) {
+      throw Object.assign(new Error(`${name} timed out`), {
+        code: "ECONNABORTED",
+      });
+    }
     return value();
   };
 
@@ -56,7 +63,7 @@ function fakeProvider() {
     getTokenMetadata: () => call("getTokenMetadata", () => ({})),
   };
 
-  return { provider, calls, failing };
+  return { provider, calls, failing, timingOut };
 }
 
 function setup() {
@@ -69,6 +76,7 @@ function setup() {
     immutable,
     mutable,
     ttlMs: TTL_MS,
+    timeoutBackoffMs: BACKOFF_MS,
     onUpstream: (key) => upstream.push(key),
   });
   return { ...fake, cached, immutable, mutable, upstream };
@@ -160,6 +168,21 @@ describe("withUpstreamCache", () => {
     await expect(cached.getAssetInfo("gone")).rejects.toThrow("failed");
     expect(count(calls, "getAssetInfo:gone")).toBe(2);
     expect(immutable.size + mutable.size).toBe(0);
+  });
+
+  it("fails fast on a lookup that timed out, until the backoff ends", async () => {
+    vi.useFakeTimers();
+    const { cached, calls, timingOut } = setup();
+    timingOut.add("getAssetInfo:heavy");
+
+    await expect(cached.getAssetInfo("heavy")).rejects.toThrow("timed out");
+    await expect(cached.getAssetInfo("heavy")).rejects.toThrow("timed out");
+    expect(count(calls, "getAssetInfo:heavy")).toBe(1);
+
+    timingOut.delete("getAssetInfo:heavy");
+    vi.advanceTimersByTime(BACKOFF_MS);
+    await expect(cached.getAssetInfo("heavy")).resolves.toBeTruthy();
+    expect(count(calls, "getAssetInfo:heavy")).toBe(2);
   });
 
   it("does not store misses", async () => {
