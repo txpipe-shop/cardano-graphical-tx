@@ -10,6 +10,7 @@ import {
 } from "@laceanatomy/types";
 import { getNetworkConfig, type Network } from "@laceanatomy/types/cardano";
 import { cache } from "react";
+import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
 import { getAddressTxPage } from "./_components/AddressTxList";
 import { getAddressUTxOsPage } from "./_components/AddressUTxOsList";
 
@@ -88,6 +89,8 @@ export interface AddressStats {
   balance: bigint;
   tokenEntries: [string, bigint][];
   txCount: bigint;
+  /** The address has more transactions than one page; `txCount` is then a lower bound. */
+  hasMoreTxs: boolean;
   firstSeen?: {
     blockHeight: bigint;
     slot: bigint;
@@ -110,6 +113,7 @@ export const loadAddressStats = cache(async function loadAddressStats(
   let balance = 0n;
   let tokenEntries: [string, bigint][] = [];
   let txCount = 0n;
+  let hasMoreTxs = false;
   let firstSeen: AddressStats["firstSeen"];
   let lastSeen: AddressStats["lastSeen"];
   let error: string | null = null;
@@ -135,8 +139,9 @@ export const loadAddressStats = cache(async function loadAddressStats(
   }
 
   if (txsRes.status === "fulfilled") {
-    txCount = txsRes.value.total;
-    const { data } = txsRes.value;
+    const { data, total } = txsRes.value;
+    txCount = total;
+    hasMoreTxs = total > ADDRESS_PAGE_SIZE;
 
     if (data.length > 0) {
       const newest = data[0]!;
@@ -147,18 +152,37 @@ export const loadAddressStats = cache(async function loadAddressStats(
         timestamp: newest.createdAt,
       };
 
-      const oldest = data[data.length - 1]!;
-      firstSeen = {
-        blockHeight: oldest.block.height,
-        slot: oldest.block.slot,
-        hash: oldest.hash,
-        timestamp: oldest.createdAt,
-      };
+      // The page holds the newest transactions, so its oldest is only the
+      // first one when nothing older exists.
+      if (!hasMoreTxs) {
+        const oldest = data[data.length - 1]!;
+        firstSeen = {
+          blockHeight: oldest.block.height,
+          slot: oldest.block.slot,
+          hash: oldest.hash,
+          timestamp: oldest.createdAt,
+        };
+      }
     }
   } else if (!isNotFoundError(txsRes.reason)) {
     console.error(txsRes.reason);
     error = "Address stats are unavailable right now.";
   }
 
-  return { balance, tokenEntries, txCount, firstSeen, lastSeen, error };
+  return {
+    balance,
+    tokenEntries,
+    txCount,
+    hasMoreTxs,
+    firstSeen,
+    lastSeen,
+    error,
+  };
 });
+
+export function formatTxCount({
+  txCount,
+  hasMoreTxs,
+}: Pick<AddressStats, "txCount" | "hasMoreTxs">): string {
+  return hasMoreTxs ? `${ADDRESS_PAGE_SIZE}+` : txCount.toString();
+}

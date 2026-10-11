@@ -34,6 +34,7 @@ import { AddressUTxOsList } from "./_components/AddressUTxOsList";
 import { AddressUTxOsSkeleton } from "./_components/AddressUTxOsSkeleton";
 import { OverviewStat } from "./_components/OverviewStat";
 import {
+  formatTxCount,
   loadAddressStats,
   resolveDisplayAddress,
   resolveTab,
@@ -100,12 +101,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       normalizedAddress,
     );
     const stats = await loadAddressStats(chain, normalizedAddress);
-    const { balance, tokenEntries, txCount } = stats;
+    const { balance, tokenEntries } = stats;
 
     if (!stats.error && !hasAddressActivity(stats)) notFound();
 
     const title = `${typeLabel} ${truncateMiddle(displayAddress, 16, 12)}`;
-    const description = `${formatAdaCompact(balance)} balance, ${txCount.toString()} transactions, ${tokenEntries.length} native assets on ${chainLabel}.`;
+    const description = `${formatAdaCompact(balance)} balance, ${formatTxCount(stats)} transactions, ${tokenEntries.length} native assets on ${chainLabel}.`;
 
     return createPageMetadata({
       title,
@@ -167,7 +168,7 @@ export default async function AddressDetailPage({
   const basePath = ROUTES.EXPLORER_ADDRESS(chain, raw);
 
   const stats = await loadAddressStats(chain, normalizedAddress);
-  const { balance, tokenEntries, txCount, firstSeen, lastSeen, error } = stats;
+  const { balance, tokenEntries, firstSeen, lastSeen, error } = stats;
 
   const hasAnyActivity = hasAddressActivity(stats);
   if (!error && !hasAnyActivity) notFound();
@@ -193,7 +194,7 @@ export default async function AddressDetailPage({
     },
     {
       key: "Transactions",
-      title: `Transactions (${txCount.toString()})`,
+      title: `Transactions (${formatTxCount(stats)})`,
       content: (
         <Suspense fallback={<TxTableSkeleton rows={3} />}>
           <AddressTxList address={normalizedAddress} chain={chain} />
@@ -253,7 +254,7 @@ export default async function AddressDetailPage({
               </OverviewStat>
 
               <OverviewStat label="Transaction Count">
-                {txCount.toString()}
+                {formatTxCount(stats)}
               </OverviewStat>
 
               <OverviewStat label="First Seen">

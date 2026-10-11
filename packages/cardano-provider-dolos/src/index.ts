@@ -194,18 +194,9 @@ export class DolosProvider
     const bech32 = hexToBech32(HexString(addressHex), this.addressPrefix);
     const resp = await this.addrApi.addressesAddressTransactionsGet(bech32, count, page, 'desc');
     const txRefs = resp.data;
-
-    let total = 0n;
-    try {
-      const totalResp = await this.addrApi.addressesAddressTotalGet(bech32);
-      total = BigInt(totalResp.data.tx_count);
-    } catch {
-      total = 0n;
-    }
-
-    if (total === 0n) {
-      total = BigInt(txRefs.length);
-    }
+    // Only the refs on this page: Dolos's /addresses/{address}/total scans the
+    // address's whole history, and most Dolos versions do not serve it.
+    const total = BigInt(txRefs.length);
 
     if (txRefs.length === 0) return { data: [], total };
 
