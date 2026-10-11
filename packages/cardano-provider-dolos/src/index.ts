@@ -32,6 +32,7 @@ import {
   Hash,
   HexString,
   hexToBech32,
+  isHexString,
   policyFromUnit,
   Unit
 } from '@laceanatomy/types';
@@ -196,7 +197,7 @@ export class DolosProvider
     count: number,
     page: number
   ): Promise<TxsRes<cardano.UTxO, cardano.Tx, Cardano>> {
-    const bech32 = hexToBech32(HexString(addressHex), this.addressPrefix);
+    const bech32 = this.toMinibfAddress(addressHex);
     const resp = await this.addrApi.addressesAddressTransactionsGet(bech32, count, page, 'desc');
     const txRefs = resp.data;
     // Only the refs on this page: Dolos's /addresses/{address}/total scans the
@@ -494,8 +495,16 @@ export class DolosProvider
   // Address — Blockfrost
   // ---------------------------------------------------------------------------
 
+  /**
+   * The minibf form of an address: bech32 for the hex that `Address()` keeps
+   * for Shelley, and the base58 it keeps for Byron, unchanged.
+   */
+  private toMinibfAddress(address: string): string {
+    return isHexString(address) ? hexToBech32(HexString(address), this.addressPrefix) : address;
+  }
+
   async getAddressFunds({ address }: AddressFundsReq): Promise<AddressFundsRes> {
-    const bech32 = hexToBech32(HexString(address), this.addressPrefix);
+    const bech32 = this.toMinibfAddress(address);
     const [contentResp, totalResp] = await Promise.all([
       this.addrApi.addressesAddressGet(bech32),
       this.addrApi.addressesAddressTotalGet(bech32)
@@ -513,7 +522,7 @@ export class DolosProvider
   }: AddressUTxOsReq): Promise<AddressUTxOsRes<cardano.UTxO>> {
     const count = Number(limit);
     const page = Math.floor(Number(offset ?? 0n) / count) + 1;
-    const bech32 = hexToBech32(HexString(q.address), this.addressPrefix);
+    const bech32 = this.toMinibfAddress(q.address);
 
     const resp = await this.addrApi.addressesAddressUtxosGet(bech32, count, page);
     const data = resp.data.map(blockfrostUtxoToCardanoUtxo);
