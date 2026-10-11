@@ -7,16 +7,17 @@ import { useState } from "react";
 import { DetailTabs, type DetailTab } from "~/app/_components/DetailTabs";
 import { EmptyState } from "~/app/_components/EmptyState";
 import { type TokenTab } from "~/app/_utils/constants";
-import type { TokenPageData } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
+import type { TokenSummary } from "~/app/explorer/[chain]/tokens/[unit]/_shared";
 import HoldersTab from "./HoldersTab";
 import TokenOverview from "./TokenOverview";
 import TransactionsTab from "./TransactionsTab";
 
 export interface TokenTabsProps {
-  data: TokenPageData;
+  data: TokenSummary;
   tab: TokenTab;
   chain: Network;
   historyContent?: React.ReactNode;
+  transactionsContent?: React.ReactNode;
 }
 
 export default function TokenTabs({
@@ -24,6 +25,7 @@ export default function TokenTabs({
   tab,
   chain,
   historyContent,
+  transactionsContent,
 }: TokenTabsProps) {
   const [activeTab, setActiveTab] = useState(tab);
 
@@ -49,12 +51,12 @@ export default function TokenTabs({
     {
       key: "Transactions",
       title: "Transactions",
-      content: (
+      content: transactionsContent ?? (
         <TransactionsTab
-          transactions={data.transactions}
+          transactions={[]}
           chain={chain}
           unit={Unit(data.assetInfo.unit)}
-          hasMoreTransactions={data.hasMoreTransactions}
+          hasMoreTransactions={false}
         />
       ),
     },
