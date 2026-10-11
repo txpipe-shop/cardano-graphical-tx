@@ -70,8 +70,9 @@ export class TokenRegistryClient {
         signal: this.timeoutMs ? AbortSignal.timeout(this.timeoutMs) : undefined
       });
 
+      // The registry answers an unknown subject with 204, and used to with 404.
+      if (response.status === 204 || response.status === 404) return null;
       if (!response.ok) {
-        if (response.status === 404) return null;
         throw new Error(`Failed to fetch metadata for ${subject}: ${response.statusText}`);
       }
 
