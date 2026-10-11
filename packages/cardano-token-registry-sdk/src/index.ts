@@ -55,9 +55,16 @@ export type TokenRegistryOptions = {
   timeoutMs?: number;
 };
 
+/**
+ * How long lookups stop after a 429. The registry's load balancer sends no
+ * Retry-After; this covers a typical rate-rule window.
+ */
+const RATE_LIMIT_PAUSE_MS = 5 * 60 * 1000;
+
 export class TokenRegistryClient {
   private baseUrl: string;
   private timeoutMs?: number;
+  private pausedUntil = 0;
 
   constructor(network: TokenRegistryNetwork = 'mainnet', options: TokenRegistryOptions = {}) {
     this.baseUrl = `${BASE_URLS[network]}/metadata`;
@@ -65,6 +72,8 @@ export class TokenRegistryClient {
   }
 
   async getToken(subject: string): Promise<TokenMetadata | null> {
+    if (Date.now() < this.pausedUntil) return null;
+
     try {
       const response = await fetch(`${this.baseUrl}/${subject}`, {
         signal: this.timeoutMs ? AbortSignal.timeout(this.timeoutMs) : undefined
@@ -72,6 +81,13 @@ export class TokenRegistryClient {
 
       // The registry answers an unknown subject with 204, and used to with 404.
       if (response.status === 204 || response.status === 404) return null;
+      if (response.status === 429) {
+        this.pausedUntil = Date.now() + RATE_LIMIT_PAUSE_MS;
+        console.warn(
+          `Token registry rate limit hit; skipping lookups for ${RATE_LIMIT_PAUSE_MS / 1000} s`
+        );
+        return null;
+      }
       if (!response.ok) {
         throw new Error(`Failed to fetch metadata for ${subject}: ${response.statusText}`);
       }

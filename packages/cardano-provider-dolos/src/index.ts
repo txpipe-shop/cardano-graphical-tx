@@ -102,6 +102,7 @@ export class DolosProvider
     CursorPaginatedProvider<cardano.UTxO, cardano.Tx, Cardano, BlockCursor>
 {
   private static readonly MAX_BLOCKS_LOOKBACK = 100;
+  private static readonly ASSET_SHARE_MS = 10_000;
 
   private utxoRpc: UtxoRpcClient;
   private blockApi: CardanoBlocksApi;
@@ -112,6 +113,10 @@ export class DolosProvider
   private txApi: CardanoTransactionsApi;
   private addressPrefix: string;
   private tokenClient: TokenRegistryClient;
+  private assetRequests = new Map<
+    string,
+    { expiresAt: number; request: ReturnType<CardanoAssetsApi['assetsAssetGet']> }
+  >();
 
   constructor({
     transport,
@@ -530,8 +535,30 @@ export class DolosProvider
   // Assets — Blockfrost
   // ---------------------------------------------------------------------------
 
+  /**
+   * getAssetInfo and the CIP-25 lookup both read /assets/{unit}, about 0.6 s
+   * on Dolos, and a token page asks for both; they share one request for a
+   * few seconds.
+   */
+  private fetchAsset(unit: string) {
+    const now = Date.now();
+    // Entries share one lifetime, so the oldest come first.
+    for (const [key, entry] of this.assetRequests) {
+      if (entry.expiresAt > now) break;
+      this.assetRequests.delete(key);
+    }
+
+    const shared = this.assetRequests.get(unit);
+    if (shared) return shared.request;
+
+    const request = this.assetsApi.assetsAssetGet(unit);
+    this.assetRequests.set(unit, { expiresAt: now + DolosProvider.ASSET_SHARE_MS, request });
+    request.catch(() => this.assetRequests.delete(unit));
+    return request;
+  }
+
   async getAssetInfo(asset: string) {
-    const resp = await this.assetsApi.assetsAssetGet(asset);
+    const resp = await this.fetchAsset(asset);
     return {
       policyId: HexString(resp.data.policy_id),
       assetName: HexString(resp.data.asset_name ?? ''),
@@ -596,23 +623,16 @@ export class DolosProvider
     const needsCip25 = !type || type.startsWith('Cip25');
     const needsCip68 = !type || type.startsWith('Cip68');
 
-    if (needsCip25) {
-      await this.fetchCip25Metadata(unit, metadata);
-    }
+    const policyId = policyFromUnit(unit);
+    const baseName = this.stripCip68Prefix(assetNameFromUnit(unit));
 
-    if (needsCip68) {
-      const policyId = policyFromUnit(unit);
-      const rawAssetName = assetNameFromUnit(unit);
-      const baseName = this.stripCip68Prefix(rawAssetName);
-      if (policyId && baseName) {
-        await this.fetchCip68Metadata(policyId, baseName, metadata);
-      }
-    }
-
-    // CIP-26: token registry (offchain)
-    if (!type || type === 'Cip26') {
-      await this.fetchCip26Metadata(unit, network, metadata);
-    }
+    // Each source fills its own keys, so they can run at once.
+    await Promise.all([
+      needsCip25 && this.fetchCip25Metadata(unit, metadata),
+      needsCip68 && policyId && baseName && this.fetchCip68Metadata(policyId, baseName, metadata),
+      // CIP-26: token registry (offchain)
+      (!type || type === 'Cip26') && this.fetchCip26Metadata(unit, network, metadata)
+    ]);
 
     if (type) {
       for (const key of Object.keys(metadata) as (keyof cardano.TokenMetadata)[]) {
@@ -679,7 +699,7 @@ export class DolosProvider
     metadata: cardano.NullableTokenMetadata
   ): Promise<void> {
     try {
-      const resp = await this.assetsApi.assetsAssetGet(unit);
+      const resp = await this.fetchAsset(unit);
       const standard = resp.data.onchain_metadata_standard;
       const data = resp.data.onchain_metadata;
       if (!data || !standard) return;
