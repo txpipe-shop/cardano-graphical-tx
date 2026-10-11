@@ -85,104 +85,136 @@ export function resolveTypeLabel(
   return "Shelley";
 }
 
-export interface AddressStats {
+export interface SeenAt {
+  blockHeight: bigint;
+  slot: bigint;
+  hash: string;
+  timestamp?: number;
+}
+
+/** What the address holds now, from its first page of UTxOs. */
+export interface AddressHoldings {
   balance: bigint;
   tokenEntries: [string, bigint][];
-  txCount: bigint;
-  /** The address has more transactions than one page; `txCount` is then a lower bound. */
-  hasMoreTxs: boolean;
-  firstSeen?: {
-    blockHeight: bigint;
-    slot: bigint;
-    hash: string;
-    timestamp?: number;
-  };
-  lastSeen?: {
-    blockHeight: bigint;
-    slot: bigint;
-    hash: string;
-    timestamp?: number;
-  };
   error: string | null;
 }
 
-export const loadAddressStats = cache(async function loadAddressStats(
+/** What the address has done, from its newest page of transactions. */
+export interface AddressActivity {
+  txCount: bigint;
+  /** The address has more transactions than one page; `txCount` is then a lower bound. */
+  hasMoreTxs: boolean;
+  firstSeen?: SeenAt;
+  lastSeen?: SeenAt;
+  error: string | null;
+}
+
+export type AddressStats = AddressHoldings & AddressActivity;
+
+const STATS_UNAVAILABLE = "Address stats are unavailable right now.";
+
+export const loadAddressHoldings = cache(async function loadAddressHoldings(
   chain: Network,
   normalizedAddress: Address,
-): Promise<AddressStats> {
-  let balance = 0n;
-  let tokenEntries: [string, bigint][] = [];
-  let txCount = 0n;
-  let hasMoreTxs = false;
-  let firstSeen: AddressStats["firstSeen"];
-  let lastSeen: AddressStats["lastSeen"];
-  let error: string | null = null;
-
-  const [utxosRes, txsRes] = await Promise.allSettled([
-    getAddressUTxOsPage(chain, normalizedAddress),
-    getAddressTxPage(chain, normalizedAddress),
-  ]);
-
-  if (utxosRes.status === "fulfilled") {
+): Promise<AddressHoldings> {
+  try {
+    const { data } = await getAddressUTxOsPage(chain, normalizedAddress);
+    let balance = 0n;
     const tokenMap = new Map<string, bigint>();
-    for (const utxo of utxosRes.value.data) {
+    for (const utxo of data) {
       balance += utxo.coin ?? 0n;
       for (const [unit, amount] of Object.entries(utxo.value)) {
         if (unit === "lovelace") continue;
         tokenMap.set(unit, (tokenMap.get(unit) ?? 0n) + amount);
       }
     }
-    tokenEntries = [...tokenMap.entries()];
-  } else if (!isNotFoundError(utxosRes.reason)) {
-    console.error(utxosRes.reason);
-    error = "Address stats are unavailable right now.";
+    return { balance, tokenEntries: [...tokenMap.entries()], error: null };
+  } catch (err) {
+    if (!isNotFoundError(err)) console.error(err);
+    return {
+      balance: 0n,
+      tokenEntries: [],
+      error: isNotFoundError(err) ? null : STATS_UNAVAILABLE,
+    };
   }
+});
 
-  if (txsRes.status === "fulfilled") {
-    const { data, total } = txsRes.value;
-    txCount = total;
-    hasMoreTxs = total > ADDRESS_PAGE_SIZE;
+function seenAt(tx: cardano.Tx): SeenAt {
+  return {
+    blockHeight: tx.block.height,
+    slot: tx.block.slot,
+    hash: tx.hash,
+    timestamp: tx.createdAt,
+  };
+}
 
-    if (data.length > 0) {
-      const newest = data[0]!;
-      lastSeen = {
-        blockHeight: newest.block.height,
-        slot: newest.block.slot,
-        hash: newest.hash,
-        timestamp: newest.createdAt,
-      };
-
+export const loadAddressActivity = cache(async function loadAddressActivity(
+  chain: Network,
+  normalizedAddress: Address,
+): Promise<AddressActivity> {
+  try {
+    const { data, total } = await getAddressTxPage(chain, normalizedAddress);
+    const hasMoreTxs = total > ADDRESS_PAGE_SIZE;
+    const newest = data[0];
+    const oldest = data[data.length - 1];
+    return {
+      txCount: total,
+      hasMoreTxs,
+      lastSeen: newest && seenAt(newest),
       // The page holds the newest transactions, so its oldest is only the
       // first one when nothing older exists.
-      if (!hasMoreTxs) {
-        const oldest = data[data.length - 1]!;
-        firstSeen = {
-          blockHeight: oldest.block.height,
-          slot: oldest.block.slot,
-          hash: oldest.hash,
-          timestamp: oldest.createdAt,
-        };
-      }
-    }
-  } else if (!isNotFoundError(txsRes.reason)) {
-    console.error(txsRes.reason);
-    error = "Address stats are unavailable right now.";
+      firstSeen: oldest && !hasMoreTxs ? seenAt(oldest) : undefined,
+      error: null,
+    };
+  } catch (err) {
+    if (!isNotFoundError(err)) console.error(err);
+    return {
+      txCount: 0n,
+      hasMoreTxs: false,
+      error: isNotFoundError(err) ? null : STATS_UNAVAILABLE,
+    };
   }
+});
 
+export const loadAddressStats = cache(async function loadAddressStats(
+  chain: Network,
+  normalizedAddress: Address,
+): Promise<AddressStats> {
+  const [holdings, activity] = await Promise.all([
+    loadAddressHoldings(chain, normalizedAddress),
+    loadAddressActivity(chain, normalizedAddress),
+  ]);
   return {
-    balance,
-    tokenEntries,
-    txCount,
-    hasMoreTxs,
-    firstSeen,
-    lastSeen,
-    error,
+    ...holdings,
+    ...activity,
+    error: holdings.error ?? activity.error,
   };
 });
+
+/**
+ * False only when the address is known to have never been used. Its
+ * transactions are read only when it holds nothing, since that read scans
+ * the address's history on Dolos.
+ */
+export async function isAddressUsed(
+  chain: Network,
+  normalizedAddress: Address,
+  holdings: AddressHoldings,
+): Promise<boolean> {
+  if (
+    holdings.error ||
+    holdings.balance > 0n ||
+    holdings.tokenEntries.length > 0
+  ) {
+    return true;
+  }
+  const activity = await loadAddressActivity(chain, normalizedAddress);
+  return activity.error !== null || activity.txCount > 0n;
+}
 
 export function formatTxCount({
   txCount,
   hasMoreTxs,
-}: Pick<AddressStats, "txCount" | "hasMoreTxs">): string {
+}: Pick<AddressActivity, "txCount" | "hasMoreTxs">): string {
   return hasMoreTxs ? `${ADDRESS_PAGE_SIZE}+` : txCount.toString();
 }
