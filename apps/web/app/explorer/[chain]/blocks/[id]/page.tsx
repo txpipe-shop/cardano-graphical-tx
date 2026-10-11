@@ -16,6 +16,7 @@ import {
   formatChain,
   truncateMiddle,
 } from "~/app/_utils/metadata";
+import { logError } from "~/app/explorer/_utils/log";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { isExplorerNotFound } from "../../../_utils/not-found";
 import DevnetBlockTabs from "./DevnetBlockTabs";
@@ -58,7 +59,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       path,
     });
   } catch (err) {
-    console.error(err);
+    logError("block page", err);
     if (isExplorerNotFound(err)) notFound();
 
     return createPageMetadata({

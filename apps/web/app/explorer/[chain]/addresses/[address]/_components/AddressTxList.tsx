@@ -2,6 +2,7 @@ import { type Address, type cardano } from "@laceanatomy/types";
 import { type Network } from "@laceanatomy/types/cardano";
 import { cache } from "react";
 import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
+import { logError } from "~/app/explorer/_utils/log";
 import { AddressTxListClient } from "./AddressTxListClient";
 import { resolveProvider } from "./resolve-provider";
 
@@ -34,7 +35,7 @@ export async function AddressTxList({
     allTxs = response.data;
     hasMore = allTxs.length > ADDRESS_PAGE_SIZE;
   } catch (err) {
-    console.error(err);
+    logError("address tx list", err);
   }
 
   const txs = allTxs.slice(0, Number(ADDRESS_PAGE_SIZE));

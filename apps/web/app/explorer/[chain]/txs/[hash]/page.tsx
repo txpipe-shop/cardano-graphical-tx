@@ -15,6 +15,7 @@ import {
   formatChain,
   truncateMiddle,
 } from "~/app/_utils/metadata";
+import { logError } from "~/app/explorer/_utils/log";
 import { isExplorerNotFound } from "../../../_utils/not-found";
 import DevnetTxTabs from "./DevnetTxTabs";
 import { getTx, loadPageData } from "./_utils";
@@ -54,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       path,
     });
   } catch (err) {
-    console.error(err);
+    logError("tx page", err);
     if (isExplorerNotFound(err)) notFound();
 
     return createPageMetadata({

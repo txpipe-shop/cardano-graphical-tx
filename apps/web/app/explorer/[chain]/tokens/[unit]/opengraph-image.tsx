@@ -10,6 +10,7 @@ import {
   ogImageSize,
   renderOpenGraphImage,
 } from "~/app/_utils/og-image";
+import { logError } from "~/app/explorer/_utils/log";
 import { type AssetInfo, type TokenSummary } from "./_shared";
 import { loadTokenSummary } from "./_utils";
 
@@ -68,7 +69,7 @@ async function loadSummary(
   try {
     return await loadTokenSummary(chain, unit);
   } catch (err) {
-    console.error(err);
+    logError("token image", err);
     return null;
   }
 }

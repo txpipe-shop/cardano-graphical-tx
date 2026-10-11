@@ -3,6 +3,7 @@ import { type Network } from "@laceanatomy/types/cardano";
 import { cache } from "react";
 import { EmptyState } from "~/app/_components/EmptyState";
 import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
+import { logError } from "~/app/explorer/_utils/log";
 import { AddressUTxOsListClient } from "./AddressUTxOsListClient";
 import { resolveProvider } from "./resolve-provider";
 
@@ -35,7 +36,7 @@ export async function AddressUTxOsList({
     allUtxos = response.data;
     hasMore = allUtxos.length > ADDRESS_PAGE_SIZE;
   } catch (err) {
-    console.error(err);
+    logError("address utxo list", err);
   }
 
   const utxos = allUtxos.slice(0, Number(ADDRESS_PAGE_SIZE));

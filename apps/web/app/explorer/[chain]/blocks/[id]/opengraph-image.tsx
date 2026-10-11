@@ -14,6 +14,7 @@ import {
   ogImageSize,
   renderOpenGraphImage,
 } from "~/app/_utils/og-image";
+import { logError } from "~/app/explorer/_utils/log";
 import { getBlockWithTxs } from "./_utils";
 
 export const alt = "Block";
@@ -66,7 +67,7 @@ export default async function Image({ params }: Props) {
       ],
     });
   } catch (err) {
-    console.error(err);
+    logError("block image", err);
     return renderOpenGraphImage({
       kind: "block",
       title: `Block ${id}`,

@@ -16,6 +16,7 @@ import {
 import { Header } from "~/app/_components/Header";
 import { EXPLORER_PAGE_SIZE, getBlockPageSize, ROUTES } from "~/app/_utils";
 import { createPageMetadata, formatChain } from "~/app/_utils/metadata";
+import { logError } from "~/app/explorer/_utils/log";
 import { getDolosProvider } from "~/server/api/dolos-provider";
 import { BlocksList } from "./BlocksList";
 import DevnetTransactionsList from "./DevnetTransactionsList";
@@ -77,7 +78,7 @@ async function TransactionsList({ chain }: { chain: Network }) {
       />
     );
   } catch (error) {
-    console.error("Failed to fetch transactions:", error);
+    logError("latest txs", error);
     return (
       <DevnetError
         title="We're having trouble loading transactions"
