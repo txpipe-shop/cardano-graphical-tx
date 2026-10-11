@@ -16,6 +16,7 @@ import {
   renderOpenGraphImage,
 } from "~/app/_utils/og-image";
 import {
+  formatTxCount,
   loadAddressStats,
   resolveDisplayAddress,
   resolveTypeLabel,
@@ -51,9 +52,9 @@ export default async function Image({ params }: Props) {
       chain,
       normalizedAddress,
     );
-    const { balance, tokenEntries, txCount, firstSeen, lastSeen } =
-      await loadAddressStats(chain, normalizedAddress);
-    const description = `${formatAdaCompact(balance)} balance, ${txCount.toString()} transactions, ${tokenEntries.length} native assets on ${chainLabel}.`;
+    const stats = await loadAddressStats(chain, normalizedAddress);
+    const { balance, tokenEntries, firstSeen, lastSeen } = stats;
+    const description = `${formatAdaCompact(balance)} balance, ${formatTxCount(stats)} transactions, ${tokenEntries.length} native assets on ${chainLabel}.`;
 
     return renderOpenGraphImage({
       kind: "address",
@@ -63,7 +64,7 @@ export default async function Image({ params }: Props) {
       chain,
       facts: [
         ["Balance", formatAdaCompact(balance)],
-        ["Txs", txCount.toString()],
+        ["Txs", formatTxCount(stats)],
         ["Assets", tokenEntries.length.toString()],
         [
           "First seen",
