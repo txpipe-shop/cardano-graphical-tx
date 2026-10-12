@@ -9,6 +9,7 @@ import {
   UPSTREAM_CACHE_MUTABLE_BYTES,
   UPSTREAM_CACHE_TTL_MS,
   UPSTREAM_HTTP_TIMEOUT_MS,
+  UPSTREAM_TIMEOUT_BACKOFF_MS,
   memoize,
 } from "./upstream";
 import { getUtxoRpcTransport } from "./utxorpc-client";
@@ -42,6 +43,7 @@ export const getDolosProvider = memoize((chain: Network): DolosProvider => {
     immutable: immutableCache,
     mutable: mutableCache,
     ttlMs: UPSTREAM_CACHE_TTL_MS,
+    timeoutBackoffMs: UPSTREAM_TIMEOUT_BACKOFF_MS,
     onUpstream:
       env.UPSTREAM_REQUEST_LOG === "1"
         ? (key) => console.info(`upstream lookup ${key}`)

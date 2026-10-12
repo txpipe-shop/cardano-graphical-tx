@@ -19,6 +19,13 @@ export const UPSTREAM_HTTP_TIMEOUT_MS = positiveInt(
   15_000,
 );
 
+/**
+ * How long a lookup that timed out fails at once instead of asking again. A
+ * crawler opens one heavy address under several tab URLs, and each of those
+ * reads would rescan its history on Dolos.
+ */
+export const UPSTREAM_TIMEOUT_BACKOFF_MS = 5 * 60_000;
+
 const MB = 1024 * 1024;
 const heapLimit = getHeapStatistics().heap_size_limit;
 

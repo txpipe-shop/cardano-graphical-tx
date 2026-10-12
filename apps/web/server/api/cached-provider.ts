@@ -31,9 +31,28 @@ export type UpstreamCacheOptions = {
   /** Everything else, kept for `ttlMs`. */
   mutable: ByteLru;
   ttlMs: number;
+  /**
+   * How long a lookup that timed out fails at once instead of asking the
+   * upstream again. Other errors are never kept.
+   */
+  timeoutBackoffMs?: number;
   /** Called with the key of every lookup that goes to the upstream. */
   onUpstream?: (key: string) => void;
 };
+
+/** Bounds the timed-out lookups kept at once. */
+const MAX_TIMED_OUT = 1_000;
+
+/** Axios's timeout codes, and connect-rpc's DeadlineExceeded (4). */
+function isTimeout(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const { code, name } = error as { code?: unknown; name?: unknown };
+  return (
+    code === "ECONNABORTED" ||
+    code === "ETIMEDOUT" ||
+    (name === "ConnectError" && code === 4)
+  );
+}
 
 /**
  * Where a loaded value is stored: always final, short-lived, or decided by the
@@ -55,13 +74,32 @@ function blockKey(ref: BlockReq): string {
  * Serves the provider's lookups from in-process caches. Values are stored
  * serialized, so the byte caps bound the memory they hold and every caller
  * gets its own copy. Concurrent misses share one upstream call; errors are
- * never stored.
+ * never stored, except that a timed-out lookup fails fast for
+ * `timeoutBackoffMs`, so a slow request is not repeated on every page view.
  */
 export function withUpstreamCache<P extends CacheableProvider>(
   provider: P,
-  { network, immutable, mutable, ttlMs, onUpstream }: UpstreamCacheOptions,
+  {
+    network,
+    immutable,
+    mutable,
+    ttlMs,
+    timeoutBackoffMs,
+    onUpstream,
+  }: UpstreamCacheOptions,
 ): P {
   const inFlight = new Map<string, Promise<string>>();
+  const timedOut = new Map<string, { error: unknown; until: number }>();
+
+  // Entries share one backoff, so the oldest come first.
+  function rememberTimeout(key: string, error: unknown, backoffMs: number) {
+    const now = Date.now();
+    for (const [old, entry] of timedOut) {
+      if (entry.until > now && timedOut.size < MAX_TIMED_OUT) break;
+      timedOut.delete(old);
+    }
+    timedOut.set(key, { error, until: now + backoffMs });
+  }
   let tip: { height: bigint; expiresAt: number } | undefined;
   let tipInFlight: Promise<bigint> | undefined;
 
@@ -122,10 +160,23 @@ export function withUpstreamCache<P extends CacheableProvider>(
     const hit = immutable.get(key) ?? mutable.get(key);
     if (hit !== undefined) return superjson.parse<T>(hit);
 
+    const recent = timedOut.get(key);
+    if (recent) {
+      if (recent.until > Date.now()) throw recent.error;
+      timedOut.delete(key);
+    }
+
     let pending = inFlight.get(key);
     if (!pending) {
       onUpstream?.(key);
-      pending = load(key, fetch, placement).finally(() => inFlight.delete(key));
+      pending = load(key, fetch, placement)
+        .catch((error: unknown) => {
+          if (timeoutBackoffMs && isTimeout(error)) {
+            rememberTimeout(key, error, timeoutBackoffMs);
+          }
+          throw error;
+        })
+        .finally(() => inFlight.delete(key));
       inFlight.set(key, pending);
     }
     return superjson.parse<T>(await pending);
