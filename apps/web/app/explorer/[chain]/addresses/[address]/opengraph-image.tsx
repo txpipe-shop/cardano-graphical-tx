@@ -15,6 +15,7 @@ import {
   ogImageSize,
   renderOpenGraphImage,
 } from "~/app/_utils/og-image";
+import { logError } from "~/app/explorer/_utils/log";
 import {
   formatTxCount,
   loadAddressStats,
@@ -77,7 +78,7 @@ export default async function Image({ params }: Props) {
       ],
     });
   } catch (err) {
-    console.error(err);
+    logError("address image", err);
     return renderOpenGraphImage({
       kind: "address",
       title: raw,

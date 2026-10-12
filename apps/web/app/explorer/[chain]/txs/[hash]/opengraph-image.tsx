@@ -14,6 +14,7 @@ import {
   ogImageSize,
   renderOpenGraphImage,
 } from "~/app/_utils/og-image";
+import { logError } from "~/app/explorer/_utils/log";
 import { getTx } from "./_utils";
 
 export const alt = "Transaction";
@@ -75,7 +76,7 @@ export default async function Image({ params }: Props) {
       ],
     });
   } catch (err) {
-    console.error(err);
+    logError("tx image", err);
     return renderOpenGraphImage({
       kind: "transaction",
       title: hash,

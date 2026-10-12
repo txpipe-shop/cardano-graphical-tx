@@ -26,6 +26,7 @@ import {
   formatChain,
   truncateMiddle,
 } from "~/app/_utils/metadata";
+import { logError } from "~/app/explorer/_utils/log";
 import {
   AddressActivityStats,
   AddressActivityStatsSkeleton,
@@ -100,7 +101,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       path,
     });
   } catch (err) {
-    console.error(err);
+    logError("address metadata", err);
     return createPageMetadata({
       title: fallbackTitle,
       description: fallbackDescription,
@@ -134,7 +135,7 @@ export default async function AddressDetailPage({
   try {
     addressInfoRes = parseAddress(raw);
   } catch (err) {
-    console.error(err);
+    logError("address parse", err);
     addressInfoRes = { error: "Invalid address" };
   }
 

@@ -16,6 +16,7 @@ import {
   formatChain,
   truncateMiddle,
 } from "~/app/_utils/metadata";
+import { logError } from "~/app/explorer/_utils/log";
 import { isExplorerNotFound } from "../../../_utils/not-found";
 import { AssetHistoryList } from "./_components/AssetHistoryList";
 import { AssetTxList } from "./_components/AssetTxList";
@@ -91,7 +92,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     data = await loadTokenSummary(chain, unit);
   } catch (err) {
-    console.error(err);
+    logError("token metadata", err);
     if (isExplorerNotFound(err)) notFound();
 
     return createPageMetadata({
@@ -130,7 +131,7 @@ async function loadData(chain: Network, unit: Unit) {
     const data = await loadTokenSummary(chain, unit);
     return { data, error: null };
   } catch (err) {
-    console.error(err);
+    logError("token page", err);
     return { data: null, error: err };
   }
 }

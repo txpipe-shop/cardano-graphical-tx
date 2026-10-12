@@ -11,6 +11,7 @@ import {
 import { getNetworkConfig, type Network } from "@laceanatomy/types/cardano";
 import { cache } from "react";
 import { ADDRESS_PAGE_SIZE } from "~/app/_utils/constants";
+import { logError } from "~/app/explorer/_utils/log";
 import { getAddressTxPage } from "./_components/AddressTxList";
 import { getAddressUTxOsPage } from "./_components/AddressUTxOsList";
 
@@ -130,7 +131,7 @@ export const loadAddressHoldings = cache(async function loadAddressHoldings(
     }
     return { balance, tokenEntries: [...tokenMap.entries()], error: null };
   } catch (err) {
-    if (!isNotFoundError(err)) console.error(err);
+    if (!isNotFoundError(err)) logError("address holdings", err);
     return {
       balance: 0n,
       tokenEntries: [],
@@ -167,7 +168,7 @@ export const loadAddressActivity = cache(async function loadAddressActivity(
       error: null,
     };
   } catch (err) {
-    if (!isNotFoundError(err)) console.error(err);
+    if (!isNotFoundError(err)) logError("address activity", err);
     return {
       txCount: 0n,
       hasMoreTxs: false,
