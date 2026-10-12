@@ -3,6 +3,7 @@ import { type Network } from "@laceanatomy/types/cardano";
 import { env } from "~/app/env.mjs";
 import { ByteLru } from "./cache";
 import { withUpstreamCache } from "./cached-provider";
+import { detachUpstream } from "./detached";
 import { getNetworkConfigServer } from "./server-network-config";
 import {
   UPSTREAM_CACHE_IMMUTABLE_BYTES,
@@ -38,7 +39,7 @@ export const getDolosProvider = memoize((chain: Network): DolosProvider => {
     network: chain,
   });
 
-  return withUpstreamCache(provider, {
+  return withUpstreamCache(detachUpstream(provider), {
     network: chain,
     immutable: immutableCache,
     mutable: mutableCache,
