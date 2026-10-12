@@ -7,7 +7,6 @@ import {
   type Network,
 } from "@laceanatomy/types/cardano";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import {
@@ -16,7 +15,6 @@ import {
   StakeSection,
 } from "~/app/_components/AddressSection";
 import CopyButton from "~/app/_components/ExplorerSection/CopyButton";
-import DateViewer from "~/app/_components/ExplorerSection/DateViewer";
 import TokenPill from "~/app/_components/ExplorerSection/TokenPill";
 import { TxTableSkeleton } from "~/app/_components/ExplorerSection/Transactions";
 import { Header } from "~/app/_components/Header";
@@ -28,14 +26,18 @@ import {
   formatChain,
   truncateMiddle,
 } from "~/app/_utils/metadata";
+import {
+  AddressActivityStats,
+  AddressActivityStatsSkeleton,
+} from "./_components/AddressActivityStats";
 import AddressTabs from "./_components/AddressTabs";
 import { AddressTxList } from "./_components/AddressTxList";
 import { AddressUTxOsList } from "./_components/AddressUTxOsList";
 import { AddressUTxOsSkeleton } from "./_components/AddressUTxOsSkeleton";
 import { OverviewStat } from "./_components/OverviewStat";
 import {
-  formatTxCount,
-  loadAddressStats,
+  isAddressUsed,
+  loadAddressHoldings,
   resolveDisplayAddress,
   resolveTab,
   resolveTypeLabel,
@@ -46,22 +48,6 @@ export const revalidate = 10;
 interface Props {
   params: Promise<{ chain: Network; address: string }>;
   searchParams?: Promise<{ tab?: string }>;
-}
-
-function hasAddressActivity({
-  balance,
-  tokenEntries,
-  txCount,
-  firstSeen,
-  lastSeen,
-}: Awaited<ReturnType<typeof loadAddressStats>>): boolean {
-  return (
-    txCount > 0n ||
-    balance > 0n ||
-    tokenEntries.length > 0 ||
-    !!firstSeen ||
-    !!lastSeen
-  );
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -100,13 +86,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       chain,
       normalizedAddress,
     );
-    const stats = await loadAddressStats(chain, normalizedAddress);
-    const { balance, tokenEntries } = stats;
+    const holdings = await loadAddressHoldings(chain, normalizedAddress);
+    const { balance, tokenEntries } = holdings;
 
-    if (!stats.error && !hasAddressActivity(stats)) notFound();
+    if (!(await isAddressUsed(chain, normalizedAddress, holdings))) notFound();
 
     const title = `${typeLabel} ${truncateMiddle(displayAddress, 16, 12)}`;
-    const description = `${formatAdaCompact(balance)} balance, ${formatTxCount(stats)} transactions, ${tokenEntries.length} native assets on ${chainLabel}.`;
+    const description = `${formatAdaCompact(balance)} balance, ${tokenEntries.length} native assets on ${chainLabel}.`;
 
     return createPageMetadata({
       title,
@@ -167,11 +153,12 @@ export default async function AddressDetailPage({
 
   const basePath = ROUTES.EXPLORER_ADDRESS(chain, raw);
 
-  const stats = await loadAddressStats(chain, normalizedAddress);
-  const { balance, tokenEntries, firstSeen, lastSeen, error } = stats;
+  // The transaction-derived stats stream in: reading an address's
+  // transactions scans its history on Dolos, while its UTxOs are quick.
+  const holdings = await loadAddressHoldings(chain, normalizedAddress);
+  const { balance, tokenEntries, error } = holdings;
 
-  const hasAnyActivity = hasAddressActivity(stats);
-  if (!error && !hasAnyActivity) notFound();
+  if (!(await isAddressUsed(chain, normalizedAddress, holdings))) notFound();
 
   const dissectContent = (
     <div className="px-4 py-2">
@@ -194,7 +181,7 @@ export default async function AddressDetailPage({
     },
     {
       key: "Transactions",
-      title: `Transactions (${formatTxCount(stats)})`,
+      title: "Transactions",
       content: (
         <Suspense fallback={<TxTableSkeleton rows={3} />}>
           <AddressTxList address={normalizedAddress} chain={chain} />
@@ -253,69 +240,12 @@ export default async function AddressDetailPage({
                 </div>
               </OverviewStat>
 
-              <OverviewStat label="Transaction Count">
-                {formatTxCount(stats)}
-              </OverviewStat>
-
-              <OverviewStat label="First Seen">
-                {firstSeen ? (
-                  <div className="space-y-2">
-                    <div className="font-mono text-xs">
-                      Block{" "}
-                      <Link
-                        href={ROUTES.EXPLORER_BLOCK(
-                          chain,
-                          firstSeen.blockHeight.toString(),
-                        )}
-                        className="hover:underline"
-                      >
-                        {firstSeen.blockHeight.toString()}
-                      </Link>
-                    </div>
-                    <div className="font-mono text-xs">
-                      Slot {firstSeen.slot.toString()}
-                    </div>
-                    {firstSeen.timestamp !== undefined && (
-                      <DateViewer
-                        timestamp={firstSeen.timestamp}
-                        className="text-xs text-p-secondary"
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <span className="text-p-secondary">—</span>
-                )}
-              </OverviewStat>
-
-              <OverviewStat label="Last Seen">
-                {lastSeen ? (
-                  <div className="space-y-2">
-                    <div className="font-mono text-xs">
-                      Block{" "}
-                      <Link
-                        href={ROUTES.EXPLORER_BLOCK(
-                          chain,
-                          lastSeen.blockHeight.toString(),
-                        )}
-                        className="hover:underline"
-                      >
-                        {lastSeen.blockHeight.toString()}
-                      </Link>
-                    </div>
-                    <div className="font-mono text-xs">
-                      Slot {lastSeen.slot.toString()}
-                    </div>
-                    {lastSeen.timestamp !== undefined && (
-                      <DateViewer
-                        timestamp={lastSeen.timestamp}
-                        className="text-xs text-p-secondary"
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <span className="text-p-secondary">—</span>
-                )}
-              </OverviewStat>
+              <Suspense fallback={<AddressActivityStatsSkeleton />}>
+                <AddressActivityStats
+                  chain={chain}
+                  address={normalizedAddress}
+                />
+              </Suspense>
             </div>
           </div>
 
