@@ -1,4 +1,4 @@
-FROM node:22-slim AS base
+FROM node:22.23.4-slim AS base
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -88,7 +88,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm run build --filter=cardano-graphical-tx
 
-FROM node:22-slim AS production
+FROM node:22.23.4-slim AS production
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
